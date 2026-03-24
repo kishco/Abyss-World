@@ -1740,9 +1740,23 @@ function openIM(it){
     return`<div class="srow"><span class="sn">${label}</span><span class="sv" style="color:var(--green)">+${newVal||0}</span>${diffStr}</div>`;
   }
 
-  const newStats=it.stats||{};
-  const oldStats=equipped?.stats||{};
-  const allKeys=[...new Set([...Object.keys(newStats),...Object.keys(oldStats)])].filter(k=>newStats[k]>0||oldStats[k]>0);
+  // ★ 총합 스탯 계산 (기본 + 접두 + 접미)
+  function totalStats(item){
+    const t={...item.stats};
+    for(const enc of[item.prefix,item.suffix]){
+      if(!enc?.b)continue;
+      for(const[k,v]of Object.entries(enc.b)){
+        if(!isFinite(v)||Math.abs(v)>9999)continue;
+        if(['atk','def','hp','spd','crit','matk'].includes(k))
+          t[k]=(t[k]||0)+v;
+      }
+    }
+    return t;
+  }
+
+  const newStats=totalStats(it);
+  const oldStats=equipped?totalStats(equipped):{};
+  const allKeys=[...new Set([...Object.keys(newStats),...Object.keys(oldStats)])].filter(k=>(newStats[k]||0)!==0||(oldStats[k]||0)!==0);
   const sr=allKeys.map(k=>statRowHtml(k.toUpperCase(),newStats[k],oldStats[k])).join('');
 
   const ph=(!it.prefix||it.grade==='set')?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span><br>${Object.entries(it.prefix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
