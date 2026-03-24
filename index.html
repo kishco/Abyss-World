@@ -968,7 +968,31 @@ async function loadChars(){
   const cl=document.getElementById('charList');
   cl.innerHTML=mine.map(c=>`<div class="ccard" data-id="${c.id}"><div class="ccname">${c.name}</div><div class="ccinfo">Lv.${c.level}<br>💰${c.gold}</div><button class="ccdel" data-del="${c.id}">삭제</button></div>`).join('');
   cl.querySelectorAll('.ccard').forEach(el=>el.addEventListener('click',e=>{if(e.target.dataset.del)return;selChar(el.dataset.id);}));
-  cl.querySelectorAll('[data-del]').forEach(btn=>btn.addEventListener('click',async e=>{e.stopPropagation();if(!confirm('삭제?'))return;await set(ref(db,`chars/${btn.dataset.del}`),null);await set(ref(db,`inv/${btn.dataset.del}`),null);loadChars();}));
+  cl.querySelectorAll('[data-del]').forEach(btn=>btn.addEventListener('click',async e=>{
+    e.stopPropagation();
+    if(!confirm('삭제?'))return;
+    const delId=btn.dataset.del;
+    // ★ 해당 캐릭터가 속한 파티에서 제거 + 빈 파티 삭제
+    const partiesSn=await get(ref(db,'parties'));
+    const allParties=partiesSn.val()||{};
+    for(const[pid,pd]of Object.entries(allParties)){
+      if(pd.members&&pd.members[delId]){
+        await remove(ref(db,`parties/${pid}/members/${delId}`));
+        // 멤버가 0명이 되면 파티 통째로 삭제
+        const remSn=await get(ref(db,`parties/${pid}/members`));
+        if(!remSn.val()||Object.keys(remSn.val()).length===0){
+          await remove(ref(db,`parties/${pid}`));
+        } else if(pd.leader===delId){
+          // 파티장이 삭제되면 다음 멤버에게 파티장 이전
+          const others=Object.keys(remSn.val());
+          await update(ref(db,`parties/${pid}`),{leader:others[0]});
+        }
+      }
+    }
+    await set(ref(db,`chars/${delId}`),null);
+    await set(ref(db,`inv/${delId}`),null);
+    loadChars();
+  }));
 }
 document.getElementById('createCharBtn').onclick=async()=>{
   const n=document.getElementById('newCharName').value.trim();
