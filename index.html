@@ -1472,8 +1472,17 @@ window.openEqDetail=function(slotKey){
   const content=document.getElementById('eqDetailContent');
   if(!it){panel.style.display='none';return;}
 
-  // 스탯
-  const statsHtml=Object.entries(it.stats||{}).filter(([,v])=>v>0)
+  // ★ 총합 스탯 (기본 + 접두 + 접미)
+  const totalSt={...it.stats};
+  for(const enc of[it.prefix,it.suffix]){
+    if(!enc?.b)continue;
+    for(const[k,v]of Object.entries(enc.b)){
+      if(!isFinite(v)||Math.abs(v)>9999)continue;
+      if(['atk','def','hp','spd','crit','matk'].includes(k))
+        totalSt[k]=(totalSt[k]||0)+v;
+    }
+  }
+  const statsHtml=Object.entries(totalSt).filter(([,v])=>v>0)
     .map(([k,v])=>`<span style="background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--green)">${k.toUpperCase()} +${v}</span>`).join(' ');
 
   // 인챈트
