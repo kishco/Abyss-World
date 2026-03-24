@@ -1573,10 +1573,11 @@ async function equipItem(it){
   if(it.reqLv&&char.level<it.reqLv){toast(`⚠️ Lv.${it.reqLv} 이상이어야 장착 가능합니다 (현재 Lv.${char.level})`);return;}
   let sl=it.slot==='accessory'?['accessory1','accessory2','accessory3'].find(k=>!char.equipment[k])||'accessory1':it.slot;
   if(it.slot==='weapon'&&it.hand==='2H'){
-    // ★ 2H 장착 시 기존 offhand를 인벤토리로 이동
-    const oh=char.equipment.offhand;
-    if(oh){inv[oh.id]=oh;}
-    char.equipment.offhand=null;
+    // ★ 방패 착용 중이면 2H 장비 착용 차단
+    if(char.equipment.offhand){
+      toast('⚠️ 보조 장비(방패)를 먼저 해제해주세요!',3000);
+      return;
+    }
   }
   const prev=char.equipment[sl];if(prev)inv[prev.id]=prev;
   char.equipment[sl]=it;delete inv[it.id];
@@ -2309,6 +2310,7 @@ function startBattle(tierIdx,mode,diffKey,players){
   document.getElementById('dungMode').style.display='none';
   document.getElementById('dungMain').style.display='none';
   document.getElementById('dungBattle').style.display='block';
+  document.getElementById('dungBattle').innerHTML=''; // ★ 이전 전투 결과 초기화
   updateNavLock();
   nextFloor();
 }
@@ -2338,8 +2340,8 @@ function nextFloor(){
   // Spawn monsters
   const isBoss=battle.floor===battle.floors;
   battle.monsters=spawnMonsters(battle,isBoss);
-  // ★ 히든 상인 등장 (보스 층 제외, 5% 확률)
-  if(battle.floor<battle.floors&&Math.random()<0.05){
+  // ★ 히든 상인 등장 (보스 층 제외, 5% 확률, 배틀 진행 중일 때만)
+  if(battle.floor<battle.floors&&!battle.done&&Math.random()<0.05){
     showHiddenMerchant();
     return; // 히든 상인 보여주고 거기서 다음 층 진행
   }
