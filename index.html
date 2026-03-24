@@ -259,13 +259,20 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .plyit{background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:9px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;}
 
 /* CHAT WIDGET - fixed top right */
-#chatWidget{position:fixed;top:46px;right:0;width:285px;height:calc(100vh - 46px);background:var(--sf);border-left:1px solid var(--bd);display:flex;flex-direction:column;z-index:100;}
-/* 모바일: 채팅창을 하단 고정 패널로 변경 */
+#chatWidget{position:fixed;top:46px;right:0;width:285px;height:calc(100vh - 46px);background:var(--sf);border-left:1px solid var(--bd);display:flex;flex-direction:column;z-index:100;transition:transform .25s,height .25s;}
+#chatWidget.cw-hidden{transform:translateX(100%);}
+/* 모바일 */
 @media(max-width:768px){
-  #chatWidget{top:auto;bottom:0;left:0;right:0;width:100%;height:45vh;border-left:none;border-top:2px solid var(--bd2);z-index:200;}
-  .main{padding-right:0!important;padding-bottom:45vh;}
-  .cw-input{font-size:16px!important;} /* iOS 자동 줌 방지 */
+  #chatWidget{top:auto;bottom:0;left:0;right:0;width:100%;height:45vh;border-left:none;border-top:2px solid var(--bd2);z-index:200;transform:none;}
+  #chatWidget.cw-hidden{transform:translateY(100%);}
+  .main{padding-right:0!important;}
+  .main:not(.chat-hidden){padding-bottom:45vh;}
+  .cw-input{font-size:16px!important;}
 }
+/* 채팅 토글 플로팅 버튼 */
+#chatToggleBtn{position:fixed;bottom:14px;right:14px;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0a1830,#1a3060);border:1.5px solid var(--blue);color:var(--blue);font-size:18px;cursor:pointer;display:none;z-index:201;box-shadow:0 4px 16px rgba(0,0,0,.5);transition:.2s;align-items:center;justify-content:center;}
+#chatToggleBtn:hover{filter:brightness(1.2);}
+#chatToggleBtn .unread-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);display:none;}
 .cw-header{padding:8px 10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .cw-online{font-size:10px;color:var(--green);font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:4px;}
 .cw-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
@@ -276,6 +283,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .cw-msgs::-webkit-scrollbar{width:3px;}
 .cw-msgs::-webkit-scrollbar-thumb{background:var(--bd2);}
 .cw-msg{background:rgba(0,0,0,.3);border-radius:6px;padding:5px 7px;}
+.cw-admin-msg{background:rgba(240,192,64,.06)!important;border-left:2px solid var(--gold);}
 .cw-author{font-family:'Cinzel',serif;font-size:9.5px;font-weight:700;color:var(--gold);}
 .cw-time{font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--tx3);margin-left:5px;}
 .cw-text{font-size:11px;color:var(--tx);line-height:1.5;margin-top:1px;}
@@ -539,6 +547,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="cw-header">
     <div class="cw-online"><div class="cw-dot"></div><span id="cwOnline">0</span>명 접속</div>
     <span style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold)">채팅</span>
+    <button onclick="toggleChat()" title="채팅 숨기기" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:2px 6px;border-radius:4px;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
   </div>
   <div class="cw-tabs">
     <button class="cw-tab on" id="cwt-world" onclick="cwTab('world')">월드</button>
@@ -574,6 +583,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 </div>
 
 <div class="toast" id="toast"></div>
+<button id="chatToggleBtn" onclick="toggleChat()">💬<div class="unread-dot" id="unreadDot"></div></button>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
@@ -932,8 +942,32 @@ onAuthStateChanged(auth,async user=>{
 });
 
 // ═══ PRESENCE ═══
+window.toggleChat=function(forceHide){
+  const w=document.getElementById('chatWidget');
+  const btn=document.getElementById('chatToggleBtn');
+  const main=document.querySelector('.main');
+  const isHidden=w.classList.contains('cw-hidden');
+  const doHide=forceHide!==undefined?forceHide:isHidden?false:true;
+  if(doHide){
+    w.classList.add('cw-hidden');
+    btn.innerHTML='💬<div class="unread-dot" id="unreadDot"></div>';
+    btn.title='채팅 열기';
+    if(main)main.classList.add('chat-hidden');
+    localStorage.setItem('chatHidden','1');
+  }else{
+    w.classList.remove('cw-hidden');
+    btn.innerHTML='✕<div class="unread-dot" id="unreadDot"></div>';
+    btn.title='채팅 숨기기';
+    if(main)main.classList.remove('chat-hidden');
+    localStorage.setItem('chatHidden','0');
+    document.getElementById('unreadDot').style.display='none';
+    // 열릴 때 스크롤 맨 아래
+    const msgs=document.getElementById('cwMsgs');if(msgs)msgs.scrollTop=msgs.scrollHeight;
+  }
+};
+
+// ═══ PRESENCE ═══
 function startPresence(){
-  if(!curUser)return;
   const pRef=ref(db,`presence/${curUser.uid}`);
   const update_p=()=>set(pRef,{charName:char?.name||'',lastSeen:Date.now()});
   update_p();
@@ -1089,6 +1123,10 @@ async function selChar(id){
   document.getElementById('topbar').style.display='flex';
   document.getElementById('gameLayout').style.display='flex';
   document.getElementById('chatWidget').style.display='flex';
+  // 채팅 토글 버튼 표시
+  document.getElementById('chatToggleBtn').style.display='flex';
+  // 채팅창 숨김 상태 복원
+  if(localStorage.getItem('chatHidden')==='1') toggleChat(true);
   const isAdmin=curUser.email===ADMIN_EMAIL;
   document.getElementById('adminNav').style.display=isAdmin?'flex':'none';
   onValue(ref(db,`chars/${id}`),sn=>{if(sn.val()){char=sn.val();char.equipment=char.equipment||{};if(!char.str)char.str=5;updateTop();renderChar();}});
@@ -1311,12 +1349,56 @@ function openIM(it){
     document.getElementById('useScrollBtn').onclick=()=>useRerollScroll(it.id);
     document.getElementById('imodal').classList.add('open');return;
   }
-  const sr=Object.entries(it.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`<div class="srow"><span class="sn">${k.toUpperCase()}</span><span class="sv" style="color:var(--green)">+${v}</span></div>`).join('');
-  const ph=it.prefix?`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span><br>${Object.entries(it.prefix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc} (${Math.round(SKILLS[it.prefix.sk].base*(GRADES[it.grade]?.skillM||0)*100)}% 발동)</span>`:''}</div>`:'';
-  const sh=it.suffix?`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span><br>${Object.entries(it.suffix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc} (${Math.round(SKILLS[it.suffix.sk].base*(GRADES[it.grade]?.skillM||0)*100)}% 발동)</span>`:''}</div>`:'';
+
+  // 현재 장착 아이템 찾기
+  const eqSlot=it.slot==='accessory'?null:it.slot;
+  const equipped=eqSlot?char.equipment[eqSlot]:null;
+
+  function statRowHtml(label,newVal,oldVal){
+    if(!newVal&&!oldVal)return'';
+    const diff=(newVal||0)-(oldVal||0);
+    const col=diff>0?'var(--green)':diff<0?'var(--red)':'var(--tx3)';
+    const diffStr=diff>0?`<span style="color:var(--green);font-size:10px"> ▲${diff}</span>`:
+                  diff<0?`<span style="color:var(--red);font-size:10px"> ▼${Math.abs(diff)}</span>`:'';
+    return`<div class="srow"><span class="sn">${label}</span><span class="sv" style="color:var(--green)">+${newVal||0}</span>${diffStr}</div>`;
+  }
+
+  const newStats=it.stats||{};
+  const oldStats=equipped?.stats||{};
+  const allKeys=[...new Set([...Object.keys(newStats),...Object.keys(oldStats)])].filter(k=>newStats[k]>0||oldStats[k]>0);
+  const sr=allKeys.map(k=>statRowHtml(k.toUpperCase(),newStats[k],oldStats[k])).join('');
+
+  const ph=it.prefix?`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span><br>${Object.entries(it.prefix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`:'';
+  const sh=it.suffix?`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span><br>${Object.entries(it.suffix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`:'';
   const seth=it.grade==='set'?`<div style="margin-top:6px;padding:6px 9px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:11px;color:var(--st)">◆ ${it.setName}</div>`:'';
+
+  // 장착 중 아이템 비교 표시
+  const compareHtml=equipped?`
+    <div style="margin-top:8px;padding:7px 9px;background:rgba(255,150,0,.05);border:1px solid rgba(255,150,0,.2);border-radius:6px;font-size:11px">
+      <div style="font-size:9px;color:var(--tx3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">현재 장착 중</div>
+      <div class="icname g-${equipped.grade}" style="font-size:11px;margin-bottom:3px">${equipped.name}</div>
+      <div style="font-size:10px;color:var(--tx3)">${Object.entries(equipped.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' · ')}</div>
+    </div>`:'<div style="font-size:10px;color:var(--tx3);margin-top:5px">현재 슬롯 비어있음</div>';
+
   document.getElementById('imtitle').innerHTML=`<span class="g-${it.grade}">${it.name}</span>`;
   const lvLock=it.reqLv&&char.level<it.reqLv;
+
+  // 장신구 슬롯 선택 UI
+  const isAcc=it.slot==='accessory';
+  const accSelHtml=isAcc?`
+    <div style="margin-top:8px">
+      <div style="font-size:9px;color:var(--tx3);margin-bottom:5px">장착 슬롯 선택</div>
+      <div style="display:flex;gap:5px">
+        ${['accessory1','accessory2','accessory3'].map((sl,i)=>{
+          const cur=char.equipment[sl];
+          return`<button class="btn btn-ghost btn-xs" style="flex:1;flex-direction:column;height:auto;padding:5px 4px;gap:1px" onclick="equipItemSlot('${it.id}','${sl}')">
+            <span>장신구${i+1}</span>
+            <span style="font-size:8.5px;color:${cur?'var(--gold)':'var(--tx3)'};white-space:nowrap;overflow:hidden;max-width:60px;text-overflow:ellipsis">${cur?cur.name.slice(0,6)+'…':'비어있음'}</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`:'';
+
   document.getElementById('imbody').innerHTML=`
     <div style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
       <span style="background:${it.gradeColor}22;border:1px solid ${it.gradeColor}44;color:${it.gradeColor};padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700">${it.gradeName}</span>
@@ -1326,14 +1408,26 @@ function openIM(it){
     ${it.itemLv?`<div style="font-size:10px;color:var(--tx3);margin-bottom:6px">아이템 레벨 ${it.itemLv}</div>`:''}
     ${sr?`<div class="sgrid" style="margin-bottom:7px">${sr}</div>`:''}
     ${ph}${sh}${seth}
-    <div style="display:flex;gap:6px;margin-top:10px">
-      <button class="btn btn-gold" id="equipBtn" style="flex:1" ${lvLock?'disabled style="opacity:.4"':''}>⚔ 장착${lvLock?' (레벨 부족)':''}</button>
+    ${!isAcc?compareHtml:''}
+    ${isAcc?accSelHtml:''}
+    ${!isAcc?`<div style="display:flex;gap:6px;margin-top:10px">
+      <button class="btn btn-gold" id="equipBtn" style="flex:1" ${lvLock?'disabled':''}>${lvLock?'⚔ 장착 (레벨 부족)':'⚔ 장착'}</button>
       <button class="btn btn-red btn-sm" id="discBtn">버리기</button>
-    </div>`;
-  document.getElementById('equipBtn').onclick=()=>equipItem(it);
+    </div>`:`<div style="margin-top:8px"><button class="btn btn-red btn-sm" id="discBtn" style="width:100%">버리기</button></div>`}`;
+
+  if(!isAcc)document.getElementById('equipBtn').onclick=()=>equipItem(it);
   document.getElementById('discBtn').onclick=async()=>{if(!confirm('버리시겠습니까?'))return;delete inv[it.id];await saveInv();closeIM();toast('버림');};
   document.getElementById('imodal').classList.add('open');
 }
+
+window.equipItemSlot=async(itemId,slot)=>{
+  const it=inv[itemId];if(!it)return;
+  if(it.reqLv&&char.level<it.reqLv){toast(`⚠️ Lv.${it.reqLv} 이상 필요`);return;}
+  const prev=char.equipment[slot];if(prev)inv[prev.id]=prev;
+  char.equipment[slot]=it;delete inv[it.id];
+  await saveChar();await saveInv();closeIM();
+  toast(`${it.name} → 장신구${slot.slice(-1)} 장착!`);
+};
 function closeIM(){document.getElementById('imodal').classList.remove('open');}
 document.getElementById('imc').onclick=closeIM;
 document.getElementById('imodal').onclick=e=>{if(e.target===document.getElementById('imodal'))closeIM();};
@@ -2316,31 +2410,41 @@ window.cwTab=function(m){
 function renderChatMsgs(msgs,type){
   const el=document.getElementById('cwMsgs');
   const arr=Object.values(msgs).sort((a,b)=>(a.ts||0)-(b.ts||0)).slice(-80);
-  el.innerHTML=arr.map(m=>`<div class="cw-msg">
-    <div><span class="cw-author">${m.author}</span><span class="cw-time">${new Date(m.ts||Date.now()).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'})}</span>${m.whisperTo?`<span class="cw-whisper-tag">→${m.whisperTo}</span>`:''}</div>
+  el.innerHTML=arr.map(m=>`<div class="cw-msg${m.isAdmin?' cw-admin-msg':''}">
+    <div>
+      <span class="cw-author" style="${m.isAdmin?'color:var(--gold)':''}">${m.author}</span>
+      ${m.isAdmin?`<span style="font-size:8px;background:rgba(240,192,64,.2);border:1px solid rgba(240,192,64,.4);color:var(--gold);padding:1px 4px;border-radius:3px;margin-left:3px;font-family:'IBM Plex Mono',monospace">ADMIN</span>`:''}
+      <span class="cw-time">${new Date(m.ts||Date.now()).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'})}</span>
+      ${m.whisperTo?`<span class="cw-whisper-tag">→${m.whisperTo}</span>`:''}
+    </div>
     <div class="cw-text">${escapeHtml(m.text)}</div>
   </div>`).join('');
   el.scrollTop=el.scrollHeight;
+  // 채팅 숨김 상태면 빨간 점
+  const w=document.getElementById('chatWidget');
+  if(w&&w.classList.contains('cw-hidden')){
+    const dot=document.getElementById('unreadDot');if(dot)dot.style.display='block';
+  }
 }
 function escapeHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 async function cwSendMsg(){
   const inp=document.getElementById('cwInput');const txt=inp.value.trim();if(!txt)return;
   const ts=Date.now();const author=char.name;
+  const isAdminMsg=curUser?.email===ADMIN_EMAIL;
   if(cwMode==='world'){
-    await push(ref(db,'chat/world'),{author,text:txt,ts});
+    await push(ref(db,'chat/world'),{author,text:txt,ts,isAdmin:isAdminMsg});
   }else if(cwMode==='party'){
     if(!myPartyId){toast('파티 없음');return;}
-    await push(ref(db,`chat/party/${myPartyId}`),{author,text:txt,ts});
+    await push(ref(db,`chat/party/${myPartyId}`),{author,text:txt,ts,isAdmin:isAdminMsg});
   }else if(cwMode==='whisper'){
     const targetName=document.getElementById('cwTarget').value.trim();
     if(!targetName){toast('대상 이름 입력');return;}
-    // Find target char
     const allChars=await get(ref(db,'chars'));const ac=allChars.val()||{};
     const tEntry=Object.entries(ac).find(([,c])=>c.name===targetName);
     if(!tEntry){toast('캐릭터 없음');return;}
     const [tid]=tEntry;
-    const wMsg={author,text:txt,ts,whisperTo:targetName,from:charId};
+    const wMsg={author,text:txt,ts,whisperTo:targetName,from:charId,isAdmin:isAdminMsg};
     await push(ref(db,`chat/whisper/${tid}`),wMsg);
     await push(ref(db,`chat/whisper/${charId}`),wMsg);
   }
