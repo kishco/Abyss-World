@@ -1224,14 +1224,28 @@ function gainExp(amt){
     char.exp-=char.expNext;char.level++;
     char.expNext=expForLevel(char.level);
     char.baseAtk+=0.7;char.baseDef+=0.3;char.baseSpd+=0.3;char.maxHp+=2;char.hp=char.maxHp;
-    // Random stat allocation 1-5
     const totalPts=rand(1,5);
     const rolled={};
     for(let i=0;i<totalPts;i++){const k=pick(STATS_DEF.map(s=>s.k));char[k]=(char[k]||1)+1;rolled[k]=(rolled[k]||0)+1;}
     lvUps.push({level:char.level,pts:totalPts,rolled});
   }
-  saveChar();updateTop();renderChar();
-  if(lvUps.length>0)showLvModal(lvUps);
+  saveChar();updateTop();
+  // ★ 던전 중 레벨업 모달은 전투 종료 후 표시 (화면 가림 방지)
+  if(lvUps.length>0){
+    if(battle&&!battle.done){
+      // 전투 중: 로그에만 표시, 나중에 모달
+      if(!battle._pendingLvUps)battle._pendingLvUps=[];
+      for(const lu of lvUps){
+        battle._pendingLvUps.push(lu);
+        blogAdd(`<span class="l-exp">🎉 레벨 업! Lv.${lu.level} (+${lu.pts}pts)</span>`);
+      }
+    }else{
+      renderChar();
+      showLvModal(lvUps);
+    }
+  }else{
+    renderChar();
+  }
   return lvUps.length>0;
 }
 function showLvModal(lvUps){
@@ -2026,11 +2040,9 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
   const t=DTIERS[tierIdx];const d=DIFF[diffKey];
   const s=calcStats(char);
   if(mode==='solo'){
-    // Check min level
-    if(char.level<t.minLv){toast('레벨 부족');return;}
+    if(char.level<t.minLv){toast(`레벨 부족! 최소 Lv.${t.minLv} 필요`);return;}
     startBattle(tierIdx,mode,diffKey,[{id:charId,name:char.name,charData:char,stats:s,hp:s.maxHp,maxHp:s.maxHp,potions:5+(char.extraPotions||0)}]);
   }else{
-    // Party mode
     if(!myPartyId){toast('파티가 없습니다. 파티 탭에서 생성하세요.');return;}
     const ps=await get(ref(db,`parties/${myPartyId}`));
     const pd=ps.val();if(!pd){toast('파티 없음');return;}
@@ -2041,7 +2053,13 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
       const score=equipScore(char);
       if(score<d.reqScore){toast(`장비 점수 부족! 현재: ${score}, 필요: ${d.reqScore}`);return;}
     }
-    // Launch lobby
+    // ★ 파티원 전체 레벨 체크 — 한 명이라도 부족하면 입장 불가
+    const underLevel=memArr.filter(m=>m.level<t.minLv);
+    if(underLevel.length>0){
+      const names=underLevel.map(m=>m.charName).join(', ');
+      toast(`⚠️ ${names} — Lv.${t.minLv} 미달! 파티원 전원이 최소 레벨을 충족해야 입장 가능합니다.`,4000);
+      return;
+    }
     showPartyLobby(tierIdx,mode,diffKey);
   }
 };
@@ -2332,7 +2350,7 @@ function resolvePhase(){
     if(p.actionChosen==='defend'){p.defending=true;blogAdd(`<span class="l-sys">🛡 ${p.name} 방어 자세</span>`);}
     else if(p.actionChosen==='heal'){
       if(p.potions>0){
-        p.potions--;const heal=Math.round(p.maxHp*0.4);p.hp=Math.min(p.hp+heal,p.maxHp);
+        p.potions--;const heal=Math.round(p.maxHp*0.5);p.hp=Math.min(p.hp+heal,p.maxHp);
         p.healing=true; // ★ 회복 중 — 몬스터 공격 30% 감소
         p.aggro=Math.max(0,(p.aggro||0)*0.3); // ★ 어그로 대폭 감소 (몬스터가 딜러 우선 공격)
         blogAdd(`<span class="l-heal">💊 ${p.name} 포션 사용! +${heal}HP (${p.hp}/${p.maxHp}) — 회복 자세 (피해 30%↓)</span>`);
@@ -2398,7 +2416,10 @@ function resolvePhase(){
 
     let dmg=Math.max(1,m.atk-calcStats(tgt.charData||char).def);
     if(tgt.defending)dmg=Math.round(dmg*0.5);
-    if(tgt.healing)dmg=Math.round(dmg*0.7); // ★ 회복 중 30% 감소
+    if(tgt.healing){
+      if(battle.mode==='solo'){blogAdd(`<span class="l-sys">💊 ${tgt.name} 회복 중 — 공격 무효!</span>`);continue;}
+      else dmg=Math.round(dmg*0.7); // 파티: 30% 감소
+    }
     const dodge=calcStats(tgt.charData||char).dodge;
     if(Math.random()*100<dodge){blogAdd(`<span class="l-sys">🌀 ${tgt.name} 회피!</span>`);continue;}
     tgt.hp=Math.max(0,tgt.hp-dmg);
@@ -2520,8 +2541,8 @@ function maybeLoseItem(){
 
 async function dungeonClear(){
   const d=battle.diff;const dk=battle.diffKey;
+  const mode=battle.mode; // ★ 로컬 변수로 명시
   blogAdd(`<span class="l-exp">🏆 던전 클리어! 난이도: ${d.name}</span>`);
-  // Hard+ clear: increase max potions
   if(dk==='hard'||dk==='vhard'){
     char.extraPotions=(char.extraPotions||0)+1;
     blogAdd(`<span class="l-heal">💊 최대 포션 +1! (${5+char.extraPotions}개)</span>`);
@@ -2568,17 +2589,40 @@ async function dungeonClear(){
 }
 
 function endBattle(success,fled){
-  battle={...battle,done:true};
+  if(!battle)return;
+  battle.done=true;
+  battle.ended=true; // ★ renderBattle 차단 플래그
   if(battle.timer)clearInterval(battle.timer);
-  updateNavLock(); // ★ 잠금 해제
+  updateNavLock();
+
+  // ★ dungBattle 강제 표시
   const db2=document.getElementById('dungBattle');
-  db2.innerHTML+=`<div style="margin-top:14px;text-align:center"><button class="btn btn-gold" onclick="exitBattle()">← 던전 목록으로</button></div>`;
+  db2.style.display='block';
+
+  const resultColor=success?'var(--green)':fled?'var(--tx2)':'var(--red)';
+  const resultMsg=success?'🏆 던전 클리어!':fled?'💨 도망쳤습니다':'💀 전멸';
+  db2.innerHTML=`
+    <div style="text-align:center;padding:24px 0 14px;position:sticky;top:0;background:var(--sf);z-index:10;border-bottom:1px solid var(--bd);margin-bottom:12px">
+      <div style="font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:${resultColor};margin-bottom:10px">${resultMsg}</div>
+      <button class="btn btn-gold" style="padding:12px 36px;font-size:15px;font-weight:700" onclick="exitBattle()">← 던전 목록으로</button>
+    </div>
+    <div style="padding:0 4px">
+      <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">전투 기록</div>
+      <div class="clog">${(battle.log||[]).map(l=>`<div>${l}</div>`).join('')}</div>
+    </div>`;
 }
 window.exitBattle=()=>{
+  const pendingLvUps=battle?battle._pendingLvUps:null;
   battle=null;
   document.getElementById('dungBattle').style.display='none';
   document.getElementById('dungMain').style.display='block';
-  renderDungeon();
+  document.getElementById('dungMode').style.display='none';
+  document.getElementById('dungLobby').style.display='none';
+  document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='dungeon'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-dungeon'));
+  renderDungeon();renderChar();
+  // ★ 던전 중 레벨업 모달 지연 표시
+  if(pendingLvUps&&pendingLvUps.length>0)setTimeout(()=>showLvModal(pendingLvUps),300);
 };
 
 function blogAdd(html){
@@ -2589,7 +2633,7 @@ function blogAdd(html){
 }
 
 function renderBattle(){
-  if(!battle)return;
+  if(!battle||battle.ended)return; // ★ 종료 후 렌더 차단
   const db2=document.getElementById('dungBattle');
   const t=battle.tier;const d=battle.diff;
   const myP=battle.players.find(p=>p.id===charId);
@@ -2638,7 +2682,7 @@ function renderBattle(){
       <div class="act-btns">
         <button id="actbtn-atk" class="act-btn act-atk" onclick="chooseAction('attack')">⚔ 공격</button>
         <button id="actbtn-def" class="act-btn act-def" onclick="chooseAction('defend')">🛡 방어<br><span style="font-size:9px">피해 50% 감소</span></button>
-        <button id="actbtn-heal" class="act-btn act-heal" onclick="chooseAction('heal')">💊 회복<br><span style="font-size:9px">HP 40% 회복 (포션 ${myP.potions}개)</span></button>
+        <button id="actbtn-heal" class="act-btn act-heal" onclick="chooseAction('heal')">💊 회복<br><span style="font-size:9px">HP 50% 회복${isSolo?' · 무적':' · 피해30%↓'} (포션 ${myP.potions}개)</span></button>
         <button id="actbtn-flee" class="act-btn act-flee" onclick="chooseAction('flee')">💨 도망<br><span style="font-size:9px">${isSolo?'즉시 도망':'전원 선택 시'}</span></button>
       </div>`:
     myP&&myP.status==='alive'&&battle.phase===1&&myP.actionChosen?
