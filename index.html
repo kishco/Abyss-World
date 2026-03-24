@@ -1288,6 +1288,8 @@ function renderChar(){
 }
 function renderEq(){
   const is2H=char.equipment?.weapon?.hand==='2H';
+  // ★ 2H 장착 시 offhand가 null이면 인벤으로 돌려보내기
+  if(is2H&&char.equipment.offhand){inv[char.equipment.offhand.id]=char.equipment.offhand;char.equipment.offhand=null;}
   document.getElementById('eqgrid').innerHTML=EQSLOTS.map(sl=>{
     const it=char.equipment[sl.k];const lk=sl.k==='offhand'&&is2H;
     let tooltip='';
@@ -1307,22 +1309,26 @@ function renderEq(){
       const enchStr=[it.prefix,it.suffix].filter(Boolean)
         .map(e=>`<div style="font-size:9.5px;color:${e===it.prefix?'var(--blue)':'var(--purple)'}">• ${e.n}: ${Object.entries(e.b||{}).filter(([,v])=>v!==0).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(' ')}</div>`).join('');
       const lvStr=it.reqLv?`<div style="font-size:9px;color:${char.level<it.reqLv?'var(--red)':'var(--tx3)'}">필요 Lv.${it.reqLv}</div>`:'';
+      const setTag=it.grade==='set'?`<div style="font-size:8px;color:${GRADES.set.color}">◆ ${it.setName||'세트'}</div>`:'';
       tooltip=`<div class="sk-tooltip">
         <div style="font-size:9px;color:${it.gradeColor};font-weight:700;margin-bottom:4px">${it.gradeName} · 아이템Lv.${it.itemLv||1}</div>
-        <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:5px">${it.name}</div>
+        ${setTag}
+        <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:5px">${itName(it)}</div>
         ${lvStr}
         ${statRows?`<div class="sk-tooltip-stats">${statRows}</div>`:''}
         ${enchStr?`<div style="margin-bottom:4px">${enchStr}</div>`:''}
         ${skillInfos.length?`<div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--bd)">${skillInfos.join('<hr style="border-color:var(--bd);margin:3px 0">')}</div>`:''}
+        <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--bd)">
+          <button class="btn btn-red btn-xs" style="width:100%" onclick="event.stopPropagation();unequip('${sl.k}')">✕ 해제</button>
+        </div>
       </div>`;
     }
     return`<div class="eqsl ${it?'gb-'+(it.grade||'normal'):''}" data-k="${sl.k}" style="${lk?'opacity:.4;pointer-events:none':''}" onclick="toggleEqTip(this,'${sl.k}')">
       <div class="eqlb">${sl.i} ${sl.l}</div>
       ${lk?'<div class="eqem">양손 장착</div>':
         it?`<div class="eqit g-${it.grade}">${itName(it)}</div>
-            <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${GRADES[it.grade]?.name||it.grade}${it.itemLv?' · Lv.'+it.itemLv:''}</div>
-            ${itSkStr(it)?`<div class="eqsk">${itSkStr(it)}</div>`:''}
-            <button class="equn" data-un="${sl.k}" onclick="event.stopPropagation();unequip('${sl.k}')">✕</button>`:
+            <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${it.grade==='set'?`◆${it.setName?.slice(0,4)||'세트'}`:GRADES[it.grade]?.name||it.grade}${it.itemLv?' · Lv.'+it.itemLv:''}</div>
+            ${itSkStr(it)?`<div class="eqsk">${itSkStr(it)}</div>`:''}`:
         '<div class="eqem">비어있음</div>'}
       ${tooltip}
     </div>`;
@@ -1404,25 +1410,33 @@ function itName(it){return it?(it.enhance>0?`+${it.enhance} ${it.name}`:it.name)
 function renderSetPanel(){
   const p=document.getElementById('setbonuspanel');
   const eq=char.equipment||{};
+  // ★ 세트별 장착 슬롯 목록
   const sc={};
-  for(const it of Object.values(eq)){if(it&&it.grade==='set'&&it.setId)sc[it.setId]=(sc[it.setId]||0)+1;}
+  for(const[slKey,it]of Object.entries(eq)){
+    if(it&&it.grade==='set'&&it.setId){
+      if(!sc[it.setId])sc[it.setId]=[];
+      sc[it.setId].push({slKey,it});
+    }
+  }
   if(!Object.keys(sc).length){p.innerHTML='';return;}
-  p.innerHTML=Object.entries(sc).map(([sid,cnt])=>{
+  const slotLabels={head:'머리',chest:'상의',legs:'하의',boots:'신발',weapon:'무기',offhand:'보조',neck:'목',accessory1:'장신구1',accessory2:'장신구2',accessory3:'장신구3'};
+  p.innerHTML=Object.entries(sc).map(([sid,slots])=>{
     const sd=SETS[sid];if(!sd)return'';
+    const cnt=slots.length;
     const total=Object.keys(sd.pcs).length;
+    const slotList=slots.map(s=>`<span style="font-size:9px;background:${sd.col}22;color:${sd.col};padding:1px 5px;border-radius:3px;margin-right:3px">${slotLabels[s.slKey]||s.slKey}</span>`).join('');
     return`<div class="card2" style="margin-bottom:7px;border-color:${sd.col}44">
-      <div style="font-size:10px;font-weight:700;color:${sd.col};margin-bottom:6px;display:flex;justify-content:space-between">
+      <div style="font-size:10px;font-weight:700;color:${sd.col};margin-bottom:5px;display:flex;justify-content:space-between;align-items:center">
         <span>◆ ${sd.name}</span>
         <span style="font-size:9px;background:${sd.col}22;padding:1px 6px;border-radius:8px">${cnt}/${total} 세트</span>
       </div>
+      <div style="margin-bottom:6px">${slotList}</div>
       ${sd.bonuses.map(b=>{
         const active=cnt>=b.cnt;
-        return`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--bd);font-size:10.5px">
-          <span style="color:${active?sd.col:'var(--tx3)'};font-size:12px">${active?'✅':'○'}</span>
-          <div style="flex:1">
-            <span style="color:${active?'var(--tx)':'var(--tx3)'}">${b.cnt}세트: ${b.desc}</span>
-            ${active?'':'<span style="font-size:9px;color:var(--tx3)"> (미달성)</span>'}
-          </div>
+        return`<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:10.5px">
+          <span style="color:${active?sd.col:'var(--tx3)'}">${active?'✅':'○'}</span>
+          <span style="color:${active?'var(--tx)':'var(--tx3)'}">${b.cnt}세트: ${b.desc}</span>
+          ${!active?`<span style="font-size:9px;color:var(--tx3)">(${cnt}/${b.cnt})</span>`:''}
         </div>`;
       }).join('')}
     </div>`;
@@ -1611,20 +1625,28 @@ function openIM(it){
   document.getElementById('imtitle').innerHTML=`<span class="g-${it.grade}">${it.name}</span>`;
   const lvLock=it.reqLv&&char.level<it.reqLv;
 
-  // 장신구 슬롯 선택 UI
+  // 장신구 슬롯 선택 UI - 1,2,3 전부 비교
   const isAcc=it.slot==='accessory';
   const accSelHtml=isAcc?`
     <div style="margin-top:8px">
-      <div style="font-size:9px;color:var(--tx3);margin-bottom:5px">장착 슬롯 선택</div>
-      <div style="display:flex;gap:5px">
-        ${['accessory1','accessory2','accessory3'].map((sl,i)=>{
-          const cur=char.equipment[sl];
-          return`<button class="btn btn-ghost btn-xs" style="flex:1;flex-direction:column;height:auto;padding:5px 4px;gap:1px" onclick="equipItemSlot('${it.id}','${sl}')">
-            <span>장신구${i+1}</span>
-            <span style="font-size:8.5px;color:${cur?'var(--gold)':'var(--tx3)'};white-space:nowrap;overflow:hidden;max-width:60px;text-overflow:ellipsis">${cur?cur.name.slice(0,6)+'…':'비어있음'}</span>
-          </button>`;
-        }).join('')}
-      </div>
+      <div style="font-size:9px;color:var(--tx3);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px">슬롯 선택 (현재 장착과 비교)</div>
+      ${['accessory1','accessory2','accessory3'].map((sl,i)=>{
+        const cur=char.equipment[sl];
+        const curStats=cur?Object.entries(cur.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' '):'';
+        return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;margin-bottom:5px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:9.5px;color:var(--tx3);margin-bottom:3px">장신구 ${i+1}번</div>
+              ${cur
+                ?`<div class="icname g-${cur.grade}" style="font-size:11px;margin-bottom:2px">${itName(cur)}</div>
+                  <div style="font-size:9.5px;color:var(--tx3)">${curStats}</div>
+                  ${cur.prefix||cur.suffix?`<div style="font-size:9px;color:var(--tx3);margin-top:1px">${cur.prefix?`[접두:${cur.prefix.n}]`:''} ${cur.suffix?`[접미:${cur.suffix.n}]`:''}</div>`:''}`
+                :`<div style="font-size:10px;color:var(--tx3)">비어있음</div>`}
+            </div>
+            <button class="btn btn-gold btn-xs" style="flex-shrink:0;margin-left:8px" onclick="equipItemSlot('${it.id}','${sl}')">착용</button>
+          </div>
+        </div>`;
+      }).join('')}
     </div>`:'';
 
   document.getElementById('imbody').innerHTML=`
