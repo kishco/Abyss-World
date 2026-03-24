@@ -1572,7 +1572,12 @@ async function equipItem(it){
   // ★ 레벨 제한 체크
   if(it.reqLv&&char.level<it.reqLv){toast(`⚠️ Lv.${it.reqLv} 이상이어야 장착 가능합니다 (현재 Lv.${char.level})`);return;}
   let sl=it.slot==='accessory'?['accessory1','accessory2','accessory3'].find(k=>!char.equipment[k])||'accessory1':it.slot;
-  if(it.slot==='weapon'&&it.hand==='2H')char.equipment.offhand=null;
+  if(it.slot==='weapon'&&it.hand==='2H'){
+    // ★ 2H 장착 시 기존 offhand를 인벤토리로 이동
+    const oh=char.equipment.offhand;
+    if(oh){inv[oh.id]=oh;}
+    char.equipment.offhand=null;
+  }
   const prev=char.equipment[sl];if(prev)inv[prev.id]=prev;
   char.equipment[sl]=it;delete inv[it.id];
   await saveChar();await saveInv();closeIM();toast(it.name+' 장착!');
@@ -2375,7 +2380,12 @@ function spawnMonsters(b,isBoss){
 
 // ★ 히든 상인
 function showHiddenMerchant(){
+  // ★ dungBattle이 보이는지 확인
   const db2=document.getElementById('dungBattle');
+  db2.style.display='block';
+  document.getElementById('dungMain').style.display='none';
+  // 먼저 현재 전투 상태 렌더링
+  renderBattle();
   const lv=battle.tier.recLv;
   // 좋은 등급 아이템 2~3개 생성
   const pool=[...WBASES,...ABASES,...ACCBASES];
