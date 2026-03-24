@@ -2252,7 +2252,7 @@ function startActionPhase(){
   if(!battle)return;
   battle.phase=1;battle.timerVal=15;
   battle._phaseStart=Date.now(); // ★ 페이즈 시작
-  battle.players.forEach(p=>{p.actionChosen=null;p.defending=false;});
+  battle.players.forEach(p=>{p.actionChosen=null;p.defending=false;p.healing=false;});
   battle.fleeVotes.clear();
   renderBattle();
   battle.timer=setInterval(()=>{
@@ -2333,7 +2333,9 @@ function resolvePhase(){
     else if(p.actionChosen==='heal'){
       if(p.potions>0){
         p.potions--;const heal=Math.round(p.maxHp*0.4);p.hp=Math.min(p.hp+heal,p.maxHp);
-        blogAdd(`<span class="l-heal">💊 ${p.name} 포션 사용! +${heal}HP (${p.hp}/${p.maxHp})</span>`);
+        p.healing=true; // ★ 회복 중 — 몬스터 공격 30% 감소
+        p.aggro=Math.max(0,(p.aggro||0)*0.3); // ★ 어그로 대폭 감소 (몬스터가 딜러 우선 공격)
+        blogAdd(`<span class="l-heal">💊 ${p.name} 포션 사용! +${heal}HP (${p.hp}/${p.maxHp}) — 회복 자세 (피해 30%↓)</span>`);
       }
     }else if(p.actionChosen==='attack'){
       // Update aggro from damage
@@ -2396,6 +2398,7 @@ function resolvePhase(){
 
     let dmg=Math.max(1,m.atk-calcStats(tgt.charData||char).def);
     if(tgt.defending)dmg=Math.round(dmg*0.5);
+    if(tgt.healing)dmg=Math.round(dmg*0.7); // ★ 회복 중 30% 감소
     const dodge=calcStats(tgt.charData||char).dodge;
     if(Math.random()*100<dodge){blogAdd(`<span class="l-sys">🌀 ${tgt.name} 회피!</span>`);continue;}
     tgt.hp=Math.max(0,tgt.hp-dmg);
