@@ -149,11 +149,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .equn{position:absolute;top:3px;right:3px;background:none;border:none;color:var(--tx3);font-size:9px;cursor:pointer;padding:1px 3px;border-radius:3px;}
 .equn:hover{color:var(--red);}
 /* Skill tooltip */
-.sk-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#0a1020;border:1px solid var(--bd2);border-radius:7px;padding:8px 10px;width:200px;z-index:200;font-size:10.5px;line-height:1.6;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.7);}
+.sk-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#070d1a;border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;width:220px;z-index:200;font-size:10.5px;line-height:1.6;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.85);}
 .eqsl:hover .sk-tooltip{display:block;}
-.sk-tooltip-title{font-weight:700;color:var(--purple);margin-bottom:3px;font-size:11px;}
+.eqsl.tip-open .sk-tooltip{display:block;}
+.sk-tooltip-title{font-weight:700;color:var(--purple);margin-bottom:2px;font-size:11px;}
 .sk-tooltip-desc{color:var(--tx2);}
-.sk-tooltip-proc{color:var(--gold);font-size:10px;margin-top:3px;}
+.sk-tooltip-proc{color:var(--gold);font-size:10px;margin-top:2px;}
+.sk-tooltip-stats{margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--bd);}
+.sk-tooltip-stat-row{display:flex;justify-content:space-between;font-size:10px;}
+.sk-tooltip-stat-row span:first-child{color:var(--tx3);}
+.sk-tooltip-stat-row span:last-child{color:var(--green);font-family:'IBM Plex Mono',monospace;}
 
 /* INVGRID */
 .invgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:6px;}
@@ -629,56 +634,56 @@ function expForLevel(lv){return Math.round(200*lv*lv*Math.pow(1.055,lv));}
 
 // Skills — 전체 하향조정
 const SKILLS={
-  flame_burst:{name:'화염 폭발',icon:'🔥',desc:'130% 화염 피해',base:0.07,aggro:1.5,
-    fx:(a)=>({dmg:a*1.3,type:'fire',msg:'🔥 화염 폭발!'})},
-  ice_shard:{name:'빙결 파편',icon:'❄',desc:'100% 냉기+SPD 감소',base:0.07,aggro:1.0,
-    fx:(a)=>({dmg:a*1.0,type:'ice',debuff:'spd',msg:'❄ 빙결 파편!'})},
-  lightning:{name:'번개 연쇄',icon:'⚡',desc:'2연타 60% 번개',base:0.08,aggro:1.2,
-    fx:(a)=>({dmg:a*1.2,hits:2,type:'lightning',msg:'⚡ 번개 연쇄!'})},
-  shadow_strike:{name:'그림자 타격',icon:'🌑',desc:'110% 어둠+방어무시',base:0.06,aggro:0.8,
-    fx:(a)=>({dmg:a*1.1,ignoreDef:true,type:'dark',msg:'🌑 그림자 타격!'})},
-  holy_judgment:{name:'신성 심판',icon:'✨',desc:'140% 신성',base:0.05,aggro:2.0,
-    fx:(a)=>({dmg:a*1.4,type:'holy',msg:'✨ 신성 심판!'})},
+  flame_burst:{name:'화염 폭발',icon:'🔥',desc:'150% 화염 피해',base:0.08,aggro:1.5,
+    fx:(a)=>({dmg:a*1.5,type:'fire',msg:'🔥 화염 폭발!'})},
+  ice_shard:{name:'빙결 파편',icon:'❄',desc:'110% 냉기+SPD 감소',base:0.08,aggro:1.0,
+    fx:(a)=>({dmg:a*1.1,type:'ice',debuff:'spd',msg:'❄ 빙결 파편!'})},
+  lightning:{name:'번개 연쇄',icon:'⚡',desc:'2연타 70% 번개',base:0.09,aggro:1.2,
+    fx:(a)=>({dmg:a*0.7,hits:2,type:'lightning',msg:'⚡ 번개 연쇄!'})},
+  shadow_strike:{name:'그림자 타격',icon:'🌑',desc:'120% 어둠+방어무시',base:0.07,aggro:0.8,
+    fx:(a)=>({dmg:a*1.2,ignoreDef:true,type:'dark',msg:'🌑 그림자 타격!'})},
+  holy_judgment:{name:'신성 심판',icon:'✨',desc:'150% 신성',base:0.06,aggro:2.0,
+    fx:(a)=>({dmg:a*1.5,type:'holy',msg:'✨ 신성 심판!'})},
   poison_stack:{name:'독 중첩',icon:'☠',desc:'50% + 2턴 독(30%)',base:0.09,aggro:0.6,
     fx:(a)=>({dmg:a*0.5,dot:2,msg:'☠ 독 중첩!'})},
-  wind_slash:{name:'바람 베기',icon:'💨',desc:'90% 피해+회피+5',base:0.08,aggro:0.9,
-    fx:(a)=>({dmg:a*0.9,buffDodge:5,msg:'💨 바람 베기!'})},
-  vampiric:{name:'흡혈',icon:'🩸',desc:'80%+HP 5% 흡수',base:0.06,aggro:1.0,
-    fx:(a)=>({dmg:a*0.8,heal:0.05,type:'dark',msg:'🩸 흡혈!'})},
-  taunt:{name:'도발',icon:'😤',desc:'적개심 자신에게 집중',base:0.07,aggro:5.0,
+  wind_slash:{name:'바람 베기',icon:'💨',desc:'100% 피해+회피+5',base:0.09,aggro:0.9,
+    fx:(a)=>({dmg:a*1.0,buffDodge:5,msg:'💨 바람 베기!'})},
+  vampiric:{name:'흡혈',icon:'🩸',desc:'80%+HP 2% 흡수',base:0.07,aggro:1.0,
+    fx:(a,s)=>({dmg:a*0.8,heal:0.02,type:'dark',msg:'🩸 흡혈!'})},
+  taunt:{name:'도발',icon:'😤',desc:'적개심 자신에게 집중',base:0.08,aggro:5.0,
     fx:(a)=>({dmg:a*0.4,taunt:true,msg:'😤 도발!'})},
-  shadow_step:{name:'그림자 걸음',icon:'👥',desc:'어그로 분산',base:0.06,aggro:0.1,
-    fx:(a)=>({dmg:a*0.6,disperseAggro:true,msg:'👥 그림자 걸음!'})},
-  divine_shield:{name:'신성 방벽',icon:'🛡',desc:'피해 50% 감소 1턴',base:0.06,aggro:1.8,
+  shadow_step:{name:'그림자 걸음',icon:'👥',desc:'어그로 분산',base:0.07,aggro:0.1,
+    fx:(a)=>({dmg:a*0.5,disperseAggro:true,msg:'👥 그림자 걸음!'})},
+  divine_shield:{name:'신성 방벽',icon:'🛡',desc:'피해 50% 감소 1턴',base:0.07,aggro:1.8,
     fx:(a)=>({dmg:0,shield:true,msg:'🛡 신성 방벽!'})},
-  storm_strike:{name:'폭풍 일격',icon:'⛈',desc:'160% 번개',base:0.05,aggro:2.5,
-    fx:(a)=>({dmg:a*1.6,type:'lightning',msg:'⛈ 폭풍 일격!'})},
-  chaos_blast:{name:'혼돈 폭발',icon:'🌀',desc:'160% 랜덤 속성',base:0.04,aggro:3.0,
-    fx:(a)=>({dmg:a*1.6,type:'chaos',msg:'🌀 혼돈 폭발!'})},
-  frozen:{name:'동결',icon:'🧊',desc:'90%+1턴 마비',base:0.06,aggro:1.2,
-    fx:(a)=>({dmg:a*0.9,stun:true,type:'ice',msg:'🧊 동결!'})},
-  berserk:{name:'광폭화',icon:'🔴',desc:'ATK+15% 2턴',base:0.06,aggro:1.5,
+  storm_strike:{name:'폭풍 일격',icon:'⛈',desc:'170% 번개',base:0.06,aggro:2.5,
+    fx:(a)=>({dmg:a*1.7,type:'lightning',msg:'⛈ 폭풍 일격!'})},
+  chaos_blast:{name:'혼돈 폭발',icon:'🌀',desc:'170% 랜덤 속성',base:0.05,aggro:3.0,
+    fx:(a)=>({dmg:a*1.7,type:'chaos',msg:'🌀 혼돈 폭발!'})},
+  frozen:{name:'동결',icon:'🧊',desc:'100%+1턴 마비',base:0.07,aggro:1.2,
+    fx:(a)=>({dmg:a*1.0,stun:true,type:'ice',msg:'🧊 동결!'})},
+  berserk:{name:'광폭화',icon:'🔴',desc:'ATK+15% 2턴',base:0.07,aggro:1.5,
     fx:(a)=>({dmg:0,buffAtk:0.15,buffTurns:2,msg:'🔴 광폭화!'})},
-  mana_surge:{name:'마력 급등',icon:'🔮',desc:'스킬확률+10% 2턴',base:0.07,aggro:0.5,
+  mana_surge:{name:'마력 급등',icon:'🔮',desc:'스킬확률+10% 2턴',base:0.08,aggro:0.5,
     fx:(a)=>({dmg:0,buffSkill:0.10,buffTurns:2,msg:'🔮 마력 급등!'})},
-  doom_strike:{name:'파멸 일격',icon:'💀',desc:'200% 어둠',base:0.03,aggro:4.0,
-    fx:(a)=>({dmg:a*2.0,type:'dark',msg:'💀 파멸의 일격!'})},
-  void_slash:{name:'공허 베기',icon:'🕳',desc:'140%+방어무시',base:0.04,aggro:2.0,
-    fx:(a)=>({dmg:a*1.4,ignoreDef:true,msg:'🕳 공허 베기!'})},
-  quick_strike:{name:'속격',icon:'⚡',desc:'3연타 40%',base:0.09,aggro:0.8,
-    fx:(a)=>({dmg:a*1.2,hits:3,msg:'⚡ 속격!'})},
-  arcane_burst:{name:'비전 폭발',icon:'🔮',desc:'INT 기반 100%',base:0.06,aggro:1.5,
-    fx:(a,s)=>({dmg:(s?.matk||a)*1.0,type:'arcane',msg:'🔮 비전 폭발!'})},
-  catastrophe:{name:'재앙',icon:'💥',desc:'250%+자신HP-25%',base:0.02,aggro:5.0,
-    fx:(a)=>({dmg:a*2.5,selfDmg:0.25,msg:'💥 재앙!'})},
-  heal_on_hit:{name:'치유 일격',icon:'💚',desc:'70%+HP 4% 흡수',base:0.08,aggro:0.7,
-    fx:(a)=>({dmg:a*0.7,heal:0.04,type:'holy',msg:'💚 치유 일격!'})},
-  explosion:{name:'폭발',icon:'💣',desc:'160% 화염',base:0.05,aggro:3.5,
-    fx:(a)=>({dmg:a*1.6,type:'fire',msg:'💣 폭발!'})},
-  blizzard:{name:'눈보라',icon:'🌨',desc:'3연타 50%',base:0.05,aggro:1.3,
-    fx:(a)=>({dmg:a*1.5,hits:3,type:'ice',msg:'🌨 눈보라!'})},
-  holy_light:{name:'신성의 빛',icon:'🌟',desc:'팀 HP 3% 회복',base:0.05,aggro:2.0,
-    fx:(a)=>({dmg:a*0.3,teamHeal:0.03,type:'holy',msg:'🌟 신성의 빛!'})},
+  doom_strike:{name:'파멸 일격',icon:'💀',desc:'220% 어둠',base:0.04,aggro:4.0,
+    fx:(a)=>({dmg:a*2.2,type:'dark',msg:'💀 파멸의 일격!'})},
+  void_slash:{name:'공허 베기',icon:'🕳',desc:'150%+방어무시',base:0.05,aggro:2.0,
+    fx:(a)=>({dmg:a*1.5,ignoreDef:true,msg:'🕳 공허 베기!'})},
+  quick_strike:{name:'속격',icon:'⚡',desc:'3연타 50%',base:0.10,aggro:0.8,
+    fx:(a)=>({dmg:a*0.5,hits:3,msg:'⚡ 속격!'})},
+  arcane_burst:{name:'비전 폭발',icon:'🔮',desc:'INT 기반 120%',base:0.07,aggro:1.5,
+    fx:(a,s)=>({dmg:(s?.matk||a)*1.2,type:'arcane',msg:'🔮 비전 폭발!'})},
+  catastrophe:{name:'재앙',icon:'💥',desc:'260%+자신HP-25%',base:0.03,aggro:5.0,
+    fx:(a)=>({dmg:a*2.6,selfDmg:0.25,msg:'💥 재앙!'})},
+  heal_on_hit:{name:'치유 일격',icon:'💚',desc:'80%+HP 2% 흡수',base:0.08,aggro:0.7,
+    fx:(a)=>({dmg:a*0.8,heal:0.02,type:'holy',msg:'💚 치유 일격!'})},
+  explosion:{name:'폭발',icon:'💣',desc:'180% 화염',base:0.06,aggro:3.5,
+    fx:(a)=>({dmg:a*1.8,type:'fire',msg:'💣 폭발!'})},
+  blizzard:{name:'눈보라',icon:'🌨',desc:'3연타 60%',base:0.06,aggro:1.3,
+    fx:(a)=>({dmg:a*0.6,hits:3,type:'ice',msg:'🌨 눈보라!'})},
+  holy_light:{name:'신성의 빛',icon:'🌟',desc:'팀 HP 2% 회복',base:0.06,aggro:2.0,
+    fx:(a)=>({dmg:a*0.2,teamHeal:0.02,type:'holy',msg:'🌟 신성의 빛!'})},
 };
 
 // 50 Enchants (25 prefix + 25 suffix)
@@ -1226,18 +1231,55 @@ function renderEq(){
   const is2H=char.equipment?.weapon?.hand==='2H';
   document.getElementById('eqgrid').innerHTML=EQSLOTS.map(sl=>{
     const it=char.equipment[sl.k];const lk=sl.k==='offhand'&&is2H;
-    return`<div class="eqsl ${it?'gb-'+(it.grade||'normal'):''}" data-k="${sl.k}" ${it?`onclick="openEqDetail('${sl.k}')" style="cursor:pointer${lk?';opacity:.4;pointer-events:none':''}"`:`style="${lk?'opacity:.4;pointer-events:none':''}"`}>
+    let tooltip='';
+    if(it){
+      const statLabels={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK'};
+      const statRows=Object.entries(it.stats||{}).filter(([,v])=>v>0)
+        .map(([k,v])=>`<div class="sk-tooltip-stat-row"><span>${statLabels[k]||k.toUpperCase()}</span><span>+${v}</span></div>`).join('');
+      const gM=GRADES[it.grade]?.skillM||0;
+      const skillInfos=[];
+      for(const src of[it.prefix,it.suffix]){
+        if(src?.sk&&SKILLS[src.sk]){
+          const sk=SKILLS[src.sk];
+          const proc=Math.round(sk.base*gM*(1+(char.int||3)*0.005)*100);
+          if(proc>0)skillInfos.push(`<div class="sk-tooltip-title">${sk.icon} ${sk.name}</div><div class="sk-tooltip-desc">${sk.desc}</div><div class="sk-tooltip-proc">발동률: ${proc}%</div>`);
+        }
+      }
+      const enchStr=[it.prefix,it.suffix].filter(Boolean)
+        .map(e=>`<div style="font-size:9.5px;color:${e===it.prefix?'var(--blue)':'var(--purple)'}">• ${e.n}: ${Object.entries(e.b||{}).filter(([,v])=>v!==0).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(' ')}</div>`).join('');
+      const lvStr=it.reqLv?`<div style="font-size:9px;color:${char.level<it.reqLv?'var(--red)':'var(--tx3)'}">필요 Lv.${it.reqLv}</div>`:'';
+      tooltip=`<div class="sk-tooltip">
+        <div style="font-size:9px;color:${it.gradeColor};font-weight:700;margin-bottom:4px">${it.gradeName} · 아이템Lv.${it.itemLv||1}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:5px">${it.name}</div>
+        ${lvStr}
+        ${statRows?`<div class="sk-tooltip-stats">${statRows}</div>`:''}
+        ${enchStr?`<div style="margin-bottom:4px">${enchStr}</div>`:''}
+        ${skillInfos.length?`<div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--bd)">${skillInfos.join('<hr style="border-color:var(--bd);margin:3px 0">')}</div>`:''}
+      </div>`;
+    }
+    return`<div class="eqsl ${it?'gb-'+(it.grade||'normal'):''}" data-k="${sl.k}" style="${lk?'opacity:.4;pointer-events:none':''}" onclick="toggleEqTip(this,'${sl.k}')">
       <div class="eqlb">${sl.i} ${sl.l}</div>
       ${lk?'<div class="eqem">양손 장착</div>':
         it?`<div class="eqit g-${it.grade}">${it.name}</div>
             <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${GRADES[it.grade]?.name||it.grade}${it.itemLv?' · Lv.'+it.itemLv:''}</div>
             ${itSkStr(it)?`<div class="eqsk">${itSkStr(it)}</div>`:''}
-            <button class="equn" data-un="${sl.k}" onclick="event.stopPropagation()">✕</button>`:
+            <button class="equn" data-un="${sl.k}" onclick="event.stopPropagation();unequip('${sl.k}')">✕</button>`:
         '<div class="eqem">비어있음</div>'}
+      ${tooltip}
     </div>`;
   }).join('');
-  document.querySelectorAll('[data-un]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();unequip(b.dataset.un);}));
 }
+
+// 모바일: 탭하면 툴팁 열고/닫기. 데스크탑: hover CSS가 처리
+window.toggleEqTip=function(el,slotKey){
+  const isTouchDevice='ontouchstart' in window;
+  if(isTouchDevice){
+    // 이미 열려있으면 닫기
+    const wasOpen=el.classList.contains('tip-open');
+    document.querySelectorAll('.eqsl.tip-open').forEach(e=>e.classList.remove('tip-open'));
+    if(!wasOpen)el.classList.add('tip-open');
+  }
+};
 
 window.closeEqDetail=()=>{document.getElementById('eqDetailPanel').style.display='none';};
 
