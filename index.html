@@ -260,6 +260,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* CHAT WIDGET - fixed top right */
 #chatWidget{position:fixed;top:46px;right:0;width:285px;height:calc(100vh - 46px);background:var(--sf);border-left:1px solid var(--bd);display:flex;flex-direction:column;z-index:100;}
+/* 모바일: 채팅창을 하단 고정 패널로 변경 */
+@media(max-width:768px){
+  #chatWidget{top:auto;bottom:0;left:0;right:0;width:100%;height:45vh;border-left:none;border-top:2px solid var(--bd2);z-index:200;}
+  .main{padding-right:0!important;padding-bottom:45vh;}
+  .cw-input{font-size:16px!important;} /* iOS 자동 줌 방지 */
+}
 .cw-header{padding:8px 10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .cw-online{font-size:10px;color:var(--green);font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:4px;}
 .cw-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
@@ -282,7 +288,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .cw-input{flex:1;padding:7px 9px;background:rgba(0,0,0,.3);border:1.5px solid var(--bd2);border-radius:6px;color:var(--tx);font-family:'Noto Sans KR',sans-serif;font-size:11.5px;outline:none;}
 .cw-input:focus{border-color:var(--blue);}
 .cw-input::placeholder{color:var(--tx3);}
-.cw-send{padding:7px 11px;background:linear-gradient(135deg,#0a1830,#152850);border:1px solid var(--blue);color:var(--blue);border-radius:6px;font-size:11px;cursor:pointer;}
+.cw-send{padding:7px 14px;background:linear-gradient(135deg,#0a1830,#152850);border:1px solid var(--blue);color:var(--blue);border-radius:6px;font-size:11px;cursor:pointer;min-width:44px;min-height:44px;touch-action:manipulation;}
 
 /* ADMIN */
 .akpigrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:14px;}
@@ -445,6 +451,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="ptitle">마을</div>
       <div class="tgrid" id="townmenu">
         <div class="tcard" onclick="townSec('shop')"><div class="tcicon">⚔️</div><div class="tcname">무기/방어구 상점</div><div class="tcdesc">기본 장비 구매</div></div>
+        <div class="tcard" onclick="townSec('sell')"><div class="tcicon">💰</div><div class="tcname">아이템 판매</div><div class="tcdesc">장비 판매·일괄판매</div></div>
         <div class="tcard" onclick="townSec('gamble')"><div class="tcicon">🎰</div><div class="tcname">도박장</div><div class="tcdesc">랜덤 아이템 획득</div></div>
         <div class="tcard" onclick="townSec('enchant')"><div class="tcicon">✨</div><div class="tcname">마법 단련소</div><div class="tcdesc">장비 인챈트 추가</div></div>
         <div class="tcard" onclick="townSec('forge')"><div class="tcicon">🔨</div><div class="tcname">대장간</div><div class="tcdesc">장비 강화</div></div>
@@ -1036,7 +1043,7 @@ async function loadChars(){
   const mine=Object.entries(all).filter(([,c])=>c.owner===curUser.uid).map(([id,c])=>({...c,id}));
   document.getElementById('charScr').classList.add('open');
   const cl=document.getElementById('charList');
-  cl.innerHTML=mine.map(c=>`<div class="ccard" data-id="${c.id}"><div class="ccname">${c.name}</div><div class="ccinfo">Lv.${c.level}<br>💰${c.gold}</div><button class="ccdel" data-del="${c.id}">삭제</button></div>`).join('');
+  cl.innerHTML=mine.map(c=>`<div class="ccard" data-id="${c.id}"><div class="ccname">${c.name}${curUser?.email===ADMIN_EMAIL?` <span style="font-size:8px;color:var(--gold);background:rgba(240,192,64,.15);border:1px solid rgba(240,192,64,.3);padding:1px 4px;border-radius:3px">ADMIN</span>`:''}</div><div class="ccinfo">Lv.${c.level}<br>💰${c.gold}</div><button class="ccdel" data-del="${c.id}">삭제</button></div>`).join('');
   cl.querySelectorAll('.ccard').forEach(el=>el.addEventListener('click',e=>{if(e.target.dataset.del)return;selChar(el.dataset.id);}));
   cl.querySelectorAll('[data-del]').forEach(btn=>btn.addEventListener('click',async e=>{
     e.stopPropagation();
@@ -1096,7 +1103,8 @@ async function selChar(id){
 function updateTop(){
   if(!char)return;
   const s=calcStats(char);
-  document.getElementById('tname').textContent=char.name;
+  const isAdmin=curUser?.email===ADMIN_EMAIL;
+  document.getElementById('tname').innerHTML=char.name+(isAdmin?` <span style="font-size:8px;background:rgba(240,192,64,.2);border:1px solid rgba(240,192,64,.4);color:var(--gold);padding:1px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace">ADMIN</span>`:'');
   document.getElementById('tlv').textContent='Lv.'+char.level;
   const pct=Math.round(char.hp/s.maxHp*100);
   document.getElementById('thpbar').style.width=pct+'%';
@@ -1352,15 +1360,102 @@ window.townSec=function(id){
   townSecId=id;
   document.getElementById('townmenu').style.display='none';
   const sec=document.getElementById('townsec');sec.style.display='block';
-  sec.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="closeTownSec()">← 마을로</button><div class="ptitle" style="margin:0">${{shop:'⚔️ 상점',gamble:'🎰 도박장',enchant:'✨ 마법 단련소',forge:'🔨 대장간',reroll:'🔮 능력치 재조정'}[id]||''}</div></div><div id="secbody"></div>`;
+  sec.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="closeTownSec()">← 마을로</button><div class="ptitle" style="margin:0">${{shop:'⚔️ 상점',sell:'💰 아이템 판매',gamble:'🎰 도박장',enchant:'✨ 마법 단련소',forge:'🔨 대장간',reroll:'🔮 능력치 재조정'}[id]||''}</div></div><div id="secbody"></div>`;
   const sb=document.getElementById('secbody');
   if(id==='shop')renderShop(sb);
+  else if(id==='sell')renderSell(sb);
   else if(id==='gamble')renderGamble(sb);
   else if(id==='enchant')renderEnchant(sb);
   else if(id==='forge')renderForge(sb);
   else if(id==='reroll')renderRerollSec(sb);
 };
 window.closeTownSec=()=>{document.getElementById('townmenu').style.display='grid';document.getElementById('townsec').style.display='none';};
+
+// 판매가 계산: 등급 기본값 × 아이템레벨 배율
+function getSellPrice(it){
+  // 등급 기본가 × 레벨 배율 — 저렴하게 유지
+  const BASE={normal:8,uncommon:25,rare:70,epic:180,legendary:450,set:900};
+  const base=BASE[it.grade]||8;
+  const lv=it.itemLv||1;
+  const lvMult=1+(lv-1)*0.04; // 레벨당 4% 증가 (스탯 배율과 동일)
+  return Math.round(base*lvMult);
+}
+
+function renderSell(sb){
+  const items=Object.values(inv).filter(i=>!i.isScroll);
+  if(!items.length){sb.innerHTML='<div class="iempty">판매할 아이템 없음</div>';return;}
+  const gColors={normal:'#9d9d9d',uncommon:'#1eff00',rare:'#0070dd',epic:'#a335ee',legendary:'#ff8c00',set:'#00ffcc'};
+  const gNames={normal:'노말',uncommon:'언커먼',rare:'레어',epic:'에픽',legendary:'레전더리',set:'세트'};
+  const gradeOrder=['set','legendary','epic','rare','uncommon','normal'];
+
+  // 등급별 일괄
+  const gradeGroups={};
+  for(const it of items){if(!gradeGroups[it.grade])gradeGroups[it.grade]=[];gradeGroups[it.grade].push(it);}
+  const bulkHtml=gradeOrder.filter(g=>gradeGroups[g]).map(g=>{
+    const arr=gradeGroups[g];
+    const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
+    const sellable=arr.filter(it=>!equippedIds.has(it.id));
+    const total=sellable.reduce((s,it)=>s+getSellPrice(it),0);
+    return`<div style="display:flex;align-items:center;justify-content:space-between;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 11px;margin-bottom:5px">
+      <div>
+        <span style="color:${gColors[g]};font-weight:700;font-size:11px">${gNames[g]}</span>
+        <span style="font-size:10px;color:var(--tx3);margin-left:6px">${sellable.length}개 판매가능</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="font-size:11px;color:var(--gold)">💰${total.toLocaleString()}</span>
+        <button class="btn btn-gold btn-xs" onclick="sellByGrade('${g}')">일괄판매</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 개별 목록
+  const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
+  const itemHtml=items.sort((a,b)=>gradeOrder.indexOf(a.grade)-gradeOrder.indexOf(b.grade)).map(it=>{
+    const price=getSellPrice(it);
+    const isEq=equippedIds.has(it.id);
+    return`<div style="display:flex;align-items:center;justify-content:space-between;background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;margin-bottom:4px${isEq?';opacity:.4':''}">
+      <div style="min-width:0;flex:1">
+        <div class="icname g-${it.grade}" style="font-size:11px">${it.name}${isEq?' 🔒':''}</div>
+        <div style="font-size:9px;color:var(--tx3)">아이템Lv.${it.itemLv||1} · ${it.slot}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <span style="font-size:11px;color:var(--gold)">💰${price}</span>
+        ${isEq?`<span style="font-size:9px;color:var(--tx3)">장착중</span>`:`<button class="btn btn-gold btn-xs" onclick="sellItem('${it.id}')">판매</button>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  sb.innerHTML=`
+    <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">등급별 일괄 판매</div>
+    ${bulkHtml}
+    <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin:12px 0 7px">개별 판매</div>
+    ${itemHtml}`;
+}
+
+window.sellItem=async id=>{
+  const it=inv[id];if(!it)return;
+  const isEquipped=Object.values(char.equipment||{}).some(e=>e&&e.id===id);
+  if(isEquipped){toast('장착 중인 장비는 판매할 수 없습니다');return;}
+  const price=getSellPrice(it);
+  char.gold+=price;delete inv[id];
+  await saveChar();await saveInv();updateTop();
+  toast(`💰 ${it.name} 판매! +${price}G`);
+  const sb=document.getElementById('secbody');if(sb)renderSell(sb);
+};
+
+window.sellByGrade=async grade=>{
+  const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
+  const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!equippedIds.has(it.id));
+  if(!toSell.length){toast('판매할 아이템 없음');return;}
+  const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
+  if(!confirm(`${toSell.length}개를 ${total.toLocaleString()}G에 판매?`))return;
+  for(const it of toSell)delete inv[it.id];
+  char.gold+=total;
+  await saveChar();await saveInv();updateTop();
+  toast(`💰 ${toSell.length}개 일괄판매! +${total.toLocaleString()}G`);
+  const sb=document.getElementById('secbody');if(sb)renderSell(sb);
+};
+
 
 function renderShop(sb){
   sb.innerHTML=`<div class="shopgrid">${SHOP_ITEMS.map((si,i)=>{
@@ -1979,6 +2074,7 @@ function renderBattle(){
       </div>`;}).join('')}
     </div>
     <!-- Action buttons (show if alive and in phase 1) -->
+    <div style="position:sticky;bottom:0;background:var(--sf);border-top:1px solid var(--bd);padding:8px 0 4px;margin-top:8px">
     ${myP&&myP.status==='alive'&&battle.phase===1&&!myP.actionChosen?`
       <div class="act-btns">
         <button id="actbtn-atk" class="act-btn act-atk" onclick="chooseAction('attack')">⚔ 공격</button>
@@ -1989,7 +2085,9 @@ function renderBattle(){
     myP&&myP.status==='alive'&&battle.phase===1&&myP.actionChosen?
       `<div style="padding:10px;text-align:center;background:rgba(68,212,136,.08);border:1px solid rgba(68,212,136,.2);border-radius:7px;font-size:12px;color:var(--green)">✅ 행동 선택됨 — 대기 중...</div>`:
     myP&&myP.status==='dead'?
-      `<div style="padding:10px;text-align:center;background:rgba(232,68,68,.08);border:1px solid var(--red);border-radius:7px;font-size:12px;color:var(--red)">💀 사망 — 다음 페이즈에 부활</div>`:''}
+      `<div style="padding:10px;text-align:center;background:rgba(232,68,68,.08);border:1px solid var(--red);border-radius:7px;font-size:12px;color:var(--red)">💀 사망 — 다음 페이즈에 부활</div>`:
+    battle.phase===2?`<div style="padding:10px;text-align:center;color:var(--tx3);font-size:11px">⚔️ 전투 처리 중...</div>`:''}
+    </div>
     <!-- Log -->
     <div style="margin-top:10px">
       <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">전투 기록</div>
