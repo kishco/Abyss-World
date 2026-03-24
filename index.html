@@ -390,8 +390,30 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="ptag" style="display:none;font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace">👥파티</span>
   </div>
   <span class="sdot" id="sdot"></span>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);margin-left:auto;margin-right:6px">v1.0</span>
   <button class="tlo" id="tlo">로그아웃</button>
 </header>
+
+<!-- 업데이트 팝업 -->
+<div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+  <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:400px;width:90%">
+    <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
+    <div style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;margin-bottom:16px">v1.0 업데이트</div>
+    <div style="font-size:12px;color:var(--tx2);line-height:2;margin-bottom:18px">
+      🏆 랭킹 시스템 추가<br>
+      👥 파티 시스템 (비공개/추방)<br>
+      💰 아이템 판매 시스템<br>
+      ✨ 인챈트 스크롤 시스템<br>
+      💀 보스 격노·차지 기믹<br>
+      🧙 히든 상인 등장<br>
+      ⚖️ 전체 밸런스 조정
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-gold" style="flex:1" onclick="closeUpdatePopup(false)">확인</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeUpdatePopup(true)">오늘 하루 안보기</button>
+    </div>
+  </div>
+</div>
 
 <!-- GAME LAYOUT -->
 <div class="glayout" id="gameLayout" style="display:none">
@@ -473,7 +495,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="tcard" onclick="townSec('shop')"><div class="tcicon">⚔️</div><div class="tcname">무기/방어구 상점</div><div class="tcdesc">기본 장비 구매</div></div>
         <div class="tcard" onclick="townSec('sell')"><div class="tcicon">💰</div><div class="tcname">아이템 판매</div><div class="tcdesc">장비 판매·일괄판매</div></div>
         <div class="tcard" onclick="townSec('gamble')"><div class="tcicon">🎰</div><div class="tcname">도박장</div><div class="tcdesc">랜덤 아이템 획득</div></div>
-        <div class="tcard" onclick="townSec('enchant')"><div class="tcicon">✨</div><div class="tcname">마법 단련소</div><div class="tcdesc">장비 인챈트 추가</div></div>
         <div class="tcard" onclick="townSec('forge')"><div class="tcicon">🔨</div><div class="tcname">대장간</div><div class="tcdesc">장비 강화</div></div>
         <div class="tcard" onclick="townSec('reroll')"><div class="tcicon">🔮</div><div class="tcname">능력치 재조정</div><div class="tcdesc">재조정 주문서 사용</div></div>
       </div>
@@ -619,18 +640,18 @@ const ADMIN_EMAIL='aimori1@ag.game';
 
 // ═══ CONSTANTS ═══
 const GRADES={
-  normal:   {name:'노말',    color:'#9d9d9d',w:50,  mult:1.0,skillM:0  },
-  uncommon: {name:'언커먼',  color:'#1eff00',w:27,  mult:1.3,skillM:0.5},
-  rare:     {name:'레어',    color:'#0070dd',w:14,  mult:1.7,skillM:1.0},
-  epic:     {name:'에픽',    color:'#a335ee',w:5,   mult:2.4,skillM:1.5},
-  legendary:{name:'레전더리',color:'#ff8c00',w:1.5, mult:3.5,skillM:2.5},
-  set:      {name:'세트',    color:'#00ffcc',w:0.5, mult:3.0,skillM:3.0},
+  normal:   {name:'노말',    color:'#9d9d9d',w:55,  mult:0.8,skillM:0  },
+  uncommon: {name:'언커먼',  color:'#1eff00',w:25,  mult:1.1,skillM:0.4},
+  rare:     {name:'레어',    color:'#0070dd',w:12,  mult:1.5,skillM:0.8},
+  epic:     {name:'에픽',    color:'#a335ee',w:4,   mult:2.0,skillM:1.2},
+  legendary:{name:'레전더리',color:'#ff8c00',w:0.8, mult:2.8,skillM:2.0},
+  set:      {name:'세트',    color:'#00ffcc',w:0.2, mult:2.5,skillM:2.5},
 };
 const ATTR_N={fire:'🔥화염',ice:'❄냉기',lightning:'⚡번개',dark:'🌑어둠',holy:'✨신성',poison:'☠독'};
 const ATTR_C={fire:'#ff6030',ice:'#60c8ff',lightning:'#ffe040',dark:'#a060ff',holy:'#fff080',poison:'#80ff40'};
 
-// 레벨 EXP 테이블 (99레벨에 1년)
-function expForLevel(lv){return Math.round(200*lv*lv*Math.pow(1.055,lv));}
+// ★ 경험치 테이블 대폭 강화 — 99레벨 매우 오래 걸림
+function expForLevel(lv){return Math.round(500*lv*lv*lv*Math.pow(1.08,lv));}
 
 // Skills — 전체 하향조정
 const SKILLS={
@@ -810,20 +831,20 @@ const STATS_DEF=[
 ];
 const SETS={
   frost:{name:'서리 군주 세트',col:'#00ffcc',pcs:{
-    frost_helm:{n:'서리군주 투구',slot:'head',stats:{def:25,hp:80}},
-    frost_chest:{n:'서리군주 흉갑',slot:'chest',stats:{def:40,hp:120}},
-    frost_sword:{n:'서리군주 검',slot:'weapon',hand:'1H',stats:{atk:45,def:15}},
-  },bonuses:[{cnt:2,desc:'DEF+40 HP+80',b:{def:40,hp:80}},{cnt:3,desc:'SPD+20',b:{spd:20}}]},
+    frost_helm: {n:'서리군주 투구',slot:'head', stats:{def:12,hp:30}},
+    frost_chest:{n:'서리군주 흉갑',slot:'chest',stats:{def:20,hp:50}},
+    frost_sword:{n:'서리군주 검',  slot:'weapon',hand:'1H',stats:{atk:18,def:8}},
+  },bonuses:[{cnt:2,desc:'DEF+15 HP+30',b:{def:15,hp:30}},{cnt:3,desc:'SPD+10',b:{spd:10}}]},
   flame:{name:'불꽃의 분노 세트',col:'#ff6030',pcs:{
-    flame_chest:{n:'분노의 흉갑',slot:'chest',stats:{def:35,atk:20}},
-    flame_sword:{n:'분노의 화염검',slot:'weapon',hand:'2H',stats:{atk:70}},
-    flame_helm:{n:'불꽃전사 투구',slot:'head',stats:{def:20,atk:15}},
-  },bonuses:[{cnt:2,desc:'ATK+30',b:{atk:30}},{cnt:3,desc:'ATK+60 CRIT+10%',b:{atk:60,crit:10}}]},
+    flame_chest:{n:'분노의 흉갑',    slot:'chest', stats:{def:15,atk:10}},
+    flame_sword:{n:'분노의 화염검',  slot:'weapon',hand:'2H',stats:{atk:30}},
+    flame_helm: {n:'불꽃전사 투구',  slot:'head',  stats:{def:10,atk:8}},
+  },bonuses:[{cnt:2,desc:'ATK+12',b:{atk:12}},{cnt:3,desc:'ATK+25 CRIT+5%',b:{atk:25,crit:5}}]},
   abyss:{name:'심연의 왕 세트',col:'#a060ff',pcs:{
-    abyss_helm:{n:'심연의 왕관',slot:'head',stats:{atk:20,spd:15}},
-    abyss_chest:{n:'심연의 갑주',slot:'chest',stats:{def:50,atk:30}},
-    abyss_sword:{n:'심연의 대검',slot:'weapon',hand:'2H',stats:{atk:90}},
-  },bonuses:[{cnt:2,desc:'CRIT+15%',b:{crit:15}},{cnt:3,desc:'ATK+80 DEF+40',b:{atk:80,def:40}}]},
+    abyss_helm: {n:'심연의 왕관',slot:'head',  stats:{atk:10,spd:8}},
+    abyss_chest:{n:'심연의 갑주',slot:'chest', stats:{def:22,atk:14}},
+    abyss_sword:{n:'심연의 대검',slot:'weapon',hand:'2H',stats:{atk:40}},
+  },bonuses:[{cnt:2,desc:'CRIT+8%',b:{crit:8}},{cnt:3,desc:'ATK+35 DEF+18',b:{atk:35,def:18}}]},
 };
 
 // Dungeons
@@ -964,7 +985,24 @@ onAuthStateChanged(auth,async user=>{
   }
 });
 
-// ═══ PRESENCE ═══
+// ═══ 업데이트 팝업 ═══
+function checkUpdatePopup(){
+  const key='abyssworld_update_v1.0';
+  const hidden=localStorage.getItem(key);
+  if(hidden&&Date.now()<parseInt(hidden))return;
+  const pop=document.getElementById('updatePopup');
+  if(pop)pop.style.display='flex';
+}
+window.closeUpdatePopup=function(dontShow){
+  const pop=document.getElementById('updatePopup');
+  if(pop)pop.style.display='none';
+  if(dontShow){
+    const expire=Date.now()+24*60*60*1000;
+    localStorage.setItem('abyssworld_update_v1.0',expire);
+  }
+};
+
+// ═══ CHAT TOGGLE ═══
 window.toggleChat=function(forceHide){
   const w=document.getElementById('chatWidget');
   const btn=document.getElementById('chatToggleBtn');
@@ -1158,6 +1196,7 @@ async function selChar(id){
   onValue(ref(db,`inv/${id}`),sn=>{inv=sn.val()||{};renderInv();});
   updateTop();renderChar();renderInv();renderDungeon();
   startChat();startParty();
+  checkUpdatePopup();
   if(isAdmin)loadAdmin();
   set(ref(db,`presence/${curUser.uid}`),{charName:char.name,lastSeen:Date.now()});
 }
@@ -1391,6 +1430,19 @@ function getItemName(base,grade){
   if(ACCN[base.id])return ACCN[base.id][idx];
   return base.id;
 }
+// ★ 인챈트 스탯을 아이템 레벨과 등급에 따라 유동적으로 계산
+function scaleEnchant(b, lv, gradeMult){
+  const scaled={};
+  const lm=1+(lv-1)*0.03; // 레벨당 3%
+  for(const[k,v]of Object.entries(b)){
+    if(v===0){scaled[k]=0;continue;}
+    const base=Math.abs(v)*lm*gradeMult;
+    const min=Math.max(1,Math.round(base*0.7));
+    const max=Math.round(base*1.3);
+    scaled[k]=(v>0?1:-1)*rand(min,max);
+  }
+  return scaled;
+}
 function genItem(pool,forcedGrade=null,lv=1,hint=false){
   const base=pick(pool);
   const grade=forcedGrade||rollGrade(hint);
@@ -1402,8 +1454,12 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false){
   if(base.hr)stats.hp =Math.round(rand(10,30)*base.hr*mult*lm);
   if(base.sr)stats.spd=Math.round(rand(2,6)*base.sr*mult*lm);
   const gi=Object.keys(GRADES).indexOf(grade);
-  const pre=gi>=1?wRand(PRE):null;
-  const suf=gi>=2?wRand(SUF):null;
+  const gradeMult=GRADES[grade]?.mult||1;
+  const preRaw=gi>=1?wRand(PRE):null;
+  const sufRaw=gi>=2?wRand(SUF):null;
+  // ★ 접두/접미 스탯 유동 적용
+  const pre=preRaw?{...preRaw,b:scaleEnchant(preRaw.b,lv,gradeMult)}:null;
+  const suf=sufRaw?{...sufRaw,b:scaleEnchant(sufRaw.b,lv,gradeMult)}:null;
   const attr=pre?.attr||(gi>=4?pick(Object.keys(ATTR_N)):null);
   const bname=getItemName(base,grade);
   // ★ 이름 구조: [접두] [등급수식어] [장비명]
@@ -1422,10 +1478,14 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false){
 function genSetItem(){
   const sid=pick(Object.keys(SETS));const sd=SETS[sid];
   const pid=pick(Object.keys(sd.pcs));const pd=sd.pcs[pid];
-  return{id:gId(),name:pd.n,baseId:pid,slot:pd.slot,hand:pd.hand||null,grade:'set',gradeName:'세트',gradeColor:sd.col,setId:sid,setName:sd.name,stats:{...pd.stats},prefix:null,suffix:null,attr:null};
+  const reqLv=sid==='abyss'?60:sid==='flame'?40:20;
+  return{id:gId(),name:pd.n,baseId:pid,slot:pd.slot,hand:pd.hand||null,grade:'set',
+    gradeName:'세트',gradeColor:sd.col,setId:sid,setName:sd.name,
+    stats:{...pd.stats},prefix:null,suffix:null,attr:null,reqLv,itemLv:reqLv};
 }
 function genShopItem(si){return{id:gId(),name:si.n||si.name,baseId:si.n,slot:si.slot,hand:si.hand||null,grade:'normal',gradeName:'노말',gradeColor:'#9d9d9d',stats:{...si.stats},prefix:null,suffix:null,attr:null};}
 function genScrollItem(){return{id:gId(),name:'능력치 재조정 주문서',baseId:'reroll_scroll',slot:'scroll',hand:null,grade:'legendary',gradeName:'전설',gradeColor:'#ff8c00',stats:{},prefix:null,suffix:null,attr:null,isScroll:true};}
+function genEnchantScroll(){return{id:gId(),name:'인챈트 스크롤',baseId:'enchant_scroll',slot:'scroll',hand:null,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',stats:{},prefix:null,suffix:null,attr:null,isEnchantScroll:true};}
 
 // ═══ INVENTORY ═══
 function renderInv(){
@@ -1433,7 +1493,7 @@ function renderInv(){
   document.getElementById('invcnt').textContent=items.length+'개';
   const tf=document.getElementById('invType').value,gf=document.getElementById('invGrade').value;
   const fil=items.filter(i=>{
-    const to=!tf||(tf==='weapon'&&i.slot==='weapon')||(tf==='armor'&&['head','neck','chest','legs','boots','offhand'].includes(i.slot))||(tf==='accessory'&&i.slot==='accessory')||(tf==='set'&&i.grade==='set')||(tf==='scroll'&&i.isScroll);
+    const to=!tf||(tf==='weapon'&&i.slot==='weapon')||(tf==='armor'&&['head','neck','chest','legs','boots','offhand'].includes(i.slot))||(tf==='accessory'&&i.slot==='accessory')||(tf==='set'&&i.grade==='set')||(tf==='scroll'&&(i.isScroll||i.isEnchantScroll));
     return to&&(!gf||i.grade===gf);
   });
   const gr=document.getElementById('invgrid');
@@ -1444,6 +1504,7 @@ function renderInv(){
     return`<div class="icard gb-${it.grade} ${lvLock?'lv-locked':''}" data-id="${it.id}">
       ${it.grade==='set'?`<div style="font-size:8.5px;color:var(--st);margin-bottom:2px">◆${it.setName||'세트'}</div>`:''}
       ${it.isScroll?`<div style="font-size:8.5px;color:var(--lg);margin-bottom:2px">📜 주문서</div>`:''}
+      ${it.isEnchantScroll?`<div style="font-size:8.5px;color:var(--purple);margin-bottom:2px">✨ 인챈트 스크롤</div>`:''}
       <div class="icname g-${it.grade}">${it.name}</div>
       <div class="ictype">${it.slot}${it.hand?' · '+it.hand:''}</div>
       ${it.reqLv?`<div style="font-size:9px;${lvLock?'color:var(--red)':'color:var(--tx3)'}">Lv.${it.reqLv} 필요${lvLock?' 🔒':''}</div>`:''}
@@ -1457,6 +1518,31 @@ function renderInv(){
 
 function openIM(it){
   if(!it)return;
+  if(it.isEnchantScroll){
+    // 장착된 장비 목록 보여주고 선택하면 인챈트 부여
+    const eqItems=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it&&x.it.grade!=='set');
+    document.getElementById('imtitle').innerHTML=`<span class="g-epic">✨ 인챈트 스크롤</span>`;
+    document.getElementById('imbody').innerHTML=`
+      <div style="font-size:12px;color:var(--tx2);line-height:1.8;margin-bottom:12px">
+        인챈트를 부여할 장착 장비를 선택하세요.<br>
+        <span style="font-size:10px;color:var(--tx3)">기존 접두/접미가 있으면 교체됩니다.</span>
+      </div>
+      ${!eqItems.length?'<div style="color:var(--tx3)">장착된 장비 없음</div>':
+      `<div style="display:flex;flex-direction:column;gap:6px">
+        ${eqItems.map(x=>`
+          <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div class="icname g-${x.it.grade}" style="font-size:11px">${x.it.name}</div>
+              <div style="font-size:9px;color:var(--tx3)">접두: ${x.it.prefix?.n||'없음'} / 접미: ${x.it.suffix?.n||'없음'}</div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-blue btn-xs" onclick="useEnchantScroll('${it.id}','${x.sl}','pre')">접두</button>
+              <button class="btn btn-purple btn-xs" onclick="useEnchantScroll('${it.id}','${x.sl}','suf')">접미</button>
+            </div>
+          </div>`).join('')}
+      </div>`}`;
+    document.getElementById('imodal').classList.add('open');return;
+  }
   if(it.isScroll){
     document.getElementById('imtitle').innerHTML=`<span class="g-legendary">📜 ${it.name}</span>`;
     document.getElementById('imbody').innerHTML=`
@@ -1549,7 +1635,22 @@ function closeIM(){document.getElementById('imodal').classList.remove('open');}
 document.getElementById('imc').onclick=closeIM;
 document.getElementById('imodal').onclick=e=>{if(e.target===document.getElementById('imodal'))closeIM();};
 
-async function useRerollScroll(scrollId){
+window.useEnchantScroll=async(scrollId,slotKey,type)=>{
+  const eq=char.equipment[slotKey];if(!eq){toast('장비 없음');return;}
+  const lv=eq.itemLv||1;
+  const gradeMult=GRADES[eq.grade]?.mult||1;
+  if(type==='pre'){
+    const en=wRand(PRE);
+    eq.prefix={n:en.n,b:scaleEnchant(en.b,lv,gradeMult),sk:en.sk||null,attr:en.attr||null};
+    toast(`✨ ${eq.name}에 접두 [${en.n}] 부여!`);
+  }else{
+    const en=wRand(SUF);
+    eq.suffix={n:en.n,b:scaleEnchant(en.b,lv,gradeMult),sk:en.sk||null};
+    toast(`✨ ${eq.name}에 접미 [${en.n}] 부여!`);
+  }
+  delete inv[scrollId];
+  await saveChar();await saveInv();closeIM();updateTop();renderChar();
+};
   if(!confirm('능력치를 랜덤으로 재배분합니다. 계속하시겠습니까?'))return;
   // Calculate total invested points above base (5 each)
   const base=5,total=(char.str-base)+(char.dex-base)+(char.int-base)+(char.vit-base)+(char.luk-base);
@@ -1593,7 +1694,7 @@ function getSellPrice(it){
 }
 
 function renderSell(sb){
-  const items=Object.values(inv).filter(i=>!i.isScroll);
+  const items=Object.values(inv).filter(i=>!i.isScroll&&!i.isEnchantScroll);
   if(!items.length){sb.innerHTML='<div class="iempty">판매할 아이템 없음</div>';return;}
   const gColors={normal:'#9d9d9d',uncommon:'#1eff00',rare:'#0070dd',epic:'#a335ee',legendary:'#ff8c00',set:'#00ffcc'};
   const gNames={normal:'노말',uncommon:'언커먼',rare:'레어',epic:'에픽',legendary:'레전더리',set:'세트'};
@@ -1656,7 +1757,7 @@ window.sellItem=async id=>{
 
 window.sellByGrade=async grade=>{
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
-  const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!equippedIds.has(it.id));
+  const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!it.isEnchantScroll&&!equippedIds.has(it.id));
   if(!toSell.length){toast('판매할 아이템 없음');return;}
   const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
   if(!confirm(`${toSell.length}개를 ${total.toLocaleString()}G에 판매?`))return;
@@ -1962,6 +2063,12 @@ function nextFloor(){
   // Spawn monsters
   const isBoss=battle.floor===battle.floors;
   battle.monsters=spawnMonsters(battle,isBoss);
+  // ★ 히든 상인 등장 (보스 층 제외, 5% 확률)
+  if(battle.floor<battle.floors&&Math.random()<0.05){
+    showHiddenMerchant();
+    return; // 히든 상인 보여주고 거기서 다음 층 진행
+  }
+
   battle.fleeVotes=new Set();
   renderBattle();
   startActionPhase();
@@ -1974,18 +2081,20 @@ function spawnMonsters(b,isBoss){
     const bAtk=Math.round((35+lv*5.5)*d.monMult*sm*0.8);
     const bHp=Math.round((300+lv*60)*d.monMult*sm);
     const bDef=Math.round((8+lv*2.0)*d.monMult*sm);
-    return[{id:'boss_0',name:BOSSN[t.tier-1],hp:bHp,maxHp:bHp,atk:bAtk,def:bDef,isBoss:true,hidden:false,aggro:0,expR:1.5,goldR:2.0,status:'alive'}];
-  }
+    return[{id:'boss_0',name:BOSSN[t.tier-1],hp:bHp,maxHp:bHp,atk:bAtk,def:bDef,
+      isBoss:true,hidden:false,aggro:0,expR:1.5,goldR:2.0,status:'alive',
+      // ★ 보스 기믹: 체력 50% 이하에서 격노
+      gimmick:{rage50:false,chargeWarn:false,chargeCount:0}}];}
   const cnt=b.mode==='solo'?rand(1,2):rand(2,4);
   const mons=[];
   for(let i=0;i<cnt;i++){
     let mn=pick(MNAMES[area]||MNAMES.grassland);
     let am=1,hm=1,em=1,gm=1,hidden=false;
     const roll=Math.random();
-    if(roll<0.03&&d!=='normal'){const hp_m=pick(HPFX);mn=hp_m.n+' '+mn;am*=hp_m.am;hm*=hp_m.hm;em*=hp_m.em;gm*=hp_m.gm;hidden=hp_m.hidden||false;}
-    else if(roll<0.12){const sfx=pick(MSFX);mn+=' '+sfx.n;am*=sfx.am;hm*=sfx.hm;em*=sfx.em;gm*=sfx.gm||1;}
-    else if(roll<0.35){const pfx=pick(MPFX);mn=pfx.n+' '+mn;am*=pfx.am;hm*=pfx.hm;em*=pfx.em;}
-    // ★ 몬스터 스탯 대폭 강화
+    // ★ 히든 몬스터 확률 소폭 증가 (5%)
+    if(roll<0.05){const hp_m=pick(HPFX);mn=hp_m.n+' '+mn;am*=hp_m.am;hm*=hp_m.hm;em*=hp_m.em;gm*=hp_m.gm;hidden=true;}
+    else if(roll<0.15){const sfx=pick(MSFX);mn+=' '+sfx.n;am*=sfx.am;hm*=sfx.hm;em*=sfx.em;gm*=sfx.gm||1;}
+    else if(roll<0.40){const pfx=pick(MPFX);mn=pfx.n+' '+mn;am*=pfx.am;hm*=pfx.hm;em*=pfx.em;}
     const hp=Math.round((60+lv*25)*hm*d.monMult*sm);
     const atk=Math.round((15+lv*5)*am*d.dmgMult*sm);
     const def=Math.round((3+lv*1.2)*d.monMult*sm);
@@ -1993,6 +2102,60 @@ function spawnMonsters(b,isBoss){
   }
   return mons;
 }
+
+// ★ 히든 상인
+function showHiddenMerchant(){
+  const db2=document.getElementById('dungBattle');
+  const lv=battle.tier.recLv;
+  // 좋은 등급 아이템 2~3개 생성
+  const pool=[...WBASES,...ABASES,...ACCBASES];
+  const items=[];
+  const gradePool=['rare','rare','epic','epic','legendary'];
+  for(let i=0;i<rand(2,3);i++){
+    const g=pick(gradePool);
+    const it=genItem(pool,g,lv+rand(0,5));
+    const price=Math.round(getSellPrice(it)*8); // 판매가의 8배
+    items.push({it,price});
+  }
+  const itemsHtml=items.map((x,i)=>`
+    <div style="background:var(--sf2);border:1px solid rgba(240,192,64,.3);border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div style="min-width:0">
+        <div class="icname g-${x.it.grade}" style="font-size:11px">${x.it.name}</div>
+        <div style="font-size:9px;color:var(--tx3)">${Object.entries(x.it.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <span style="color:var(--gold);font-size:11px">💰${x.price}</span>
+        <button class="btn btn-gold btn-xs" onclick="buyFromMerchant(${i})">구매</button>
+      </div>
+    </div>`).join('');
+
+  battle._merchantItems=items;
+  db2.innerHTML+=`
+    <div id="hiddenMerchant" style="margin-top:10px;background:rgba(240,192,64,.06);border:2px solid rgba(240,192,64,.3);border-radius:10px;padding:14px">
+      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);margin-bottom:4px">🧙 히든 상인 등장!</div>
+      <div style="font-size:10.5px;color:var(--tx2);margin-bottom:10px">신비로운 상인이 귀한 물건을 팔고 있습니다...</div>
+      ${itemsHtml}
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%" onclick="closeMerchant()">거래 안 함 → 다음 층</button>
+    </div>`;
+}
+
+window.buyFromMerchant=async(idx)=>{
+  const x=battle._merchantItems?.[idx];if(!x)return;
+  if(char.gold<x.price){toast('골드 부족');return;}
+  char.gold-=x.price;
+  await addItem(x.it);await saveChar();updateTop();
+  toast(`🧙 ${x.it.name} 구매!`);
+  battle._merchantItems.splice(idx,1);
+  // 다 팔았으면 버튼 비활성화
+  document.querySelectorAll('#hiddenMerchant .btn-gold').forEach((b,i)=>{if(i===idx)b.disabled=true;});
+};
+
+window.closeMerchant=()=>{
+  document.getElementById('hiddenMerchant')?.remove();
+  battle.fleeVotes=new Set();
+  renderBattle();
+  startActionPhase();
+};
 
 function startActionPhase(){
   if(!battle)return;
@@ -2102,10 +2265,43 @@ function resolvePhase(){
   // Monsters attack
   const aliveM=battle.monsters.filter(m=>m.status==='alive');
   for(const m of aliveM){
-    // Find highest aggro player among alive
     const aliveP=battle.players.filter(p=>p.status==='alive');if(!aliveP.length)break;
     aliveP.sort((a,b)=>(b.aggro||0)-(a.aggro||0));
     const tgt=aliveP[0];
+
+    // ★ 보스 기믹
+    if(m.isBoss&&m.gimmick){
+      const hpPct=m.hp/m.maxHp;
+      // 격노 (체력 50% 이하)
+      if(!m.gimmick.rage50&&hpPct<=0.5){
+        m.gimmick.rage50=true;m.atk=Math.round(m.atk*1.5);
+        blogAdd(`<span class="l-dead">💢 ${m.name}이(가) 격노했습니다! ATK 50% 증가!</span>`);
+      }
+      // 차지 어택 (2턴 예고)
+      if(!m.gimmick.chargeWarn&&Math.random()<0.2){
+        m.gimmick.chargeWarn=true;m.gimmick.chargeCount=2;
+        blogAdd(`<span class="l-warn">⚠️ ${m.name}이(가) 강력한 공격을 준비 중입니다... (2턴 후)</span>`);
+        continue; // 이번 턴은 공격 안 함
+      }
+      if(m.gimmick.chargeWarn&&m.gimmick.chargeCount>0){
+        m.gimmick.chargeCount--;
+        if(m.gimmick.chargeCount===1)blogAdd(`<span class="l-warn">⚠️ ${m.name}: 강력한 공격 준비 중... (1턴 후)</span>`);
+        if(m.gimmick.chargeCount===0){
+          m.gimmick.chargeWarn=false;
+          // 전체 공격 (HP 20% 피해)
+          blogAdd(`<span class="l-dead">💥 ${m.name}의 절멸 일격!</span>`);
+          for(const p of battle.players.filter(p=>p.status==='alive')){
+            const hpDmg=Math.round(p.maxHp*0.20);
+            p.hp=Math.max(0,p.hp-hpDmg);
+            blogAdd(`<span class="l-dmg">💥 ${p.name} -${hpDmg}HP (최대HP 20%)</span>`);
+            if(p.hp<=0){p.hp=0;p.status='dead';blogAdd(`<span class="l-dead">💀 ${p.name} 사망!</span>`);battle.reviveQueue.add(p.id);}
+          }
+          continue;
+        }
+        continue;
+      }
+    }
+
     let dmg=Math.max(1,m.atk-calcStats(tgt.charData||char).def);
     if(tgt.defending)dmg=Math.round(dmg*0.5);
     const dodge=calcStats(tgt.charData||char).dodge;
@@ -2186,15 +2382,27 @@ function lootPhase(){
     totalExp+=exp;totalGold+=gold;
     // Item drop
     const dropR=d.dropMult*(1+char.luk*0.003);
-    if(Math.random()<0.35*dropR){
+    // ★ 등급별 드랍 확률 (노말 위주, 높은 등급 매우 희박)
+    const dropRoll=Math.random();
+    if(dropRoll<0.30*dropR){
       const pool=[...WBASES,...ABASES,...ACCBASES];
-      const it=genItem(pool,null,t.recLv+rand(-5,5),d===DIFF.vhard);
+      // 등급 강제 적용으로 분배 조정
+      let forcedGrade=null;
+      const gr=Math.random();
+      if(gr<0.60)forcedGrade='normal';
+      else if(gr<0.85)forcedGrade='uncommon';
+      else if(gr<0.96)forcedGrade='rare';
+      else if(gr<0.993)forcedGrade='epic';
+      else forcedGrade='legendary';
+      const it=genItem(pool,forcedGrade,t.recLv+rand(-5,5));
       addItem(it);blogAdd(`<span class="l-item">🎁 드랍: ${it.name}</span>`);
     }
-    // Scroll drop: 0.1% (quite rare but not 0.00001%)
-    if(Math.random()<0.001){const sc=genScrollItem();addItem(sc);blogAdd('<span class="l-set">📜 능력치 재조정 주문서 드랍!</span>');}
-    // Set drop: 0.005
-    if(Math.random()<0.005*dropR){const si=genSetItem();addItem(si);blogAdd(`<span class="l-set">🌟 세트 아이템 드랍: ${si.name}</span>`);}
+    // ★ 능력치 재조정 주문서 (0.05%)
+    if(Math.random()<0.0005){const sc=genScrollItem();addItem(sc);blogAdd('<span class="l-set">📜 능력치 재조정 주문서 드랍!</span>');}
+    // ★ 인챈트 스크롤 드랍 (0.08%) - 재조정 주문서보다 약간 높음
+    if(Math.random()<0.0008){const es=genEnchantScroll();addItem(es);blogAdd('<span class="l-set">✨ 인챈트 스크롤 드랍!</span>');}
+    // ★ 세트 드랍 (0.1%) - 더 희박하게
+    if(Math.random()<0.001*dropR){const si=genSetItem();addItem(si);blogAdd(`<span class="l-set">🌟 세트 아이템 드랍: ${si.name}</span>`);}
   }
   char.gold+=totalGold;
   const lvUp=gainExp(totalExp);
@@ -2844,30 +3052,41 @@ async function loadRanking(){
       return;
     }
 
-    // 전체 기록 목록 (최신순)
-    const allSorted=records.sort((a,b)=>a.combatSec-b.combatSec);
+    // 선택된 던전 필터 (없으면 전체)
+    const selTier=rb.__selTier??null;
+
+    // 던전 필터 버튼
+    const tierBtns=[{idx:null,n:'전체'},...DTIERS.map((t,i)=>({idx:i,n:`T${t.tier} ${t.n}`}))];
+    const filterHtml=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
+      ${tierBtns.map(t=>`<button class="btn btn-xs ${selTier===t.idx?'btn-gold':'btn-ghost'}" onclick="setRankTier(${t.idx===null?'null':t.idx})">${t.n}</button>`).join('')}
+    </div>`;
+
+    // 필터 적용
+    const filtered=selTier===null?records:records.filter(r=>r.tierIdx===selTier);
+    const allSorted=[...filtered].sort((a,b)=>a.combatSec-b.combatSec);
+
     rb.innerHTML=`
-      <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">* 파티 매우어려움 기준으로 측정됩니다</div>
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">* 파티 매우어려움 기준으로 측정됩니다</div>
+      ${filterHtml}
+      ${!allSorted.length?`<div style="color:var(--tx3);font-size:11px;padding:10px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px">해당 던전 기록 없음</div>`:`
       <div style="overflow-x:auto">
         <table class="utbl">
           <thead>
-            <tr>
-              <th>순위</th><th>캐릭터</th><th>던전</th><th>모드</th><th>전투시간</th><th>파티원</th>
-            </tr>
+            <tr><th>순위</th><th>캐릭터</th><th>던전</th><th>전투시간</th><th>파티원</th></tr>
           </thead>
           <tbody>
             ${allSorted.slice(0,50).map((r,i)=>`
               <tr style="${r.charName===char.name?'background:rgba(240,192,64,.07)':''}">
                 <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span></td>
                 <td><span style="font-family:'Cinzel',serif;font-size:11px;color:${r.charName===char.name?'var(--gold)':'var(--tx)'}">${r.charName}${r.charName===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:3px">나</span>':''}</span></td>
-                <td style="font-size:10px">Tier${r.tierIdx+1} ${r.tierName}</td>
-                <td><span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${r.mode==='solo'?'rgba(74,143,255,.15)':'rgba(240,192,64,.15)'};color:${r.mode==='solo'?'var(--blue)':'var(--gold)'}">${r.mode==='solo'?'솔로':'파티'}</span></td>
+                <td style="font-size:10px;white-space:nowrap">T${r.tierIdx+1} ${r.tierName}</td>
                 <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green)">${formatSec(r.combatSec)}</td>
-                <td style="font-size:10px;color:var(--tx2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.mode==='party'?r.members||'-':'-'}</td>
+                <td style="font-size:10px;color:var(--tx2);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.members||'-'}</td>
               </tr>`).join('')}
           </tbody>
         </table>
-      </div>`;
+      </div>`}`;
+    rb.__selTier=selTier;
   }
 }
 
@@ -2876,6 +3095,12 @@ function formatSec(s){
   return Math.floor(s/60)+'분 '+(s%60)+'초';
 }
 window.loadRanking=loadRanking;
+
+window.setRankTier=function(tierIdx){
+  const rb=document.getElementById('rankBody');
+  if(rb)rb.__selTier=tierIdx;
+  loadRanking();
+};
 
 window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};
 window.unban=async uid=>{await remove(ref(db,`bans/${uid}`));toast('밴 해제');loadAdmin();};
