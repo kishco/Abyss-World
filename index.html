@@ -398,23 +398,37 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="ptag" style="display:none;font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace">👥파티</span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);margin-left:auto;margin-right:6px">v1.0</span>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);margin-left:auto;margin-right:6px">v1.1</span>
   <button class="tlo" id="tlo">로그아웃</button>
 </header>
 
 <!-- 업데이트 팝업 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
-  <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:400px;width:90%">
+  <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:420px;width:90%;max-height:80vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
-    <div style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;margin-bottom:16px">v1.0 업데이트</div>
-    <div style="font-size:12px;color:var(--tx2);line-height:2;margin-bottom:18px">
-      🏆 랭킹 시스템 추가<br>
-      👥 파티 시스템 (비공개/추방)<br>
-      💰 아이템 판매 시스템<br>
-      ✨ 인챈트 스크롤 시스템<br>
-      💀 보스 격노·차지 기믹<br>
-      🧙 히든 상인 등장<br>
-      ⚖️ 전체 밸런스 조정
+    <div style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;margin-bottom:16px">v1.1 패치노트</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">⚖️ 밸런스 조정</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      🗡 노말 몬스터 체력·공격력 대폭 하향<br>
+      ⚔ 어려움·매우어려움 몬스터도 하향 조정<br>
+      🎯 클리어 보너스 경험치 대폭 감소<br>
+      👥 파티 최소 인원 2인으로 완화<br>
+      ⏱ 파티 행동 타이머 15초→10초 단축<br>
+      💊 물약 보상 체계 전면 개편
+    </div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">💊 물약 시스템 변경</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      매우어려움 <b>최초 1회</b> 클리어 시 물약 +1<br>
+      솔로/파티 각각 별도 카운트<br>
+      티어 5개 × 솔로·파티 = 최대 <b>10회</b> 보상 가능<br>
+      최종 물약 상한: 기본 5개 + 최대 10개 = <b>15개</b>
+    </div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🐛 버그 수정</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2;margin-bottom:18px">
+      🔧 대장간 강화 수치 표시 오류 수정<br>
+      💥 데미지 천문학적 수치 오염 방어<br>
+      ✕ 장비 해제 버튼 작동 수정<br>
+      🏆 랭킹 중복 기록 제거 개선
     </div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-gold" style="flex:1" onclick="closeUpdatePopup(false)">확인</button>
@@ -880,9 +894,9 @@ const DTIERS=[
   {tier:5,n:'신들의 전장',icon:'⚡',minLv:80,floors:12,recLv:85,areas:['abyss']},
 ];
 const DIFF={
-  normal:{name:'노말',color:'var(--green)',minParty:1,maxParty:4,monMult:1.0,dmgMult:1.2,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
-  hard:{name:'어려움',color:'#ff9900',minParty:2,maxParty:4,monMult:2.5,dmgMult:3.5,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:15},
-  vhard:{name:'매우어려움',color:'var(--red)',minParty:2,maxParty:4,monMult:5.0,dmgMult:8.0,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:30,canWipe:true},
+  normal:{name:'노말',color:'var(--green)',minParty:1,maxParty:4,monMult:0.7,dmgMult:0.8,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
+  hard:{name:'어려움',color:'#ff9900',minParty:2,maxParty:4,monMult:1.8,dmgMult:2.2,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:15},
+  vhard:{name:'매우어려움',color:'var(--red)',minParty:2,maxParty:4,monMult:3.5,dmgMult:5.0,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:30,canWipe:true},
 };
 const MNAMES={
   grassland:['고블린','들쥐','녹색슬라임','도적','들개','메뚜기전사','초원유충','야생멧돼지'],
@@ -1011,7 +1025,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v1.0';
+  const key='abyssworld_update_v1.1';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1022,7 +1036,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v1.0',expire);
+    localStorage.setItem('abyssworld_update_v1.1',expire);
   }
 };
 
@@ -1631,9 +1645,12 @@ function genSetItem(){
   const sid=pick(Object.keys(SETS));const sd=SETS[sid];
   const pid=pick(Object.keys(sd.pcs));const pd=sd.pcs[pid];
   const reqLv=sid==='abyss'?60:sid==='flame'?40:20;
-  return{id:gId(),name:pd.n,baseId:pid,slot:pd.slot,hand:pd.hand||null,grade:'set',
-    gradeName:'세트',gradeColor:sd.col,setId:sid,setName:sd.name,
-    stats:{...pd.stats},prefix:null,suffix:null,attr:null,reqLv,itemLv:reqLv};
+  return{id:gId(),name:pd.n,baseId:pid,slot:pd.slot,hand:pd.hand||null,
+    grade:'set',gradeName:'세트',gradeColor:sd.col,
+    setId:sid,setName:sd.name,
+    stats:{...pd.stats},
+    prefix:null,suffix:null,attr:null,
+    reqLv,itemLv:reqLv,enhance:0};
 }
 function genShopItem(si){return{id:gId(),name:si.n||si.name,baseId:si.n,slot:si.slot,hand:si.hand||null,grade:'normal',gradeName:'노말',gradeColor:'#9d9d9d',stats:{...si.stats},prefix:null,suffix:null,attr:null};}
 function genScrollItem(){return{id:gId(),name:'능력치 재조정 주문서',baseId:'reroll_scroll',slot:'scroll',hand:null,grade:'legendary',gradeName:'전설',gradeColor:'#ff8c00',stats:{},prefix:null,suffix:null,attr:null,isScroll:true};}
@@ -1723,8 +1740,8 @@ function openIM(it){
   const allKeys=[...new Set([...Object.keys(newStats),...Object.keys(oldStats)])].filter(k=>newStats[k]>0||oldStats[k]>0);
   const sr=allKeys.map(k=>statRowHtml(k.toUpperCase(),newStats[k],oldStats[k])).join('');
 
-  const ph=it.prefix?`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span><br>${Object.entries(it.prefix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`:'';
-  const sh=it.suffix?`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span><br>${Object.entries(it.suffix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`:'';
+  const ph=(!it.prefix||it.grade==='set')?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span><br>${Object.entries(it.prefix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
+  const sh=(!it.suffix||it.grade==='set')?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span><br>${Object.entries(it.suffix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
   const seth=it.grade==='set'?`<div style="margin-top:6px;padding:6px 9px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:11px;color:var(--st)">◆ ${it.setName}</div>`:'';
 
   // 장착 중 아이템 비교 표시
@@ -2331,9 +2348,9 @@ function spawnMonsters(b,isBoss){
   const t=b.tier;const d=b.diff;const sm=b.soloMult;
   const lv=t.recLv;const area=pick(t.areas);
   if(isBoss){
-    const bAtk=Math.round((35+lv*5.5)*d.monMult*sm*0.8);
-    const bHp=Math.round((300+lv*60)*d.monMult*sm);
-    const bDef=Math.round((8+lv*2.0)*d.monMult*sm);
+    const bAtk=Math.round((28+lv*4.5)*d.monMult*sm*0.8);
+    const bHp=Math.round((250+lv*50)*d.monMult*sm);
+    const bDef=Math.round((6+lv*1.5)*d.monMult*sm);
     return[{id:'boss_0',name:BOSSN[t.tier-1],hp:bHp,maxHp:bHp,atk:bAtk,def:bDef,
       isBoss:true,hidden:false,aggro:0,expR:1.5,goldR:2.0,status:'alive',
       // ★ 보스 기믹: 체력 50% 이하에서 격노
@@ -2348,9 +2365,9 @@ function spawnMonsters(b,isBoss){
     if(roll<0.05){const hp_m=pick(HPFX);mn=hp_m.n+' '+mn;am*=hp_m.am;hm*=hp_m.hm;em*=hp_m.em;gm*=hp_m.gm;hidden=true;}
     else if(roll<0.15){const sfx=pick(MSFX);mn+=' '+sfx.n;am*=sfx.am;hm*=sfx.hm;em*=sfx.em;gm*=sfx.gm||1;}
     else if(roll<0.40){const pfx=pick(MPFX);mn=pfx.n+' '+mn;am*=pfx.am;hm*=pfx.hm;em*=pfx.em;}
-    const hp=Math.round((60+lv*25)*hm*d.monMult*sm);
-    const atk=Math.round((15+lv*5)*am*d.dmgMult*sm);
-    const def=Math.round((3+lv*1.2)*d.monMult*sm);
+    const hp=Math.round((50+lv*18)*hm*d.monMult*sm);
+    const atk=Math.round((12+lv*4)*am*d.dmgMult*sm);
+    const def=Math.round((2+lv*0.9)*d.monMult*sm);
     mons.push({id:'mon_'+i,name:mn,hp,maxHp:hp,atk,def,hidden,isBoss:false,aggro:0,expR:em,goldR:gm,status:'alive'});
   }
   return mons;
@@ -3378,6 +3395,12 @@ window.adminUpdateItemSelect=function(){
   };
   const list=opts[type]||[];
   sub.innerHTML=list.map(o=>`<option value="${o.v}">${o.n}</option>`).join('');
+  // ★ 세트는 등급/접두/접미 비활성화
+  const isSet=type==='set';
+  ['giGrade','giPre','giSuf'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.disabled=isSet;el.style.opacity=isSet?'.3':'1';}
+  });
 };
 
 window.adminGiveItem=async function(cid){
