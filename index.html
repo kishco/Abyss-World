@@ -269,6 +269,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .utbl td{padding:6px 8px;border-bottom:1px solid var(--bd);vertical-align:middle;}
 .utbl tr:hover td{background:var(--sf2);}
 .banbadge{background:rgba(232,68,68,.15);border:1px solid rgba(232,68,68,.3);color:var(--red);padding:2px 6px;border-radius:8px;font-size:9.5px;font-weight:700;}
+.adeq-slot{background:var(--sf3);border:1px solid var(--bd);border-radius:6px;padding:5px 8px;font-size:10.5px;display:flex;align-items:center;gap:3px;min-height:28px;}
+.adeq-slot.empty{opacity:.4;}
 
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(6px);}
@@ -462,14 +464,32 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="akpi ak4"><div class="aklbl">밴 유저</div><div class="akval" id="ak-bans">0</div></div>
       </div>
       <div class="atabs">
-        <button class="atab on" onclick="atab('users')">유저 관리</button>
-        <button class="atab" onclick="atab('chars')">캐릭터</button>
-        <button class="atab" onclick="atab('achat')">채팅</button>
-        <button class="atab" onclick="atab('game')">게임</button>
+        <button class="atab on" onclick="atab('users')">👤 유저관리</button>
+        <button class="atab" onclick="atab('parties')">👥 파티현황</button>
+        <button class="atab" onclick="atab('achat')">💬 채팅</button>
+        <button class="atab" onclick="atab('game')">📊 통계</button>
       </div>
-      <div class="acont on" id="ac-users"><div style="overflow-x:auto"><table class="utbl"><thead><tr><th>이름</th><th>레벨</th><th>골드</th><th>UID</th><th>상태</th><th>관리</th></tr></thead><tbody id="utblbody"></tbody></table></div></div>
-      <div class="acont" id="ac-chars"><div style="overflow-x:auto"><table class="utbl"><thead><tr><th>이름</th><th>레벨</th><th>HP</th><th>골드</th><th>STR</th><th>DEX</th><th>INT</th><th>VIT</th><th>LUK</th></tr></thead><tbody id="ctblbody"></tbody></table></div></div>
-      <div class="acont" id="ac-achat"><div style="display:flex;gap:7px;margin-bottom:7px"><button class="btn btn-red btn-xs" onclick="clearChat()">전체 삭제</button></div><div id="adminchat" style="max-height:350px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:7px;padding:8px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;"></div></div>
+
+      <!-- 유저 관리 탭 -->
+      <div class="acont on" id="ac-users">
+        <div style="overflow-x:auto"><table class="utbl"><thead><tr><th>이름</th><th>레벨</th><th>골드</th><th>UID</th><th>상태</th><th>관리</th></tr></thead><tbody id="utblbody"></tbody></table></div>
+        <!-- 유저 상세 패널 -->
+        <div id="adminUserDetail" style="display:none;margin-top:14px;background:var(--sf2);border:1px solid var(--bd2);border-radius:10px;padding:14px"></div>
+      </div>
+
+      <!-- 파티 현황 탭 (실시간) -->
+      <div class="acont" id="ac-parties">
+        <div style="font-size:10px;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:5px"><div class="sdot"></div>실시간 자동 갱신</div>
+        <div id="adminPartyList"></div>
+      </div>
+
+      <!-- 채팅 탭 -->
+      <div class="acont" id="ac-achat">
+        <div style="display:flex;gap:7px;margin-bottom:7px"><button class="btn btn-red btn-xs" onclick="clearChat()">전체 삭제</button></div>
+        <div id="adminchat" style="max-height:350px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:7px;padding:8px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;"></div>
+      </div>
+
+      <!-- 통계 탭 -->
       <div class="acont" id="ac-game"><div id="gamestat" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div></div>
     </div>
 
@@ -2203,8 +2223,11 @@ function atab(id){
   document.querySelectorAll('.atab').forEach((t,i)=>t.classList.toggle('on',[...document.querySelectorAll('.atab')][i]===event.target));
   document.querySelectorAll('.acont').forEach(c=>c.classList.remove('on'));
   document.getElementById('ac-'+id).classList.add('on');
+  if(id==='parties')startAdminPartyWatch();
 }
 window.atab=atab;
+
+let adminPartyUnsub=null;
 
 async function loadAdmin(){
   const [cs,is,bans]=await Promise.all([get(ref(db,'chars')),get(ref(db,'inv')),get(ref(db,'bans'))]);
@@ -2213,28 +2236,188 @@ async function loadAdmin(){
   const totalGold=charArr.reduce((s,[,c])=>s+(c.gold||0),0);
   document.getElementById('ak-chars').textContent=charArr.length;
   document.getElementById('ak-items').textContent=allInv.length;
-  document.getElementById('ak-gold').textContent=totalGold;
+  document.getElementById('ak-gold').textContent=totalGold.toLocaleString();
   document.getElementById('ak-bans').textContent=Object.keys(bansD).length;
-  // Users
+
+  // 유저 관리 테이블
   document.getElementById('utblbody').innerHTML=charArr.map(([id,c])=>`
-    <tr><td>${c.name}</td><td>${c.level}</td><td>💰${c.gold}</td><td style="font-size:9px;color:var(--tx3)">${c.owner?.slice(0,8)}...</td>
-    <td>${bansD[c.owner]?`<span class="banbadge">밴됨</span>`:''}</td>
-    <td><div style="display:flex;gap:4px">
-      ${bansD[c.owner]?`<button class="btn btn-green btn-xs" onclick="unban('${c.owner}')">언밴</button>`:`<button class="btn btn-red btn-xs" onclick="banU('${c.owner}')">밴</button>`}
-    </div></td></tr>`).join('');
-  // Chars table
-  document.getElementById('ctblbody').innerHTML=charArr.map(([,c])=>`<tr><td>${c.name}</td><td>${c.level}</td><td>${c.hp}/${c.maxHp||100}</td><td>${c.gold}</td><td>${c.str||5}</td><td>${c.dex||5}</td><td>${c.int||3}</td><td>${c.vit||5}</td><td>${c.luk||2}</td></tr>`).join('');
-  // Chat
+    <tr>
+      <td><span style="font-family:'Cinzel',serif;color:var(--gold);font-size:11px">${c.name}</span></td>
+      <td>Lv.${c.level}</td>
+      <td>💰${(c.gold||0).toLocaleString()}</td>
+      <td style="font-size:9px;color:var(--tx3)">${(c.owner||'').slice(0,8)}...</td>
+      <td>${bansD[c.owner]?`<span class="banbadge">밴됨</span>`:`<span style="font-size:9px;color:var(--green)">정상</span>`}</td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="btn btn-blue btn-xs" onclick="adminOpenUser('${id}')">🔍 상세</button>
+          ${bansD[c.owner]
+            ?`<button class="btn btn-green btn-xs" onclick="unban('${c.owner}')">언밴</button>`
+            :`<button class="btn btn-red btn-xs" onclick="banU('${c.owner}')">밴</button>`}
+        </div>
+      </td>
+    </tr>`).join('');
+
+  // 채팅
   const chatSn=await get(ref(db,'chat/world'));const chatD=chatSn.val()||{};
   const chatArr=Object.entries(chatD).sort((a,b)=>(a[1].ts||0)-(b[1].ts||0)).slice(-50);
-  document.getElementById('adminchat').innerHTML=chatArr.map(([mid,m])=>`<div style="margin-bottom:3px"><span style="color:var(--gold)">${m.author}:</span> ${escapeHtml(m.text)} <button class="btn btn-red btn-xs" style="margin-left:5px" onclick="delChat('${mid}')">삭제</button></div>`).join('');
-  // Stats
+  document.getElementById('adminchat').innerHTML=chatArr.map(([mid,m])=>`
+    <div style="margin-bottom:3px">
+      <span style="color:var(--gold)">${m.author}:</span> ${escapeHtml(m.text)}
+      <button class="btn btn-red btn-xs" style="margin-left:5px" onclick="delChat('${mid}')">삭제</button>
+    </div>`).join('');
+
+  // 통계
   document.getElementById('gamestat').innerHTML=`
     <div class="akpi ak1"><div class="aklbl">평균 레벨</div><div class="akval">${charArr.length?Math.round(charArr.reduce((s,[,c])=>s+(c.level||1),0)/charArr.length):0}</div></div>
     <div class="akpi ak2"><div class="aklbl">최고 레벨</div><div class="akval">${charArr.length?Math.max(...charArr.map(([,c])=>c.level||1)):0}</div></div>
     <div class="akpi ak3"><div class="aklbl">총 캐릭터</div><div class="akval">${charArr.length}</div></div>
     <div class="akpi ak4"><div class="aklbl">총 아이템</div><div class="akval">${allInv.length}</div></div>`;
 }
+
+// ── 유저 상세 패널 ──
+window.adminOpenUser=async function(cid){
+  const el=document.getElementById('adminUserDetail');
+  el.style.display='block';
+  el.innerHTML=`<div style="color:var(--tx3);font-size:11px">로딩 중...</div>`;
+  const [cSn,iSn]=await Promise.all([get(ref(db,`chars/${cid}`)),get(ref(db,`inv/${cid}`))]);
+  const c=cSn.val();const iv=iSn.val()||{};
+  if(!c){el.innerHTML='캐릭터 없음';return;}
+  const eq=c.equipment||{};
+  const eqHtml=EQSLOTS.map(sl=>{
+    const it=eq[sl.k];
+    if(!it)return`<div class="adeq-slot empty">${sl.i} <span style="color:var(--tx3)">${sl.l} — 없음</span></div>`;
+    return`<div class="adeq-slot">
+      ${sl.i} <span style="color:var(--tx3);font-size:9px">${sl.l}</span>
+      <span class="icname g-${it.grade}" style="font-size:11px;margin-left:4px">${it.name}</span>
+      <span style="font-size:9px;color:var(--tx3);margin-left:4px">${Object.entries(it.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}${it.reqLv?' Lv.'+it.reqLv:''}</span>
+    </div>`;
+  }).join('');
+  const invHtml=Object.values(iv).slice(0,20).map(it=>
+    `<span class="icname g-${it.grade}" style="font-size:10px;background:var(--sf3);padding:2px 6px;border-radius:4px;margin:2px;display:inline-block">${it.name}${it.reqLv?' (Lv.'+it.reqLv+')':''}</span>`
+  ).join('');
+
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--gold)">${c.name}</div>
+      <div style="font-size:11px;color:var(--tx2)">Lv.${c.level} | 💰${(c.gold||0).toLocaleString()}</div>
+      <button class="btn btn-ghost btn-xs" style="margin-left:auto" onclick="document.getElementById('adminUserDetail').style.display='none'">✕ 닫기</button>
+    </div>
+    <!-- 스탯 -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      ${['str','dex','int','vit','luk'].map(k=>`<div style="background:var(--sf3);border:1px solid var(--bd);border-radius:5px;padding:4px 9px;font-size:11px"><span style="color:var(--tx3)">${k.toUpperCase()}</span> <strong style="color:var(--tx)">${c[k]||5}</strong></div>`).join('')}
+      <div style="background:var(--sf3);border:1px solid var(--bd);border-radius:5px;padding:4px 9px;font-size:11px"><span style="color:var(--tx3)">HP</span> <strong style="color:var(--green)">${c.hp||100}/${c.maxHp||100}</strong></div>
+    </div>
+    <!-- 장착 장비 -->
+    <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">장착 장비</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px">${eqHtml}</div>
+    <!-- 인벤토리 미리보기 -->
+    <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">인벤토리 (${Object.values(iv).length}개)</div>
+    <div style="margin-bottom:12px;max-height:80px;overflow-y:auto">${invHtml||'<span style="color:var(--tx3);font-size:11px">비어있음</span>'}</div>
+    <!-- 장비 지급 -->
+    <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">🎁 장비 지급</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;align-items:end;margin-bottom:6px">
+      <div>
+        <div style="font-size:9.5px;color:var(--tx3);margin-bottom:3px">슬롯</div>
+        <select id="giSlot" style="width:100%;padding:5px 7px;background:var(--sf3);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none">
+          ${EQSLOTS.filter(s=>!s.k.startsWith('accessory')).map(s=>`<option value="${s.k}">${s.l}</option>`).join('')}
+          <option value="accessory">장신구</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:9.5px;color:var(--tx3);margin-bottom:3px">등급</div>
+        <select id="giGrade" style="width:100%;padding:5px 7px;background:var(--sf3);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none">
+          <option value="normal">노말</option>
+          <option value="uncommon">언커먼</option>
+          <option value="rare">레어</option>
+          <option value="epic">에픽</option>
+          <option value="legendary">레전더리</option>
+          <option value="set">세트</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:9.5px;color:var(--tx3);margin-bottom:3px">아이템레벨</div>
+        <input id="giLv" type="number" min="1" max="99" value="${c.level}" style="width:100%;padding:5px 7px;background:var(--sf3);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
+      </div>
+      <button class="btn btn-gold" onclick="adminGiveItem('${cid}')">지급</button>
+    </div>
+    <!-- 골드 지급 -->
+    <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+      <div style="font-size:9.5px;color:var(--tx3);white-space:nowrap">💰 골드 지급</div>
+      <input id="giGold" type="number" min="1" value="1000" style="flex:1;padding:5px 7px;background:var(--sf3);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
+      <button class="btn btn-gold btn-sm" onclick="adminGiveGold('${cid}')">지급</button>
+    </div>`;
+};
+
+window.adminGiveItem=async function(cid){
+  const slot=document.getElementById('giSlot').value;
+  const grade=document.getElementById('giGrade').value;
+  const lv=parseInt(document.getElementById('giLv').value)||1;
+  let it;
+  if(grade==='set'){it=genSetItem();}
+  else{
+    const pool=slot==='weapon'?WBASES:slot==='accessory'?ACCBASES:ABASES.filter(b=>b.slot===slot).length?ABASES.filter(b=>b.slot===slot):[...ABASES];
+    it=genItem(pool.length?pool:[...WBASES,...ABASES,...ACCBASES],grade,lv);
+    it.slot=slot==='accessory'?'accessory':it.slot;
+  }
+  const iRef=ref(db,`inv/${cid}/${it.id}`);
+  await set(iRef,it);
+  toast(`✅ ${it.name} 지급 완료!`);
+  adminOpenUser(cid);
+};
+
+window.adminGiveGold=async function(cid){
+  const amt=parseInt(document.getElementById('giGold').value)||0;
+  if(amt<=0)return;
+  const cSn=await get(ref(db,`chars/${cid}`));const c=cSn.val();if(!c)return;
+  await update(ref(db,`chars/${cid}`),{gold:(c.gold||0)+amt});
+  toast(`💰 ${amt.toLocaleString()} 골드 지급 완료!`);
+  adminOpenUser(cid);
+};
+
+// ── 파티 실시간 현황 ──
+function startAdminPartyWatch(){
+  const el=document.getElementById('adminPartyList');
+  if(adminPartyUnsub)adminPartyUnsub();
+  adminPartyUnsub=onValue(ref(db,'parties'),sn=>{
+    const all=sn.val()||{};const arr=Object.entries(all);
+    if(!arr.length){el.innerHTML='<div style="color:var(--tx3);font-size:11px">활성 파티 없음</div>';return;}
+    el.innerHTML=arr.map(([pid,pd])=>{
+      const mems=Object.entries(pd.members||{});
+      return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--gold)">${pd.name}</div>
+          ${pd.private?'<span style="font-size:9px;color:#f87;border:1px solid #f874;padding:1px 5px;border-radius:3px">🔒 비공개</span>':'<span style="font-size:9px;color:var(--green);border:1px solid rgba(68,212,136,.3);padding:1px 5px;border-radius:3px">🌐 공개</span>'}
+          <span style="font-size:9px;color:var(--tx3);margin-left:auto">${mems.length}/4명</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px">
+          ${mems.map(([mid,m])=>`
+            <div style="background:var(--sf3);border:1px solid var(--bd);border-radius:6px;padding:7px 9px;display:flex;align-items:center;gap:6px">
+              <div style="width:6px;height:6px;border-radius:50%;background:${pd.leader===mid?'var(--gold)':'var(--tx3)'};flex-shrink:0"></div>
+              <div>
+                <div style="font-size:11px;color:${pd.leader===mid?'var(--gold)':'var(--tx)'}">${pd.leader===mid?'👑 ':''}${m.charName}</div>
+                <div style="font-size:9px;color:var(--tx3)">Lv.${m.level}</div>
+              </div>
+              <button class="btn btn-red btn-xs" style="margin-left:auto;padding:2px 5px" onclick="adminKickFromParty('${pid}','${mid}','${m.charName}')">추방</button>
+            </div>`).join('')}
+        </div>
+        <button class="btn btn-red btn-xs" style="margin-top:8px" onclick="adminDisbandParty('${pid}')">파티 강제해산</button>
+      </div>`;
+    }).join('');
+  });
+}
+window.adminKickFromParty=async(pid,mid,name)=>{
+  if(!confirm(`${name}을(를) 파티에서 추방?`))return;
+  await remove(ref(db,`parties/${pid}/members/${mid}`));
+  const sn=await get(ref(db,`parties/${pid}/members`));
+  if(!sn.val()||!Object.keys(sn.val()).length)await remove(ref(db,`parties/${pid}`));
+  toast(`${name} 추방`);
+};
+window.adminDisbandParty=async(pid)=>{
+  if(!confirm('파티를 강제 해산합니까?'))return;
+  await remove(ref(db,`parties/${pid}`));
+  toast('파티 해산');
+};
+
 window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};
 window.unban=async uid=>{await remove(ref(db,`bans/${uid}`));toast('밴 해제');loadAdmin();};
 window.delChat=async mid=>{await remove(ref(db,`chat/world/${mid}`));loadAdmin();};
