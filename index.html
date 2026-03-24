@@ -1130,11 +1130,7 @@ function getSkills(c_arg){
     }
   }return sk;
 }
-async function saveChar(){
-  if(!db||!charId)return;
-  char.gold=Math.floor(char.gold||0); // ★ 골드 항상 정수
-  await set(ref(db,`chars/${charId}`),char);
-}
+async function saveChar(){if(db&&charId)await set(ref(db,`chars/${charId}`),char);}
 async function saveInv(){if(db&&charId)await set(ref(db,`inv/${charId}`),inv);}
 async function addItem(item){inv[item.id]=item;await saveInv();renderInv();}
 
@@ -1183,8 +1179,6 @@ async function selChar(id){
   charId=id;const cs=await get(ref(db,`chars/${id}`));char=cs.val();if(!char)return;
   char.equipment=char.equipment||{};
   EQSLOTS.forEach(s=>{if(!(s.k in char.equipment))char.equipment[s.k]=null;});
-  // ★ 기존 9강 초과 장비 강제 9강 캡
-  for(const sl of EQSLOTS){const it=char.equipment[sl.k];if(it&&(it.enhance||0)>9)it.enhance=9;}
   if(!char.str){char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;}
   if(char.extraPotions===undefined)char.extraPotions=0;
   const is=await get(ref(db,`inv/${id}`));inv=is.val()||{};
@@ -1305,7 +1299,7 @@ function renderEq(){
     return`<div class="eqsl ${it?'gb-'+(it.grade||'normal'):''}" data-k="${sl.k}" style="${lk?'opacity:.4;pointer-events:none':''}" onclick="toggleEqTip(this,'${sl.k}')">
       <div class="eqlb">${sl.i} ${sl.l}</div>
       ${lk?'<div class="eqem">양손 장착</div>':
-        it?`<div class="eqit g-${it.grade}">${itName(it)}</div>
+        it?`<div class="eqit g-${it.grade}">${it.name}</div>
             <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${GRADES[it.grade]?.name||it.grade}${it.itemLv?' · Lv.'+it.itemLv:''}</div>
             ${itSkStr(it)?`<div class="eqsk">${itSkStr(it)}</div>`:''}
             <button class="equn" data-un="${sl.k}" onclick="event.stopPropagation();unequip('${sl.k}')">✕</button>`:
@@ -1384,9 +1378,6 @@ function itSkStr(it){
   if(it.suffix?.sk&&SKILLS[it.suffix.sk])sk.push('⚡'+SKILLS[it.suffix.sk].name);
   return sk.join(' ');
 }
-// ★ 강화 수치 포함 이름
-function itName(it){return it?(it.enhance>0?`+${it.enhance} ${it.name}`:it.name):'';}
-
 function renderSetPanel(){
   const p=document.getElementById('setbonuspanel');
   const eq=char.equipment||{};
@@ -1466,11 +1457,9 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false){
   const gradeMult=GRADES[grade]?.mult||1;
   const preRaw=gi>=1?wRand(PRE):null;
   const sufRaw=gi>=2?wRand(SUF):null;
-  // ★ 접두/접미: 원본 b 유지, scaledB 따로 계산해서 저장
-  const pre=preRaw?{n:preRaw.n,sk:preRaw.sk||null,attr:preRaw.attr||null,
-    b:scaleEnchant(preRaw.b,lv,gradeMult)}:null;
-  const suf=sufRaw?{n:sufRaw.n,sk:sufRaw.sk||null,
-    b:scaleEnchant(sufRaw.b,lv,gradeMult)}:null;
+  // ★ 접두/접미 스탯 유동 적용
+  const pre=preRaw?{...preRaw,b:scaleEnchant(preRaw.b,lv,gradeMult)}:null;
+  const suf=sufRaw?{...sufRaw,b:scaleEnchant(sufRaw.b,lv,gradeMult)}:null;
   const attr=pre?.attr||(gi>=4?pick(Object.keys(ATTR_N)):null);
   const bname=getItemName(base,grade);
   // ★ 이름 구조: [접두] [등급수식어] [장비명]
@@ -1516,7 +1505,7 @@ function renderInv(){
       ${it.grade==='set'?`<div style="font-size:8.5px;color:var(--st);margin-bottom:2px">◆${it.setName||'세트'}</div>`:''}
       ${it.isScroll?`<div style="font-size:8.5px;color:var(--lg);margin-bottom:2px">📜 주문서</div>`:''}
       ${it.isEnchantScroll?`<div style="font-size:8.5px;color:var(--purple);margin-bottom:2px">✨ 인챈트 스크롤</div>`:''}
-      <div class="icname g-${it.grade}">${itName(it)}</div>
+      <div class="icname g-${it.grade}">${it.name}</div>
       <div class="ictype">${it.slot}${it.hand?' · '+it.hand:''}</div>
       ${it.reqLv?`<div style="font-size:9px;${lvLock?'color:var(--red)':'color:var(--tx3)'}">Lv.${it.reqLv} 필요${lvLock?' 🔒':''}</div>`:''}
       ${ss?`<div class="icstat">${ss}</div>`:''}
@@ -1662,8 +1651,6 @@ window.useEnchantScroll=async(scrollId,slotKey,type)=>{
   delete inv[scrollId];
   await saveChar();await saveInv();closeIM();updateTop();renderChar();
 };
-
-async function useRerollScroll(scrollId){
   if(!confirm('능력치를 랜덤으로 재배분합니다. 계속하시겠습니까?'))return;
   // Calculate total invested points above base (5 each)
   const base=5,total=(char.str-base)+(char.dex-base)+(char.int-base)+(char.vit-base)+(char.luk-base);
@@ -1832,99 +1819,21 @@ window.doEnchant=async(sl,type)=>{
   else{const en=wRand(SUF);it.suffix={n:en.n,b:en.b,sk:en.sk||null};toast(it.name+'에 접미 '+en.n+' 추가!');}
   await saveChar();updateTop();renderChar();
 };
-// ★ 강화 비용 계산 (장비레벨 + 등급 + 인챈트 가치 반영)
-function getForgeCost(it){
-  const gradeMult={normal:1,uncommon:2,rare:4,epic:10,legendary:25,set:40};
-  const lv=it.itemLv||1;
-  const enh=(it.enhance||0)+1; // 다음 강화 단계
-  const gm=gradeMult[it.grade]||1;
-  // 인챈트 가치 (접두+접미 스탯 합산)
-  const enchantVal=Object.values(it.prefix?.b||{}).reduce((s,v)=>s+Math.abs(v||0),0)
-    +Object.values(it.suffix?.b||{}).reduce((s,v)=>s+Math.abs(v||0),0);
-  const enchBonus=Math.round(enchantVal*5);
-  const base=Math.round(200*gm*(1+(lv-1)*0.08)*Math.pow(1.4,enh-1));
-  return Math.max(500,base+enchBonus);
-}
-
-// 강화 단계별 성공률과 파괴율
-const FORGE_TABLE=[
-  {step:1,succ:90,fail:10,destroy:0},   // +0→+1  성공90 실패10 파괴0
-  {step:2,succ:80,fail:18,destroy:2},   // +1→+2  성공80 실패18 파괴2
-  {step:3,succ:70,fail:25,destroy:5},   // +2→+3
-  {step:4,succ:60,fail:30,destroy:10},  // +3→+4
-  {step:5,succ:50,fail:35,destroy:15},  // +4→+5
-  {step:6,succ:40,fail:40,destroy:20},  // +5→+6
-  {step:7,succ:30,fail:45,destroy:25},  // +6→+7
-  {step:8,succ:20,fail:48,destroy:32},  // +7→+8
-  {step:9,succ:10,fail:50,destroy:40},  // +8→+9
-];
-
 function renderForge(sb){
-  const rows=EQSLOTS.map(sl=>{
-    const it=char.equipment[sl.k];if(!it)return'';
-    const enh=it.enhance||0;
-    const maxed=enh>=9;
-    const cost=maxed?0:getForgeCost(it);
-    const table=FORGE_TABLE[enh]||FORGE_TABLE[8];
-    const canAfford=char.gold>=cost;
-    return`<div class="shopitem" style="border-color:${maxed?'var(--gold)':'var(--bd)'}">
-      <div class="icname g-${it.grade}" style="margin-bottom:3px">${enh>0?`<span style="color:var(--gold)">+${enh}</span> `:''}${it.name}</div>
-      <div style="font-size:9.5px;color:var(--tx3);margin-bottom:4px">${maxed?'<span style="color:var(--gold)">★ 최대 강화</span>':`다음: +${enh+1}`}</div>
-      ${!maxed?`<div style="font-size:9px;color:var(--tx3);margin-bottom:5px">
-        성공 <span style="color:var(--green)">${table.succ}%</span> · 
-        실패 <span style="color:var(--tx2)">${table.fail}%</span> · 
-        파괴 <span style="color:var(--red)">${table.destroy}%</span>
-      </div>`:''}
-      <div style="font-size:10px;color:var(--gold);margin-bottom:5px">${!maxed?`💰${cost.toLocaleString()}G`:''}</div>
-      <button class="btn ${maxed?'btn-ghost':canAfford?'btn-gold':'btn-red'} btn-sm" style="width:100%" 
-        onclick="doForge('${sl.k}')" ${maxed?'disabled':''}
-      >${maxed?'최대':`강화 (${cost.toLocaleString()}G)`}</button>
-    </div>`;
-  }).join('');
-  sb.innerHTML=`
-    <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">강화 단계가 높을수록 <span style="color:var(--red)">파괴 확률</span>이 증가합니다.</div>
-    <div style="font-size:10px;color:var(--tx3);margin-bottom:12px">비용은 장비 레벨 · 등급 · 인챈트 가치에 따라 달라집니다.</div>
-    <div class="shopgrid">${rows}</div>`;
+  sb.innerHTML=`<div style="font-size:11.5px;color:var(--tx2);margin-bottom:10px">장착 장비를 강화합니다. 비용: 300G / 성공률: 70%</div><div class="shopgrid">${EQSLOTS.map(sl=>{const it=char.equipment[sl.k];if(!it)return'';return`<div class="shopitem"><div class="icname g-${it.grade}" style="margin-bottom:3px">${it.name}</div><div style="font-size:10px;color:var(--tx3)">강화+${it.enhance||0}</div><button class="btn btn-gold btn-sm" style="margin-top:7px;width:100%" onclick="doForge('${sl.k}')">강화 (300G)</button></div>`;}).join('')}</div>`;
 }
-
 window.doForge=async sl=>{
   const it=char.equipment[sl];if(!it){toast('장비 없음');return;}
-  const enh=it.enhance||0;
-  if(enh>=9){toast('최대 강화 +9');return;}
-  const cost=getForgeCost(it);
-  if(char.gold<cost){toast(`골드 부족! 필요: ${cost.toLocaleString()}G`);return;}
-  char.gold-=cost;
-
-  const table=FORGE_TABLE[enh];
-  const roll=Math.random()*100;
-
-  if(roll<table.succ){
-    // ★ 성공
-    it.enhance=enh+1;
-    if(!it._baseStats)it._baseStats={...it.stats};
-    const newEnh=it.enhance;
-    // +9강까지 스탯이 의미있게 증가: 강화수치^1.3 * 6%
-    for(const k of Object.keys(it._baseStats)){
-      if((it._baseStats[k]||0)>0)
-        it.stats[k]=Math.round(it._baseStats[k]*(1+Math.pow(newEnh,1.3)*0.06));
-    }
-    toast(`🔨 강화 성공! +${it.enhance}`,'3000');
-    blogAdd&&blogAdd(`<span class="l-exp">🔨 ${it.name} +${it.enhance} 강화 성공!</span>`);
-  }else if(roll<table.succ+table.destroy){
-    // ★ 파괴
-    char.equipment[sl]=null;
-    await saveChar();await saveInv();updateTop();renderChar();
-    toast(`💥 강화 실패 — ${it.name} 파괴됨!`,4000);
-    blogAdd&&blogAdd(`<span class="l-dead">💥 ${it.name} 강화 실패로 파괴!</span>`);
-    const sb=document.getElementById('secbody');if(sb)renderForge(sb);
-    return;
-  }else{
-    // ★ 실패 (파괴 안 됨)
-    toast(`강화 실패... (+${enh} 유지)`);
-  }
-
+  if(char.gold<300){toast('골드 부족');return;}
+  char.gold-=300;
+  if(Math.random()<0.7){
+    it.enhance=(it.enhance||0)+1;
+    const em=it.enhance*0.1;
+    if(it.stats.atk)it.stats.atk=Math.round(it.stats.atk*(1+em/it.enhance*0.1+(it.enhance-1)*0.05));
+    if(it.stats.def)it.stats.def=Math.round(it.stats.def*(1+em/it.enhance*0.1+(it.enhance-1)*0.05));
+    toast(`🔨 강화 성공! +${it.enhance}`);
+  }else toast('강화 실패...');
   await saveChar();updateTop();renderChar();
-  const sb=document.getElementById('secbody');if(sb)renderForge(sb);
 };
 function renderRerollSec(sb){
   const scrolls=Object.values(inv).filter(i=>i.isScroll);
@@ -2327,8 +2236,7 @@ function resolvePhase(){
   // Players act
   for(const p of alive){
     if(!p.actionChosen||p.actionChosen==='flee')p.actionChosen='attack';
-    const s=p.stats||calcStats(p.charData||char); // ★ 배틀 시작 시 계산된 스탯 사용
-    if(!s||isNaN(s.atk)){blogAdd(`<span class="l-sys">⚠️ ${p.name} 스탯 오류 — 공격 건너뜀</span>`);continue;}
+    const s=calcStats(p.charData||char);
     if(p.actionChosen==='defend'){p.defending=true;blogAdd(`<span class="l-sys">🛡 ${p.name} 방어 자세</span>`);}
     else if(p.actionChosen==='heal'){
       if(p.potions>0){
@@ -2425,16 +2333,13 @@ function resolvePhase(){
 }
 
 function calcPlayerDmg(p,s){
-  const base=Math.round(s.atk||10);
-  const variance=Math.round(base*0.1);
-  return Math.max(1,Math.min(base+rand(-variance,variance),99999)); // 최대 99999
+  const base=s.atk||10;return Math.max(1,base+rand(-Math.round(base*0.1),Math.round(base*0.1)));
 }
 function trySkillProc(p,s,target,allM){
   const skills=getSkills(p.charData||char);
   for(const sk of skills){
     if(Math.random()<sk.proc){
       const fx=sk.fx(s.atk,s);
-      if(fx.dmg)fx.dmg=Math.min(Math.round(fx.dmg),99999);
       if(fx.taunt){p.aggro=(p.aggro||0)+9999;blogAdd(`<span class="l-skill">😤 ${p.name}: ${fx.msg}</span>`);}
       else if(fx.disperseAggro){
         // Distribute p's aggro among all alive players
@@ -2528,6 +2433,7 @@ async function dungeonClear(){
   if(dk==='vhard'){
     const combatSec=Math.round((battle.combatMs||0)/1000);
     const tierIdx=battle.tierIdx;
+    const mode=battle.mode;
     const members=battle.players.map(p=>p.name);
     const record={
       charName:char.name,
@@ -2539,23 +2445,8 @@ async function dungeonClear(){
       memberCount:members.length,
       ts:Date.now(),
     };
-    // ★ 솔로: 캐릭터+던전 고유키 (최고기록 갱신)
-    // ★ 파티: 파티원 구성+던전 고유키 (구성원 1명이라도 다르면 새 기록)
-    let rankKey;
-    if(mode==='solo'){
-      rankKey=`solo_${char.name}_tier${tierIdx}`.replace(/[^a-zA-Z0-9가-힣_]/g,'_');
-    }else{
-      const sortedMembers=[...members].sort().join('_');
-      rankKey=`party_${sortedMembers}_tier${tierIdx}`.replace(/[^a-zA-Z0-9가-힣_]/g,'_');
-    }
-    const existing=await get(ref(db,`rankings/vhard/${rankKey}`));
-    const prev=existing.val();
-    if(!prev||combatSec<prev.combatSec){
-      await set(ref(db,`rankings/vhard/${rankKey}`),record);
-      blogAdd(`<span class="l-set">🏆 기록 ${prev?'갱신':'등록'}! 전투시간: ${combatSec}초${prev?' (이전: '+prev.combatSec+'초)':''}</span>`);
-    }else{
-      blogAdd(`<span class="l-sys">📊 기존 기록(${prev.combatSec}초) 유지 — 현재: ${combatSec}초</span>`);
-    }
+    await push(ref(db,`rankings/vhard`),record);
+    blogAdd(`<span class="l-set">🏆 기록 등록! 전투시간: ${combatSec}초</span>`);
   }
   // Big EXP bonus for full clear
   const bonusExp=Math.round(expForLevel(battle.tier.recLv)*0.15*d.expMult);
@@ -3140,66 +3031,63 @@ async function loadRanking(){
           <tbody>${sorted.slice(0,50).map((c,i)=>`
             <tr style="${c.name===char.name?'background:rgba(240,192,64,.07)':''}">
               <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span></td>
-              <td><span style="font-family:'Cinzel',serif;font-size:11px;color:${c.name===char.name?'var(--gold)':'var(--tx)'}">${c.name}${c.name===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:4px">나</span>':''}</span></td>
+              <td>
+                <span style="font-family:'Cinzel',serif;font-size:11px;color:${c.name===char.name?'var(--gold)':'var(--tx)'}">${c.name}</span>
+                ${c.name===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:4px">나</span>':''}
+              </td>
               <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green)">${rankMode==='level'?'Lv.'+c.level:'💰'+(c.gold||0).toLocaleString()}</td>
             </tr>`).join('')}
           </tbody>
         </table>
       </div>`;
-    return;
-  }
+  } else {
+    // 던전 클리어 랭킹
+    const rs=await get(ref(db,'rankings/vhard'));
+    const records=Object.values(rs.val()||{});
 
-  // ★ 던전 클리어 랭킹 — 던전별 탭, 1인 1기록
-  const rs=await get(ref(db,'rankings/vhard'));
-  const allRecords=Object.values(rs.val()||{});
-  const selTier=rb.__selTier??0; // 기본 Tier1
+    if(!records.length){
+      rb.innerHTML=`
+        <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">* 파티 매우어려움 기준으로 측정됩니다</div>
+        <div style="color:var(--tx3);font-size:11px;padding:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px">아직 기록 없음 — 파티 매우어려움을 클리어하면 자동 등록됩니다</div>`;
+      return;
+    }
 
-  // 던전 탭
-  const tierBtns=DTIERS.map((t,i)=>({idx:i,n:`${t.icon} T${t.tier}`}));
-  const filterHtml=`
-    <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">* 매우어려움 기준 / 동일 캐릭터는 최고기록(최단시간)만 표시됩니다</div>
-    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px">
-      ${tierBtns.map(t=>`
-        <button class="btn btn-sm ${selTier===t.idx?'btn-gold':'btn-ghost'}" onclick="setRankTier(${t.idx})" style="font-size:10.5px;min-width:60px">
-          ${t.n}<br><span style="font-size:8.5px;opacity:.7">${DTIERS[t.idx].n}</span>
-        </button>`).join('')}
+    // 선택된 던전 필터 (없으면 전체)
+    const selTier=rb.__selTier??null;
+
+    // 던전 필터 버튼
+    const tierBtns=[{idx:null,n:'전체'},...DTIERS.map((t,i)=>({idx:i,n:`T${t.tier} ${t.n}`}))];
+    const filterHtml=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
+      ${tierBtns.map(t=>`<button class="btn btn-xs ${selTier===t.idx?'btn-gold':'btn-ghost'}" onclick="setRankTier(${t.idx===null?'null':t.idx})">${t.n}</button>`).join('')}
     </div>`;
 
-  const filtered=allRecords.filter(r=>r.tierIdx===selTier).sort((a,b)=>a.combatSec-b.combatSec);
-  const myRecord=filtered.find(r=>r.charName===char.name);
+    // 필터 적용
+    const filtered=selTier===null?records:records.filter(r=>r.tierIdx===selTier);
+    const allSorted=[...filtered].sort((a,b)=>a.combatSec-b.combatSec);
 
-  rb.innerHTML=filterHtml+(
-    !filtered.length
-    ? `<div style="color:var(--tx3);font-size:11px;padding:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;text-align:center">
-        ${DTIERS[selTier].icon} ${DTIERS[selTier].n}<br>아직 클리어 기록 없음
-       </div>`
-    : `${myRecord?`<div style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:11px;display:flex;align-items:center;gap:8px">
-        <span style="color:var(--gold)">나의 기록</span>
-        <span style="font-family:'IBM Plex Mono',monospace;color:var(--green);font-weight:700">${formatSec(myRecord.combatSec)}</span>
-        <span style="color:var(--tx3)">— ${filtered.findIndex(r=>r.charName===char.name)+1}위</span>
-       </div>`:''}
+    rb.innerHTML=`
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">* 파티 매우어려움 기준으로 측정됩니다</div>
+      ${filterHtml}
+      ${!allSorted.length?`<div style="color:var(--tx3);font-size:11px;padding:10px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px">해당 던전 기록 없음</div>`:`
       <div style="overflow-x:auto">
         <table class="utbl">
           <thead>
-            <tr><th>순위</th><th>캐릭터</th><th>전투시간</th><th>파티원</th><th>날짜</th></tr>
+            <tr><th>순위</th><th>캐릭터</th><th>던전</th><th>전투시간</th><th>파티원</th></tr>
           </thead>
           <tbody>
-            ${filtered.map((r,i)=>`
-              <tr style="${r.charName===char.name?'background:rgba(240,192,64,.05);border-left:2px solid rgba(240,192,64,.4)':''}">
-                <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span></td>
-                <td>
-                  <div style="font-family:'Cinzel',serif;font-size:11px;color:${r.charName===char.name?'var(--gold)':'var(--tx)'}">${r.charName}${r.charName===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:3px">나</span>':''}</div>
-                  <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${r.mode==='solo'?'rgba(74,143,255,.15)':'rgba(240,192,64,.15)'};color:${r.mode==='solo'?'var(--blue)':'var(--gold)'}">${r.mode==='solo'?'솔로':'파티'}</span>
-                </td>
-                <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--green);font-weight:700">${formatSec(r.combatSec)}</td>
-                <td style="font-size:10px;color:var(--tx2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.mode==='party'?(r.members||'-'):'-'}</td>
-                <td style="font-size:9.5px;color:var(--tx3);white-space:nowrap">${r.ts?new Date(r.ts).toLocaleDateString('ko'):'-'}</td>
+            ${allSorted.slice(0,50).map((r,i)=>`
+              <tr style="${r.charName===char.name?'background:rgba(240,192,64,.07)':''}">
+                <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span></td>
+                <td><span style="font-family:'Cinzel',serif;font-size:11px;color:${r.charName===char.name?'var(--gold)':'var(--tx)'}">${r.charName}${r.charName===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:3px">나</span>':''}</span></td>
+                <td style="font-size:10px;white-space:nowrap">T${r.tierIdx+1} ${r.tierName}</td>
+                <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green)">${formatSec(r.combatSec)}</td>
+                <td style="font-size:10px;color:var(--tx2);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.members||'-'}</td>
               </tr>`).join('')}
           </tbody>
         </table>
-      </div>`
-  );
-  rb.__selTier=selTier;
+      </div>`}`;
+    rb.__selTier=selTier;
+  }
 }
 
 function formatSec(s){
