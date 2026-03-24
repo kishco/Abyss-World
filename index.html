@@ -273,6 +273,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 #chatToggleBtn{position:fixed;bottom:14px;right:14px;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0a1830,#1a3060);border:1.5px solid var(--blue);color:var(--blue);font-size:18px;cursor:pointer;display:none;z-index:201;box-shadow:0 4px 16px rgba(0,0,0,.5);transition:.2s;align-items:center;justify-content:center;}
 #chatToggleBtn:hover{filter:brightness(1.2);}
 #chatToggleBtn .unread-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);display:none;}
+@media(max-width:768px){#chatToggleBtn{bottom:60px;right:10px;width:38px;height:38px;font-size:16px;}}
 .cw-header{padding:8px 10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .cw-online{font-size:10px;color:var(--green);font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:4px;}
 .cw-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
@@ -378,7 +379,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="tinfo">
     <span class="tname" id="tname">-</span>
     <span class="tlvb" id="tlv">Lv.1</span>
-    <div class="thpw"><div class="thpo"><div class="thpi" id="thpbar" style="width:100%"></div></div><span class="thpt" id="thptxt">-</span></div>
+    
     <span class="tg">💰<span id="tgold">0</span></span>
     <span class="tsp" id="tsp" style="display:none" onclick="navTo('character')"></span>
     <span id="ptag" style="display:none;font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace">👥파티</span>
@@ -395,6 +396,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <button class="nbtn" data-tab="town"><div class="ni">🏘️</div><div class="nl">마을</div></button>
     <button class="nbtn" data-tab="dungeon"><div class="ni">🏰</div><div class="nl">던전</div></button>
     <button class="nbtn" data-tab="party"><div class="ni">👥</div><div class="nl">파티</div></button>
+    <button class="nbtn" data-tab="ranking"><div class="ni">🏆</div><div class="nl">랭킹</div></button>
     <button class="nbtn" data-tab="admin" id="adminNav" style="display:none"><div class="ni">⚙️</div><div class="nl">관리자</div></button>
   </nav>
   <main class="main">
@@ -424,6 +426,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <div class="srow"><span class="sn">🌀 회피</span><span class="sv" id="s-dodge">-</span></div>
               <div class="srow"><span class="sn">🔮 MATK</span><span class="sv" id="s-matk">-</span></div>
               <div class="srow"><span class="sn">💀 치명피해</span><span class="sv" id="s-cdmg">-</span></div>
+              <div class="srow" style="border-top:1px solid var(--bd);margin-top:4px;padding-top:4px"><span class="sn" style="color:var(--gold)">⚙️ 장비점수</span><span class="sv" id="s-score" style="color:var(--gold)">-</span></div>
             </div>
           </div>
           <div class="card2" style="margin-bottom:9px">
@@ -436,9 +439,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <div id="setbonuspanel"></div>
         </div>
         <div class="card">
-          <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px">장비</div>
+          <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px">장비 <span style="color:var(--tx3);font-weight:400">(클릭/탭 시 상세)</span></div>
           <div class="eqgrid" id="eqgrid"></div>
           <div style="margin-top:8px;font-size:10px;color:var(--tx3)">💊 던전 물약: <span id="charPotions" style="color:var(--green);font-weight:700">5</span>개 (최대: <span id="charMaxPotions">5</span>개)</div>
+          <div id="eqDetailPanel" style="display:none;margin-top:10px;background:var(--sf3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;position:relative">
+            <button onclick="closeEqDetail()" style="position:absolute;top:6px;right:8px;background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;line-height:1">✕</button>
+            <div id="eqDetailContent"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -498,6 +505,17 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <div id="pubparties"></div>
         </div>
       </div>
+    </div>
+
+    <!-- RANKING -->
+    <div class="pane" id="pane-ranking">
+      <div class="ptitle">🏆 랭킹</div>
+      <div class="atabs" id="rankTabs">
+        <button class="atab on" onclick="rankTab('level')">레벨</button>
+        <button class="atab" onclick="rankTab('gold')">골드</button>
+        <button class="atab" onclick="rankTab('clear')">매우어려움 클리어</button>
+      </div>
+      <div id="rankBody"></div>
     </div>
 
     <!-- ADMIN -->
@@ -609,114 +627,114 @@ const ATTR_C={fire:'#ff6030',ice:'#60c8ff',lightning:'#ffe040',dark:'#a060ff',ho
 // 레벨 EXP 테이블 (99레벨에 1년)
 function expForLevel(lv){return Math.round(200*lv*lv*Math.pow(1.055,lv));}
 
-// Skills
+// Skills — 전체 하향조정
 const SKILLS={
-  flame_burst:{name:'화염 폭발',icon:'🔥',desc:'300% 화염 피해',base:0.12,aggro:1.5,
-    fx:(a)=>({dmg:a*3.0,type:'fire',msg:'🔥 화염 폭발! 화염이 타오른다!'})},
-  ice_shard:{name:'빙결 파편',icon:'❄',desc:'200% 냉기+적 SPD 감소',base:0.12,aggro:1.0,
-    fx:(a)=>({dmg:a*2.0,type:'ice',debuff:'spd',msg:'❄ 빙결 파편!'})},
-  lightning:{name:'번개 연쇄',icon:'⚡',desc:'2연타 100% 번개',base:0.13,aggro:1.2,
-    fx:(a)=>({dmg:a*2.0,hits:2,type:'lightning',msg:'⚡ 번개 연쇄!'})},
-  shadow_strike:{name:'그림자 타격',icon:'🌑',desc:'250% 어둠+방어무시',base:0.10,aggro:0.8,
-    fx:(a)=>({dmg:a*2.5,ignoreDef:true,type:'dark',msg:'🌑 그림자 타격!'})},
-  holy_judgment:{name:'신성 심판',icon:'✨',desc:'350% 신성',base:0.08,aggro:2.0,
-    fx:(a)=>({dmg:a*3.5,type:'holy',msg:'✨ 신성 심판!'})},
-  poison_stack:{name:'독 중첩',icon:'☠',desc:'3턴 독 피해',base:0.15,aggro:0.6,
-    fx:(a)=>({dmg:a*0.3,dot:3,msg:'☠ 독 중첩!'})},
-  wind_slash:{name:'바람 베기',icon:'💨',desc:'180% 피해+회피+20',base:0.13,aggro:0.9,
-    fx:(a)=>({dmg:a*1.8,buffDodge:20,msg:'💨 바람 베기!'})},
-  vampiric:{name:'흡혈',icon:'🩸',desc:'150%+HP 30% 흡수',base:0.12,aggro:1.0,
-    fx:(a)=>({dmg:a*1.5,heal:0.3,type:'dark',msg:'🩸 흡혈!'})},
-  taunt:{name:'도발',icon:'😤',desc:'적의 어그로를 자신에게 집중',base:0.11,aggro:5.0,
-    fx:(a)=>({dmg:a*0.5,taunt:true,msg:'😤 도발! 모든 적개심이 집중된다!'})},
-  shadow_step:{name:'그림자 걸음',icon:'👥',desc:'어그로 분산 (팀 분배)',base:0.10,aggro:0.1,
-    fx:(a)=>({dmg:a*1.0,disperseAggro:true,msg:'👥 그림자 걸음! 어그로가 분산된다!'})},
-  divine_shield:{name:'신성 방벽',icon:'🛡',desc:'1턴 받는 피해 50% 감소',base:0.10,aggro:1.8,
+  flame_burst:{name:'화염 폭발',icon:'🔥',desc:'130% 화염 피해',base:0.07,aggro:1.5,
+    fx:(a)=>({dmg:a*1.3,type:'fire',msg:'🔥 화염 폭발!'})},
+  ice_shard:{name:'빙결 파편',icon:'❄',desc:'100% 냉기+SPD 감소',base:0.07,aggro:1.0,
+    fx:(a)=>({dmg:a*1.0,type:'ice',debuff:'spd',msg:'❄ 빙결 파편!'})},
+  lightning:{name:'번개 연쇄',icon:'⚡',desc:'2연타 60% 번개',base:0.08,aggro:1.2,
+    fx:(a)=>({dmg:a*1.2,hits:2,type:'lightning',msg:'⚡ 번개 연쇄!'})},
+  shadow_strike:{name:'그림자 타격',icon:'🌑',desc:'110% 어둠+방어무시',base:0.06,aggro:0.8,
+    fx:(a)=>({dmg:a*1.1,ignoreDef:true,type:'dark',msg:'🌑 그림자 타격!'})},
+  holy_judgment:{name:'신성 심판',icon:'✨',desc:'140% 신성',base:0.05,aggro:2.0,
+    fx:(a)=>({dmg:a*1.4,type:'holy',msg:'✨ 신성 심판!'})},
+  poison_stack:{name:'독 중첩',icon:'☠',desc:'50% + 2턴 독(30%)',base:0.09,aggro:0.6,
+    fx:(a)=>({dmg:a*0.5,dot:2,msg:'☠ 독 중첩!'})},
+  wind_slash:{name:'바람 베기',icon:'💨',desc:'90% 피해+회피+5',base:0.08,aggro:0.9,
+    fx:(a)=>({dmg:a*0.9,buffDodge:5,msg:'💨 바람 베기!'})},
+  vampiric:{name:'흡혈',icon:'🩸',desc:'80%+HP 5% 흡수',base:0.06,aggro:1.0,
+    fx:(a)=>({dmg:a*0.8,heal:0.05,type:'dark',msg:'🩸 흡혈!'})},
+  taunt:{name:'도발',icon:'😤',desc:'적개심 자신에게 집중',base:0.07,aggro:5.0,
+    fx:(a)=>({dmg:a*0.4,taunt:true,msg:'😤 도발!'})},
+  shadow_step:{name:'그림자 걸음',icon:'👥',desc:'어그로 분산',base:0.06,aggro:0.1,
+    fx:(a)=>({dmg:a*0.6,disperseAggro:true,msg:'👥 그림자 걸음!'})},
+  divine_shield:{name:'신성 방벽',icon:'🛡',desc:'피해 50% 감소 1턴',base:0.06,aggro:1.8,
     fx:(a)=>({dmg:0,shield:true,msg:'🛡 신성 방벽!'})},
-  storm_strike:{name:'폭풍 일격',icon:'⛈',desc:'400% 번개',base:0.08,aggro:2.5,
-    fx:(a)=>({dmg:a*4.0,type:'lightning',msg:'⛈폭풍 일격!'})},
-  chaos_blast:{name:'혼돈 폭발',icon:'🌀',desc:'400% 랜덤 속성',base:0.07,aggro:3.0,
-    fx:(a)=>({dmg:a*4.0,type:'chaos',msg:'🌀 혼돈 폭발!'})},
-  frozen:{name:'동결',icon:'🧊',desc:'200%+1턴 마비',base:0.10,aggro:1.2,
-    fx:(a)=>({dmg:a*2.0,stun:true,type:'ice',msg:'🧊 동결!'})},
-  berserk:{name:'광폭화',icon:'🔴',desc:'ATK+50% 3턴',base:0.10,aggro:1.5,
-    fx:(a)=>({dmg:0,buffAtk:0.5,buffTurns:3,msg:'🔴 광폭화!'})},
-  mana_surge:{name:'마력 급등',icon:'🔮',desc:'스킬확률+30% 2턴',base:0.12,aggro:0.5,
-    fx:(a)=>({dmg:0,buffSkill:0.3,buffTurns:2,msg:'🔮 마력 급등!'})},
-  doom_strike:{name:'파멸 일격',icon:'💀',desc:'500% 어둠',base:0.06,aggro:4.0,
-    fx:(a)=>({dmg:a*5.0,type:'dark',msg:'💀 파멸의 일격!'})},
-  void_slash:{name:'공허 베기',icon:'🕳',desc:'350%+방어무시',base:0.07,aggro:2.0,
-    fx:(a)=>({dmg:a*3.5,ignoreDef:true,msg:'🕳 공허 베기!'})},
-  quick_strike:{name:'속격',icon:'⚡',desc:'3연타 70%',base:0.14,aggro:0.8,
-    fx:(a)=>({dmg:a*2.1,hits:3,msg:'⚡ 속격!'})},
-  arcane_burst:{name:'비전 폭발',icon:'🔮',desc:'INT 기반 마법 피해',base:0.11,aggro:1.5,
-    fx:(a,s)=>({dmg:(s?.matk||a)*2.5,type:'arcane',msg:'🔮 비전 폭발!'})},
-  catastrophe:{name:'재앙',icon:'💥',desc:'600%+HP-15%',base:0.05,aggro:5.0,
-    fx:(a)=>({dmg:a*6.0,selfDmg:0.15,msg:'💥 재앙!'})},
-  heal_on_hit:{name:'치유 일격',icon:'💚',desc:'120%+HP 25% 흡수',base:0.13,aggro:0.7,
-    fx:(a)=>({dmg:a*1.2,heal:0.25,type:'holy',msg:'💚 치유 일격!'})},
-  explosion:{name:'폭발',icon:'💣',desc:'400% 화염',base:0.08,aggro:3.5,
-    fx:(a)=>({dmg:a*4.0,type:'fire',msg:'💣 폭발!'})},
-  blizzard:{name:'눈보라',icon:'🌨',desc:'3연타 130%',base:0.09,aggro:1.3,
-    fx:(a)=>({dmg:a*3.9,hits:3,type:'ice',msg:'🌨 눈보라!'})},
-  holy_light:{name:'신성의 빛',icon:'🌟',desc:'팀 전체 소량 HP 회복',base:0.09,aggro:2.0,
-    fx:(a)=>({dmg:a*0.8,teamHeal:0.1,type:'holy',msg:'🌟 신성의 빛! 팀이 회복된다!'})},
+  storm_strike:{name:'폭풍 일격',icon:'⛈',desc:'160% 번개',base:0.05,aggro:2.5,
+    fx:(a)=>({dmg:a*1.6,type:'lightning',msg:'⛈ 폭풍 일격!'})},
+  chaos_blast:{name:'혼돈 폭발',icon:'🌀',desc:'160% 랜덤 속성',base:0.04,aggro:3.0,
+    fx:(a)=>({dmg:a*1.6,type:'chaos',msg:'🌀 혼돈 폭발!'})},
+  frozen:{name:'동결',icon:'🧊',desc:'90%+1턴 마비',base:0.06,aggro:1.2,
+    fx:(a)=>({dmg:a*0.9,stun:true,type:'ice',msg:'🧊 동결!'})},
+  berserk:{name:'광폭화',icon:'🔴',desc:'ATK+15% 2턴',base:0.06,aggro:1.5,
+    fx:(a)=>({dmg:0,buffAtk:0.15,buffTurns:2,msg:'🔴 광폭화!'})},
+  mana_surge:{name:'마력 급등',icon:'🔮',desc:'스킬확률+10% 2턴',base:0.07,aggro:0.5,
+    fx:(a)=>({dmg:0,buffSkill:0.10,buffTurns:2,msg:'🔮 마력 급등!'})},
+  doom_strike:{name:'파멸 일격',icon:'💀',desc:'200% 어둠',base:0.03,aggro:4.0,
+    fx:(a)=>({dmg:a*2.0,type:'dark',msg:'💀 파멸의 일격!'})},
+  void_slash:{name:'공허 베기',icon:'🕳',desc:'140%+방어무시',base:0.04,aggro:2.0,
+    fx:(a)=>({dmg:a*1.4,ignoreDef:true,msg:'🕳 공허 베기!'})},
+  quick_strike:{name:'속격',icon:'⚡',desc:'3연타 40%',base:0.09,aggro:0.8,
+    fx:(a)=>({dmg:a*1.2,hits:3,msg:'⚡ 속격!'})},
+  arcane_burst:{name:'비전 폭발',icon:'🔮',desc:'INT 기반 100%',base:0.06,aggro:1.5,
+    fx:(a,s)=>({dmg:(s?.matk||a)*1.0,type:'arcane',msg:'🔮 비전 폭발!'})},
+  catastrophe:{name:'재앙',icon:'💥',desc:'250%+자신HP-25%',base:0.02,aggro:5.0,
+    fx:(a)=>({dmg:a*2.5,selfDmg:0.25,msg:'💥 재앙!'})},
+  heal_on_hit:{name:'치유 일격',icon:'💚',desc:'70%+HP 4% 흡수',base:0.08,aggro:0.7,
+    fx:(a)=>({dmg:a*0.7,heal:0.04,type:'holy',msg:'💚 치유 일격!'})},
+  explosion:{name:'폭발',icon:'💣',desc:'160% 화염',base:0.05,aggro:3.5,
+    fx:(a)=>({dmg:a*1.6,type:'fire',msg:'💣 폭발!'})},
+  blizzard:{name:'눈보라',icon:'🌨',desc:'3연타 50%',base:0.05,aggro:1.3,
+    fx:(a)=>({dmg:a*1.5,hits:3,type:'ice',msg:'🌨 눈보라!'})},
+  holy_light:{name:'신성의 빛',icon:'🌟',desc:'팀 HP 3% 회복',base:0.05,aggro:2.0,
+    fx:(a)=>({dmg:a*0.3,teamHeal:0.03,type:'holy',msg:'🌟 신성의 빛!'})},
 };
 
 // 50 Enchants (25 prefix + 25 suffix)
 const PRE=[
-  {n:'불타는',     attr:'fire',      b:{atk:8},              sk:'flame_burst',  w:14},
-  {n:'서리의',     attr:'ice',       b:{def:8},              sk:'ice_shard',    w:14},
-  {n:'번개의',     attr:'lightning', b:{spd:6},              sk:'lightning',    w:12},
-  {n:'어둠의',     attr:'dark',      b:{atk:6,spd:4},        sk:'shadow_strike',w:10},
-  {n:'신성한',     attr:'holy',      b:{hp:40},              sk:'holy_judgment',w:10},
-  {n:'독의',       attr:'poison',    b:{atk:5},              sk:'poison_stack', w:11},
-  {n:'강철의',     attr:null,        b:{def:12},             sk:null,           w:12},
-  {n:'바람의',     attr:null,        b:{spd:8,dex:3},        sk:'wind_slash',   w:10},
-  {n:'피의',       attr:null,        b:{atk:7,crit:3},       sk:'vampiric',     w:9},
-  {n:'황금의',     attr:null,        b:{goldBonus:12,luk:3}, sk:null,           w:9},
-  {n:'고대의',     attr:null,        b:{atk:10,def:5},       sk:null,           w:7},
-  {n:'심연의',     attr:'dark',      b:{atk:14,spd:6},       sk:'shadow_strike',w:6},
-  {n:'용사의',     attr:null,        b:{str:5,vit:3},        sk:'taunt',        w:9},
-  {n:'현자의',     attr:null,        b:{int:6},              sk:'arcane_burst', w:9},
-  {n:'민첩한',     attr:null,        b:{dex:6,spd:4},        sk:'shadow_step',  w:10},
-  {n:'강인한',     attr:null,        b:{vit:8,hp:50},        sk:null,           w:9},
-  {n:'마법의',     attr:null,        b:{int:4,skillBonus:5}, sk:'mana_surge',   w:8},
-  {n:'저주받은',   attr:null,        b:{atk:15,def:-5},      sk:null,           w:6},
-  {n:'축복받은',   attr:'holy',      b:{hp:60,def:8},        sk:'divine_shield',w:7},
-  {n:'폭풍의',     attr:'lightning', b:{atk:8,spd:8},        sk:'storm_strike', w:7},
-  {n:'혼돈의',     attr:null,        b:{str:2,dex:2,int:2},  sk:'chaos_blast',  w:5},
-  {n:'심판의',     attr:'holy',      b:{atk:12},             sk:'holy_judgment',w:6},
-  {n:'얼어붙은',   attr:'ice',       b:{def:12,spd:-2},      sk:'frozen',       w:7},
-  {n:'불멸의',     attr:null,        b:{vit:10,hp:80},       sk:null,           w:5},
-  {n:'운명의',     attr:null,        b:{luk:8,crit:5},       sk:null,           w:4},
+  {n:'불타는',     attr:'fire',      b:{atk:4},              sk:'flame_burst',  w:14},
+  {n:'서리의',     attr:'ice',       b:{def:4},              sk:'ice_shard',    w:14},
+  {n:'번개의',     attr:'lightning', b:{spd:3},              sk:'lightning',    w:12},
+  {n:'어둠의',     attr:'dark',      b:{atk:3,spd:2},        sk:'shadow_strike',w:10},
+  {n:'신성한',     attr:'holy',      b:{hp:20},              sk:'holy_judgment',w:10},
+  {n:'독의',       attr:'poison',    b:{atk:3},              sk:'poison_stack', w:11},
+  {n:'강철의',     attr:null,        b:{def:6},              sk:null,           w:12},
+  {n:'바람의',     attr:null,        b:{spd:4,dex:2},        sk:'wind_slash',   w:10},
+  {n:'피의',       attr:null,        b:{atk:4,crit:2},       sk:'vampiric',     w:9},
+  {n:'황금의',     attr:null,        b:{goldBonus:8,luk:2},  sk:null,           w:9},
+  {n:'고대의',     attr:null,        b:{atk:5,def:3},        sk:null,           w:7},
+  {n:'심연의',     attr:'dark',      b:{atk:7,spd:3},        sk:'shadow_strike',w:6},
+  {n:'용사의',     attr:null,        b:{str:3,vit:2},        sk:'taunt',        w:9},
+  {n:'현자의',     attr:null,        b:{int:3},              sk:'arcane_burst', w:9},
+  {n:'민첩한',     attr:null,        b:{dex:3,spd:2},        sk:'shadow_step',  w:10},
+  {n:'강인한',     attr:null,        b:{vit:4,hp:25},        sk:null,           w:9},
+  {n:'마법의',     attr:null,        b:{int:2,skillBonus:3}, sk:'mana_surge',   w:8},
+  {n:'저주받은',   attr:null,        b:{atk:8,def:-3},       sk:null,           w:6},
+  {n:'축복받은',   attr:'holy',      b:{hp:30,def:4},        sk:'divine_shield',w:7},
+  {n:'폭풍의',     attr:'lightning', b:{atk:4,spd:4},        sk:'storm_strike', w:7},
+  {n:'혼돈의',     attr:null,        b:{str:1,dex:1,int:1},  sk:'chaos_blast',  w:5},
+  {n:'심판의',     attr:'holy',      b:{atk:6},              sk:'holy_judgment',w:6},
+  {n:'얼어붙은',   attr:'ice',       b:{def:6,spd:-1},       sk:'frozen',       w:7},
+  {n:'불멸의',     attr:null,        b:{vit:5,hp:40},        sk:null,           w:5},
+  {n:'운명의',     attr:null,        b:{luk:4,crit:3},       sk:null,           w:4},
 ];
 const SUF=[
-  {n:'의 힘',   b:{str:6,atk:10},           sk:null,           w:14},
-  {n:'의 수호', b:{def:8,hp:30},            sk:null,           w:14},
-  {n:'의 질풍', b:{spd:10,dex:4},           sk:null,           w:12},
-  {n:'의 행운', b:{goldBonus:12,luk:5},     sk:null,           w:12},
-  {n:'의 생명', b:{hp:60,vit:5},            sk:null,           w:13},
-  {n:'의 광기', b:{atk:8,crit:6},           sk:'berserk',      w:9},
-  {n:'의 지혜', b:{int:8},                  sk:'arcane_burst', w:9},
-  {n:'의 투지', b:{hp:40,def:7},            sk:null,           w:11},
-  {n:'의 파멸', b:{atk:18,def:-6},          sk:'doom_strike',  w:6},
-  {n:'의 영원', b:{hp:80,atk:8},            sk:null,           w:7},
-  {n:'의 심연', b:{atk:18,crit:7},          sk:'void_slash',   w:6},
-  {n:'의 용기', b:{str:6,vit:4},            sk:'taunt',        w:10},
-  {n:'의 예지', b:{int:6,luk:4},            sk:null,           w:9},
-  {n:'의 민첩', b:{dex:8,spd:6},            sk:'quick_strike', w:9},
-  {n:'의 분노', b:{str:8,crit:8},           sk:'berserk',      w:7},
-  {n:'의 평온', b:{vit:6,def:10},           sk:null,           w:9},
-  {n:'의 번영', b:{goldBonus:15,luk:6},     sk:null,           w:8},
-  {n:'의 신비', b:{int:10,skillBonus:10},   sk:'mana_surge',   w:6},
-  {n:'의 전설', b:{str:3,dex:3,int:3},      sk:null,           w:5},
-  {n:'의 재앙', b:{atk:22,hp:-60},          sk:'catastrophe',  w:4},
-  {n:'의 축복', b:{hp:50},                  sk:'heal_on_hit',  w:8},
-  {n:'의 어둠', b:{atk:12,spd:8},           sk:'shadow_step',  w:7},
-  {n:'의 빛',   b:{def:12,hp:40},           sk:'holy_light',   w:7},
-  {n:'의 폭발', b:{atk:14,crit:6},          sk:'explosion',    w:6},
-  {n:'의 냉기', b:{def:15,spd:4},           sk:'blizzard',     w:6},
+  {n:'의 힘',   b:{str:3,atk:5},            sk:null,           w:14},
+  {n:'의 수호', b:{def:4,hp:15},            sk:null,           w:14},
+  {n:'의 질풍', b:{spd:5,dex:2},            sk:null,           w:12},
+  {n:'의 행운', b:{goldBonus:8,luk:3},      sk:null,           w:12},
+  {n:'의 생명', b:{hp:30,vit:3},            sk:null,           w:13},
+  {n:'의 광기', b:{atk:4,crit:3},           sk:'berserk',      w:9},
+  {n:'의 지혜', b:{int:4},                  sk:'arcane_burst', w:9},
+  {n:'의 투지', b:{hp:20,def:4},            sk:null,           w:11},
+  {n:'의 파멸', b:{atk:9,def:-3},           sk:'doom_strike',  w:6},
+  {n:'의 영원', b:{hp:40,atk:4},            sk:null,           w:7},
+  {n:'의 심연', b:{atk:9,crit:4},           sk:'void_slash',   w:6},
+  {n:'의 용기', b:{str:3,vit:2},            sk:'taunt',        w:10},
+  {n:'의 예지', b:{int:3,luk:2},            sk:null,           w:9},
+  {n:'의 민첩', b:{dex:4,spd:3},            sk:'quick_strike', w:9},
+  {n:'의 분노', b:{str:4,crit:4},           sk:'berserk',      w:7},
+  {n:'의 평온', b:{vit:3,def:5},            sk:null,           w:9},
+  {n:'의 번영', b:{goldBonus:10,luk:3},     sk:null,           w:8},
+  {n:'의 신비', b:{int:5,skillBonus:5},     sk:'mana_surge',   w:6},
+  {n:'의 전설', b:{str:2,dex:2,int:2},      sk:null,           w:5},
+  {n:'의 재앙', b:{atk:11,hp:-30},          sk:'catastrophe',  w:4},
+  {n:'의 축복', b:{hp:25},                  sk:'heal_on_hit',  w:8},
+  {n:'의 어둠', b:{atk:6,spd:4},            sk:'shadow_step',  w:7},
+  {n:'의 빛',   b:{def:6,hp:20},            sk:'holy_light',   w:7},
+  {n:'의 폭발', b:{atk:7,crit:3},           sk:'explosion',    w:6},
+  {n:'의 냉기', b:{def:8,spd:2},            sk:'blizzard',     w:6},
 ];
 
 // Weapon / Armor names (10 each)
@@ -812,9 +830,9 @@ const DTIERS=[
   {tier:5,n:'신들의 전장',icon:'⚡',minLv:80,floors:12,recLv:85,areas:['abyss']},
 ];
 const DIFF={
-  normal:{name:'노말',color:'var(--green)',minParty:1,maxParty:4,monMult:1.0,dmgMult:1.0,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
-  hard:{name:'어려움',color:'#ff9900',minParty:4,maxParty:4,monMult:2.0,dmgMult:2.5,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:15},
-  vhard:{name:'매우어려움',color:'var(--red)',minParty:4,maxParty:4,monMult:4.0,dmgMult:6.0,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:30,canWipe:true},
+  normal:{name:'노말',color:'var(--green)',minParty:1,maxParty:4,monMult:1.0,dmgMult:1.2,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
+  hard:{name:'어려움',color:'#ff9900',minParty:4,maxParty:4,monMult:2.5,dmgMult:3.5,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:15},
+  vhard:{name:'매우어려움',color:'var(--red)',minParty:4,maxParty:4,monMult:5.0,dmgMult:8.0,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:30,canWipe:true},
 };
 const MNAMES={
   grassland:['고블린','들쥐','녹색슬라임','도적','들개','메뚜기전사','초원유충','야생멧돼지'],
@@ -1008,7 +1026,8 @@ let char=null,charId=null,inv={},myPartyId=null;
 
 function mkChar(name){
   return{id:gId(),owner:curUser.uid,name:name.trim(),level:1,exp:0,expNext:expForLevel(1),
-    hp:100,maxHp:100,baseAtk:10,baseDef:5,baseSpd:10,
+    // ★ 기본값 하향: HP 60, ATK 8, DEF 3
+    hp:60,maxHp:60,baseAtk:8,baseDef:3,baseSpd:8,
     str:5,dex:5,int:3,vit:5,luk:2,
     extraPotions:0,  // from hard+ clears
     gold:0,
@@ -1017,10 +1036,11 @@ function mkChar(name){
 }
 
 function calcStats(c){
-  let atk=c.baseAtk+(c.str||5)*2.5,matk=(c.int||3)*3,def=c.baseDef+(c.vit||5)*1.5;
-  let spd=c.baseSpd+(c.dex||5)*1.5,hp=(c.maxHp||100);
-  let dodge=Math.min((c.dex||5)*0.4,40),crit=10+(c.dex||5)*0.3+(c.luk||2)*0.2;
-  let critDmg=150+(c.str||5)*0.8+(c.luk||2)*0.5;
+  // ★ 기본 스탯 하향: 베이스 낮추고 VIT 효율 감소
+  let atk=c.baseAtk+(c.str||5)*1.8,matk=(c.int||3)*2,def=c.baseDef+(c.vit||5)*1.0;
+  let spd=c.baseSpd+(c.dex||5)*1.0,hp=(c.maxHp||100);
+  let dodge=Math.min((c.dex||5)*0.3,35),crit=8+(c.dex||5)*0.25+(c.luk||2)*0.15;
+  let critDmg=140+(c.str||5)*0.6+(c.luk||2)*0.4;
   let goldBonus=(c.luk||2)*0.3,skillBonus=0;
   const eq=c.equipment||{};
   for(const it of Object.values(eq)){
@@ -1030,17 +1050,17 @@ function calcStats(c){
     const ab=b=>{if(!b)return;
       atk+=b.atk||0;def+=b.def||0;spd+=b.spd||0;hp+=b.hp||0;crit+=b.crit||0;
       goldBonus+=b.goldBonus||0;skillBonus+=b.skillBonus||0;
-      if(b.str)atk+=b.str*2.5;if(b.dex){dodge+=b.dex*0.3;spd+=b.dex*0.5;crit+=b.dex*0.1;}
-      if(b.int)matk+=b.int*3;if(b.vit){hp+=b.vit*15;def+=b.vit*0.8;}
-      if(b.luk){goldBonus+=b.luk*0.2;crit+=b.luk*0.1;}
+      if(b.str)atk+=b.str*1.8;if(b.dex){dodge+=b.dex*0.25;spd+=b.dex*0.4;crit+=b.dex*0.08;}
+      if(b.int)matk+=b.int*2;if(b.vit){hp+=b.vit*10;def+=b.vit*0.6;}
+      if(b.luk){goldBonus+=b.luk*0.2;crit+=b.luk*0.08;}
     };
     ab(it.prefix?.b);ab(it.suffix?.b);
   }
   const sb=calcSetB(eq);
   atk+=sb.atk||0;def+=sb.def||0;spd+=sb.spd||0;hp+=sb.hp||0;crit+=sb.crit||0;
   return{atk:Math.round(atk),matk:Math.round(matk),def:Math.round(def),spd:Math.round(spd),
-    maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),40),
-    crit:Math.min(Math.round(crit),85),critDmg:Math.round(critDmg),
+    maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),35),
+    crit:Math.min(Math.round(crit),80),critDmg:Math.round(critDmg),
     goldBonus:Math.round(goldBonus),skillBonus:Math.round(skillBonus)};
 }
 function calcSetB(eq){
@@ -1144,9 +1164,6 @@ function updateTop(){
   const isAdmin=curUser?.email===ADMIN_EMAIL;
   document.getElementById('tname').innerHTML=char.name+(isAdmin?` <span style="font-size:8px;background:rgba(240,192,64,.2);border:1px solid rgba(240,192,64,.4);color:var(--gold);padding:1px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace">ADMIN</span>`:'');
   document.getElementById('tlv').textContent='Lv.'+char.level;
-  const pct=Math.round(char.hp/s.maxHp*100);
-  document.getElementById('thpbar').style.width=pct+'%';
-  document.getElementById('thptxt').textContent=`${char.hp}/${s.maxHp}`;
   document.getElementById('tgold').textContent=char.gold;
 }
 
@@ -1156,7 +1173,7 @@ function gainExp(amt){
   while(char.exp>=char.expNext){
     char.exp-=char.expNext;char.level++;
     char.expNext=expForLevel(char.level);
-    char.baseAtk+=1;char.baseDef+=0.5;char.baseSpd+=0.5;char.maxHp+=3;char.hp=char.maxHp;
+    char.baseAtk+=0.7;char.baseDef+=0.3;char.baseSpd+=0.3;char.maxHp+=2;char.hp=char.maxHp;
     // Random stat allocation 1-5
     const totalPts=rand(1,5);
     const rolled={};
@@ -1198,6 +1215,7 @@ function renderChar(){
   document.getElementById('s-dodge').textContent=s.dodge+'%';
   document.getElementById('s-matk').textContent=s.matk;
   document.getElementById('s-cdmg').textContent=s.critDmg+'%';
+  document.getElementById('s-score').textContent=equipScore(char);
   document.getElementById('baseStatGrid').innerHTML=STATS_DEF.map(st=>`<div class="srow"><span class="sn">${st.n}</span><span class="sv">${char[st.k]||0}</span></div>`).join('');
   const maxP=5+(char.extraPotions||0);
   document.getElementById('charPotions').textContent=maxP;
@@ -1208,32 +1226,71 @@ function renderEq(){
   const is2H=char.equipment?.weapon?.hand==='2H';
   document.getElementById('eqgrid').innerHTML=EQSLOTS.map(sl=>{
     const it=char.equipment[sl.k];const lk=sl.k==='offhand'&&is2H;
-    // build tooltip
-    let tooltip='';
-    if(it){
-      const skillInfos=[];
-      for(const src of[it.prefix,it.suffix]){
-        if(src?.sk&&SKILLS[src.sk]){
-          const sk=SKILLS[src.sk];const gM=GRADES[it.grade]?.skillM||0;
-          const proc=Math.round(sk.base*gM*(1+(char.int||3)*0.005)*100);
-          skillInfos.push(`<div class="sk-tooltip-title">${sk.icon}${sk.name}</div><div class="sk-tooltip-desc">${sk.desc}</div><div class="sk-tooltip-proc">발동률: ${proc}%</div>`);
-        }
-      }
-      if(skillInfos.length)tooltip=`<div class="sk-tooltip">${skillInfos.join('<hr style="border-color:var(--bd);margin:5px 0">')}</div>`;
-    }
-    return`<div class="eqsl ${it?'gb-'+(it.grade||'normal'):''}" data-k="${sl.k}" style="${lk?'opacity:.4;pointer-events:none':''}">
+    return`<div class="eqsl ${it?'gb-'+(it.grade||'normal'):''}" data-k="${sl.k}" ${it?`onclick="openEqDetail('${sl.k}')" style="cursor:pointer${lk?';opacity:.4;pointer-events:none':''}"`:`style="${lk?'opacity:.4;pointer-events:none':''}"`}>
       <div class="eqlb">${sl.i} ${sl.l}</div>
       ${lk?'<div class="eqem">양손 장착</div>':
         it?`<div class="eqit g-${it.grade}">${it.name}</div>
-            <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${GRADES[it.grade]?.name||it.grade}</div>
+            <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${GRADES[it.grade]?.name||it.grade}${it.itemLv?' · Lv.'+it.itemLv:''}</div>
             ${itSkStr(it)?`<div class="eqsk">${itSkStr(it)}</div>`:''}
-            <button class="equn" data-un="${sl.k}">✕</button>`:
+            <button class="equn" data-un="${sl.k}" onclick="event.stopPropagation()">✕</button>`:
         '<div class="eqem">비어있음</div>'}
-      ${tooltip}
     </div>`;
   }).join('');
   document.querySelectorAll('[data-un]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();unequip(b.dataset.un);}));
 }
+
+window.closeEqDetail=()=>{document.getElementById('eqDetailPanel').style.display='none';};
+
+window.openEqDetail=function(slotKey){
+  const it=char.equipment[slotKey];
+  const panel=document.getElementById('eqDetailPanel');
+  const content=document.getElementById('eqDetailContent');
+  if(!it){panel.style.display='none';return;}
+
+  // 스탯
+  const statsHtml=Object.entries(it.stats||{}).filter(([,v])=>v>0)
+    .map(([k,v])=>`<span style="background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--green)">${k.toUpperCase()} +${v}</span>`).join(' ');
+
+  // 인챈트
+  const gM=GRADES[it.grade]?.skillM||0;
+  const enchantHtml=[it.prefix,it.suffix].filter(Boolean).map(enc=>{
+    const skInfo=enc.sk&&SKILLS[enc.sk]?SKILLS[enc.sk]:null;
+    const encStats=Object.entries(enc.b||{}).filter(([,v])=>v!==0).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(' ');
+    const proc=skInfo?Math.round(skInfo.base*gM*(1+(char.int||3)*0.005)*100):0;
+    return`<div style="margin-top:6px;padding:6px 8px;background:rgba(74,143,255,.06);border:1px solid rgba(74,143,255,.2);border-radius:5px;font-size:10.5px">
+      <div style="font-weight:700;color:var(--blue);margin-bottom:2px">${enc.n}</div>
+      ${encStats?`<div style="color:var(--tx2);font-size:10px">${encStats}</div>`:''}
+      ${skInfo?`<div style="color:var(--purple);font-size:10px;margin-top:2px">⚡ ${skInfo.name} — ${skInfo.desc} <span style="color:var(--gold)">(발동 ${proc}%)</span></div>`:''}
+    </div>`;
+  }).join('');
+
+  // 세트 효과
+  let setHtml='';
+  if(it.grade==='set'&&it.setId){
+    const sd=SETS[it.setId];
+    const cnt=Object.values(char.equipment||{}).filter(e=>e&&e.setId===it.setId).length;
+    if(sd){
+      setHtml=`<div style="margin-top:6px;padding:6px 8px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:10.5px">
+        <div style="font-weight:700;color:${sd.col};margin-bottom:3px">◆ ${sd.name} (${cnt}/${Object.keys(sd.pcs).length}세트)</div>
+        ${sd.bonuses.map(b=>`<div style="color:${cnt>=b.cnt?sd.col:'var(--tx3)'}">${cnt>=b.cnt?'✅':'○'} ${b.cnt}세트: ${b.desc}</div>`).join('')}
+      </div>`;
+    }
+  }
+
+  content.innerHTML=`
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-right:18px">
+      <span class="icname g-${it.grade}" style="font-size:12px">${it.name}</span>
+      <span style="font-size:9px;color:var(--tx3)">${it.slot}${it.hand?' · '+it.hand:''}${it.itemLv?' · 아이템Lv.'+it.itemLv:''}</span>
+    </div>
+    ${statsHtml?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${statsHtml}</div>`:''}
+    ${enchantHtml}
+    ${setHtml}
+    <div style="margin-top:8px;display:flex;gap:6px">
+      <button class="btn btn-red btn-xs" onclick="unequip('${slotKey}');closeEqDetail()">해제</button>
+    </div>`;
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+};
 function itSkStr(it){
   const sk=[];
   if(it.prefix?.sk&&SKILLS[it.prefix.sk])sk.push('⚡'+SKILLS[it.prefix.sk].name);
@@ -1242,12 +1299,29 @@ function itSkStr(it){
 }
 function renderSetPanel(){
   const p=document.getElementById('setbonuspanel');
-  const ac=calcSetB(char.equipment||{});
-  if(!Object.keys(ac).length){p.innerHTML='';return;}
-  p.innerHTML=Object.entries(SETS).map(([sid,sd])=>{
-    const cnt=Object.values(char.equipment||{}).filter(it=>it&&it.setId===sid).length;
-    if(cnt===0)return'';
-    return`<div class="card2" style="margin-bottom:7px"><div style="font-size:9px;font-weight:700;color:${sd.col};margin-bottom:4px">◆${sd.name}(${cnt}/${Object.keys(sd.pcs).length})</div>${sd.bonuses.map(b=>`<div style="font-size:10.5px;color:${cnt>=b.cnt?sd.col:'var(--tx3)'}"><span>${cnt>=b.cnt?'✅':'○'}</span> ${b.cnt}세트: ${b.desc}</div>`).join('')}</div>`;
+  const eq=char.equipment||{};
+  const sc={};
+  for(const it of Object.values(eq)){if(it&&it.grade==='set'&&it.setId)sc[it.setId]=(sc[it.setId]||0)+1;}
+  if(!Object.keys(sc).length){p.innerHTML='';return;}
+  p.innerHTML=Object.entries(sc).map(([sid,cnt])=>{
+    const sd=SETS[sid];if(!sd)return'';
+    const total=Object.keys(sd.pcs).length;
+    return`<div class="card2" style="margin-bottom:7px;border-color:${sd.col}44">
+      <div style="font-size:10px;font-weight:700;color:${sd.col};margin-bottom:6px;display:flex;justify-content:space-between">
+        <span>◆ ${sd.name}</span>
+        <span style="font-size:9px;background:${sd.col}22;padding:1px 6px;border-radius:8px">${cnt}/${total} 세트</span>
+      </div>
+      ${sd.bonuses.map(b=>{
+        const active=cnt>=b.cnt;
+        return`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--bd);font-size:10.5px">
+          <span style="color:${active?sd.col:'var(--tx3)'};font-size:12px">${active?'✅':'○'}</span>
+          <div style="flex:1">
+            <span style="color:${active?'var(--tx)':'var(--tx3)'}">${b.cnt}세트: ${b.desc}</span>
+            ${active?'':'<span style="font-size:9px;color:var(--tx3)"> (미달성)</span>'}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
   }).join('');
 }
 async function unequip(sl){const it=char.equipment[sl];if(!it)return;char.equipment[sl]=null;inv[it.id]=it;await saveChar();await saveInv();toast(it.name+' 해제');}
@@ -1278,12 +1352,13 @@ function getItemName(base,grade){
 function genItem(pool,forcedGrade=null,lv=1,hint=false){
   const base=pick(pool);
   const grade=forcedGrade||rollGrade(hint);
-  const mult=GRADES[grade]?.mult||1,lm=1+(lv-1)*0.04;
+  const mult=GRADES[grade]?.mult||1,lm=1+(lv-1)*0.035; // ★ 레벨 배율 낮춤
   const stats={};
-  if(base.ar)stats.atk=Math.round(rand(8,18)*base.ar*mult*lm);
-  if(base.dr)stats.def=Math.round(rand(5,14)*base.dr*mult*lm);
-  if(base.hr)stats.hp =Math.round(rand(20,60)*base.hr*mult*lm);
-  if(base.sr)stats.spd=Math.round(rand(4,12)*base.sr*mult*lm);
+  // ★ 기본 스탯 범위 대폭 하향
+  if(base.ar)stats.atk=Math.round(rand(4,10)*base.ar*mult*lm);
+  if(base.dr)stats.def=Math.round(rand(2,7)*base.dr*mult*lm);
+  if(base.hr)stats.hp =Math.round(rand(10,30)*base.hr*mult*lm);
+  if(base.sr)stats.spd=Math.round(rand(2,6)*base.sr*mult*lm);
   const gi=Object.keys(GRADES).indexOf(grade);
   const pre=gi>=1?wRand(PRE):null;
   const suf=gi>=2?wRand(SUF):null;
@@ -1803,12 +1878,14 @@ function startBattle(tierIdx,mode,diffKey,players){
     tierIdx,tier:t,mode,diffKey,diff:d,
     players:players.map(p=>({...p,status:'alive',buffs:{},aggro:0,actionChosen:null,defending:false})),
     floor:0,floors:t.floors,
-    phase:0, // 0=pre-phase, 1=choosing, 2=resolving
+    phase:0,
     soloMult,
     log:[],
     done:false,timer:null,timerVal:0,
     fleeVotes:new Set(),
     reviveQueue:new Set(),
+    combatMs:0,       // ★ 순수 전투 시간(ms) 누적
+    _phaseStart:null, // ★ 현재 페이즈 시작 시각
   };
   document.getElementById('dungLobby').style.display='none';
   document.getElementById('dungMode').style.display='none';
@@ -1852,9 +1929,9 @@ function spawnMonsters(b,isBoss){
   const t=b.tier;const d=b.diff;const sm=b.soloMult;
   const lv=t.recLv;const area=pick(t.areas);
   if(isBoss){
-    const bAtk=Math.round((25+lv*4)*d.monMult*sm*0.8);
-    const bHp=Math.round((200+lv*40)*d.monMult*sm);
-    const bDef=Math.round((5+lv*1.5)*d.monMult*sm);
+    const bAtk=Math.round((35+lv*5.5)*d.monMult*sm*0.8);
+    const bHp=Math.round((300+lv*60)*d.monMult*sm);
+    const bDef=Math.round((8+lv*2.0)*d.monMult*sm);
     return[{id:'boss_0',name:BOSSN[t.tier-1],hp:bHp,maxHp:bHp,atk:bAtk,def:bDef,isBoss:true,hidden:false,aggro:0,expR:1.5,goldR:2.0,status:'alive'}];
   }
   const cnt=b.mode==='solo'?rand(1,2):rand(2,4);
@@ -1866,9 +1943,10 @@ function spawnMonsters(b,isBoss){
     if(roll<0.03&&d!=='normal'){const hp_m=pick(HPFX);mn=hp_m.n+' '+mn;am*=hp_m.am;hm*=hp_m.hm;em*=hp_m.em;gm*=hp_m.gm;hidden=hp_m.hidden||false;}
     else if(roll<0.12){const sfx=pick(MSFX);mn+=' '+sfx.n;am*=sfx.am;hm*=sfx.hm;em*=sfx.em;gm*=sfx.gm||1;}
     else if(roll<0.35){const pfx=pick(MPFX);mn=pfx.n+' '+mn;am*=pfx.am;hm*=pfx.hm;em*=pfx.em;}
-    const hp=Math.round((40+lv*18)*hm*d.monMult*sm);
-    const atk=Math.round((10+lv*3.5)*am*d.dmgMult*sm);
-    const def=Math.round((2+lv*0.8)*d.monMult*sm);
+    // ★ 몬스터 스탯 대폭 강화
+    const hp=Math.round((60+lv*25)*hm*d.monMult*sm);
+    const atk=Math.round((15+lv*5)*am*d.dmgMult*sm);
+    const def=Math.round((3+lv*1.2)*d.monMult*sm);
     mons.push({id:'mon_'+i,name:mn,hp,maxHp:hp,atk,def,hidden,isBoss:false,aggro:0,expR:em,goldR:gm,status:'alive'});
   }
   return mons;
@@ -1877,6 +1955,7 @@ function spawnMonsters(b,isBoss){
 function startActionPhase(){
   if(!battle)return;
   battle.phase=1;battle.timerVal=15;
+  battle._phaseStart=Date.now(); // ★ 페이즈 시작
   battle.players.forEach(p=>{p.actionChosen=null;p.defending=false;});
   battle.fleeVotes.clear();
   renderBattle();
@@ -1936,6 +2015,11 @@ function updateActionButtons(chosen){
 function resolvePhase(){
   if(!battle)return;
   battle.phase=2;
+  // ★ 이 페이즈의 전투 시간 누적 (선택 대기 시간 제외, 실제 행동까지의 시간만)
+  if(battle._phaseStart){
+    battle.combatMs=(battle.combatMs||0)+(Date.now()-battle._phaseStart);
+    battle._phaseStart=null;
+  }
   const alive=battle.players.filter(p=>p.status==='alive');
   // Check flee (all alive must choose flee)
   if(alive.every(p=>p.actionChosen==='flee')||
@@ -2094,6 +2178,25 @@ async function dungeonClear(){
     char.extraPotions=(char.extraPotions||0)+1;
     blogAdd(`<span class="l-heal">💊 최대 포션 +1! (${5+char.extraPotions}개)</span>`);
     await saveChar();
+  }
+  // ★ 매우어려움 클리어 랭킹 기록
+  if(dk==='vhard'){
+    const combatSec=Math.round((battle.combatMs||0)/1000);
+    const tierIdx=battle.tierIdx;
+    const mode=battle.mode;
+    const members=battle.players.map(p=>p.name);
+    const record={
+      charName:char.name,
+      mode,
+      tierIdx,
+      tierName:battle.tier.n,
+      combatSec,
+      members:members.join(', '),
+      memberCount:members.length,
+      ts:Date.now(),
+    };
+    await push(ref(db,`rankings/vhard`),record);
+    blogAdd(`<span class="l-set">🏆 기록 등록! 전투시간: ${combatSec}초</span>`);
   }
   // Big EXP bonus for full clear
   const bonusExp=Math.round(expForLevel(battle.tier.recLv)*0.15*d.expMult);
@@ -2651,7 +2754,93 @@ window.adminDisbandParty=async(pid)=>{
   toast('파티 해산');
 };
 
-window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};
+// ═══ RANKING ═══
+let rankMode='level';
+window.rankTab=function(mode){
+  rankMode=mode;
+  document.querySelectorAll('#rankTabs .atab').forEach((t,i)=>
+    t.classList.toggle('on',['level','gold','clear'][i]===mode));
+  loadRanking();
+};
+
+async function loadRanking(){
+  const rb=document.getElementById('rankBody');
+  if(!rb)return;
+  rb.innerHTML=`<div style="color:var(--tx3);font-size:11px;padding:12px">로딩 중...</div>`;
+
+  if(rankMode==='level'||rankMode==='gold'){
+    const cs=await get(ref(db,'chars'));
+    const chars=Object.values(cs.val()||{});
+    const sorted=rankMode==='level'
+      ?chars.sort((a,b)=>(b.level||1)-(a.level||1))
+      :chars.sort((a,b)=>(b.gold||0)-(a.gold||0));
+    rb.innerHTML=`
+      <div style="overflow-x:auto">
+        <table class="utbl">
+          <thead><tr><th style="width:36px">순위</th><th>캐릭터</th><th>${rankMode==='level'?'레벨':'골드'}</th></tr></thead>
+          <tbody>${sorted.slice(0,50).map((c,i)=>`
+            <tr style="${c.name===char.name?'background:rgba(240,192,64,.07)':''}">
+              <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span></td>
+              <td>
+                <span style="font-family:'Cinzel',serif;font-size:11px;color:${c.name===char.name?'var(--gold)':'var(--tx)'}">${c.name}</span>
+                ${c.name===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:4px">나</span>':''}
+              </td>
+              <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green)">${rankMode==='level'?'Lv.'+c.level:'💰'+(c.gold||0).toLocaleString()}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } else {
+    // 매우어려움 클리어 랭킹
+    const rs=await get(ref(db,'rankings/vhard'));
+    const records=Object.values(rs.val()||{});
+    const tierNames=['버려진 동굴','저주받은 숲','용암의 심연','악마의 요새','신들의 전장'];
+
+    // 던전별, 모드별로 그룹화 후 각 최고기록만
+    const best={};
+    for(const r of records){
+      const key=`${r.tierIdx}_${r.mode}`;
+      if(!best[key]||r.combatSec<best[key].combatSec) best[key]=r;
+    }
+    const sorted=Object.values(best).sort((a,b)=>a.combatSec-b.combatSec);
+
+    if(!records.length){
+      rb.innerHTML='<div style="color:var(--tx3);font-size:11px;padding:12px">아직 기록 없음 — 매우어려움을 클리어하면 등록됩니다</div>';
+      return;
+    }
+
+    // 전체 기록 목록 (최신순)
+    const allSorted=records.sort((a,b)=>a.combatSec-b.combatSec);
+    rb.innerHTML=`
+      <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">매우어려움 클리어 기록 (전투시간 기준)</div>
+      <div style="overflow-x:auto">
+        <table class="utbl">
+          <thead>
+            <tr>
+              <th>순위</th><th>캐릭터</th><th>던전</th><th>모드</th><th>전투시간</th><th>파티원</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${allSorted.slice(0,50).map((r,i)=>`
+              <tr style="${r.charName===char.name?'background:rgba(240,192,64,.07)':''}">
+                <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span></td>
+                <td><span style="font-family:'Cinzel',serif;font-size:11px;color:${r.charName===char.name?'var(--gold)':'var(--tx)'}">${r.charName}${r.charName===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:3px">나</span>':''}</span></td>
+                <td style="font-size:10px">Tier${r.tierIdx+1} ${r.tierName}</td>
+                <td><span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${r.mode==='solo'?'rgba(74,143,255,.15)':'rgba(240,192,64,.15)'};color:${r.mode==='solo'?'var(--blue)':'var(--gold)'}">${r.mode==='solo'?'솔로':'파티'}</span></td>
+                <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green)">${formatSec(r.combatSec)}</td>
+                <td style="font-size:10px;color:var(--tx2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.mode==='party'?r.members||'-':'-'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+}
+
+function formatSec(s){
+  if(s<60)return s+'초';
+  return Math.floor(s/60)+'분 '+(s%60)+'초';
+}
+window.loadRanking=loadRanking;const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};
 window.unban=async uid=>{await remove(ref(db,`bans/${uid}`));toast('밴 해제');loadAdmin();};
 window.delChat=async mid=>{await remove(ref(db,`chat/world/${mid}`));loadAdmin();};
 window.clearChat=async()=>{if(!confirm('전체 삭제?'))return;await set(ref(db,'chat/world'),null);toast('채팅 삭제');loadAdmin();};
@@ -2673,6 +2862,7 @@ document.querySelectorAll('.nbtn').forEach(b=>{
     document.getElementById('pane-'+tab).classList.add('on');
     if(tab==='town'){document.getElementById('townmenu').style.display='grid';document.getElementById('townsec').style.display='none';}
     if(tab==='admin')loadAdmin();
+    if(tab==='ranking')loadRanking();
     if(tab==='dungeon'){renderDungeon();document.getElementById('dungMain').style.display='block';document.getElementById('dungMode').style.display='none';document.getElementById('dungLobby').style.display='none';document.getElementById('dungBattle').style.display='none';}
   });
 });
