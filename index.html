@@ -518,7 +518,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="atabs" id="rankTabs">
         <button class="atab on" onclick="rankTab('level')">레벨</button>
         <button class="atab" onclick="rankTab('gold')">골드</button>
-        <button class="atab" onclick="rankTab('clear')">매우어려움 클리어</button>
+        <button class="atab" onclick="rankTab('clear')">던전 클리어</button>
       </div>
       <div id="rankBody"></div>
     </div>
@@ -2833,28 +2833,21 @@ async function loadRanking(){
         </table>
       </div>`;
   } else {
-    // 매우어려움 클리어 랭킹
+    // 던전 클리어 랭킹
     const rs=await get(ref(db,'rankings/vhard'));
     const records=Object.values(rs.val()||{});
-    const tierNames=['버려진 동굴','저주받은 숲','용암의 심연','악마의 요새','신들의 전장'];
-
-    // 던전별, 모드별로 그룹화 후 각 최고기록만
-    const best={};
-    for(const r of records){
-      const key=`${r.tierIdx}_${r.mode}`;
-      if(!best[key]||r.combatSec<best[key].combatSec) best[key]=r;
-    }
-    const sorted=Object.values(best).sort((a,b)=>a.combatSec-b.combatSec);
 
     if(!records.length){
-      rb.innerHTML='<div style="color:var(--tx3);font-size:11px;padding:12px">아직 기록 없음 — 매우어려움을 클리어하면 등록됩니다</div>';
+      rb.innerHTML=`
+        <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">* 파티 매우어려움 기준으로 측정됩니다</div>
+        <div style="color:var(--tx3);font-size:11px;padding:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px">아직 기록 없음 — 파티 매우어려움을 클리어하면 자동 등록됩니다</div>`;
       return;
     }
 
     // 전체 기록 목록 (최신순)
     const allSorted=records.sort((a,b)=>a.combatSec-b.combatSec);
     rb.innerHTML=`
-      <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">매우어려움 클리어 기록 (전투시간 기준)</div>
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">* 파티 매우어려움 기준으로 측정됩니다</div>
       <div style="overflow-x:auto">
         <table class="utbl">
           <thead>
