@@ -774,31 +774,31 @@ const PRE=[
   {n:'운명의',     attr:null,        b:{luk:4,crit:3},       sk:null,           w:4},
 ];
 const SUF=[
-  {n:'의 힘',   b:{str:3,atk:5},            sk:null,           w:14},
-  {n:'의 수호', b:{def:4,hp:15},            sk:null,           w:14},
-  {n:'의 질풍', b:{spd:5,dex:2},            sk:null,           w:12},
-  {n:'의 행운', b:{goldBonus:8,luk:3},      sk:null,           w:12},
-  {n:'의 생명', b:{hp:30,vit:3},            sk:null,           w:13},
-  {n:'의 광기', b:{atk:4,crit:3},           sk:'berserk',      w:9},
-  {n:'의 지혜', b:{int:4},                  sk:'arcane_burst', w:9},
-  {n:'의 투지', b:{hp:20,def:4},            sk:null,           w:11},
-  {n:'의 파멸', b:{atk:9,def:-3},           sk:'doom_strike',  w:6},
-  {n:'의 영원', b:{hp:40,atk:4},            sk:null,           w:7},
-  {n:'의 심연', b:{atk:9,crit:4},           sk:'void_slash',   w:6},
-  {n:'의 용기', b:{str:3,vit:2},            sk:'taunt',        w:10},
-  {n:'의 예지', b:{int:3,luk:2},            sk:null,           w:9},
-  {n:'의 민첩', b:{dex:4,spd:3},            sk:'quick_strike', w:9},
-  {n:'의 분노', b:{str:4,crit:4},           sk:'berserk',      w:7},
-  {n:'의 평온', b:{vit:3,def:5},            sk:null,           w:9},
-  {n:'의 번영', b:{goldBonus:10,luk:3},     sk:null,           w:8},
-  {n:'의 신비', b:{int:5,skillBonus:5},     sk:'mana_surge',   w:6},
-  {n:'의 전설', b:{str:2,dex:2,int:2},      sk:null,           w:5},
-  {n:'의 재앙', b:{atk:11,hp:-30},          sk:'catastrophe',  w:4},
-  {n:'의 축복', b:{hp:25},                  sk:'heal_on_hit',  w:8},
-  {n:'의 어둠', b:{atk:6,spd:4},            sk:'shadow_step',  w:7},
-  {n:'의 빛',   b:{def:6,hp:20},            sk:'holy_light',   w:7},
-  {n:'의 폭발', b:{atk:7,crit:3},           sk:'explosion',    w:6},
-  {n:'의 냉기', b:{def:8,spd:2},            sk:'blizzard',     w:6},
+  {n:'힘',   b:{str:3,atk:5},            sk:null,           w:14},
+  {n:'수호', b:{def:4,hp:15},            sk:null,           w:14},
+  {n:'질풍', b:{spd:5,dex:2},            sk:null,           w:12},
+  {n:'행운', b:{goldBonus:8,luk:3},      sk:null,           w:12},
+  {n:'생명', b:{hp:30,vit:3},            sk:null,           w:13},
+  {n:'광기', b:{atk:4,crit:3},           sk:'berserk',      w:9},
+  {n:'지혜', b:{int:4},                  sk:'arcane_burst', w:9},
+  {n:'투지', b:{hp:20,def:4},            sk:null,           w:11},
+  {n:'파멸', b:{atk:9,def:-3},           sk:'doom_strike',  w:6},
+  {n:'영원', b:{hp:40,atk:4},            sk:null,           w:7},
+  {n:'심연', b:{atk:9,crit:4},           sk:'void_slash',   w:6},
+  {n:'용기', b:{str:3,vit:2},            sk:'taunt',        w:10},
+  {n:'예지', b:{int:3,luk:2},            sk:null,           w:9},
+  {n:'민첩', b:{dex:4,spd:3},            sk:'quick_strike', w:9},
+  {n:'분노', b:{str:4,crit:4},           sk:'berserk',      w:7},
+  {n:'평온', b:{vit:3,def:5},            sk:null,           w:9},
+  {n:'번영', b:{goldBonus:10,luk:3},     sk:null,           w:8},
+  {n:'신비', b:{int:5,skillBonus:5},     sk:'mana_surge',   w:6},
+  {n:'전설', b:{str:2,dex:2,int:2},      sk:null,           w:5},
+  {n:'재앙', b:{atk:11,hp:-30},          sk:'catastrophe',  w:4},
+  {n:'축복', b:{hp:25},                  sk:'heal_on_hit',  w:8},
+  {n:'어둠', b:{atk:6,spd:4},            sk:'shadow_step',  w:7},
+  {n:'빛',   b:{def:6,hp:20},            sk:'holy_light',   w:7},
+  {n:'폭발', b:{atk:7,crit:3},           sk:'explosion',    w:6},
+  {n:'냉기', b:{def:8,spd:2},            sk:'blizzard',     w:6},
 ];
 
 // Weapon / Armor names (10 each)
@@ -1636,7 +1636,7 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false){
   const bname=getItemName(base,grade);
   // ★ 이름 구조: [접두] [등급수식어] [장비명]
   const gAdj=grade==='legendary'?'전설의 ':grade==='epic'?'정예 ':grade==='rare'?'강화된 ':grade==='uncommon'?'좋은 ':'';
-  const fullN=(pre?pre.n+' ':'')+gAdj+bname+(suf?' '+suf.n:'');
+  const fullN=(pre?pre.n+' ':'')+(suf?suf.n+' ':'')+gAdj+bname;
   // ★ 레벨 제한: 던전 티어 레벨에 맞게 (최소 1, 던전 권장레벨 기준)
   const reqLv=Math.max(1,Math.floor(lv*0.85));
   return{id:gId(),name:fullN,baseName:bname,baseId:base.id,slot:base.slot,hand:base.hand||null,
