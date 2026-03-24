@@ -519,7 +519,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithPopup}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 import{getDatabase,ref,set,push,onValue,get,remove,serverTimestamp,update,onDisconnect}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 const app=initializeApp({apiKey:"AIzaSyAUkBrBb9UFj-kC45vJ-T3eiFwh8tCT1Hw",authDomain:"game1-ea736.firebaseapp.com",databaseURL:"https://game1-ea736-default-rtdb.firebaseio.com",projectId:"game1-ea736",storageBucket:"game1-ea736.firebasestorage.app",messagingSenderId:"277606211416",appId:"1:277606211416:web:1cf3a4bbb5780ecd708f2d"});
@@ -818,7 +818,34 @@ document.getElementById('authBtn').onclick=async()=>{
     }else await signInWithEmailAndPassword(auth,email,pw);
   }catch(e){err.textContent=ERR[e.code]||e.message;}
 };
-document.getElementById('googleBtn').onclick=async()=>{try{await signInWithPopup(auth,gp);}catch(e){document.getElementById('authErr').textContent=e.message;}};
+document.getElementById('googleBtn').onclick=async()=>{
+  const errEl=document.getElementById('authErr');
+  errEl.textContent='Google 로그인 시도 중...';
+  try{
+    // 팝업 먼저 시도
+    await signInWithPopup(auth,gp);
+  }catch(e){
+    if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'){
+      // 팝업 차단 시 리다이렉트로 전환
+      errEl.textContent='팝업이 차단됨 → 리다이렉트 방식으로 재시도...';
+      try{await signInWithRedirect(auth,gp);}
+      catch(e2){errEl.textContent='오류: '+e2.message;}
+    }else if(e.code==='auth/unauthorized-domain'){
+      errEl.textContent='⚠️ 이 도메인이 Firebase에 미승인 상태입니다. Firebase Console → Authentication → Settings → Authorized domains에 현재 도메인을 추가하세요.';
+    }else{
+      errEl.textContent='오류: '+(e.message||e.code);
+    }
+  }
+};
+// 리다이렉트 후 돌아왔을 때 결과 처리
+getRedirectResult(auth).then(result=>{
+  if(result?.user){/* onAuthStateChanged가 처리 */}
+}).catch(e=>{
+  if(e.code&&e.code!=='auth/no-current-user'){
+    const errEl=document.getElementById('authErr');
+    if(errEl)errEl.textContent='Google 로그인 오류: '+e.message;
+  }
+});
 document.getElementById('clogout').onclick=()=>signOut(auth);
 document.getElementById('tlo').onclick=()=>signOut(auth);
 
@@ -1882,16 +1909,30 @@ function renderBattle(){
 function startParty(){
   onValue(ref(db,'parties'),sn=>{
     const all=sn.val()||{};
-    // Remove empty parties
+    // 빈 파티 자동 삭제
     for(const[pid,pd]of Object.entries(all)){
       if(!pd.members||Object.keys(pd.members).length===0)remove(ref(db,`parties/${pid}`));
     }
     // ★ myPartyId 먼저 업데이트한 뒤 renderParty 호출
-    myPartyId=Object.keys(all).find(pid=>all[pid]?.members?.[charId])||null;
+    const newPartyId=Object.keys(all).find(pid=>all[pid]?.members?.[charId])||null;
+
+    // 파티가 바뀌었으면 onDisconnect 재등록
+    if(newPartyId!==myPartyId){
+      myPartyId=newPartyId;
+      setupPartyDisconnect();
+    }
+
     const ptag=document.getElementById('ptag');
     if(ptag){ptag.style.display=myPartyId?'flex':'none';if(myPartyId)ptag.textContent='👥파티 중';}
     renderParty(all);
   });
+}
+
+// 접속 끊기면 파티 멤버에서 자동 제거
+function setupPartyDisconnect(){
+  if(!myPartyId||!charId)return;
+  const memberRef=ref(db,`parties/${myPartyId}/members/${charId}`);
+  onDisconnect(memberRef).remove();
 }
 
 function renderParty(all){
@@ -1973,6 +2014,8 @@ window.createParty=async()=>{
     members:{[charId]:{charName:char.name,level:char.level,uid:curUser.uid}},
     createdAt:Date.now()
   });
+  // ★ 접속 끊기면 자동 제거
+  onDisconnect(ref(db,`parties/${pid}/members/${charId}`)).remove();
   toast(n+' 파티 생성!');
 };
 
@@ -1982,6 +2025,8 @@ window.joinParty=async pid=>{
   const pd=ps.val();if(!pd)return;
   if(Object.keys(pd.members||{}).length>=4){toast('파티 인원 초과 (최대 4인)');return;}
   await set(ref(db,`parties/${pid}/members/${charId}`),{charName:char.name,level:char.level,uid:curUser.uid});
+  // ★ 접속 끊기면 자동 제거
+  onDisconnect(ref(db,`parties/${pid}/members/${charId}`)).remove();
   toast('파티 참가!');
 };
 
@@ -1994,6 +2039,8 @@ window.joinPartyPw=async(pid,pname)=>{
   if(Object.keys(pd.members||{}).length>=4){toast('파티 인원 초과 (최대 4인)');return;}
   if(pd.password&&btoa(pw)!==pd.password){toast('❌ 비밀번호가 틀렸습니다');return;}
   await set(ref(db,`parties/${pid}/members/${charId}`),{charName:char.name,level:char.level,uid:curUser.uid});
+  // ★ 접속 끊기면 자동 제거
+  onDisconnect(ref(db,`parties/${pid}/members/${charId}`)).remove();
   toast('파티 참가!');
 };
 
