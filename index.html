@@ -1329,7 +1329,7 @@ function renderEq(){
       <div class="eqlb">${sl.i} ${sl.l}</div>
       ${lk?'<div class="eqem">양손 장착</div>':
         it?`<div class="eqit g-${it.grade}">${itName(it)}</div>
-            <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${it.grade==='set'?`◆${it.setName||'세트'}`:GRADES[it.grade]?.name||it.grade}${it.itemLv?' · Lv.'+it.itemLv:''}</div>
+            <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${it.grade==='set'?`◆${it.setName?.slice(0,4)||'세트'}`:GRADES[it.grade]?.name||it.grade}${it.itemLv?' · Lv.'+it.itemLv:''}</div>
             ${itSkStr(it)?`<div class="eqsk">${itSkStr(it)}</div>`:''}
             <button class="equn" onclick="event.stopPropagation();unequip('${sl.k}')">✕</button>`:
         '<div class="eqem">비어있음</div>'}
@@ -3154,6 +3154,7 @@ window.adminOpenUser=async function(cid){
 
   // 세부 선택지 초기화
   setTimeout(()=>adminUpdateItemSelect&&adminUpdateItemSelect(),100);
+};
 };
 
 window.adminUpdateItemSelect=function(){
