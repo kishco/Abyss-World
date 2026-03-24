@@ -2882,7 +2882,9 @@ function formatSec(s){
   if(s<60)return s+'초';
   return Math.floor(s/60)+'분 '+(s%60)+'초';
 }
-window.loadRanking=loadRanking;const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};
+window.loadRanking=loadRanking;
+
+window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};
 window.unban=async uid=>{await remove(ref(db,`bans/${uid}`));toast('밴 해제');loadAdmin();};
 window.delChat=async mid=>{await remove(ref(db,`chat/world/${mid}`));loadAdmin();};
 window.clearChat=async()=>{if(!confirm('전체 삭제?'))return;await set(ref(db,'chat/world'),null);toast('채팅 삭제');loadAdmin();};
