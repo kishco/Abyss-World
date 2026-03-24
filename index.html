@@ -108,7 +108,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .nbtn.on{background:var(--sf3);color:var(--blue);border:1px solid rgba(74,143,255,.2);}
 .ni{font-size:16px;line-height:1;}.nl{font-size:7.5px;letter-spacing:.3px;}
 .main{flex:1;overflow-y:auto;overflow-x:hidden;padding-right:290px;}
-.main.admin-open{overflow:visible;}
 .pane{display:none;padding:13px;}
 .pane.on{display:block;}
 
@@ -3522,8 +3521,7 @@ document.querySelectorAll('.nbtn').forEach(b=>{
     document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
     document.getElementById('pane-'+tab).classList.add('on');
     if(tab==='town'){document.getElementById('townmenu').style.display='grid';document.getElementById('townsec').style.display='none';}
-    if(tab==='admin'){loadAdmin();document.querySelector('.main')?.classList.add('admin-open');}
-    else document.querySelector('.main')?.classList.remove('admin-open');
+    if(tab==='admin')loadAdmin();
     if(tab==='ranking')loadRanking();
     if(tab==='dungeon'){renderDungeon();document.getElementById('dungMain').style.display='block';document.getElementById('dungMode').style.display='none';document.getElementById('dungLobby').style.display='none';document.getElementById('dungBattle').style.display='none';}
   });
