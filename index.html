@@ -566,6 +566,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <button class="atab" onclick="atab('parties')">👥 파티현황</button>
         <button class="atab" onclick="atab('achat')">💬 채팅</button>
         <button class="atab" onclick="atab('game')">📊 통계</button>
+        <button class="atab" onclick="atab('tools')">🔧 도구</button>
       </div>
 
       <!-- 유저 관리 탭 -->
@@ -589,6 +590,21 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
       <!-- 통계 탭 -->
       <div class="acont" id="ac-game"><div id="gamestat" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div></div>
+
+      <!-- 도구 탭 -->
+      <div class="acont" id="ac-tools">
+        <div style="font-size:12px;color:var(--tx2);font-weight:700;margin-bottom:12px">⚠️ 전체 유저 일괄 작업</div>
+        <div class="card2" style="margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">💊 전체 유저 물약 리셋</div>
+          <div style="font-size:10.5px;color:var(--tx3);margin-bottom:10px">모든 유저의 extraPotions를 0으로 초기화합니다. (기본 5개로 리셋)<br>firstClears 기록도 초기화하여 재도전 가능하게 합니다.</div>
+          <button class="btn btn-red" onclick="adminResetAllPotions()">💊 전체 물약 리셋 (extraPotions=0)</button>
+        </div>
+        <div class="card2" style="margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">🏆 랭킹 초기화</div>
+          <div style="font-size:10.5px;color:var(--tx3);margin-bottom:10px">vhard 랭킹 데이터를 전체 삭제합니다.</div>
+          <button class="btn btn-red" onclick="adminResetRanking()">🗑 랭킹 전체 삭제</button>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -865,8 +881,8 @@ const DTIERS=[
 ];
 const DIFF={
   normal:{name:'노말',color:'var(--green)',minParty:1,maxParty:4,monMult:1.0,dmgMult:1.2,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
-  hard:{name:'어려움',color:'#ff9900',minParty:4,maxParty:4,monMult:2.5,dmgMult:3.5,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:15},
-  vhard:{name:'매우어려움',color:'var(--red)',minParty:4,maxParty:4,monMult:5.0,dmgMult:8.0,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:30,canWipe:true},
+  hard:{name:'어려움',color:'#ff9900',minParty:2,maxParty:4,monMult:2.5,dmgMult:3.5,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:15},
+  vhard:{name:'매우어려움',color:'var(--red)',minParty:2,maxParty:4,monMult:5.0,dmgMult:8.0,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:30,canWipe:true},
 };
 const MNAMES={
   grassland:['고블린','들쥐','녹색슬라임','도적','들개','메뚜기전사','초원유충','야생멧돼지'],
@@ -2167,7 +2183,7 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
     const pd=ps.val();if(!pd){toast('파티 없음');return;}
     const mems=pd.members||{};const memArr=Object.values(mems);
     if(diffKey==='normal'&&memArr.length<2){toast('노말은 2인 이상 필요');return;}
-    if((diffKey==='hard'||diffKey==='vhard')&&memArr.length<4){toast('어려움 이상은 4인 필요');return;}
+    if((diffKey==='hard'||diffKey==='vhard')&&memArr.length<2){toast('어려움 이상은 2인 이상 필요');return;}
     if(diffKey!=='normal'){
       const score=equipScore(char);
       if(score<d.reqScore){toast(`장비 점수 부족! 현재: ${score}, 필요: ${d.reqScore}`);return;}
@@ -2244,7 +2260,7 @@ window.launchPartyBattle=async(tierIdx,mode,diffKey)=>{
 let battle=null;
 function startBattle(tierIdx,mode,diffKey,players){
   const t=DTIERS[tierIdx];const d=DIFF[diffKey];
-  const soloMult=mode==='solo'?0.55:1.0; // Solo monsters are weaker
+  const soloMult=mode==='solo'?0.55:1.0;
   battle={
     tierIdx,tier:t,mode,diffKey,diff:d,
     players:players.map(p=>({...p,status:'alive',buffs:{},aggro:0,actionChosen:null,defending:false})),
@@ -2255,9 +2271,18 @@ function startBattle(tierIdx,mode,diffKey,players){
     done:false,timer:null,timerVal:0,
     fleeVotes:new Set(),
     reviveQueue:new Set(),
-    combatMs:0,       // ★ 순수 전투 시간(ms) 누적
-    _phaseStart:null, // ★ 현재 페이즈 시작 시각
+    combatMs:0,
+    _phaseStart:null,
+    _presence:{}, // ★ 플레이어 presence 추적
   };
+  // ★ 파티원 presence 실시간 추적
+  if(mode!=='solo'){
+    for(const p of players){
+      onValue(ref(db,`presence/${p.id}`),sn=>{
+        if(battle&&sn.val())battle._presence[p.id]=sn.val().lastSeen||Date.now();
+      });
+    }
+  }
   document.getElementById('dungLobby').style.display='none';
   document.getElementById('dungMode').style.display='none';
   document.getElementById('dungMain').style.display='none';
@@ -2387,7 +2412,7 @@ window.closeMerchant=()=>{
 
 function startActionPhase(){
   if(!battle)return;
-  battle.phase=1;battle.timerVal=15;
+  battle.phase=1;battle.timerVal=10;
   battle._phaseStart=Date.now(); // ★ 페이즈 시작
   battle.players.forEach(p=>{p.actionChosen=null;p.defending=false;p.healing=false;});
   battle.fleeVotes.clear();
@@ -2407,7 +2432,7 @@ function startActionPhase(){
 
 function updateTimerBar(){
   const el=document.getElementById('battleTimerBar');
-  if(el)el.style.width=Math.round(battle.timerVal/15*100)+'%';
+  if(el)el.style.width=Math.round(battle.timerVal/10*100)+'%';
   const tel=document.getElementById('battleTimerTxt');
   if(tel)tel.textContent=battle.timerVal+'s';
 }
@@ -2434,7 +2459,19 @@ window.chooseAction=function(action){
   if(battle.mode==='solo'){clearInterval(battle.timer);resolvePhase();}
   else{
     const alive=battle.players.filter(p=>p.status==='alive');
-    if(alive.every(p=>p.actionChosen)){clearInterval(battle.timer);resolvePhase();}
+    // ★ 살아있는 플레이어 중 접속 중인 사람이 모두 선택했으면 즉시 진행
+    const now=Date.now();
+    const onlineAlive=alive.filter(p=>{
+      const pr=battle._presence?.[p.id];
+      return !pr||pr>now-30000; // 30초 이내 = 접속 중
+    });
+    // 접속 중인 플레이어가 모두 선택하거나, 전원 선택했으면 즉시 진행
+    if(alive.every(p=>p.actionChosen)||
+       (onlineAlive.length>0&&onlineAlive.every(p=>p.actionChosen))){
+      // 미선택 오프라인 플레이어는 자동 공격
+      alive.filter(p=>!p.actionChosen).forEach(p=>p.actionChosen='attack');
+      clearInterval(battle.timer);resolvePhase();
+    }
   }
 };
 
@@ -2660,12 +2697,25 @@ function maybeLoseItem(){
 
 async function dungeonClear(){
   const d=battle.diff;const dk=battle.diffKey;
-  const mode=battle.mode; // ★ 로컬 변수로 명시
+  const mode=battle.mode;
+  const tierIdx=battle.tierIdx;
   blogAdd(`<span class="l-exp">🏆 던전 클리어! 난이도: ${d.name}</span>`);
-  if(dk==='hard'||dk==='vhard'){
-    char.extraPotions=(char.extraPotions||0)+1;
-    blogAdd(`<span class="l-heal">💊 최대 포션 +1! (${5+char.extraPotions}개)</span>`);
-    await saveChar();
+
+  // ★ 물약 +1: vhard 최초 1회만 (솔로/파티 각각 별도, 최대 15개 = 기본5 + 최대10)
+  if(dk==='vhard'){
+    const clearKey=`vhard_${mode}_tier${tierIdx}`;
+    if(!char.firstClears)char.firstClears={};
+    if(!char.firstClears[clearKey]){
+      char.firstClears[clearKey]=true;
+      const maxExtra=10; // 기본5 + 최대10 = 최대15
+      if((char.extraPotions||0)<maxExtra){
+        char.extraPotions=(char.extraPotions||0)+1;
+        blogAdd(`<span class="l-heal">💊 최초 클리어! 최대 포션 +1 (${5+char.extraPotions}개 / 최대15)</span>`);
+      }else{
+        blogAdd(`<span class="l-heal">💊 최대 포션 수량 달성 (15개)</span>`);
+      }
+      await saveChar();
+    }
   }
   // ★ 매우어려움 클리어 랭킹 기록
   if(dk==='vhard'){
@@ -2700,8 +2750,8 @@ async function dungeonClear(){
       blogAdd(`<span class="l-sys">📊 기존 기록(${prev.combatSec}초) 유지 — 현재: ${combatSec}초</span>`);
     }
   }
-  // Big EXP bonus for full clear
-  const bonusExp=Math.round(expForLevel(battle.tier.recLv)*0.15*d.expMult);
+  // ★ 클리어 보너스 EXP 대폭 감소 (0.15 → 0.03)
+  const bonusExp=Math.round(expForLevel(battle.tier.recLv)*0.03*d.expMult);
   gainExp(bonusExp);
   blogAdd(`<span class="l-exp">🎉 클리어 보너스 EXP +${bonusExp}</span>`);
   setTimeout(()=>endBattle(true,false),2000);
@@ -3571,7 +3621,25 @@ window.setRankMode=function(mode){
   loadRanking();
 };
 
-window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};
+window.adminResetAllPotions=async()=>{
+  if(!confirm('모든 유저의 물약을 기본 5개로 리셋하시겠습니까?\nextraPotions=0, firstClears={} 초기화'))return;
+  const cs=await get(ref(db,'chars'));
+  const chars=cs.val()||{};
+  let cnt=0;
+  for(const[cid,c]of Object.entries(chars)){
+    if((c.extraPotions||0)>0||c.firstClears){
+      await update(ref(db,`chars/${cid}`),{extraPotions:0,firstClears:{}});
+      cnt++;
+    }
+  }
+  toast(`✅ ${cnt}명 물약 리셋 완료! (기본 5개)`);
+};
+
+window.adminResetRanking=async()=>{
+  if(!confirm('vhard 랭킹을 전체 삭제하시겠습니까?'))return;
+  await set(ref(db,'rankings/vhard'),null);
+  toast('✅ 랭킹 초기화 완료');
+window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};};
 window.unban=async uid=>{await remove(ref(db,`bans/${uid}`));toast('밴 해제');loadAdmin();};
 window.delChat=async mid=>{await remove(ref(db,`chat/world/${mid}`));loadAdmin();};
 window.clearChat=async()=>{if(!confirm('전체 삭제?'))return;await set(ref(db,'chat/world'),null);toast('채팅 삭제');loadAdmin();};
