@@ -1635,9 +1635,8 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false){
   const attr=pre?.attr||(gi>=4?pick(Object.keys(ATTR_N)):null);
   const bname=getItemName(base,grade);
   // ★ 이름 구조: [접두] [등급수식어] [장비명]
-  // 접미("의 힘" 등)는 이름에 넣지 않고 스탯/스킬 보너스로만 활용
   const gAdj=grade==='legendary'?'전설의 ':grade==='epic'?'정예 ':grade==='rare'?'강화된 ':grade==='uncommon'?'좋은 ':'';
-  const fullN=(pre?pre.n+' ':'')+gAdj+bname;
+  const fullN=(pre?pre.n+' ':'')+gAdj+bname+(suf?' '+suf.n:'');
   // ★ 레벨 제한: 던전 티어 레벨에 맞게 (최소 1, 던전 권장레벨 기준)
   const reqLv=Math.max(1,Math.floor(lv*0.85));
   return{id:gId(),name:fullN,baseName:bname,baseId:base.id,slot:base.slot,hand:base.hand||null,
