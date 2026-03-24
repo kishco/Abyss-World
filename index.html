@@ -570,7 +570,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="acont on" id="ac-users">
         <div style="overflow-x:auto"><table class="utbl"><thead><tr><th>이름</th><th>레벨</th><th>골드</th><th>UID</th><th>상태</th><th>관리</th></tr></thead><tbody id="utblbody"></tbody></table></div>
         <!-- 유저 상세 패널 -->
-        <div id="adminUserDetail" style="display:none;margin-top:14px;background:var(--sf2);border:1px solid var(--bd2);border-radius:10px;padding:14px"></div>
+        <div id="adminUserDetail" style="display:none;margin-top:14px;background:var(--sf2);border:1px solid var(--bd2);border-radius:10px;padding:14px;position:relative;z-index:100"></div>
       </div>
 
       <!-- 파티 현황 탭 (실시간) -->
@@ -3219,14 +3219,14 @@ window.adminOpenUser=async function(cid){
         </div>
         <div>
           <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">접두</div>
-          <select id="giPre" style="width:100%;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none">
+          <select id="giPre" style="width:100%;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;position:relative;z-index:300">
             <option value="">없음</option>
             ${PRE.map(p=>`<option value="${p.n}">${p.n} (${Object.entries(p.b).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}${p.sk&&SKILLS[p.sk]?' ⚡'+SKILLS[p.sk].name:''})</option>`).join('')}
           </select>
         </div>
         <div>
           <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">접미</div>
-          <select id="giSuf" style="width:100%;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none">
+          <select id="giSuf" style="width:100%;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;position:relative;z-index:300">
             <option value="">없음</option>
             ${SUF.map(s=>`<option value="${s.n}">${s.n} (${Object.entries(s.b).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}${s.sk&&SKILLS[s.sk]?' ⚡'+SKILLS[s.sk].name:''})</option>`).join('')}
           </select>
