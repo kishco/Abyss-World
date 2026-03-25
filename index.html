@@ -3069,12 +3069,14 @@ async function renderAuction(sb){
   };
 
   renderAuctionMain('browse');
-  // 실시간 업데이트
-  _auctionUnsub=onValue(ref(db,'auction'),()=>{
-    const currentTab=document.querySelector('#atab-browse.btn-gold')?'browse':
-                     document.querySelector('#atab-mine.btn-gold')?'mine':'sell';
-    if(document.getElementById('auctionContent'))renderAuctionTab(currentTab);
-  });
+  // 실시간 업데이트 — 초기 렌더 완료 후 연결 (즉시 발동 방지)
+  setTimeout(()=>{
+    _auctionUnsub=onValue(ref(db,'auction'),()=>{
+      const currentTab=document.querySelector('#atab-browse.btn-gold')?'browse':
+                       document.querySelector('#atab-mine.btn-gold')?'mine':'sell';
+      if(document.getElementById('auctionContent'))renderAuctionTab(currentTab);
+    });
+  },1500);
 }
 
 // 탭 전환 시 경매 리스너 정리
@@ -3455,7 +3457,7 @@ function resolvePhase(){
     battle.combatMs=(battle.combatMs||0)+(Date.now()-battle._phaseStart);
     battle._phaseStart=null;
   }
-  // ★ DoT(독) 틱 처리
+  // ★ DoT(독) 틱 처리 — 몬스터
   for(const m of battle.monsters.filter(m=>m.status==='alive')){
     if(m._dot&&m._dot>0){
       const dotDmg=Math.round(m.maxHp*0.08);
@@ -3463,6 +3465,16 @@ function resolvePhase(){
       m._dot--;
       blogAdd(`<span class="l-skill">☠ ${m.name} 독 피해 -${dotDmg}HP (남은 턴: ${m._dot})</span>`);
       if(m.hp<=0){m.status='dead';blogAdd(`<span class="l-dead">💀 ${m.name} 독으로 처치!</span>`);}
+    }
+  }
+  // ★ DoT(독) 틱 처리 — 플레이어
+  for(const p of battle.players.filter(p=>p.status==='alive')){
+    if(p._dot&&p._dot>0){
+      const dotDmg=Math.round(p.maxHp*0.06);
+      p.hp=Math.max(1,p.hp-dotDmg);
+      p._dot--;
+      blogAdd(`<span class="l-dmg">☠ ${p.name} 독 피해 -${dotDmg}HP (남은 턴: ${p._dot})</span>`);
+      if(p.hp<=1&&p._dot>0)blogAdd(`<span class="l-warn">⚠️ ${p.name} 독으로 위험!</span>`);
     }
   }
   const alive=battle.players.filter(p=>p.status==='alive');
