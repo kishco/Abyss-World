@@ -541,7 +541,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="tgrid" id="townmenu">
         <div class="tcard" onclick="townSec('shop')"><div class="tcicon">⚔️</div><div class="tcname">무기/방어구 상점</div><div class="tcdesc">기본 장비 구매</div></div>
         <div class="tcard" onclick="townSec('sell')"><div class="tcicon">💰</div><div class="tcname">아이템 판매</div><div class="tcdesc">장비 판매·일괄판매</div></div>
-        <div class="tcard" onclick="townSec('gamble')"><div class="tcicon">🎰</div><div class="tcname">도박장</div><div class="tcdesc">랜덤 아이템 획득</div></div>
+        <div class="tcard" onclick="townSec('blackmarket')" id="blackmarket-card" style="display:none"><div class="tcicon">🌑</div><div class="tcname">암시장</div><div class="tcdesc" id="blackmarket-timer">비밀 거래</div></div>
         <div class="tcard" onclick="townSec('forge')"><div class="tcicon">🔨</div><div class="tcname">대장간</div><div class="tcdesc">장비 강화 (+1~+9)</div></div>
         <div class="tcard" onclick="townSec('reroll')"><div class="tcicon">🔮</div><div class="tcname">능력치 재조정</div><div class="tcdesc">재조정 주문서 사용</div></div>
         <div class="tcard" onclick="townSec('auction')"><div class="tcicon">🏛️</div><div class="tcname">경매장</div><div class="tcdesc">유저 간 장비 거래</div></div>
@@ -787,11 +787,11 @@ const GRADES={
 const ATTR_N={fire:'🔥화염',ice:'❄냉기',lightning:'⚡번개',dark:'🌑어둠',holy:'✨신성',poison:'☠독'};
 const ATTR_C={fire:'#ff6030',ice:'#60c8ff',lightning:'#ffe040',dark:'#a060ff',holy:'#fff080',poison:'#80ff40'};
 
-// ★ 경험치 테이블: Lv60이하 동일, 이후 지수 완화 (하드코어지만 진행감 유지)
+// ★ 경험치 테이블: 초반 진입감 개선, 중후반 완만
 function expForLevel(lv){
-  if(lv<=60)return Math.round(500*lv*lv*lv*Math.pow(1.08,lv));
-  // 60레벨 이상은 완만하게
-  return Math.round(500*lv*lv*lv*Math.pow(1.05,lv));
+  if(lv<=20)return Math.round(300*lv*lv*Math.pow(1.05,lv));
+  if(lv<=60)return Math.round(350*lv*lv*lv*Math.pow(1.04,lv));
+  return Math.round(400*lv*lv*lv*Math.pow(1.03,lv));
 }
 
 // Skills — 솔로 전용 (파티/적개심 관련 제거)
@@ -1410,7 +1410,7 @@ function calcStats(c){
       matk+=cap(b.matk)||0;crit+=cap(b.crit)||0;
       goldBonus+=cap(b.goldBonus)||0;skillBonus+=cap(b.skillBonus)||0;
       if(b.str)atk+=cap(b.str)*0.8;if(b.dex){dodge+=cap(b.dex)*0.15;spd+=cap(b.dex)*0.25;crit+=cap(b.dex)*0.06;}
-      if(b.int)matk+=cap(b.int)*1.5;if(b.vit){hp+=cap(b.vit)*5;def+=cap(b.vit)*0.3;}
+      if(b.int)matk+=cap(b.int)*1.5;if(b.vit){hp+=cap(b.vit)*3;def+=cap(b.vit)*0.3;}  // VIT→HP 3 (기존5), VIT→DEF 0.3
       if(b.luk){goldBonus+=cap(b.luk)*0.2;crit+=cap(b.luk)*0.06;}
     };
     ab(it.prefix?.b);ab(it.suffix?.b);
@@ -1553,6 +1553,7 @@ async function selChar(id){
   checkUpdatePopup();
   startSubjugationWatcher();
   startChampWatcher();
+  initBlackMarket();
   if(isAdmin)loadAdmin();
   set(ref(db,`presence/${curUser.uid}`),{charName:char.name,lastSeen:Date.now()});
   // ★ 만료 경매 자동 취소 (7일)
@@ -1968,25 +1969,42 @@ function scaleEnchant(b, lv, gradeMult){
   }
   return scaled;
 }
-function genItem(pool,forcedGrade=null,lv=1,hint=false){
+function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   const base=pick(pool);
   let grade=forcedGrade||rollGrade(hint);
-  if(grade==='set')grade='legendary';
-  const mult=GRADES[grade]?.mult||1,lm=1+(lv-1)*0.055; // ★ 레벨 배율 강화
+  // 유일은 T5 vhard에서만, Lv90+
+  if(grade==='set'){
+    if(dungeonTier<5||lv<90)grade='legendary';
+    else return genSetItem(lv); // T5 vhard에서만 유일 생성
+  }
+  const mult=GRADES[grade]?.mult||1,lm=1+(lv-1)*0.055;
+  // 등급에 따라 스탯 범위 상한치 편향 (높은 등급 = 더 좋은 값 나올 확률 높음)
+  const gradeIdx=Object.keys(GRADES).indexOf(grade); // 0=normal, 4=legendary
+  const biasMin=0.6+(gradeIdx*0.07); // normal:0.6, legendary:0.88
+  const biasMax=1.0+(gradeIdx*0.08); // normal:1.0, legendary:1.32
+  function rollStat(base){return Math.round(rand(Math.round(base*biasMin),Math.round(base*biasMax)));}
   const stats={};
-  // ★ 스탯 범위 상향 + 2H 무기는 추가 없음 (ar 자체가 높음)
-  if(base.ar)stats.atk=Math.round(rand(5,12)*base.ar*mult*lm);
-  if(base.dr)stats.def=Math.round(rand(3,8)*base.dr*mult*lm);
-  if(base.hr)stats.hp =Math.round(rand(12,32)*base.hr*mult*lm);
-  if(base.sr)stats.spd=Math.round(rand(2,7)*base.sr*mult*lm);
+  if(base.ar)stats.atk=rollStat(rand(4,10)*base.ar*mult*lm);
+  if(base.dr)stats.def=rollStat(rand(2,7)*base.dr*mult*lm);
+  if(base.hr)stats.hp =rollStat(rand(8,22)*base.hr*mult*lm);
+  if(base.sr)stats.spd=rollStat(rand(2,6)*base.sr*mult*lm);
   const gi=Object.keys(GRADES).indexOf(grade);
   const gradeMult=GRADES[grade]?.mult||1;
   const preRaw=gi>=1?wRand(PRE):null;
   const sufRaw=gi>=2?wRand(SUF):null;
-  const pre=preRaw?{n:preRaw.n,sk:preRaw.sk||null,attr:preRaw.attr||null,
-    b:scaleEnchant(preRaw.b,lv,gradeMult)}:null;
-  const suf=sufRaw?{n:sufRaw.n,sk:sufRaw.sk||null,
-    b:scaleEnchant(sufRaw.b,lv,gradeMult)}:null;
+  // 인챈트 스탯도 등급 편향 적용
+  function scaleE(b){
+    const scaled={};const lm2=1+(lv-1)*0.055;
+    for(const[k,v]of Object.entries(b)){
+      if(v===0){scaled[k]=0;continue;}
+      const base2=Math.abs(v)*lm2*gradeMult;
+      const mn=Math.max(1,Math.round(base2*biasMin));
+      const mx=Math.round(base2*biasMax);
+      scaled[k]=(v>0?1:-1)*rand(mn,mx);
+    }return scaled;
+  }
+  const pre=preRaw?{n:preRaw.n,sk:preRaw.sk||null,attr:preRaw.attr||null,b:scaleE(preRaw.b)}:null;
+  const suf=sufRaw?{n:sufRaw.n,sk:sufRaw.sk||null,b:scaleE(sufRaw.b)}:null;
   const attr=pre?.attr||(gi>=4?pick(Object.keys(ATTR_N)):null);
   const bname=getItemName(base,grade);
   const gAdj=grade==='legendary'?'전설의 ':grade==='epic'?'정예 ':grade==='rare'?'강화된 ':grade==='uncommon'?'좋은 ':'';
@@ -1994,8 +2012,7 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false){
   const reqLv=Math.max(1,Math.floor(lv*0.85));
   return{id:gId(),name:fullN,baseName:bname,baseId:base.id,slot:base.slot,hand:base.hand||null,
     grade,gradeName:GRADES[grade].name,gradeColor:GRADES[grade].color,
-    stats,reqLv,itemLv:lv,
-    _v:2, // ★ 마이그레이션 버전 태그
+    stats,reqLv,itemLv:lv,_v:2,
     prefix:pre?{n:pre.n,b:pre.b,sk:pre.sk||null,attr:pre.attr||null}:null,
     suffix:suf?{n:suf.n,b:suf.b,sk:suf.sk||null}:null,
     attr};
@@ -2003,17 +2020,16 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false){
 function genSetItem(forcedLv=null){
   const sid=pick(Object.keys(SETS));const sd=SETS[sid];
   const pid=pick(Object.keys(sd.pcs));const pd=sd.pcs[pid];
-  // ★ 유일 장비 reqLv 테이블
+  // 유일 장비 최소 레벨: 90
   const SET_LV={
-    crimson_blade:50,shadow_hunter:45,
-    iron_fortress:55,stone_guardian:30,
-    divine_light:60,arcane_scholar:55,
-    dragon_sovereign:70,frost:20,flame:40,
+    crimson_blade:90,shadow_hunter:90,
+    iron_fortress:90,stone_guardian:90,
+    divine_light:90,arcane_scholar:90,
+    dragon_sovereign:90,frost:90,flame:90,
   };
-  const reqLv=SET_LV[sid]||40;
-  const itemLv=forcedLv||reqLv;
-  // ★ 레벨 스케일링: reqLv 초과 레벨마다 4% 증가
-  const lm=Math.max(0.8,1+(itemLv-reqLv)*0.04);
+  const reqLv=SET_LV[sid]||90;
+  const itemLv=Math.max(reqLv,forcedLv||reqLv);
+  const lm=Math.max(1.0,1+(itemLv-reqLv)*0.04);
   const scaledStats={};
   for(const[k,v]of Object.entries(pd.stats))scaledStats[k]=Math.round(v*lm);
   return{id:gId(),name:pd.n,baseId:pid,slot:pd.slot,hand:pd.hand||null,
@@ -2024,8 +2040,87 @@ function genSetItem(forcedLv=null){
     reqLv,itemLv,enhance:0,tradeable:true};
 }
 function genShopItem(si){return{id:gId(),name:si.n||si.name,baseId:si.n,slot:si.slot,hand:si.hand||null,grade:'normal',gradeName:'노말',gradeColor:'#9d9d9d',stats:{...si.stats},prefix:null,suffix:null,attr:null,_v:2};}
-function genScrollItem(){return{id:gId(),name:'능력치 재조정 주문서',baseId:'reroll_scroll',slot:'scroll',hand:null,grade:'legendary',gradeName:'전설',gradeColor:'#ff8c00',stats:{},prefix:null,suffix:null,attr:null,isScroll:true,_v:2};}
-function genEnchantScroll(){return{id:gId(),name:'인챈트 스크롤',baseId:'enchant_scroll',slot:'scroll',hand:null,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',stats:{},prefix:null,suffix:null,attr:null,isEnchantScroll:true,_v:2};}
+// ─── 인챈트 스크롤 아이템화 시스템 ───
+// 각 인챈트는 개별 스크롤 아이템으로 존재. tier: 1(노말급)~5(레전더리급)
+const ENCHANT_TIERS={
+  1:{name:'하급',color:'#9d9d9d',grade:'normal',  successRate:0.95,desc:'기본 인챈트'},
+  2:{name:'중급',color:'#1eff00',grade:'uncommon',successRate:0.80,desc:'중급 인챈트'},
+  3:{name:'상급',color:'#0070dd',grade:'rare',    successRate:0.60,desc:'고급 인챈트'},
+  4:{name:'고급',color:'#a335ee',grade:'epic',    successRate:0.40,desc:'희귀 인챈트'},
+  5:{name:'전설',color:'#ff8c00',grade:'legendary',successRate:0.20,desc:'전설 인챈트'},
+};
+// PRE/SUF 각 인챈트에 tier 속성 추가 (기존 배열에 병합)
+// tier 기준: 단순 스탯은 낮은 tier, 강력한 스킬+스탯 조합은 높은 tier
+const ENCHANT_TIER_MAP={
+  // 접두
+  '불타는':2,'어둠의':2,'피의':3,'저주받은':3,'폭풍의':3,'심판의':3,'심연의':3,
+  '광전사의':4,'파멸의':5,'강철의':1,'강인한':1,'불멸의':2,'축복받은':2,'얼어붙은':2,
+  '철벽의':4,'수호자의':5,'신성한':1,'생명의':2,'치유자의':3,
+  '번개의':2,'독의':2,'바람의':2,'현자의':2,'마법의':2,'혼돈의':3,
+  '황금의':1,'고대의':2,'용사의':2,'민첩한':1,'운명의':3,'서리의':1,
+  // 접미
+  '힘':1,'광기':2,'파멸':3,'심연':3,'분노':3,'폭발':3,'재앙':5,'절멸':5,'어둠':2,
+  '수호':1,'투지':1,'영원':2,'평온':2,'냉기':3,'난공불락':5,'용기':2,
+  '생명':1,'축복':2,'빛':2,'성스러움':4,'소생':2,
+  '질풍':1,'지혜':2,'신비':3,'예지':2,'전설':3,'마력폭주':5,'민첩':2,
+  '행운':1,'번영':2,'전설급':5,
+};
+function getEnchantTier(enchantName){return ENCHANT_TIER_MAP[enchantName]||2;}
+
+function genEnchantScrollItem(enchantData, isPrefix, dungeonTier=1, forcedTier=null){
+  const tier=forcedTier||getEnchantTier(enchantData.n);
+  const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
+  const typeTag=isPrefix?'접두':'접미';
+  return{
+    id:gId(),
+    name:`[${et.name}] ${enchantData.n} 인챈트 스크롤`,
+    baseId:`ench_scroll_${isPrefix?'pre':'suf'}_${enchantData.n}`,
+    slot:'scroll',hand:null,
+    grade:et.grade,gradeName:et.name,gradeColor:et.color,
+    stats:{},prefix:null,suffix:null,attr:null,
+    isEnchantScroll:true,
+    enchantData:{...enchantData},
+    enchantIsPrefix:isPrefix,
+    enchantTier:tier,
+    successRate:et.successRate,
+    desc:`[${typeTag}] ${enchantData.n} 인챈트를 장비에 부여합니다.\n성공 확률: ${Math.round(et.successRate*100)}%`,
+    tradeable:true,_v:2
+  };
+}
+
+// 던전 티어별 인챈트 스크롤 드랍 (최대 상위 tier 개방)
+function genTieredEnchantScroll(dungeonTier, difficulty='normal'){
+  // 티어별 최대 인챈트 tier 개방
+  const maxTier=Math.min(5, dungeonTier);
+  // 난이도에 따라 높은 tier 비중 조정
+  const tierWeights=[];
+  for(let t=1;t<=maxTier;t++){
+    const base=maxTier-t+1; // 높은 tier일수록 낮은 기본 가중치
+    const diffBonus=(difficulty==='vhard'?2:difficulty==='hard'?1:0)*(t===maxTier?3:1);
+    tierWeights.push({tier:t, w:base+diffBonus});
+  }
+  const total=tierWeights.reduce((a,b)=>a+b.w,0);
+  let r=Math.random()*total;
+  let chosenTier=1;
+  for(const tw of tierWeights){r-=tw.w;if(r<=0){chosenTier=tw.tier;break;}}
+  // 해당 tier의 인챈트 선택 (PRE or SUF)
+  const isPrefix=Math.random()<0.5;
+  const pool=isPrefix?PRE:SUF;
+  const candidates=pool.filter(e=>getEnchantTier(e.n)===chosenTier);
+  const chosen=candidates.length>0?pick(candidates):pick(pool);
+  return genEnchantScrollItem(chosen, isPrefix, dungeonTier, chosenTier);
+}
+
+function genEnchantScroll(){
+  // 기존 호환 (랜덤 중급 스크롤)
+  const isPrefix=Math.random()<0.5;
+  const pool=isPrefix?PRE:SUF;
+  return genEnchantScrollItem(pick(pool.filter(e=>getEnchantTier(e.n)<=3)),isPrefix,1);
+}
+function genScrollItem(){
+  return{id:gId(),name:'능력치 재조정 주문서',baseId:'reroll_scroll',slot:'scroll',hand:null,
+    grade:'legendary',gradeName:'전설',gradeColor:'#ff8c00',stats:{},prefix:null,suffix:null,attr:null,isScroll:true,_v:2};
+}
 
 // ★ 구버전 아이템 → 신규 공식으로 스탯 재계산 마이그레이션
 // 기존 등급 multiplier (구버전 기준)
@@ -2156,113 +2251,60 @@ function openIM(it){
     return;
   }
   if(it.isEnchantScroll){
-    const eqItems=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it&&x.it.grade!=='set');
-    document.getElementById('imtitle').innerHTML=`<span class="g-epic">✨ 인챈트 스크롤</span>`;
-
-    // ★ 미리 후보 3개씩 뽑아서 선택하게 함
-    function makeEnchCandidates(pool,lv,gm,count=3){
-      const cands=[];
-      for(let i=0;i<count;i++){
-        const en=wRand(pool);
-        const b=scaleEnchant(en.b,lv,gm);
-        const bStr=Object.entries(b).filter(([,v])=>v!==0).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(' ');
-        const skInfo=en.sk&&SKILLS[en.sk]?SKILLS[en.sk]:null;
-        cands.push({n:en.n,b,sk:en.sk||null,attr:en.attr||null,bStr,skInfo});
-      }
-      return cands;
-    }
-
-    // ★ 장비 선택 → 인챈트 후보 보기 → 선택 확정 흐름
-    function renderEnchantTarget(){
+    const isPrefix=it.enchantIsPrefix!==false;
+    const enchData=it.enchantData;
+    const successRate=it.successRate||0.7;
+    const tier=it.enchantTier||2;
+    const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
+    const eqItems2=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it&&x.it.grade!=='set');
+    const typeLabel=isPrefix?'접두':'접미';
+    document.getElementById('imtitle').innerHTML=`<span style="color:${et.color}">📜 ${it.name}</span>`;
+    function renderEnchantTarget2(){
+      const bPreview=enchData?.b?Object.entries(scaleEnchant(enchData.b,1,1)).filter(([,v])=>v!==0).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(' '):'';
       document.getElementById('imbody').innerHTML=`
-        <div style="font-size:11.5px;color:var(--tx2);margin-bottom:12px;line-height:1.8">
-          인챈트를 부여할 장착 장비를 선택하세요.<br>
-          <span style="font-size:10px;color:var(--tx3)">유일 장비는 인챈트 불가. 기존 인챈트는 교체됩니다.</span>
+        <div style="background:rgba(176,96,255,.07);border:1px solid rgba(176,96,255,.3);border-radius:8px;padding:10px 12px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:700;color:${et.color};margin-bottom:5px">[${typeLabel}] ${enchData?.n||'???'} 인챈트</div>
+          <div style="font-size:10px;color:var(--tx2);margin-bottom:3px">${bPreview}</div>
+          ${enchData?.sk&&SKILLS[enchData.sk]?`<div style="font-size:10px;color:var(--purple)">⚡ ${SKILLS[enchData.sk].name} — ${SKILLS[enchData.sk].desc}</div>`:''}
+          <div style="margin-top:5px;font-size:10px;color:${tier>=4?'var(--red)':'var(--tx3)'}">
+            성공 확률: <b>${Math.round(successRate*100)}%</b> · 실패 시 스크롤 소모
+          </div>
         </div>
-        ${!eqItems.length?'<div style="color:var(--tx3);font-size:11px;padding:12px 0">장착된 장비 없음</div>':
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">부여할 장비를 선택하세요:<br><span style="font-size:10px">유일 장비 불가. 기존 ${typeLabel} 인챈트는 교체됩니다.</span></div>
+        ${!eqItems2.length?'<div style="color:var(--tx3);font-size:11px;padding:12px 0">장착된 장비 없음</div>':
         `<div style="display:flex;flex-direction:column;gap:6px">
-          ${eqItems.map(x=>`
+          ${eqItems2.map(x=>`
             <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:9px 11px;cursor:pointer;transition:.15s"
               onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--bd)'"
-              onclick="enchantPickType('${it.id}','${x.sl}')">
+              onclick="applyEnchantScroll('${it.id}','${x.sl}')">
               <div class="icname g-${x.it.grade}" style="font-size:11.5px;margin-bottom:3px">${x.it.name}</div>
               <div style="font-size:9.5px;color:var(--tx3)">
-                접두: <span style="color:${x.it.prefix?'var(--blue)':'var(--tx3)'}">${x.it.prefix?.n||'없음'}</span>
-                &nbsp;/&nbsp;
+                접두: <span style="color:${x.it.prefix?'var(--blue)':'var(--tx3)'}">${x.it.prefix?.n||'없음'}</span> /
                 접미: <span style="color:${x.it.suffix?'var(--purple)':'var(--tx3)'}">${x.it.suffix?.n||'없음'}</span>
               </div>
             </div>`).join('')}
         </div>`}`;
     }
-
-    window.enchantPickType=function(scrollId,slotKey){
-      const eq=char.equipment[slotKey];if(!eq)return;
+    window.applyEnchantScroll=async function(scrollId,slotKey){
+      const sc=inv[scrollId];if(!sc)return;
+      const eq=char.equipment[slotKey];if(!eq||eq.grade==='set'){toast('유일 장비에는 인챈트 불가');return;}
+      if(!confirm(`[${typeLabel}] ${enchData?.n} 인챈트를\n${eq.name}에 부여합니까?\n성공 확률: ${Math.round(successRate*100)}%`))return;
+      delete inv[scrollId];
+      if(Math.random()>successRate){
+        toast(`💨 인챈트 실패... 스크롤 소모`,3000);
+        await saveInv();closeIM();return;
+      }
       const lv=eq.itemLv||1;const gm=GRADES[eq.grade]?.mult||1;
-      const preCands=makeEnchCandidates(PRE,lv,gm,3);
-      const sufCands=makeEnchCandidates(SUF,lv,gm,3);
-
-      function candHtml(cands,type){
-        return cands.map((c,i)=>`
-          <div style="background:var(--sf2);border:1.5px solid ${type==='pre'?'rgba(74,143,255,.2)':'rgba(176,96,255,.2)'};border-radius:7px;padding:9px 11px;margin-bottom:6px;cursor:pointer;transition:.15s"
-            onmouseover="this.style.borderColor='${type==='pre'?'var(--blue)':'var(--purple)'}'" onmouseout="this.style.borderColor='${type==='pre'?'rgba(74,143,255,.2)':'rgba(176,96,255,.2)'}'"
-            onclick="confirmEnchant('${scrollId}','${slotKey}','${type}',${i})">
-            <div style="font-weight:700;color:${type==='pre'?'var(--blue)':'var(--purple)'};font-size:11px;margin-bottom:3px">${c.n}</div>
-            <div style="font-size:10px;color:var(--tx2);margin-bottom:${c.skInfo?'3px':'0'}">${c.bStr||'—'}</div>
-            ${c.skInfo?`<div style="font-size:10px;color:var(--purple)">⚡ ${c.skInfo.name} — ${c.skInfo.desc}</div>`:''}
-          </div>`).join('');
-      }
-
-      // 후보 저장 (window에 임시 보관)
-      window._enchantCands={pre:preCands,suf:sufCands,scrollId,slotKey};
-
-      document.getElementById('imbody').innerHTML=`
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-          <button class="btn btn-ghost btn-xs" onclick="enchantGoBack()">← 뒤로</button>
-          <div class="icname g-${eq.grade}" style="font-size:11px">${eq.name}</div>
-        </div>
-        <div style="display:flex;gap:4px;margin-bottom:12px">
-          <button id="encTabPre" class="btn btn-blue btn-sm" style="flex:1" onclick="switchEncTab('pre')">접두 선택</button>
-          <button id="encTabSuf" class="btn btn-ghost btn-sm" style="flex:1" onclick="switchEncTab('suf')">접미 선택</button>
-        </div>
-        <div id="encCandList">${candHtml(preCands,'pre')}</div>`;
-      window._encCandHtml={pre:candHtml(preCands,'pre'),suf:candHtml(sufCands,'suf')};
-    };
-
-    window.switchEncTab=function(tab){
-      document.getElementById('encTabPre').className='btn btn-sm '+(tab==='pre'?'btn-blue':'btn-ghost')+' flex:1';
-      document.getElementById('encTabSuf').className='btn btn-sm '+(tab==='suf'?'btn-purple':'btn-ghost')+' flex:1';
-      document.getElementById('encTabPre').style.flex='1';
-      document.getElementById('encTabSuf').style.flex='1';
-      document.getElementById('encCandList').innerHTML=window._encCandHtml[tab];
-      window._encCurrentTab=tab;
-    };
-    window._encCurrentTab='pre';
-
-    window.enchantGoBack=renderEnchantTarget;
-
-    window.confirmEnchant=async function(scrollId,slotKey,type,idx){
-      const d=window._enchantCands;if(!d)return;
-      const cands=d[type];const chosen=cands[idx];if(!chosen)return;
-      const eq=char.equipment[slotKey];if(!eq){toast('장비 없음');return;}
-
-      // ★ 인챈트 적용
-      if(type==='pre'){
-        eq.prefix={n:chosen.n,b:chosen.b,sk:chosen.sk||null,attr:chosen.attr||null};
-      }else{
-        eq.suffix={n:chosen.n,b:chosen.b,sk:chosen.sk||null};
-      }
-
-      // ★ 아이템 이름 갱신 (접두 + 접미 + 등급수식어 + 기본이름)
+      const scaledB=scaleEnchant(enchData.b,lv,gm);
+      const enchObj={n:enchData.n,b:scaledB,sk:enchData.sk||null,attr:enchData.attr||null};
+      if(isPrefix)eq.prefix=enchObj;else eq.suffix=enchObj;
       const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
       const basePart=eq.baseName||eq.name.replace(/^.*(전설의|정예|강화된|좋은)\s/,'');
       eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+gAdj+basePart;
-
-      delete inv[scrollId];
       await saveChar();await saveInv();closeIM();updateTop();renderChar();
-      toast(`✨ [${chosen.n}] 인챈트 부여 완료!`);
+      toast(`✨ [${enchData?.n}] 인챈트 성공!`,3000);
     };
-
-    renderEnchantTarget();
+    renderEnchantTarget2();
     document.getElementById('imodal').classList.add('open');return;
   }
   if(it.isScroll){
@@ -2447,11 +2489,11 @@ window.townSec=function(id){
   townSecId=id;
   document.getElementById('townmenu').style.display='none';
   const sec=document.getElementById('townsec');sec.style.display='block';
-  sec.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="closeTownSec()">← 마을로</button><div class="ptitle" style="margin:0">${{shop:'⚔️ 상점',sell:'💰 아이템 판매',gamble:'🎰 도박장',forge:'🔨 대장간',reroll:'🔮 능력치 재조정',auction:'🏛️ 경매장',warehouse:'🏦 창고'}[id]||''}</div></div><div id="secbody"></div>`;
+  sec.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="closeTownSec()">← 마을로</button><div class="ptitle" style="margin:0">${{shop:'⚔️ 상점',sell:'💰 아이템 판매',blackmarket:'🌑 암시장',forge:'🔨 대장간',reroll:'🔮 능력치 재조정',auction:'🏛️ 경매장',warehouse:'🏦 창고'}[id]||''}</div></div><div id="secbody"></div>`;
   const sb=document.getElementById('secbody');
   if(id==='shop')renderShop(sb);
   else if(id==='sell')renderSell(sb);
-  else if(id==='gamble')renderGamble(sb);
+  else if(id==='blackmarket')renderBlackMarket(sb);
   else if(id==='forge')renderForge(sb);
   else if(id==='reroll')renderRerollSec(sb);
   else if(id==='auction')renderAuction(sb);
@@ -2572,29 +2614,109 @@ window.buyShop=async i=>{
   const si=SHOP_ITEMS[i];if(char.gold<si.price){toast('골드 부족');return;}
   char.gold-=si.price;await addItem(genShopItem(si));await saveChar();toast(si.n+' 구매!');updateTop();
 };
-function renderGamble(sb){
-  const boxes=[
-    {n:'노말 상자',desc:'노말~언커먼',price:300,g:['normal','normal','uncommon']},
-    {n:'레어 상자',desc:'언커먼~레어',price:1200,g:['uncommon','uncommon','rare']},
-    {n:'에픽 상자',desc:'레어~에픽',price:4000,g:['rare','rare','epic']},
-  ];
-  sb.innerHTML=`<div class="ggrid">${boxes.map((b,i)=>`<div class="gbox"><div style="font-size:20px;margin-bottom:5px">📦</div><div style="font-family:'Cinzel',serif;font-size:11.5px;font-weight:700;color:var(--gold);margin-bottom:2px">${b.n}</div><div style="font-size:10px;color:var(--tx2);margin-bottom:7px">${b.desc}</div><div style="font-size:11px;color:var(--gold);margin-bottom:6px">💰${b.price}</div><button class="btn btn-gold btn-sm" onclick="openBox(${i})">개봉</button></div>`).join('')}</div>`;
-  sb.__boxes=boxes;
+// ═══ 암시장 시스템 ═══
+const BM_ITEMS=[
+  {id:'bm_reroll',  name:'능력치 재분배 스크롤', icon:'🔮', desc:'모든 스탯 포인트를 재분배합니다', price:50000},
+  {id:'bm_protect', name:'파괴 방지 스크롤',      icon:'🛡', desc:'강화 실패 시 장비 파괴를 1번 막아줍니다', price:80000},
+  {id:'bm_extract', name:'인챈트 추출 스크롤',    icon:'💎', desc:'장비의 인챈트를 스크롤로 추출합니다', price:120000},
+  {id:'bm_candy',   name:'이상한 사탕',            icon:'🍬', desc:'레벨이 +1 오르거나 -1 내려갑니다 (50%)', price:30000},
+  {id:'bm_deathward',name:'죽음 방지 부적',        icon:'🧿', desc:'매우 어려움 사망 시 아이템 손실 1회 방지', price:150000},
+  {id:'bm_junk',    name:'어딘가 쓸데없는 물건',  icon:'🪣', desc:'...팔면 약간의 골드는 된다', price:9999},
+];
+function getBMSchedule(){
+  const key='bm_schedule';const today=new Date().toDateString();
+  try{
+    const s=sessionStorage.getItem(key);
+    if(s){const d=JSON.parse(s);if(d.date===today)return d;}
+  }catch{}
+  const base=new Date();base.setHours(0,0,0,0);
+  const hours=[rand(6,10),rand(11,15),rand(16,21)];
+  const slots=hours.map(h=>base.getTime()+h*3600000+rand(0,3600000));
+  const d={date:today,slots};
+  try{sessionStorage.setItem(key,JSON.stringify(d));}catch{}
+  return d;
 }
-window.openBox=async i=>{
-  const sb=document.getElementById('secbody');const boxes=sb.__boxes;if(!boxes)return;
-  const b=boxes[i];if(char.gold<b.price){toast('골드 부족');return;}
-  char.gold-=b.price;
-  let it;
-  if(b.sw&&Math.random()<b.sw){it=genSetItem();}
-  else{
-    const g=pick(b.g);
-    const pool=[...WBASES,...ABASES,...ACCBASES];
-    it=genItem(pool,g,char.level);
+function isBMActive(){
+  const sched=getBMSchedule();const now=Date.now();const DUR=30*60*1000;
+  return sched.slots.some(s=>now>=s&&now<s+DUR);
+}
+function initBlackMarket(){
+  updateBMCard();
+  setInterval(updateBMCard,30000);
+}
+function updateBMCard(){
+  const card=document.getElementById('blackmarket-card');
+  const timer=document.getElementById('blackmarket-timer');
+  if(!card)return;
+  const active=isBMActive();
+  card.style.display=active?'':'none';
+  if(active&&timer){
+    const sched=getBMSchedule();const now=Date.now();const DUR=30*60*1000;
+    const slot=sched.slots.find(s=>now>=s&&now<s+DUR);
+    const mins=slot?Math.ceil((slot+DUR-now)/60000):0;
+    timer.textContent=`지금 오픈! 남은 ${mins}분`;
   }
-  await addItem(it);await saveChar();updateTop();
-  toast(`📦 ${it.name} 획득!`,3500);openIM(it);
+}
+function renderBlackMarket(sb){
+  if(!isBMActive()){
+    sb.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--tx3)">
+      <div style="font-size:36px;margin-bottom:12px">🌑</div>
+      <div style="font-family:'Cinzel',serif;font-size:15px;color:var(--tx2);margin-bottom:8px">암시장이 닫혀 있습니다</div>
+      <div style="font-size:11px;line-height:1.8">하루 3번 랜덤 시간에 30분간 열립니다.<br>마을 탭에서 암시장 카드가 나타나면 서두르세요.</div>
+    </div>`;return;
+  }
+  sb.innerHTML=`
+    <div style="background:rgba(255,30,30,.06);border:1px solid rgba(255,30,30,.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--tx2)">
+      🌑 암시장이 열렸습니다! 가격이 비싸지만 귀한 물건이 있습니다.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${BM_ITEMS.map((item,i)=>`
+        <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:12px">
+          <div style="font-size:28px;flex-shrink:0">${item.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--tx);margin-bottom:3px">${item.name}</div>
+            <div style="font-size:10px;color:var(--tx3)">${item.desc}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:12px;font-weight:700;margin-bottom:5px">💰${item.price.toLocaleString()}</div>
+            <button class="btn btn-red btn-xs" onclick="bmBuy(${i})">구매</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+window.bmBuy=async(i)=>{
+  if(!isBMActive()){toast('암시장이 닫혔습니다!');return;}
+  const item=BM_ITEMS[i];
+  if(char.gold<item.price){toast('골드 부족');return;}
+  if(!confirm(`${item.name}을 ${item.price.toLocaleString()}G에 구매하시겠습니까?`))return;
+  char.gold-=item.price;
+  if(item.id==='bm_reroll'){
+    const totalPts=(char.str||5)+(char.dex||5)+(char.int||3)+(char.vit||5)+(char.luk||2)-20;
+    char._pendingStatPts=(char._pendingStatPts||0)+totalPts;
+    char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;
+    toast(`🔮 ${totalPts}포인트 재분배 가능! 캐릭터 탭에서 확인하세요.`,5000);renderChar();
+  }else if(item.id==='bm_protect'){
+    const si={id:gId(),name:'파괴 방지 스크롤',icon:'🛡',isProtectScroll:true,grade:'rare',gradeName:'레어',gradeColor:'#0070dd',slot:'scroll',stats:{},_v:2};
+    await addItem(si);await saveInv();toast('🛡 파괴 방지 스크롤 획득!');
+  }else if(item.id==='bm_extract'){
+    const si={id:gId(),name:'인챈트 추출 스크롤',icon:'💎',isExtractScroll:true,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',slot:'scroll',stats:{},_v:2};
+    await addItem(si);await saveInv();toast('💎 인챈트 추출 스크롤 획득!');
+  }else if(item.id==='bm_candy'){
+    if(Math.random()<0.5){char.level=Math.min(99,char.level+1);char.exp=0;char.expNext=expForLevel(char.level);toast('🍬 레벨 +1! 🎉');}
+    else{if(char.level>1){char.level--;char.exp=0;char.expNext=expForLevel(char.level);}toast('🍬 레벨 -1... 😢');}
+    renderChar();
+  }else if(item.id==='bm_deathward'){
+    char._deathWard=(char._deathWard||0)+1;
+    toast('🧿 죽음 방지 부적 장착! 아이템 손실 1회 방지.',4000);
+  }else if(item.id==='bm_junk'){
+    const sellGold=rand(5000,20000);char.gold+=sellGold;
+    toast(`🪣 쓸데없는 물건을 팔았더니 ${sellGold.toLocaleString()}G이 됐다.`);
+  }
+  await saveChar();updateTop();
 };
+
+// 암시장 시스템 → renderBlackMarket은 위에서 정의됨 (initBlackMarket 포함)
+
 // ★ 강화 비용 (절감: 골드 수입 대비 현실적 수준)
 function getForgeCost(it){
   const gradeMult={normal:1,uncommon:1.8,rare:3.5,epic:8,legendary:20,set:32};
@@ -2778,6 +2900,7 @@ async function renderAuction(sb){
                 :char.gold>=v.price
                   ?`<button class="btn btn-gold btn-xs" onclick="buyAuction('${lid}')">구매</button>`
                   :`<button class="btn btn-ghost btn-xs" disabled>골드 부족</button>`}
+              ${isAdmin?`<button class="btn btn-red btn-xs" style="margin-top:4px;display:block" onclick="adminDeleteAuction('${lid}')">🗑관리자삭제</button>`:''}
             </div>
           </div>
         </div>`;
@@ -2870,6 +2993,14 @@ async function renderAuction(sb){
     await set(ref(db,`auction/${lid}/status`),'cancelled');
     toast(`✅ ${v.item.name} 등록 취소 · 인벤 반환`);
     renderAuctionTab('mine');
+  };
+
+  window.adminDeleteAuction=async function(lid){
+    if(!isAdmin){toast('관리자 권한 필요');return;}
+    if(!confirm('⚠️ 관리자: 이 경매 항목을 강제 삭제하시겠습니까?\n(아이템은 판매자에게 반환되지 않습니다)'))return;
+    await set(ref(db,`auction/${lid}/status`),'admin_deleted');
+    toast('✅ 경매 항목 삭제 완료');
+    renderAuctionTab('browse');
   };
 
   window.buyAuction=async function(lid){
@@ -3061,10 +3192,10 @@ function nextFloor(){
   // Spawn monsters
   const isBoss=battle.floor===battle.floors;
   battle.monsters=spawnMonsters(battle,isBoss);
-  // ★ 히든 상인 등장 (보스 층 제외, 8% 확률)
-  if(battle.floor<battle.floors&&!battle.done&&Math.random()<0.08){
-    showHiddenMerchant();
-    return; // 히든 상인 보여주고 거기서 다음 층 진행
+  // ★ 랜덤 이벤트 (보스 층 제외, 12% 확률)
+  if(battle.floor<battle.floors&&!battle.done&&Math.random()<0.12){
+    triggerDungeonEvent();
+    return; // 이벤트 처리 후 startActionPhase 호출됨
   }
 
   battle.fleeVotes=new Set();
@@ -3110,48 +3241,105 @@ function spawnMonsters(b,isBoss){
 }
 
 // ★ 히든 상인
-function showHiddenMerchant(){
-  // ★ dungBattle이 보이는지 확인
-  const db2=document.getElementById('dungBattle');
-  db2.style.display='block';
-  document.getElementById('dungMain').style.display='none';
-  // 먼저 현재 전투 상태 렌더링
-  renderBattle();
-  const lv=battle.tier.recLv;
-  // 좋은 등급 아이템 2~3개 생성
-  const pool=[...WBASES,...ABASES,...ACCBASES];
-  const items=[];
-  const gradePool=['rare','rare','epic','epic','legendary'];
-  for(let i=0;i<rand(2,3);i++){
-    const g=pick(gradePool);
-    const it=genItem(pool,g,lv+rand(0,5));
-    const price=Math.round(getSellPrice(it)*4); // 판매가의 4배
-    items.push({it,price});
-  }
-  const itemsHtml=items.map((x,i)=>`
-    <div class="merchant-card" style="background:var(--sf2);border:1px solid rgba(240,192,64,.3);border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
-      <div style="min-width:0">
-        <div class="icname g-${x.it.grade}" style="font-size:11px">${x.it.name}</div>
-        <div style="font-size:9px;color:var(--tx3)">${Object.entries(x.it.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <span style="color:var(--gold);font-size:11px">💰${x.price.toLocaleString()}</span>
-        <button class="btn btn-gold btn-xs" onclick="buyFromMerchant(${i})">구매</button>
-      </div>
-    </div>`).join('');
-
-  battle._merchantItems=items;
-  db2.innerHTML+=`
-    <div id="hiddenMerchant" style="margin-top:10px;background:rgba(240,192,64,.06);border:2px solid rgba(240,192,64,.3);border-radius:10px;padding:14px">
-      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);margin-bottom:4px">🧙 히든 상인 등장!</div>
-      <div style="font-size:10.5px;color:var(--tx2);margin-bottom:10px">신비로운 상인이 귀한 물건을 팔고 있습니다...</div>
-      ${itemsHtml}
-      <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%" onclick="closeMerchant()">거래 안 함 → 다음 층</button>
-    </div>`;
+// ═══ 던전 랜덤 이벤트 시스템 ═══
+function triggerDungeonEvent(){
+  const events=[
+    {id:'fullheal',  name:'✨ 성스러운 샘',   weight:15, fn:evFullHeal},
+    {id:'goldroom',  name:'💰 금화의 방',       weight:18, fn:evGoldRoom},
+    {id:'treasure',  name:'🎁 보물의 방',       weight:12, fn:evTreasure},
+    {id:'ambush',    name:'💀 몬스터 대량 출현!',weight:20, fn:evAmbush},
+    {id:'trap',      name:'⚠️ 함정 발생!',      weight:18, fn:evTrap},
+    {id:'debuff',    name:'💀 저주의 방',        weight:12, fn:evDebuff},
+    {id:'nothing',   name:'😶 이상한 방...',     weight:5,  fn:evNothing},
+  ];
+  const total=events.reduce((a,b)=>a+b.weight,0);
+  let r=Math.random()*total;
+  let ev=events[events.length-1];
+  for(const e of events){r-=e.weight;if(r<=0){ev=e;break;}}
+  blogAdd(`<span class="l-sys">🚪 [이벤트 발생] ${ev.name}</span>`);
+  ev.fn();
 }
-
-// buyFromMerchant 비밀상점 버그 수정 버전은 아래에 있음 (인벤 가득 체크 포함)
-
+function evFullHeal(){
+  const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
+  myP.hp=myP.maxHp;
+  blogAdd(`<span class="l-heal">✨ 성스러운 힘으로 HP가 완전히 회복되었습니다! (${myP.maxHp}/${myP.maxHp})</span>`);
+  renderBattle();
+  setTimeout(()=>startActionPhase(),1200);
+}
+function evGoldRoom(){
+  const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
+  const gold=Math.round((50+battle.tier.recLv*20)*battle.diff.goldMult*(1+char.luk*0.005));
+  char.gold+=gold;saveChar();updateTop();
+  blogAdd(`<span class="l-exp">💰 금화가 가득! +${gold.toLocaleString()}G 획득!</span>`);
+  setTimeout(()=>startActionPhase(),1200);
+}
+function evTreasure(){
+  const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
+  const pool=[...WBASES,...ABASES,...ACCBASES];
+  const tierIdx=battle.tierIdx||0;
+  const gradePool=['normal','uncommon','rare','epic'];
+  const gIdx=Math.min(3,tierIdx);
+  const forcedGrade=gradePool[rand(Math.max(0,gIdx-1),gIdx)];
+  const it=genItem(pool,forcedGrade,battle.tier.recLv+rand(0,8),false,tierIdx);
+  it.tradeable=true;
+  addItem(it);
+  blogAdd(`<span class="l-item">🎁 보물 발견! — ${it.name}</span>`);
+  // 인챈트 스크롤도 30% 확률
+  if(Math.random()<0.3){
+    const es=genTieredEnchantScroll(tierIdx+1, battle.diffKey);
+    es.tradeable=true;addItem(es);
+    blogAdd(`<span class="l-set">📜 ${es.name}도 발견!</span>`);
+  }
+  setTimeout(()=>startActionPhase(),1200);
+}
+function evAmbush(){
+  // 추가 몬스터 2~4마리 스폰
+  const extraCount=rand(2,4);
+  const b=battle;const t=b.tier;const d=b.diff;const sm=b.soloMult;
+  const lv=t.recLv;const area=pick(t.areas);
+  for(let i=0;i<extraCount;i++){
+    const am=MPFX[rand(0,MPFX.length-1)];
+    const hp=Math.round((50+lv*18)*am.hm*d.monMult*sm*0.7);
+    const atk=Math.round((12+lv*4)*am.am*d.dmgMult*sm*0.7);
+    const def=Math.round((2+lv*0.9)*d.monMult*sm);
+    const mn=pick(MNAMES[area]||MNAMES.cave);
+    battle.monsters.push({id:gId(),name:am.n+' '+mn,hp,maxHp:hp,atk,def,
+      isBoss:false,hidden:false,aggro:0,expR:0.8,goldR:0.8,status:'alive',
+      skills:MON_SKILLS[area]||[],gimmick:null});
+  }
+  blogAdd(`<span class="l-dead">💀 ${extraCount}마리의 몬스터가 쏟아져 나왔다!</span>`);
+  renderBattle();
+  setTimeout(()=>startActionPhase(),1200);
+}
+function evTrap(){
+  const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
+  const dmg=Math.round(myP.maxHp*rand(15,35)/100);
+  myP.hp=Math.max(1,myP.hp-dmg);
+  blogAdd(`<span class="l-dmg">⚠️ 함정! -${dmg}HP 피해를 입었습니다!</span>`);
+  if(myP.hp<myP.maxHp*0.2)blogAdd(`<span class="l-warn">⚠️ HP가 위험합니다!</span>`);
+  renderBattle();
+  setTimeout(()=>startActionPhase(),1200);
+}
+function evDebuff(){
+  const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
+  const debuffs=[
+    {n:'공격력 저하',fn:()=>{if(myP.stats)myP.stats.atk=Math.round(myP.stats.atk*0.7);}},
+    {n:'방어력 저하',fn:()=>{if(myP.stats)myP.stats.def=Math.round(myP.stats.def*0.7);}},
+    {n:'포션 봉인',fn:()=>{battle._potionSealed=true;}},
+    {n:'빠른 몬스터 (몬스터 ATK +20%)',fn:()=>{for(const m of battle.monsters)m.atk=Math.round(m.atk*1.2);}},
+  ];
+  const db2=pick(debuffs);db2.fn();
+  battle._dungDebuff=db2.n;
+  blogAdd(`<span class="l-warn">💀 저주의 방! [${db2.n}] 디버프가 던전 종료까지 지속됩니다!</span>`);
+  renderBattle();
+  setTimeout(()=>startActionPhase(),1200);
+}
+function evNothing(){
+  const msgs=['벽에 이상한 낙서가 있다...','예전에 누가 살았던 것 같다.','오래된 뼈가 흩어져 있다.','바람이 불어온다.'];
+  blogAdd(`<span class="l-sys">😶 ${pick(msgs)}</span>`);
+  setTimeout(()=>startActionPhase(),1200);
+}
+// (히든 상인 제거됨 — 던전 이벤트 시스템으로 대체)
 window.closeMerchant=()=>{
   document.getElementById('hiddenMerchant')?.remove();
   battle.fleeVotes=new Set();
@@ -3477,25 +3665,52 @@ function lootPhase(){
     const dropRoll=Math.random();
     if(dropRoll<0.35*dropR){
       const pool=[...WBASES,...ABASES,...ACCBASES];
-      let forcedGrade=null;
-      const gr=Math.random();
-      if(gr<0.55)forcedGrade='normal';
-      else if(gr<0.80)forcedGrade='uncommon';
-      else if(gr<0.94)forcedGrade='rare';
-      else if(gr<0.992)forcedGrade='epic';
-      else forcedGrade='legendary';
-      const it=genItem(pool,forcedGrade,t.recLv+rand(-5,5));
+      // 티어+난이도별 등급 확률표
+      const tierIdx=battle.tierIdx||0;
+      const dk=battle.diffKey||'normal';
+      // maxGrade: T1=uncommon, T2=rare, T3=epic, T4=legendary, T5=legendary
+      const maxGradeIdx=Math.min(4,tierIdx+1); // 0=normal,1=uncommon,2=rare,3=epic,4=legendary
+      const gradeKeys=['normal','uncommon','rare','epic','legendary'];
+      // 난이도 보정: normal=0, hard=+0.5단계, vhard=+1단계
+      const diffShift=dk==='vhard'?1:dk==='hard'?0.5:0;
+      // 각 등급별 가중치 계산
+      const weights=[];
+      for(let i=0;i<=maxGradeIdx;i++){
+        // 기본 가중치: 낮은 등급이 많이 나옴
+        const base=[55,25,12,5,2][i];
+        // 상위 등급일수록 난이도 보정 수혜
+        const bonus=diffShift*(i/maxGradeIdx)*15;
+        weights.push(Math.max(1,base+bonus));
+      }
+      const total=weights.reduce((a,b)=>a+b,0);
+      let r=Math.random()*total;
+      let chosenIdx=0;
+      for(let i=0;i<weights.length;i++){r-=weights[i];if(r<=0){chosenIdx=i;break;}}
+      const forcedGrade=gradeKeys[chosenIdx];
+      const lv=t.recLv+rand(-3,5);
+      const it=genItem(pool,forcedGrade,lv,false,tierIdx);
       it.tradeable=true;
       droppedItems.push(it);
       blogAdd(`<span class="l-item">🎁 드랍: ${it.name}</span>`);
     }
-    if(Math.random()<0.0005){const sc=genScrollItem();sc.tradeable=true;droppedItems.push(sc);blogAdd('<span class="l-set">📜 능력치 재조정 주문서 드랍!</span>');}
-    if(Math.random()<0.0008){const es=genEnchantScroll();es.tradeable=true;droppedItems.push(es);blogAdd('<span class="l-set">✨ 인챈트 스크롤 드랍!</span>');}
-    if(battle.diffKey==='vhard'&&Math.random()<0.001){
-      const si=genSetItem(t.recLv+rand(0,10));
+    // 인챈트 스크롤 드랍 (티어별 차등)
+    const scrollChance=0.04+battle.tierIdx*0.015;
+    if(Math.random()<scrollChance*dropR){
+      const es=genTieredEnchantScroll(battle.tierIdx+1, battle.diffKey);
+      es.tradeable=true;
+      droppedItems.push(es);
+      blogAdd(`<span class="l-set">📜 ${es.name} 드랍!</span>`);
+    }
+    if(Math.random()<0.002+(battle.tierIdx*0.001)){
+      const sc=genScrollItem();sc.tradeable=true;droppedItems.push(sc);
+      blogAdd('<span class="l-set">📜 능력치 재조정 주문서 드랍!</span>');
+    }
+    // 유일 장비: T5 매우어려움에서만, 극히 낮은 확률
+    if(battle.tierIdx>=4&&battle.diffKey==='vhard'&&Math.random()<0.000001){
+      const si=genSetItem(Math.max(90,t.recLv));
       si.tradeable=true;
       droppedItems.push(si);
-      blogAdd(`<span class="l-set" style="font-weight:700;color:var(--st)">✨ 유일 장비 드랍! — ${si.name} [${si.setName}] (Lv.${si.itemLv})</span>`);
+      blogAdd(`<span class="l-set" style="font-weight:700;color:var(--st)">✨✨ 전설의 유일 장비 드랍! — ${si.name} [${si.setName}] ✨✨</span>`);
     }
   }
   // ★ 방장 골드·경험치
@@ -3509,7 +3724,12 @@ function lootPhase(){
 }
 
 function maybeLoseItem(){
-  // ★ 하드코어: 인벤토리뿐 아니라 장착 장비도 손실 대상 (50% 확률)
+  // 죽음 방지 부적 체크
+  if(char._deathWard&&char._deathWard>0){
+    char._deathWard--;
+    blogAdd(`<span class="l-set">🧿 죽음 방지 부적 발동! 아이템 손실을 막았습니다. (남은 횟수: ${char._deathWard})</span>`);
+    saveChar();return;
+  }
   const invItems=Object.values(inv).filter(i=>!i.isScroll&&!i.isEnchantScroll);
   const eqItems=Object.values(char.equipment||{}).filter(Boolean);
   const allLosable=[...invItems,...eqItems];
@@ -4699,32 +4919,24 @@ function genSubjBox(charLevel){
 
 window.openSubjBox=async function(boxId){
   const box=inv[boxId];if(!box||!box.isSubjBox){toast('토벌전 상자가 아닙니다');return;}
-  if(!confirm('토벌전 보상 상자를 개봉하시겠습니까?\n인챈트 스크롤 1개 + 에픽~유일 장비 확률 획득!'))return;
+  if(!confirm('토벌전 보상 상자를 개봉하시겠습니까?\n💰 골드 + 📜 인챈트 스크롤 획득!'))return;
   delete inv[boxId];
-  const rewards=[];
-  // Always: enchant scroll
-  const scroll=genEnchantScroll();rewards.push(scroll);
-  // Chance: epic~set gear scaled to char level
-  const gPool=['epic','epic','epic','legendary','legendary','set'];
-  const grade=pick(gPool);
-  const pool=[...WBASES,...ABASES,...ACCBASES];
-  let gear;
-  if(grade==='set')gear=genSetItem(box.forLevel||char.level);
-  else gear=genItem(pool,grade,box.forLevel||char.level);
-  gear.tradeable=true;
-  rewards.push(gear);
-  for(const r of rewards){
-    const ok=await addItem(r);
-    if(!ok){
-      // 인벤 가득 찬 경우 Firebase에 직접 저장
-      await set(ref(db,`inv/${charId}/${r.id}`),r);
-      toast('⚠️ 인벤토리가 가득 차 창고에 저장했습니다.',3000);
-    }
-  }
-  await saveInv();updateTop();renderInv();
-  const gNames={normal:'노말',uncommon:'언커먼',rare:'레어',epic:'에픽',legendary:'레전더리',set:'유일'};
-  alert(`📦 토벌전 보상 상자 개봉!\n\n획득 아이템:\n• [에픽] 인챈트 스크롤\n• [${gNames[gear.grade]}] ${gear.name}`);
-  for(const r of rewards)openIM(r);
+  // 골드 보상: 캐릭터 레벨 × 500~1500
+  const goldAmt=rand(char.level*500, char.level*1500);
+  char.gold+=goldAmt;
+  // 인챈트 스크롤: 레벨에 따라 티어 결정
+  const scrollTier=char.level>=80?4:char.level>=60?3:char.level>=40?2:1;
+  const isPrefix=Math.random()<0.5;
+  const pool=isPrefix?PRE:SUF;
+  const candidates=pool.filter(e=>getEnchantTier(e.n)===scrollTier);
+  const chosen=candidates.length>0?pick(candidates):pick(pool);
+  const scroll=genEnchantScrollItem(chosen,isPrefix,5,scrollTier);
+  scroll.tradeable=true;
+  const ok=await addItem(scroll);
+  if(!ok)await set(ref(db,`inv/${charId}/${scroll.id}`),scroll);
+  await saveChar();await saveInv();updateTop();renderInv();
+  toast(`📦 토벌전 보상 개봉!\n💰 +${goldAmt.toLocaleString()}G\n📜 ${scroll.name}`,4000);
+  blogAdd(`<span class="l-exp">📦 토벌전 보상: +${goldAmt.toLocaleString()}G + ${scroll.name}</span>`);
 };
 
 async function renderSubjugation(){
