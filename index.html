@@ -2856,30 +2856,30 @@ let _auctionUnsub=null;
 
 async function renderAuction(sb){
   if(_auctionUnsub){_auctionUnsub();_auctionUnsub=null;}
-  sb.innerHTML=`<div style="font-size:11px;color:var(--tx3);padding:20px;text-align:center">로딩 중...</div>`;
 
-  // 탭: 내 등록 / 전체 경매
-  const myListings=[];
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
   const sellable=Object.values(inv).filter(it=>it.tradeable===true&&!equippedIds.has(it.id)&&!it.isScroll);
 
-  function renderAuctionMain(tab='browse'){
-    sb.innerHTML=`
-      <div style="display:flex;gap:4px;margin-bottom:12px">
-        <button id="atab-browse" class="btn ${tab==='browse'?'btn-gold':'btn-ghost'} btn-sm" style="flex:1" onclick="auctionTab('browse')">🏛️ 경매 목록</button>
-        <button id="atab-mine" class="btn ${tab==='mine'?'btn-gold':'btn-ghost'} btn-sm" style="flex:1" onclick="auctionTab('mine')">📋 내 등록</button>
-        <button id="atab-sell" class="btn ${tab==='sell'?'btn-blue':'btn-ghost'} btn-sm" style="flex:1" onclick="auctionTab('sell')">➕ 등록</button>
-      </div>
-      <div id="auctionContent"></div>`;
-    renderAuctionTab(tab);
+  // 먼저 HTML 골격 그리기
+  sb.innerHTML=`
+    <div style="display:flex;gap:4px;margin-bottom:12px">
+      <button id="atab-browse" class="btn btn-gold btn-sm" style="flex:1" onclick="auctionTab('browse')">🏛️ 경매 목록</button>
+      <button id="atab-mine" class="btn btn-ghost btn-sm" style="flex:1" onclick="auctionTab('mine')">📋 내 등록</button>
+      <button id="atab-sell" class="btn btn-ghost btn-sm" style="flex:1" onclick="auctionTab('sell')">➕ 등록</button>
+    </div>
+    <div id="auctionContent"><div style="font-size:11px;color:var(--tx3);text-align:center;padding:12px">불러오는 중...</div></div>`;
+
+  function setTabActive(tab){
+    ['browse','mine','sell'].forEach(t=>{
+      const el=document.getElementById('atab-'+t);
+      if(!el)return;
+      el.className=`btn ${t===tab?(t==='sell'?'btn-blue':'btn-gold'):'btn-ghost'} btn-sm`;
+      el.style.flex='1';
+    });
   }
 
   window.auctionTab=function(tab){
-    ['browse','mine','sell'].forEach(t=>{
-      const el=document.getElementById('atab-'+t);
-      if(el)el.className=`btn ${t===tab?t==='sell'?'btn-blue':'btn-gold':'btn-ghost'} btn-sm`;
-      if(el)el.style.flex='1';
-    });
+    setTabActive(tab);
     renderAuctionTab(tab);
   };
 
@@ -3070,7 +3070,8 @@ async function renderAuction(sb){
     renderAuctionTab('browse');
   };
 
-  renderAuctionMain('browse');
+  // 초기 로드
+  renderAuctionTab('browse');
   // 실시간 업데이트 — 초기 렌더 완료 후 연결 (즉시 발동 방지)
   setTimeout(()=>{
     _auctionUnsub=onValue(ref(db,'auction'),()=>{
