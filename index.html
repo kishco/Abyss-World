@@ -2919,6 +2919,10 @@ window.launchPartyBattle=()=>{};
 
 // ═══ BATTLE ENGINE ═══
 let battle=null;
+// 파티 관련 변수 (v2.0에서 파티 제거됨, 코드 호환용)
+let myPartyId=null;
+let _lootBidUnsub=null;
+let _partyActionUnsub=null,_partyStateUnsub=null,_exitConfirmUnsub=null,_lobbyUnsub=null;
 function startBattle(tierIdx,mode,diffKey,players){
   // ★ 이전 배틀 리스너 전부 정리
   if(_lootBidUnsub){_lootBidUnsub();_lootBidUnsub=null;}
@@ -3314,23 +3318,8 @@ function calcPlayerDmg(p,s){
   return Math.max(1,Math.min(base+rand(-variance,variance),99999)); // 최대 99999
 }
 
-// ★ 방장이 배틀 상태를 Firebase에 동기화 (파티원 화면 업데이트용)
-function syncBattleState(opts={}){
-  if(!battle||battle.mode==='solo'||!myPartyId)return;
-  get(ref(db,`parties/${myPartyId}`)).then(ps=>{
-    const pd=ps.val();if(!pd||pd.leader!==charId)return;
-    set(ref(db,`parties/${myPartyId}/battleState`),{
-      floor:battle.floor,
-      done:battle.done||false,
-      success:opts.success||false,
-      fled:opts.fled||false,
-      players:battle.players.map(p=>({id:p.id,hp:isNaN(p.hp)?p.maxHp:(p.hp||0),maxHp:p.maxHp||0,status:p.status,potions:p.potions,aggro:p.aggro||0})),
-      monsters:battle.monsters?battle.monsters.map(m=>({id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,status:m.status,isBoss:m.isBoss||false,hidden:m.hidden||false})):null,
-      log:battle.log.slice(-80),
-      ts:Date.now(),
-    });
-  });
-}
+// syncBattleState — 파티 제거됨, no-op
+function syncBattleState(opts={}){}
 function trySkillProc(p,s,target,allM){
   const skills=getSkills(p.charData||char);
   for(const sk of skills){
@@ -3667,20 +3656,11 @@ function renderBattle(){
 }
 
 // ═══ PARTY SYSTEM (제거됨 — 하위 호환 스텁) ═══
-function startParty(){}
-function startPartyBattleSignalWatcher(){}
-let _lootBidUnsub=null;
-function startPartyLootBid(){}
-// 파티 관련 변수 및 함수 스텁
-let myPartyId=null;
-let _partyActionUnsub=null,_partyStateUnsub=null,_exitConfirmUnsub=null,_lobbyUnsub=null;
-function syncBattleState(){}
-function renderLootBidPanel(){}
-window.confirmExitBattle=()=>{};
-window.startPartyBattleSignalWatcher=()=>{};
-// ═══ 파티 관련 코드 (v2.0에서 제거됨) ═══
-// startParty, startPartyBattleSignalWatcher, renderParty 등 파티 관련 함수는
-// 하위 호환용 빈 스텁으로 처리됨. 파티 기능 완전 삭제.
+window.startParty=function(){};
+window.startPartyBattleSignalWatcher=function(){};
+window.startPartyLootBid=function(){};
+window.renderLootBidPanel=function(){};
+window.confirmExitBattle=function(){};
 
 // ★ 만료 경매 자동 취소 (7일 경과 + 본인 등록 건은 인벤 반환)
 async function cleanExpiredAuctions(){
