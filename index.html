@@ -398,38 +398,52 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="ptag" style="display:none;font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace">👥파티</span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);margin-left:auto;margin-right:6px">v1.1</span>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:6px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v1.2</span>
   <button class="tlo" id="tlo">로그아웃</button>
 </header>
 
 <!-- 업데이트 팝업 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
-  <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:420px;width:90%;max-height:80vh;overflow-y:auto">
+  <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:440px;width:90%;max-height:82vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
-    <div style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;margin-bottom:16px">v1.1 패치노트</div>
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">⚖️ 밸런스 조정</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      🗡 노말 몬스터 체력·공격력 대폭 하향<br>
-      ⚔ 어려움·매우어려움 몬스터도 하향 조정<br>
-      🎯 클리어 보너스 경험치 대폭 감소<br>
-      👥 파티 최소 인원 2인으로 완화<br>
-      ⏱ 파티 행동 타이머 15초→10초 단축<br>
-      💊 물약 보상 체계 전면 개편
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
+      <span style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:2px 8px;border-radius:5px">v1.2 업데이트</span>
     </div>
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">💊 물약 시스템 변경</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      매우어려움 <b>최초 1회</b> 클리어 시 물약 +1<br>
-      솔로/파티 각각 별도 카운트<br>
-      티어 5개 × 솔로·파티 = 최대 <b>10회</b> 보상 가능<br>
-      최종 물약 상한: 기본 5개 + 최대 10개 = <b>15개</b>
+
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🔍 아이템 정보 개선</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
+      📊 인챈트 효과가 <b style="color:var(--green)">실제 스탯 합산</b>으로 표시됩니다<br>
+      <span style="font-size:10.5px;color:var(--tx3)">예시: "str+3 (→ATK+5)" 형태로 계산값을 바로 확인</span><br>
+      📦 인벤토리 카드에서도 인챈트 포함 총합 스탯 확인 가능<br>
+      🔗 목걸이·장신구 장착 비교 시 인챈트 포함 총합으로 비교
     </div>
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🐛 버그 수정</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2;margin-bottom:18px">
-      🔧 대장간 강화 수치 표시 오류 수정<br>
-      💥 데미지 천문학적 수치 오염 방어<br>
-      ✕ 장비 해제 버튼 작동 수정<br>
-      🏆 랭킹 중복 기록 제거 개선
+
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">⚔ 파티 멀티플레이 개선</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
+      🚀 파티 배틀 <b style="color:var(--green)">동시 입장</b> 기능 추가<br>
+      <span style="font-size:10.5px;color:var(--tx3)">방장이 출발하면 모든 파티원이 자동으로 던전에 입장</span><br>
+      ⚡ 파티원 행동 선택이 실시간으로 화면에 표시<br>
+      ⏱ 타이머 만료 시 방장이 자동으로 페이즈 진행
     </div>
+
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🎒 인벤토리 필터 수정</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
+      📿 <b style="color:var(--tx)">목걸이</b>가 이제 <b style="color:var(--green)">"장신구"</b> 필터에서 표시됩니다<br>
+      <span style="font-size:10.5px;color:var(--tx3)">기존에는 방어구 필터에 잘못 분류되었습니다</span>
+    </div>
+
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🐛 버그 수정</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:18px">
+      🔧 대장간 인챈트 부여 시 장비 레벨이 정확히 반영<br>
+      📈 MATK(마법 공격력) 인챈트 효과가 이제 전투에 적용<br>
+      🛡 관리자 패널 탭 버튼 오작동 수정<br>
+      ♻ 채팅 탭 전환 시 Firebase 연결 중복 생성 수정
+    </div>
+
+    <div style="background:rgba(74,143,255,.07);border:1px solid rgba(74,143,255,.2);border-radius:8px;padding:10px 14px;font-size:10.5px;color:var(--tx2);line-height:1.9;margin-bottom:18px">
+      💡 <b style="color:var(--tx)">Tip.</b> 장비 슬롯을 클릭하면 인챈트 효과를 포함한 총합 스탯을 한눈에 볼 수 있습니다.
+    </div>
+
     <div style="display:flex;gap:8px">
       <button class="btn btn-gold" style="flex:1" onclick="closeUpdatePopup(false)">확인</button>
       <button class="btn btn-ghost btn-sm" onclick="closeUpdatePopup(true)">오늘 하루 안보기</button>
@@ -576,11 +590,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="akpi ak4"><div class="aklbl">밴 유저</div><div class="akval" id="ak-bans">0</div></div>
       </div>
       <div class="atabs">
-        <button class="atab on" onclick="atab('users')">👤 유저관리</button>
-        <button class="atab" onclick="atab('parties')">👥 파티현황</button>
-        <button class="atab" onclick="atab('achat')">💬 채팅</button>
-        <button class="atab" onclick="atab('game')">📊 통계</button>
-        <button class="atab" onclick="atab('tools')">🔧 도구</button>
+        <button class="atab on" onclick="atab('users',this)">👤 유저관리</button>
+        <button class="atab" onclick="atab('parties',this)">👥 파티현황</button>
+        <button class="atab" onclick="atab('achat',this)">💬 채팅</button>
+        <button class="atab" onclick="atab('game',this)">📊 통계</button>
+        <button class="atab" onclick="atab('tools',this)">🔧 도구</button>
       </div>
 
       <!-- 유저 관리 탭 -->
@@ -1025,7 +1039,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v1.1';
+  const key='abyssworld_update_v1.2';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1036,7 +1050,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v1.1',expire);
+    localStorage.setItem('abyssworld_update_v1.2',expire);
   }
 };
 
@@ -1164,7 +1178,8 @@ function calcStats(c){
     const ab=b=>{if(!b)return;
       // ★ 비정상적으로 큰 값 차단 (이전 scaleEnchant 버그로 오염된 데이터 방어)
       const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
-      atk+=cap(b.atk)||0;def+=cap(b.def)||0;spd+=cap(b.spd)||0;hp+=cap(b.hp)||0;crit+=cap(b.crit)||0;
+      atk+=cap(b.atk)||0;def+=cap(b.def)||0;spd+=cap(b.spd)||0;hp+=cap(b.hp)||0;
+      matk+=cap(b.matk)||0;crit+=cap(b.crit)||0; // ★ matk 직접 수치 반영
       goldBonus+=cap(b.goldBonus)||0;skillBonus+=cap(b.skillBonus)||0;
       if(b.str)atk+=cap(b.str)*1.8;if(b.dex){dodge+=cap(b.dex)*0.25;spd+=cap(b.dex)*0.4;crit+=cap(b.dex)*0.08;}
       if(b.int)matk+=cap(b.int)*2;if(b.vit){hp+=cap(b.vit)*10;def+=cap(b.vit)*0.6;}
@@ -1307,6 +1322,8 @@ async function selChar(id){
   checkUpdatePopup();
   if(isAdmin)loadAdmin();
   set(ref(db,`presence/${curUser.uid}`),{charName:char.name,lastSeen:Date.now()});
+  // ★ 파티 배틀 신호 구독 — 방장이 출발 누르면 파티원 전체 동시 입장
+  startPartyBattleSignalWatcher();
 }
 
 // ═══ TOPBAR ═══
@@ -1397,7 +1414,25 @@ function renderEq(){
     let tooltip='';
     if(it){
       const statLabels={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK'};
-      const statRows=Object.entries(it.stats||{}).filter(([,v])=>v>0)
+      // ★ 인챈트 포함 총합 스탯 계산
+      const ts=(()=>{
+        const t={...it.stats};
+        for(const enc of[it.prefix,it.suffix]){
+          if(!enc?.b)continue;
+          const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
+          for(const[k,v]of Object.entries(enc.b)){
+            const cv=cap(v);if(cv===0)continue;
+            if(['atk','def','hp','spd','crit','matk'].includes(k))t[k]=(t[k]||0)+cv;
+            if(k==='str')t.atk=(t.atk||0)+Math.round(cv*1.8);
+            if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
+            if(k==='int')t.matk=(t.matk||0)+Math.round(cv*2);
+            if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*10);t.def=(t.def||0)+Math.round(cv*0.6);}
+            if(k==='luk')t.crit=(t.crit||0)+Math.round(cv*0.08);
+          }
+        }
+        return t;
+      })();
+      const statRows=Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk'].includes(k))
         .map(([k,v])=>`<div class="sk-tooltip-stat-row"><span>${statLabels[k]||k.toUpperCase()}</span><span>+${v}</span></div>`).join('');
       const gM=GRADES[it.grade]?.skillM||0;
       const skillInfos=[];
@@ -1472,28 +1507,37 @@ window.openEqDetail=function(slotKey){
   const content=document.getElementById('eqDetailContent');
   if(!it){panel.style.display='none';return;}
 
-  // ★ 총합 스탯 (기본 + 접두 + 접미)
+  // ★ 총합 스탯 (기본 + 접두 + 접미, str/dex/int/vit 환산 포함)
   const totalSt={...it.stats};
   for(const enc of[it.prefix,it.suffix]){
     if(!enc?.b)continue;
+    const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
     for(const[k,v]of Object.entries(enc.b)){
-      if(!isFinite(v)||Math.abs(v)>9999)continue;
-      if(['atk','def','hp','spd','crit','matk'].includes(k))
-        totalSt[k]=(totalSt[k]||0)+v;
+      const cv=cap(v);if(cv===0)continue;
+      if(['atk','def','hp','spd','crit','matk'].includes(k))totalSt[k]=(totalSt[k]||0)+cv;
+      if(k==='str')totalSt.atk=(totalSt.atk||0)+Math.round(cv*1.8);
+      if(k==='dex'){totalSt.spd=(totalSt.spd||0)+Math.round(cv*0.4);totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.08);}
+      if(k==='int')totalSt.matk=(totalSt.matk||0)+Math.round(cv*2);
+      if(k==='vit'){totalSt.hp=(totalSt.hp||0)+Math.round(cv*10);totalSt.def=(totalSt.def||0)+Math.round(cv*0.6);}
+      if(k==='luk')totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.08);
     }
   }
-  const statsHtml=Object.entries(totalSt).filter(([,v])=>v>0)
+  const statsHtml=Object.entries(totalSt).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk'].includes(k))
     .map(([k,v])=>`<span style="background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--green)">${k.toUpperCase()} +${v}</span>`).join(' ');
 
   // 인챈트
   const gM=GRADES[it.grade]?.skillM||0;
+  const encHint={str:v=>`→ATK+${Math.round(v*1.8)}`,dex:v=>`→SPD+${Math.round(v*0.4)}/CRIT+${Math.round(v*0.08)}`,int:v=>`→MATK+${Math.round(v*2)}`,vit:v=>`→HP+${Math.round(v*10)}/DEF+${Math.round(v*0.6)}`,luk:v=>`→CRIT+${Math.round(v*0.08)}`};
   const enchantHtml=[it.prefix,it.suffix].filter(Boolean).map(enc=>{
     const skInfo=enc.sk&&SKILLS[enc.sk]?SKILLS[enc.sk]:null;
-    const encStats=Object.entries(enc.b||{}).filter(([,v])=>v!==0).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(' ');
+    const encStats=Object.entries(enc.b||{}).filter(([,v])=>v!==0).map(([k,v])=>{
+      const hint=encHint[k]?` <span style="color:var(--tx3);font-size:9px">(${encHint[k](v)})</span>`:'';
+      return`${k}${v>0?'+':''}${v}${hint}`;
+    }).join('  ');
     const proc=skInfo?Math.round(skInfo.base*gM*(1+(char.int||3)*0.005)*100):0;
     return`<div style="margin-top:6px;padding:6px 8px;background:rgba(74,143,255,.06);border:1px solid rgba(74,143,255,.2);border-radius:5px;font-size:10.5px">
       <div style="font-weight:700;color:var(--blue);margin-bottom:2px">${enc.n}</div>
-      ${encStats?`<div style="color:var(--tx2);font-size:10px">${encStats}</div>`:''}
+      ${encStats?`<div style="color:var(--tx2);font-size:10px;line-height:1.8">${encStats}</div>`:''}
       ${skInfo?`<div style="color:var(--purple);font-size:10px;margin-top:2px">⚡ ${skInfo.name} — ${skInfo.desc} <span style="color:var(--gold)">(발동 ${proc}%)</span></div>`:''}
     </div>`;
   }).join('');
@@ -1676,13 +1720,31 @@ function renderInv(){
   document.getElementById('invcnt').textContent=items.length+'개';
   const tf=document.getElementById('invType').value,gf=document.getElementById('invGrade').value;
   const fil=items.filter(i=>{
-    const to=!tf||(tf==='weapon'&&i.slot==='weapon')||(tf==='armor'&&['head','neck','chest','legs','boots','offhand'].includes(i.slot))||(tf==='accessory'&&i.slot==='accessory')||(tf==='set'&&i.grade==='set')||(tf==='scroll'&&(i.isScroll||i.isEnchantScroll));
+    const to=!tf||(tf==='weapon'&&i.slot==='weapon')||(tf==='armor'&&['head','chest','legs','boots','offhand'].includes(i.slot))||(tf==='accessory'&&(i.slot==='accessory'||i.slot==='neck'))||(tf==='set'&&i.grade==='set')||(tf==='scroll'&&(i.isScroll||i.isEnchantScroll));
     return to&&(!gf||i.grade===gf);
   });
   const gr=document.getElementById('invgrid');
   if(!fil.length){gr.innerHTML='<div class="iempty">🎒 아이템 없음</div>';return;}
   gr.innerHTML=fil.map(it=>{
-    const ss=Object.entries(it.stats||{}).filter(([,v])=>v>0&&v<=999999).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' ');
+    // ★ 인챈트 포함 총합 스탯
+    const ts=(()=>{
+      const t={...it.stats};
+      for(const enc of[it.prefix,it.suffix]){
+        if(!enc?.b)continue;
+        const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
+        for(const[k,v]of Object.entries(enc.b)){
+          const cv=cap(v);if(cv===0)continue;
+          if(['atk','def','hp','spd','crit','matk'].includes(k))t[k]=(t[k]||0)+cv;
+          if(k==='str')t.atk=(t.atk||0)+Math.round(cv*1.8);
+          if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
+          if(k==='int')t.matk=(t.matk||0)+Math.round(cv*2);
+          if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*10);t.def=(t.def||0)+Math.round(cv*0.6);}
+          if(k==='luk')t.crit=(t.crit||0)+Math.round(cv*0.08);
+        }
+      }
+      return t;
+    })();
+    const ss=Object.entries(ts).filter(([k,v])=>v>0&&v<=999999&&['atk','def','hp','spd','crit','matk'].includes(k)).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' ');
     const lvLock=it.reqLv&&char.level<it.reqLv;
     return`<div class="icard gb-${it.grade} ${lvLock?'lv-locked':''}" data-id="${it.id}">
       ${it.grade==='set'?`<div style="font-size:8.5px;color:var(--st);margin-bottom:2px">◆${it.setName||'세트'}</div>`:''}
@@ -1749,15 +1811,20 @@ function openIM(it){
     return`<div class="srow"><span class="sn">${label}</span><span class="sv" style="color:var(--green)">+${newVal||0}</span>${diffStr}</div>`;
   }
 
-  // ★ 총합 스탯 계산 (기본 + 접두 + 접미)
+  // ★ 총합 스탯 계산 (기본 + 접두 + 접미, str/dex/int/vit/luk → 실전스탯 환산)
   function totalStats(item){
     const t={...item.stats};
     for(const enc of[item.prefix,item.suffix]){
       if(!enc?.b)continue;
+      const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
       for(const[k,v]of Object.entries(enc.b)){
-        if(!isFinite(v)||Math.abs(v)>9999)continue;
-        if(['atk','def','hp','spd','crit','matk'].includes(k))
-          t[k]=(t[k]||0)+v;
+        const cv=cap(v);if(cv===0)continue;
+        if(['atk','def','hp','spd','crit','matk'].includes(k)) t[k]=(t[k]||0)+cv;
+        if(k==='str') t.atk=(t.atk||0)+Math.round(cv*1.8);
+        if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
+        if(k==='int') t.matk=(t.matk||0)+Math.round(cv*2);
+        if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*10);t.def=(t.def||0)+Math.round(cv*0.6);}
+        if(k==='luk') t.crit=(t.crit||0)+Math.round(cv*0.08);
       }
     }
     return t;
@@ -1768,8 +1835,14 @@ function openIM(it){
   const allKeys=[...new Set([...Object.keys(newStats),...Object.keys(oldStats)])].filter(k=>(newStats[k]||0)!==0||(oldStats[k]||0)!==0);
   const sr=allKeys.map(k=>statRowHtml(k.toUpperCase(),newStats[k],oldStats[k])).join('');
 
-  const ph=(!it.prefix||it.grade==='set')?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span><br>${Object.entries(it.prefix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
-  const sh=(!it.suffix||it.grade==='set')?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span><br>${Object.entries(it.suffix.b||{}).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
+  // ★ 인챈트 스탯을 "str+3 (→ATK+5)" 형태로 표시하는 헬퍼
+  function fmtEncStat(k,v){
+    const hint={str:`→ATK+${Math.round(v*1.8)}`,dex:`→SPD+${Math.round(v*0.4)}/CRIT+${Math.round(v*0.08)}`,int:`→MATK+${Math.round(v*2)}`,vit:`→HP+${Math.round(v*10)}/DEF+${Math.round(v*0.6)}`,luk:`→CRIT+${Math.round(v*0.08)}`};
+    const suf=hint[k]?` <span style="color:var(--tx3);font-size:9px">(${hint[k]})</span>`:'';
+    return`${k}${v>0?'+':''}${v}${suf}`;
+  }
+  const ph=(!it.prefix||it.grade==='set')?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span><br>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
+  const sh=(!it.suffix||it.grade==='set')?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span><br>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
   const seth=it.grade==='set'?`<div style="margin-top:6px;padding:6px 9px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:11px;color:var(--st)">◆ ${it.setName}</div>`:'';
 
   // 장착 중 아이템 비교 표시
@@ -1777,7 +1850,7 @@ function openIM(it){
     <div style="margin-top:8px;padding:7px 9px;background:rgba(255,150,0,.05);border:1px solid rgba(255,150,0,.2);border-radius:6px;font-size:11px">
       <div style="font-size:9px;color:var(--tx3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">현재 장착 중</div>
       <div class="icname g-${equipped.grade}" style="font-size:11px;margin-bottom:3px">${equipped.name}</div>
-      <div style="font-size:10px;color:var(--tx3)">${Object.entries(equipped.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' · ')}</div>
+      <div style="font-size:10px;color:var(--tx3)">${Object.entries(totalStats(equipped)).filter(([,v])=>v>0).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' · ')}</div>
     </div>`:'<div style="font-size:10px;color:var(--tx3);margin-top:5px">현재 슬롯 비어있음</div>';
 
   document.getElementById('imtitle').innerHTML=`<span class="g-${it.grade}">${it.name}</span>`;
@@ -1790,14 +1863,14 @@ function openIM(it){
       <div style="font-size:9px;color:var(--tx3);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px">슬롯 선택 (현재 장착과 비교)</div>
       ${['accessory1','accessory2','accessory3'].map((sl,i)=>{
         const cur=char.equipment[sl];
-        const curStats=cur?Object.entries(cur.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' '):'';
+        const curStats=cur?Object.entries(totalStats(cur)).filter(([,v])=>v>0).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' '):'';
         return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;margin-bottom:5px">
           <div style="display:flex;justify-content:space-between;align-items:flex-start">
             <div style="flex:1;min-width:0">
               <div style="font-size:9.5px;color:var(--tx3);margin-bottom:3px">장신구 ${i+1}번</div>
               ${cur
                 ?`<div class="icname g-${cur.grade}" style="font-size:11px;margin-bottom:2px">${itName(cur)}</div>
-                  <div style="font-size:9.5px;color:var(--tx3)">${curStats}</div>
+                  <div style="font-size:9.5px;color:var(--green)">${curStats}</div>
                   ${cur.prefix||cur.suffix?`<div style="font-size:9px;color:var(--tx3);margin-top:1px">${cur.prefix?`[접두:${cur.prefix.n}]`:''} ${cur.suffix?`[접미:${cur.suffix.n}]`:''}</div>`:''}`
                 :`<div style="font-size:10px;color:var(--tx3)">비어있음</div>`}
             </div>
@@ -2022,8 +2095,10 @@ window.doEnchant=async(sl,type)=>{
   const it=char.equipment[sl];if(!it){toast('장비 없음');return;}
   if(char.gold<500){toast('골드 부족');return;}
   char.gold-=500;
-  if(type==='pre'){const en=wRand(PRE);it.prefix={n:en.n,b:en.b,sk:en.sk||null,attr:en.attr||null};toast(it.name+'에 접두 '+en.n+' 추가!');}
-  else{const en=wRand(SUF);it.suffix={n:en.n,b:en.b,sk:en.sk||null};toast(it.name+'에 접미 '+en.n+' 추가!');}
+  const lv=it.itemLv||1;
+  const gradeMult=GRADES[it.grade]?.mult||1;
+  if(type==='pre'){const en=wRand(PRE);it.prefix={n:en.n,b:scaleEnchant(en.b,lv,gradeMult),sk:en.sk||null,attr:en.attr||null};toast(it.name+'에 접두 '+en.n+' 추가!');}
+  else{const en=wRand(SUF);it.suffix={n:en.n,b:scaleEnchant(en.b,lv,gradeMult),sk:en.sk||null};toast(it.name+'에 접미 '+en.n+' 추가!');}
   await saveChar();updateTop();renderChar();
 };
 // ★ 강화 비용 계산 (장비레벨 + 등급 + 인챈트 가치 반영)
@@ -2253,7 +2328,10 @@ async function showPartyLobby(tierIdx,mode,diffKey){
   await update(ref(db,`parties/${myPartyId}/lobby`),{tierIdx,mode,diffKey,active:true});
   await set(ref(db,`parties/${myPartyId}/lobby/ready/${charId}`),false);
 
-  onValue(ref(db,`parties/${myPartyId}/lobby`),async sn=>{
+  // ★ 기존 로비 리스너 해제
+  if(window._lobbyUnsub){window._lobbyUnsub();window._lobbyUnsub=null;}
+
+  window._lobbyUnsub=onValue(ref(db,`parties/${myPartyId}/lobby`),async sn=>{
     const ld=sn.val();if(!ld)return;
     const mems_sn=await get(ref(db,`parties/${myPartyId}/members`));
     const mems=mems_sn.val()||{};const memArr=Object.entries(mems);
@@ -2284,21 +2362,38 @@ window.toggleReady=async(tierIdx,diffKey)=>{
   await set(ref(db,`parties/${myPartyId}/lobby/ready/${charId}`),!ps.val());
 };
 window.cancelLobby=async()=>{
+  // ★ 로비 리스너 해제
+  if(window._lobbyUnsub){window._lobbyUnsub();window._lobbyUnsub=null;}
   if(myPartyId)await set(ref(db,`parties/${myPartyId}/lobby`),null);
   document.getElementById('dungLobby').style.display='none';
   document.getElementById('dungMode').style.display='block';
 };
 window.launchPartyBattle=async(tierIdx,mode,diffKey)=>{
+  // ★ 로비 리스너 해제
+  if(window._lobbyUnsub){window._lobbyUnsub();window._lobbyUnsub=null;}
   const mems_sn=await get(ref(db,`parties/${myPartyId}/members`));
   const mems=mems_sn.val()||{};
   const players=[];
-  for(const[id,m]of Object.entries(mems)){
-    const cs=await get(ref(db,`chars/${id}`));const cd=cs.val();if(!cd)continue;
+  // ★ 모든 캐릭터 데이터 병렬 fetch
+  const charEntries=await Promise.all(
+    Object.entries(mems).map(async([id,m])=>{
+      const cs=await get(ref(db,`chars/${id}`));
+      return[id,cs.val()];
+    })
+  );
+  for(const[id,cd]of charEntries){
+    if(!cd)continue;
     const st=calcStats(cd);
     players.push({id,name:cd.name,charData:cd,stats:st,hp:st.maxHp,maxHp:st.maxHp,potions:5+(cd.extraPotions||0)});
   }
-  if(myPartyId)await set(ref(db,`parties/${myPartyId}/lobby`),null);
-  startBattle(tierIdx,mode,diffKey,players);
+  // ★ Firebase에 배틀 시작 신호 기록 → 파티원 전체가 감지해서 동시 입장
+  await set(ref(db,`parties/${myPartyId}/battleSignal`),{
+    tierIdx,mode,diffKey,
+    players:players.map(p=>({id:p.id,name:p.name,stats:p.stats,hp:p.hp,maxHp:p.maxHp,potions:p.potions,
+      charData:{level:p.charData.level,equipment:p.charData.equipment,str:p.charData.str,dex:p.charData.dex,int:p.charData.int,vit:p.charData.vit,luk:p.charData.luk,extraPotions:p.charData.extraPotions}})),
+    startedAt:Date.now()
+  });
+  await set(ref(db,`parties/${myPartyId}/lobby`),null);
 };
 
 // ═══ BATTLE ENGINE ═══
@@ -2318,21 +2413,75 @@ function startBattle(tierIdx,mode,diffKey,players){
     reviveQueue:new Set(),
     combatMs:0,
     _phaseStart:null,
-    _presence:{}, // ★ 플레이어 presence 추적
+    _presence:{},
   };
-  // ★ 파티원 presence 실시간 추적
-  if(mode!=='solo'){
+  // ★ 파티 모드: 방장 여부 판단 (방장만 배틀 진행, 나머지는 액션 입력 + 결과 수신)
+  if(mode!=='solo'&&myPartyId){
+    // 파티원 presence 실시간 추적
     for(const p of players){
       onValue(ref(db,`presence/${p.id}`),sn=>{
         if(battle&&sn.val())battle._presence[p.id]=sn.val().lastSeen||Date.now();
       });
     }
+    // 파티원 액션 구독 (방장이 읽어서 resolvePhase에 반영)
+    if(window._partyActionUnsub)window._partyActionUnsub();
+    window._partyActionUnsub=onValue(ref(db,`parties/${myPartyId}/battleActions`),sn=>{
+      if(!battle||battle.done||battle.phase!==1)return;
+      const actions=sn.val()||{};
+      for(const[pid,act]of Object.entries(actions)){
+        const p=battle.players.find(x=>x.id===pid);
+        if(p&&!p.actionChosen&&p.status==='alive'){
+          p.actionChosen=act;
+          if(act==='flee')battle.fleeVotes.add(pid);
+          blogAdd(`<span class="l-sys">${p.name}: ${act==='attack'?'⚔ 공격':act==='defend'?'🛡 방어':act==='heal'?'💊 회복':'💨 도망'} 선택</span>`);
+          renderBattle();
+        }
+      }
+      // 방장이 전원 선택 감지 시 resolvePhase 실행
+      get(ref(db,`parties/${myPartyId}`)).then(ps=>{
+        const pd=ps.val();if(!pd||pd.leader!==charId)return;
+        const alive=battle.players.filter(p=>p.status==='alive');
+        const now=Date.now();
+        const onlineAlive=alive.filter(p=>!battle._presence[p.id]||battle._presence[p.id]>now-30000);
+        if(alive.every(p=>p.actionChosen)||(onlineAlive.length>0&&onlineAlive.every(p=>p.actionChosen))){
+          alive.filter(p=>!p.actionChosen).forEach(p=>p.actionChosen='attack');
+          clearInterval(battle.timer);
+          // 액션 초기화 후 resolvePhase
+          set(ref(db,`parties/${myPartyId}/battleActions`),null).then(()=>resolvePhase());
+        }
+      });
+    });
+    // 배틀 결과 구독 (방장이 아닌 파티원이 화면 업데이트에 사용)
+    if(window._partyStateUnsub)window._partyStateUnsub();
+    window._partyStateUnsub=onValue(ref(db,`parties/${myPartyId}/battleState`),sn=>{
+      const bs=sn.val();if(!bs||!battle)return;
+      // 방장은 자신이 직접 계산하므로 상태 수신 불필요
+      get(ref(db,`parties/${myPartyId}`)).then(ps=>{
+        const pd=ps.val();if(!pd||pd.leader===charId)return;
+        // 비방장: 배틀 상태 동기화
+        if(bs.log){const newLogs=bs.log.slice(battle.log.length);newLogs.forEach(l=>blogAdd(l));}
+        if(bs.players){
+          for(const sp of bs.players){
+            const lp=battle.players.find(p=>p.id===sp.id);
+            if(lp){lp.hp=sp.hp;lp.status=sp.status;lp.potions=sp.potions;lp.aggro=sp.aggro||0;}
+          }
+        }
+        if(bs.monsters)battle.monsters=bs.monsters;
+        if(bs.floor!==undefined)battle.floor=bs.floor;
+        if(bs.done){battle.done=true;battle.ended=true;}
+        renderBattle();
+        if(bs.done){
+          const db2=document.getElementById('dungBattle');
+          if(db2&&bs.resultHtml)db2.innerHTML=bs.resultHtml;
+        }
+      });
+    });
   }
   document.getElementById('dungLobby').style.display='none';
   document.getElementById('dungMode').style.display='none';
   document.getElementById('dungMain').style.display='none';
   document.getElementById('dungBattle').style.display='block';
-  document.getElementById('dungBattle').innerHTML=''; // ★ 이전 전투 결과 초기화
+  document.getElementById('dungBattle').innerHTML='';
   updateNavLock();
   nextFloor();
 }
@@ -2464,7 +2613,7 @@ window.closeMerchant=()=>{
 function startActionPhase(){
   if(!battle)return;
   battle.phase=1;battle.timerVal=10;
-  battle._phaseStart=Date.now(); // ★ 페이즈 시작
+  battle._phaseStart=Date.now();
   battle.players.forEach(p=>{p.actionChosen=null;p.defending=false;p.healing=false;});
   battle.fleeVotes.clear();
   renderBattle();
@@ -2473,10 +2622,19 @@ function startActionPhase(){
     updateTimerBar();
     if(battle.timerVal<=0){
       clearInterval(battle.timer);
-      // Default to attack for anyone who hasn't chosen
       for(const p of battle.players.filter(p=>p.status==='alive'&&!p.actionChosen)){p.actionChosen='attack';}
-      battle.fleeVotes.clear();// flee cancelled
-      resolvePhase();
+      battle.fleeVotes.clear();
+      // ★ 파티 모드: 방장만 resolvePhase 실행 (비방장은 타이머 UI만 표시)
+      if(battle.mode!=='solo'&&myPartyId){
+        get(ref(db,`parties/${myPartyId}`)).then(ps=>{
+          const pd=ps.val();
+          if(pd&&pd.leader===charId){
+            set(ref(db,`parties/${myPartyId}/battleActions`),null).then(()=>resolvePhase());
+          }
+        });
+      }else{
+        resolvePhase();
+      }
     }
   },1000);
 }
@@ -2493,12 +2651,18 @@ window.chooseAction=function(action){
   const myP=battle.players.find(p=>p.id===charId);
   if(!myP||myP.status!=='alive')return;
   if(myP.actionChosen){toast('이미 선택함');return;}
+  if(action==='heal'&&myP.potions<=0){toast('포션 없음!');return;}
+
+  // ★ 파티 모드: 내 액션을 Firebase에 기록 (방장이 수집)
+  if(battle.mode!=='solo'&&myPartyId){
+    set(ref(db,`parties/${myPartyId}/battleActions/${charId}`),action);
+  }
+
   myP.actionChosen=action;
   if(action==='flee'){
     battle.fleeVotes.add(charId);
     blogAdd(`<span class="l-sys">${myP.name}이 도망을 시도합니다...</span>`);
   }else if(action==='heal'){
-    if(myP.potions<=0){toast('포션 없음!');myP.actionChosen='attack';return;}
     blogAdd(`<span class="l-sys">${myP.name}: 💊 회복 선택</span>`);
   }else if(action==='defend'){
     blogAdd(`<span class="l-sys">${myP.name}: 🛡 방어 선택</span>`);
@@ -2506,23 +2670,23 @@ window.chooseAction=function(action){
     blogAdd(`<span class="l-sys">${myP.name}: ⚔ 공격 선택</span>`);
   }
   updateActionButtons(myP.actionChosen);
-  // In solo mode: resolve immediately. In party mode: check if all chose
-  if(battle.mode==='solo'){clearInterval(battle.timer);resolvePhase();}
-  else{
-    const alive=battle.players.filter(p=>p.status==='alive');
-    // ★ 살아있는 플레이어 중 접속 중인 사람이 모두 선택했으면 즉시 진행
-    const now=Date.now();
-    const onlineAlive=alive.filter(p=>{
-      const pr=battle._presence?.[p.id];
-      return !pr||pr>now-30000; // 30초 이내 = 접속 중
+
+  // 솔로: 즉시 실행. 파티 비방장: 방장이 처리하므로 대기
+  if(battle.mode==='solo'){
+    clearInterval(battle.timer);resolvePhase();
+  }else{
+    // ★ 내가 방장이면 전원 선택 여부 확인 후 진행
+    get(ref(db,`parties/${myPartyId}`)).then(ps=>{
+      const pd=ps.val();if(!pd||pd.leader!==charId)return;
+      const alive=battle.players.filter(p=>p.status==='alive');
+      const now=Date.now();
+      const onlineAlive=alive.filter(p=>!battle._presence[p.id]||battle._presence[p.id]>now-30000);
+      if(alive.every(p=>p.actionChosen)||(onlineAlive.length>0&&onlineAlive.every(p=>p.actionChosen))){
+        alive.filter(p=>!p.actionChosen).forEach(p=>p.actionChosen='attack');
+        clearInterval(battle.timer);
+        set(ref(db,`parties/${myPartyId}/battleActions`),null).then(()=>resolvePhase());
+      }
     });
-    // 접속 중인 플레이어가 모두 선택하거나, 전원 선택했으면 즉시 진행
-    if(alive.every(p=>p.actionChosen)||
-       (onlineAlive.length>0&&onlineAlive.every(p=>p.actionChosen))){
-      // 미선택 오프라인 플레이어는 자동 공격
-      alive.filter(p=>!p.actionChosen).forEach(p=>p.actionChosen='attack');
-      clearInterval(battle.timer);resolvePhase();
-    }
   }
 };
 
@@ -2642,6 +2806,7 @@ function resolvePhase(){
   if(!anyAlive){
     blogAdd('<span class="l-dead">⚠️ 파티 전멸!</span>');
     if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 아이템 손실 가능!</span>');maybeLoseItem();}
+    syncBattleState(); // ★ 파티원에게 상태 동기화
     setTimeout(()=>endBattle(false,false),1500);return;
   }
   // Check monsters dead
@@ -2649,8 +2814,10 @@ function resolvePhase(){
   if(allMDead){
     // Give loot
     lootPhase();
+    syncBattleState(); // ★ 파티원에게 상태 동기화
     setTimeout(()=>{battle.phase=0;nextFloor();},1500);return;
   }
+  syncBattleState(); // ★ 파티원에게 상태 동기화
   renderBattle();
   startActionPhase();
 }
@@ -2659,6 +2826,23 @@ function calcPlayerDmg(p,s){
   const base=Math.round(s.atk||10);
   const variance=Math.round(base*0.1);
   return Math.max(1,Math.min(base+rand(-variance,variance),99999)); // 최대 99999
+}
+
+// ★ 방장이 배틀 상태를 Firebase에 동기화 (파티원 화면 업데이트용)
+function syncBattleState(){
+  if(!battle||battle.mode==='solo'||!myPartyId)return;
+  // 방장만 기록
+  get(ref(db,`parties/${myPartyId}`)).then(ps=>{
+    const pd=ps.val();if(!pd||pd.leader!==charId)return;
+    set(ref(db,`parties/${myPartyId}/battleState`),{
+      floor:battle.floor,
+      done:battle.done||false,
+      players:battle.players.map(p=>({id:p.id,hp:p.hp,status:p.status,potions:p.potions,aggro:p.aggro||0})),
+      monsters:battle.monsters?battle.monsters.map(m=>({id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,status:m.status,isBoss:m.isBoss||false,hidden:m.hidden||false})):null,
+      log:battle.log.slice(-60), // 최근 60줄만
+      ts:Date.now(),
+    });
+  });
 }
 function trySkillProc(p,s,target,allM){
   const skills=getSkills(p.charData||char);
@@ -2811,17 +2995,16 @@ async function dungeonClear(){
 function endBattle(success,fled){
   if(!battle)return;
   battle.done=true;
-  battle.ended=true; // ★ renderBattle 차단 플래그
+  battle.ended=true;
   if(battle.timer)clearInterval(battle.timer);
   updateNavLock();
 
-  // ★ dungBattle 강제 표시
   const db2=document.getElementById('dungBattle');
   db2.style.display='block';
 
   const resultColor=success?'var(--green)':fled?'var(--tx2)':'var(--red)';
   const resultMsg=success?'🏆 던전 클리어!':fled?'💨 도망쳤습니다':'💀 전멸';
-  db2.innerHTML=`
+  const resultHtml=`
     <div style="text-align:center;padding:24px 0 14px;position:sticky;top:0;background:var(--sf);z-index:10;border-bottom:1px solid var(--bd);margin-bottom:12px">
       <div style="font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:${resultColor};margin-bottom:10px">${resultMsg}</div>
       <button class="btn btn-gold" style="padding:12px 36px;font-size:15px;font-weight:700" onclick="exitBattle()">← 던전 목록으로</button>
@@ -2830,9 +3013,30 @@ function endBattle(success,fled){
       <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">전투 기록</div>
       <div class="clog">${(battle.log||[]).map(l=>`<div>${l}</div>`).join('')}</div>
     </div>`;
+  db2.innerHTML=resultHtml;
+
+  // ★ 파티 모드: 방장이 종료 상태 동기화 후 Firebase 배틀 데이터 정리
+  if(battle.mode!=='solo'&&myPartyId){
+    get(ref(db,`parties/${myPartyId}`)).then(ps=>{
+      const pd=ps.val();if(!pd||pd.leader!==charId)return;
+      set(ref(db,`parties/${myPartyId}/battleState`),{
+        done:true,log:battle.log.slice(-60),players:battle.players.map(p=>({id:p.id,hp:p.hp,status:p.status})),
+        monsters:[],floor:battle.floor,resultHtml,ts:Date.now()
+      }).then(()=>{
+        // 3초 후 battleState 정리
+        setTimeout(()=>set(ref(db,`parties/${myPartyId}/battleState`),null),3000);
+      });
+    });
+    // 파티 액션/상태 구독 해제
+    if(window._partyActionUnsub){window._partyActionUnsub();window._partyActionUnsub=null;}
+    if(window._partyStateUnsub){window._partyStateUnsub();window._partyStateUnsub=null;}
+  }
 }
 window.exitBattle=()=>{
   const pendingLvUps=battle?battle._pendingLvUps:null;
+  // ★ 배틀 관련 Firebase 리스너 정리
+  if(window._partyActionUnsub){window._partyActionUnsub();window._partyActionUnsub=null;}
+  if(window._partyStateUnsub){window._partyStateUnsub();window._partyStateUnsub=null;}
   battle=null;
   document.getElementById('dungBattle').style.display='none';
   document.getElementById('dungMain').style.display='block';
@@ -2841,7 +3045,6 @@ window.exitBattle=()=>{
   document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='dungeon'));
   document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-dungeon'));
   renderDungeon();renderChar();
-  // ★ 던전 중 레벨업 모달 지연 표시
   if(pendingLvUps&&pendingLvUps.length>0)setTimeout(()=>showLvModal(pendingLvUps),300);
 };
 
@@ -2869,7 +3072,7 @@ function renderBattle(){
     <!-- Floor dots -->
     <div class="fdots">${Array.from({length:battle.floors},(_,i)=>`<div class="fdot ${i<battle.floor-1?'done':i===battle.floor-1?'cur':''} ${i===battle.floors-1?'boss':''}">${i===battle.floors-1?'👑':i+1}</div>`).join('')}</div>
     <!-- Timer -->
-    ${!isSolo&&battle.phase===1?`<div class="timer-bar"><div class="timer-fill" id="battleTimerBar" style="width:100%"></div></div><div style="text-align:right;font-size:10px;color:var(--tx3);margin-bottom:5px" id="battleTimerTxt">15s</div>`:''}
+    ${!isSolo&&battle.phase===1?`<div class="timer-bar"><div class="timer-fill" id="battleTimerBar" style="width:100%"></div></div><div style="text-align:right;font-size:10px;color:var(--tx3);margin-bottom:5px" id="battleTimerTxt">${battle.timerVal}s</div>`:''}
     <!-- Enemies -->
     <div style="margin-bottom:10px">${aliveM.map(m=>`
       <div class="ebox">
@@ -2925,25 +3128,24 @@ function startParty(){
   onValue(ref(db,'parties'),async sn=>{
     const all=sn.val()||{};
 
-    // ★ 유령 멤버(캐릭터 삭제된) 및 빈 파티 정리
+    // ★ 유령 멤버/빈 파티 정리 — 모든 chars를 1회 fetch하여 N+1 제거
+    const charsSn=await get(ref(db,'chars'));
+    const allChars=charsSn.val()||{};
+
     for(const[pid,pd]of Object.entries(all)){
       if(!pd.members){remove(ref(db,`parties/${pid}`));continue;}
       const mems=pd.members;
+      const removes=[];
       for(const mid of Object.keys(mems)){
-        const cSn=await get(ref(db,`chars/${mid}`));
-        if(!cSn.val()){
-          // 캐릭터 없으면 파티에서 제거
-          await remove(ref(db,`parties/${pid}/members/${mid}`));
-        }
+        if(!allChars[mid])removes.push(remove(ref(db,`parties/${pid}/members/${mid}`)));
       }
-      // 정리 후 다시 확인해서 빈 파티 삭제
-      const remSn=await get(ref(db,`parties/${pid}/members`));
-      if(!remSn.val()||Object.keys(remSn.val()).length===0){
+      if(removes.length)await Promise.all(removes);
+      // 정리 후 빈 파티 삭제
+      const remaining=Object.keys(mems).filter(mid=>allChars[mid]);
+      if(remaining.length===0){
         await remove(ref(db,`parties/${pid}`));
-      } else if(pd.leader&&!(await get(ref(db,`chars/${pd.leader}`))).val()){
-        // 파티장 캐릭터도 없으면 다음 멤버로 이전
-        const others=Object.keys(remSn.val());
-        if(others.length>0)await update(ref(db,`parties/${pid}`),{leader:others[0]});
+      } else if(pd.leader&&!allChars[pd.leader]){
+        await update(ref(db,`parties/${pid}`),{leader:remaining[0]});
       }
     }
 
@@ -2966,6 +3168,38 @@ function setupPartyDisconnect(){
   if(!myPartyId||!charId)return;
   const memberRef=ref(db,`parties/${myPartyId}/members/${charId}`);
   onDisconnect(memberRef).remove();
+}
+
+// ★ 파티 배틀 신호 감시 — 방장이 출발 누르면 파티원 전체 동시 입장
+let _battleSignalUnsub=null;
+let _lastBattleSignalTs=0;
+function startPartyBattleSignalWatcher(){
+  if(_battleSignalUnsub)_battleSignalUnsub();
+  // parties 전체를 감시하되, myPartyId가 생기면 해당 파티 신호 감시
+  _battleSignalUnsub=onValue(ref(db,'parties'),sn=>{
+    if(!myPartyId)return;
+    const all=sn.val()||{};
+    const pd=all[myPartyId];
+    if(!pd?.battleSignal)return;
+    const sig=pd.battleSignal;
+    // ★ 이미 처리한 신호 or 이미 배틀 중이면 무시
+    if(sig.startedAt<=_lastBattleSignalTs)return;
+    if(battle&&!battle.done)return;
+    _lastBattleSignalTs=sig.startedAt;
+    // 로비 리스너 해제
+    if(window._lobbyUnsub){window._lobbyUnsub();window._lobbyUnsub=null;}
+    // 신호에 담긴 players 데이터로 배틀 시작
+    const players=sig.players.map(p=>({
+      ...p,
+      status:'alive',buffs:{},aggro:0,actionChosen:null,defending:false
+    }));
+    // 방장이 이미 배틀 시작했으므로 신호 삭제 (방장만)
+    if(pd.leader===charId){
+      set(ref(db,`parties/${myPartyId}/battleSignal`),null);
+    }
+    // 배틀 진입 (모든 파티원이 동일한 players 배열로 시작)
+    startBattle(sig.tierIdx,sig.mode,sig.diffKey,sig.players);
+  });
 }
 
 function renderParty(all){
@@ -3107,12 +3341,16 @@ window.leaveParty=async()=>{
 
 // ═══ CHAT ═══
 let cwMode='world',cwActive=false;
+// ★ 채팅 리스너 중복 방지: 각 채널별 unsubscribe 함수 보관
+const cwUnsub={world:null,party:null,whisper:null};
 
 function startChat(){
   cwActive=true;
-  onValue(ref(db,'chat/world'),sn=>{
+  // 월드 채팅 리스너 1회만 등록
+  if(cwUnsub.world)cwUnsub.world();
+  cwUnsub.world=onValue(ref(db,'chat/world'),sn=>{
     if(cwMode!=='world')return;
-    const msgs=sn.val()||{};renderChatMsgs(msgs,'world');
+    renderChatMsgs(sn.val()||{},'world');
   });
   document.getElementById('cwInput').addEventListener('keydown',e=>{if(e.key==='Enter')cwSendMsg();});
   document.getElementById('cwSend').onclick=cwSendMsg;
@@ -3124,15 +3362,21 @@ window.cwTab=function(m){
   document.getElementById('cwt-'+m).classList.add('on');
   document.getElementById('cwWhisperRow').style.display=m==='whisper'?'flex':'none';
   if(m==='world'){
+    // 이미 startChat()에서 등록된 리스너 재사용, 최초 1회만 즉시 렌더
     get(ref(db,'chat/world')).then(sn=>renderChatMsgs(sn.val()||{},'world'));
-    onValue(ref(db,'chat/world'),sn=>{if(cwMode==='world')renderChatMsgs(sn.val()||{},'world');});
   }else if(m==='party'){
     if(!myPartyId){document.getElementById('cwMsgs').innerHTML='<div style="font-size:11px;color:var(--tx3);padding:10px">파티 없음</div>';return;}
-    get(ref(db,`chat/party/${myPartyId}`)).then(sn=>renderChatMsgs(sn.val()||{},'party'));
-    onValue(ref(db,`chat/party/${myPartyId}`),sn=>{if(cwMode==='party')renderChatMsgs(sn.val()||{},'party');});
+    // ★ 이전 파티 리스너 해제 후 재등록
+    if(cwUnsub.party)cwUnsub.party();
+    cwUnsub.party=onValue(ref(db,`chat/party/${myPartyId}`),sn=>{
+      if(cwMode==='party')renderChatMsgs(sn.val()||{},'party');
+    });
   }else if(m==='whisper'){
-    get(ref(db,`chat/whisper/${charId}`)).then(sn=>renderChatMsgs(sn.val()||{},'whisper'));
-    onValue(ref(db,`chat/whisper/${charId}`),sn=>{if(cwMode==='whisper')renderChatMsgs(sn.val()||{},'whisper');});
+    // ★ 이전 귓속말 리스너 해제 후 재등록
+    if(cwUnsub.whisper)cwUnsub.whisper();
+    cwUnsub.whisper=onValue(ref(db,`chat/whisper/${charId}`),sn=>{
+      if(cwMode==='whisper')renderChatMsgs(sn.val()||{},'whisper');
+    });
   }
 };
 
@@ -3181,8 +3425,9 @@ async function cwSendMsg(){
 }
 
 // ═══ ADMIN ═══
-function atab(id){
-  document.querySelectorAll('.atab').forEach((t,i)=>t.classList.toggle('on',[...document.querySelectorAll('.atab')][i]===event.target));
+function atab(id,btn){
+  document.querySelectorAll('#pane-admin .atab').forEach(t=>t.classList.remove('on'));
+  if(btn)btn.classList.add('on');
   document.querySelectorAll('.acont').forEach(c=>c.classList.remove('on'));
   document.getElementById('ac-'+id).classList.add('on');
   if(id==='parties')startAdminPartyWatch();
@@ -3696,7 +3941,8 @@ window.adminResetRanking=async()=>{
   if(!confirm('vhard 랭킹을 전체 삭제하시겠습니까?'))return;
   await set(ref(db,'rankings/vhard'),null);
   toast('✅ 랭킹 초기화 완료');
-window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};};
+};
+window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};
 window.unban=async uid=>{await remove(ref(db,`bans/${uid}`));toast('밴 해제');loadAdmin();};
 window.delChat=async mid=>{await remove(ref(db,`chat/world/${mid}`));loadAdmin();};
 window.clearChat=async()=>{if(!confirm('전체 삭제?'))return;await set(ref(db,'chat/world'),null);toast('채팅 삭제');loadAdmin();};
