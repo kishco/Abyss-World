@@ -4262,6 +4262,43 @@ function updateNavLock(){
   });
 }
 
+// ═══ 사이드바 탭 클릭 이벤트 등록 ═══
+document.querySelectorAll('.nbtn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const tab=b.dataset.tab;
+    if(battle&&!battle.done&&tab!=='dungeon'){
+      toast('⚔️ 던전 진행 중에는 이동할 수 없습니다!');
+      return;
+    }
+    document.querySelectorAll('.nbtn').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
+    const paneEl=document.getElementById('pane-'+tab);
+    if(paneEl)paneEl.classList.add('on');
+    if(tab==='town'){
+      document.getElementById('townmenu').style.display='grid';
+      document.getElementById('townsec').style.display='none';
+    }
+    if(tab==='admin'){loadAdmin();document.querySelector('.main')?.classList.add('admin-open');}
+    else document.querySelector('.main')?.classList.remove('admin-open');
+    if(tab==='ranking')loadRanking();
+    if(tab==='dungeon'){
+      renderDungeon();
+      document.getElementById('dungMain').style.display='block';
+      document.getElementById('dungMode').style.display='none';
+      document.getElementById('dungLobby').style.display='none';
+      document.getElementById('dungBattle').style.display='none';
+    }
+    if(tab==='subjugation'){renderSubjugation();}
+    if(tab==='champ'){renderChamp();}
+  });
+});
+window.navTo=function(tab){
+  if(battle&&!battle.done&&tab!=='dungeon'){toast('⚔️ 던전 진행 중에는 이동할 수 없습니다!');return;}
+  document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab===tab));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-'+tab));
+};
+
 
 // ═══ 창고 시스템 ═══
 async function saveWarehouse(){if(db&&charId)await set(ref(db,`warehouse/${charId}`),warehouse);}
