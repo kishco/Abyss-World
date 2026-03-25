@@ -2283,8 +2283,15 @@ function openIM(it){
     </div>`}`;
 
   if(!isAcc)document.getElementById('equipBtn')?.addEventListener('click',()=>equipItem(it));
-  // ★ 경매 버튼: 경매장으로 이동
-  document.getElementById('auctionBtn')?.addEventListener('click',()=>{closeIM();townSec('auction');});
+  // ★ 경매 버튼: 마을 탭으로 이동 후 경매장 오픈
+  document.getElementById('auctionBtn')?.addEventListener('click',()=>{
+    closeIM();
+    // 마을 탭으로 전환
+    document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='town'));
+    document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-town'));
+    // 경매장 섹션 열기
+    setTimeout(()=>townSec('auction'),50);
+  });
   // ★ 버리기: 경매 등록 중이면 차단
   document.getElementById('discBtn').onclick=async()=>{
     if(!confirm('버리시겠습니까?'))return;
