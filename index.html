@@ -2008,8 +2008,11 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   const maxEnchTier=Math.min(5, gi+1); // gi: 0=normal→1, 1=uncommon→2 ...
   const prePool=PRE.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
   const sufPool=SUF.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
-  const preRaw=gi>=1?wRand(prePool.length?prePool:PRE):null;
-  const sufRaw=gi>=2?wRand(sufPool.length?sufPool:SUF):null;
+  // ★ 등급별 인챈트 확률 (접두=접미 동일)
+  // 노말:0% / 언커먼:30% / 레어:50% / 에픽:70% / 레전더리:90%
+  const enchProb=[0, 0.3, 0.5, 0.7, 0.9, 1.0][gi]||0;
+  const preRaw=(gi>=1&&Math.random()<enchProb)?wRand(prePool.length?prePool:PRE):null;
+  const sufRaw=(gi>=1&&Math.random()<enchProb)?wRand(sufPool.length?sufPool:SUF):null;
   // 인챈트 스탯도 등급 편향 적용
   function scaleE(b){
     const scaled={};const lm2=1+(lv-1)*0.055;
