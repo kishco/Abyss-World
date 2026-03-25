@@ -210,7 +210,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .fdot.done{background:linear-gradient(135deg,#0a180a,#142014);border-color:var(--green);color:var(--green);}
 .fdot.cur{background:linear-gradient(135deg,#0d1a30,#1a2850);border-color:var(--blue);color:var(--blue);}
 .fdot.boss{border-color:var(--red);}
-.clog{background:rgba(0,0,0,.45);border:1px solid var(--bd);border-radius:7px;padding:8px;height:260px;overflow-y:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.9;}
+.clog{background:rgba(0,0,0,.45);border:1px solid var(--bd);border-radius:7px;padding:8px;max-height:320px;overflow-y:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.9;}
 .l-dmg{color:#ff6060;}.l-heal{color:var(--green);}.l-item{color:var(--lg);}.l-set{color:#00ffcc;}.l-exp{color:var(--blue);}.l-sys{color:var(--tx3);}.l-crit{color:#ff9900;font-weight:600;}.l-skill{color:var(--purple);}.l-warn{color:#ff9900;font-weight:700;}.l-dead{color:var(--red);font-weight:700;}.l-revive{color:var(--green);font-weight:700;}
 .ebox{background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:9px;margin-bottom:8px;}
 .ename-el{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--red);}
@@ -398,7 +398,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="ptag" style="display:none;font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace">👥파티</span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:6px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v1.4</span>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:6px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v1.5</span>
   <button class="tlo" id="tlo">로그아웃</button>
 </header>
 
@@ -407,40 +407,34 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:440px;width:90%;max-height:82vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
-      <span style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:2px 8px;border-radius:5px">v1.4 업데이트</span>
+      <span style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:2px 8px;border-radius:5px">v1.5 업데이트</span>
     </div>
 
-    <div style="font-size:11px;color:var(--st);font-weight:700;margin-bottom:7px">◆ 유일 장비 시스템</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🎲 파티 아이템 주사위 입찰</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      ✨ '세트 장비' → <b style="color:var(--st)">유일 장비</b>로 명칭 변경<br>
-      🎲 <b style="color:var(--red)">매우어려움 전용</b> 드랍 — 확률 0.1% (매우 희귀)<br>
-      📈 <b style="color:var(--green)">레벨 스케일링</b> 적용 — 높은 레벨에서 드랍될수록 강해짐<br>
-      🔗 여러 유일 장비 조합으로 <b style="color:var(--st)">2조합·3조합·5조합</b> 강력한 보너스 발동
+      파티 던전에서 몬스터를 처치하면 드랍 아이템을 <b style="color:var(--gold)">주사위로 배분</b>합니다<br>
+      🎯 1~100 주사위를 굴려 <b style="color:var(--green)">높은 숫자</b>가 나온 파티원이 아이템 획득<br>
+      🏆 아이템이 여러 개면 순위순으로 각자 배분<br>
+      <span style="font-size:10px;color:var(--tx3)">더 이상 방장만 아이템을 독식하지 않습니다</span>
     </div>
 
-    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:7px">🔮 빌드 시스템 강화</div>
+    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:7px">👥 파티 플레이 개선</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      ⚔ <b style="color:#ff6060">딜러</b> · 🛡 <b style="color:var(--blue)">탱커</b> · 🔮 <b style="color:var(--purple)">마법사</b> · 💚 <b style="color:var(--green)">힐러</b> 빌드 특화 인챈트 추가<br>
-      인벤토리 카드에 <b style="color:var(--tx)">빌드 태그</b> 자동 표시<br>
-      극고위험 인챈트 추가 (절멸, 마력폭주, 광전사의…)
+      🚪 파티장이 대기실 입장 시 <b style="color:var(--green)">파티원 자동 이동</b><br>
+      ✅ 결과창 <b style="color:var(--gold)">전원 확인</b> 후 자동 종료 — 혼자 나가지 않아도 됩니다<br>
+      ⏱ 타이머 만료 시 방장 오프라인 → <b style="color:var(--tx)">비방장 자동 처리</b> (5초 fallback)<br>
+      💰 파티원 골드·경험치 정상 지급 버그 수정
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🐉 던전·몬스터 개편</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      🏜️ Tier3 → <b style="color:var(--tx)">오염된 사막</b> / 🏰 Tier4 → <b style="color:var(--tx)">요새</b> / 🐉 Tier5 → <b style="color:var(--tx)">용의 둥지</b><br>
-      몬스터마다 <b style="color:var(--green)">랜덤 스킬 1~3개</b> 부여 (모래폭풍, 화염 숨결, 군단 규합…)<br>
-      🐉 용의 둥지 보스 <b style="color:var(--red)">아르카낙스</b> — 모든 구역 스킬 보유
-    </div>
-
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🏛️ 경매장 오픈</div>
+    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:7px">🐛 버그 수정</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:18px">
-      🗡 던전 드랍 아이템만 거래 가능<br>
-      💰 구매 후 재판매 불가 · 점검 선물 거래 불가<br>
-      📦 7일 경과 미판매 시 자동 인벤 반환
+      📜 전투 기록 스크롤이 항상 최신 로그로 이동<br>
+      🧙 히든 상인에서 구매한 아이템 즉시 목록 제거<br>
+      💊 선물 지급에서 포션 슬롯 증가 제거 (기본 5개 유지)
     </div>
 
-    <div style="background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.25);border-radius:8px;padding:10px 14px;font-size:10.5px;color:var(--tx2);line-height:1.9;margin-bottom:18px">
-      💡 <b style="color:var(--st)">Tip.</b> 유일 장비는 서로 다른 세트를 조합해도 각각의 보너스가 별도로 발동됩니다. 2조합 + 2조합 크로스 빌드를 노려보세요.
+    <div style="background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.25);border-radius:8px;padding:10px 14px;font-size:10.5px;color:var(--tx2);line-height:1.9;margin-bottom:18px">
+      🎲 <b style="color:var(--gold)">Tip.</b> 주사위 입찰은 페이즈(층) 종료 시마다 진행됩니다. 주사위를 빨리 굴릴수록 다음 층으로 빠르게 진행됩니다.
     </div>
 
     <div style="display:flex;gap:8px">
@@ -1236,7 +1230,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v1.4';
+  const key='abyssworld_update_v1.5';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1247,7 +1241,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v1.4',expire);
+    localStorage.setItem('abyssworld_update_v1.5',expire);
   }
 };
 
@@ -2935,12 +2929,15 @@ async function showPartyLobby(tierIdx,mode,diffKey){
   const t=DTIERS[tierIdx];const d=DIFF[diffKey];
   document.getElementById('dungMode').style.display='none';
   document.getElementById('dungLobby').style.display='block';
+  // 던전 탭으로 전환
+  document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='dungeon'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-dungeon'));
   const lb=document.getElementById('dungLobby');
-  // Set ready state in firebase
   await update(ref(db,`parties/${myPartyId}/lobby`),{tierIdx,mode,diffKey,active:true});
   await set(ref(db,`parties/${myPartyId}/lobby/ready/${charId}`),false);
+  // ★ 방장이 로비 진입했음을 파티원에게 신호 (자동 이동용)
+  await set(ref(db,`parties/${myPartyId}/lobbySignal`),{tierIdx,mode,diffKey,ts:Date.now(),leader:charId});
 
-  // ★ 기존 로비 리스너 해제
   if(window._lobbyUnsub){window._lobbyUnsub();window._lobbyUnsub=null;}
 
   window._lobbyUnsub=onValue(ref(db,`parties/${myPartyId}/lobby`),async sn=>{
@@ -3198,13 +3195,13 @@ function showHiddenMerchant(){
     items.push({it,price});
   }
   const itemsHtml=items.map((x,i)=>`
-    <div style="background:var(--sf2);border:1px solid rgba(240,192,64,.3);border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+    <div class="merchant-card" style="background:var(--sf2);border:1px solid rgba(240,192,64,.3);border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
       <div style="min-width:0">
         <div class="icname g-${x.it.grade}" style="font-size:11px">${x.it.name}</div>
         <div style="font-size:9px;color:var(--tx3)">${Object.entries(x.it.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <span style="color:var(--gold);font-size:11px">💰${x.price}</span>
+        <span style="color:var(--gold);font-size:11px">💰${x.price.toLocaleString()}</span>
         <button class="btn btn-gold btn-xs" onclick="buyFromMerchant(${i})">구매</button>
       </div>
     </div>`).join('');
@@ -3225,9 +3222,15 @@ window.buyFromMerchant=async(idx)=>{
   char.gold-=x.price;
   await addItem(x.it);await saveChar();updateTop();
   toast(`🧙 ${x.it.name} 구매!`);
-  battle._merchantItems.splice(idx,1);
-  // 다 팔았으면 버튼 비활성화
-  document.querySelectorAll('#hiddenMerchant .btn-gold').forEach((b,i)=>{if(i===idx)b.disabled=true;});
+  // ★ 구매한 아이템 배열에서 제거 + DOM에서 카드 삭제
+  battle._merchantItems[idx]=null;
+  const cards=document.querySelectorAll('#hiddenMerchant .merchant-card');
+  if(cards[idx])cards[idx].remove();
+  // 모두 구매했으면 상점 자동 닫기
+  if(battle._merchantItems.every(x=>!x)){
+    blogAdd('<span class="l-sys">🧙 상인: 물건이 다 팔렸습니다. 다음 층으로!</span>');
+    setTimeout(()=>closeMerchant(),800);
+  }
 };
 
 window.closeMerchant=()=>{
@@ -3239,7 +3242,7 @@ window.closeMerchant=()=>{
 
 function startActionPhase(){
   if(!battle)return;
-  battle.phase=1;battle.timerVal=10;
+  battle.phase=1;battle.timerVal=15; // ★ 파티는 15초로 연장
   battle._phaseStart=Date.now();
   battle.players.forEach(p=>{p.actionChosen=null;p.defending=false;p.healing=false;});
   battle.fleeVotes.clear();
@@ -3251,12 +3254,20 @@ function startActionPhase(){
       clearInterval(battle.timer);
       for(const p of battle.players.filter(p=>p.status==='alive'&&!p.actionChosen)){p.actionChosen='attack';}
       battle.fleeVotes.clear();
-      // ★ 파티 모드: 방장만 resolvePhase 실행 (비방장은 타이머 UI만 표시)
       if(battle.mode!=='solo'&&myPartyId){
         get(ref(db,`parties/${myPartyId}`)).then(ps=>{
           const pd=ps.val();
           if(pd&&pd.leader===charId){
+            // 방장: 액션 초기화 후 resolvePhase
             set(ref(db,`parties/${myPartyId}/battleActions`),null).then(()=>resolvePhase());
+          }else{
+            // ★ 비방장 fallback: 방장이 20초 내 처리 안 하면 비방장이 처리
+            battle._leaderFallbackTimer=setTimeout(()=>{
+              if(battle&&battle.phase===1){
+                blogAdd('<span class="l-warn">⏱ 방장 응답 없음 — 자동 진행</span>');
+                set(ref(db,`parties/${myPartyId}/battleActions`),null).then(()=>resolvePhase());
+              }
+            },5000);
           }
         });
       }else{
@@ -3326,6 +3337,8 @@ function updateActionButtons(chosen){
 
 function resolvePhase(){
   if(!battle)return;
+  // ★ fallback 타이머 정리
+  if(battle._leaderFallbackTimer){clearTimeout(battle._leaderFallbackTimer);battle._leaderFallbackTimer=null;}
   battle.phase=2;
   if(battle._phaseStart){
     battle.combatMs=(battle.combatMs||0)+(Date.now()-battle._phaseStart);
@@ -3483,14 +3496,15 @@ function resolvePhase(){
   // Check monsters dead
   const allMDead=battle.monsters.every(m=>m.status==='dead');
   if(allMDead){
-    // Give loot
     lootPhase();
-    syncBattleState(); // ★ 파티원에게 상태 동기화
-    setTimeout(()=>{battle.phase=0;nextFloor();},1500);return;
+    syncBattleState();
+    // ★ 로그 읽을 시간 - 파티는 2.5초, 솔로는 1.5초
+    setTimeout(()=>{battle.phase=0;nextFloor();},battle.mode==='solo'?1500:2500);return;
   }
-  syncBattleState(); // ★ 파티원에게 상태 동기화
+  syncBattleState();
   renderBattle();
-  startActionPhase();
+  // ★ 턴 사이 짧은 딜레이 (로그 확인용) - 파티 2초, 솔로 0.8초
+  setTimeout(()=>startActionPhase(), battle.mode==='solo'?800:2000);
 }
 
 function calcPlayerDmg(p,s){
@@ -3583,14 +3597,13 @@ function trySkillProc(p,s,target,allM){
 function lootPhase(){
   const t=battle.tier;const d=battle.diff;
   let totalExp=0,totalGold=0;
+  const droppedItems=[]; // ★ 파티 입찰용 드랍 아이템 수집
   for(const m of battle.monsters){
     const lv=t.recLv;
     const exp=Math.round((30+lv*8)*m.expR*d.expMult);
     const gold=Math.round((15+lv*3)*m.goldR*d.goldMult*(1+char.luk*0.005));
     totalExp+=exp;totalGold+=gold;
-    // Item drop
     const dropR=d.dropMult*(1+char.luk*0.003);
-    // ★ 등급별 드랍 확률 (노말 위주, 높은 등급 매우 희박)
     const dropRoll=Math.random();
     if(dropRoll<0.35*dropR){
       const pool=[...WBASES,...ABASES,...ACCBASES];
@@ -3602,23 +3615,56 @@ function lootPhase(){
       else if(gr<0.992)forcedGrade='epic';
       else forcedGrade='legendary';
       const it=genItem(pool,forcedGrade,t.recLv+rand(-5,5));
-      it.tradeable=true; // ★ 드랍 아이템은 1회 거래 가능
-      addItem(it);blogAdd(`<span class="l-item">🎁 드랍: ${it.name}</span>`);
+      it.tradeable=true;
+      droppedItems.push(it);
+      blogAdd(`<span class="l-item">🎁 드랍: ${it.name}</span>`);
     }
-    if(Math.random()<0.0005){const sc=genScrollItem();sc.tradeable=true;addItem(sc);blogAdd('<span class="l-set">📜 능력치 재조정 주문서 드랍!</span>');}
-    if(Math.random()<0.0008){const es=genEnchantScroll();es.tradeable=true;addItem(es);blogAdd('<span class="l-set">✨ 인챈트 스크롤 드랍!</span>');}
-    // ★ 유일 장비: vhard 전용, 0.001 고정 확률, 레벨 스케일링 적용
+    if(Math.random()<0.0005){const sc=genScrollItem();sc.tradeable=true;droppedItems.push(sc);blogAdd('<span class="l-set">📜 능력치 재조정 주문서 드랍!</span>');}
+    if(Math.random()<0.0008){const es=genEnchantScroll();es.tradeable=true;droppedItems.push(es);blogAdd('<span class="l-set">✨ 인챈트 스크롤 드랍!</span>');}
     if(battle.diffKey==='vhard'&&Math.random()<0.001){
       const si=genSetItem(t.recLv+rand(0,10));
       si.tradeable=true;
-      addItem(si);
+      droppedItems.push(si);
       blogAdd(`<span class="l-set" style="font-weight:700;color:var(--st)">✨ 유일 장비 드랍! — ${si.name} [${si.setName}] (Lv.${si.itemLv})</span>`);
     }
   }
+  // ★ 방장 골드·경험치
   char.gold+=totalGold;
   const lvUp=gainExp(totalExp);
   blogAdd(`<span class="l-exp">📊 EXP +${totalExp} | 💰 +${totalGold}G</span>`);
   if(!lvUp)saveChar();updateTop();
+
+  // ★ 파티원 골드·경험치 지급
+  if(battle.mode!=='solo'&&myPartyId){
+    const otherPlayers=battle.players.filter(p=>p.id!==charId);
+    for(const p of otherPlayers){
+      get(ref(db,`chars/${p.id}`)).then(sn=>{
+        const c=sn.val();if(!c)return;
+        const newGold=(c.gold||0)+totalGold;
+        let newExp=(c.exp||0)+totalExp;
+        let newLevel=c.level||1;
+        let newExpNext=c.expNext||expForLevel(newLevel);
+        while(newExp>=newExpNext){newExp-=newExpNext;newLevel++;newExpNext=expForLevel(newLevel);}
+        update(ref(db,`chars/${p.id}`),{gold:newGold,exp:newExp,level:newLevel,expNext:newExpNext});
+      });
+      blogAdd(`<span class="l-exp">💰 ${p.name}: +${totalGold}G +${totalExp}EXP</span>`);
+    }
+
+    // ★ 파티 모드 드랍 아이템: 주사위 입찰 (방장이 처리)
+    if(droppedItems.length>0){
+      get(ref(db,`parties/${myPartyId}`)).then(ps=>{
+        const pd=ps.val();
+        if(pd&&pd.leader===charId){
+          // 방장만 입찰 처리
+          startPartyLootBid(droppedItems);
+        }
+        // 비방장은 battleState 동기화로 UI 표시
+      });
+    }
+  }else{
+    // 솔로: 드랍 아이템 바로 인벤에
+    for(const it of droppedItems)addItem(it);
+  }
 }
 
 function maybeLoseItem(){
@@ -3712,10 +3758,39 @@ async function dungeonClear(){
       blogAdd(`<span class="l-sys">📊 기존 기록(${prev.combatSec}초) 유지 — 현재: ${combatSec}초</span>`);
     }
   }
-  // ★ 클리어 보너스 EXP 대폭 감소 (0.15 → 0.03)
+  // ★ 클리어 보너스 EXP (방장)
   const bonusExp=Math.round(expForLevel(battle.tier.recLv)*0.03*d.expMult);
   gainExp(bonusExp);
   blogAdd(`<span class="l-exp">🎉 클리어 보너스 EXP +${bonusExp}</span>`);
+
+  // ★ 파티원 보상: 클리어 보너스 EXP + 골드 + vhard 최초클리어 포션 지급
+  if(battle.mode!=='solo'&&myPartyId){
+    const bonusGold=Math.round((50+battle.tier.recLv*10)*d.goldMult);
+    const otherPlayers=battle.players.filter(p=>p.id!==charId);
+    for(const p of otherPlayers){
+      get(ref(db,`chars/${p.id}`)).then(sn=>{
+        const c=sn.val();if(!c)return;
+        const newGold=(c.gold||0)+bonusGold;
+        let newExp=(c.exp||0)+bonusExp;
+        let newLevel=c.level||1;
+        let newExpNext=c.expNext||expForLevel(newLevel);
+        while(newExp>=newExpNext){newExp-=newExpNext;newLevel++;newExpNext=expForLevel(newLevel);}
+        const upd={gold:newGold,exp:newExp,level:newLevel,expNext:newExpNext};
+        // vhard 최초 클리어 포션
+        if(dk==='vhard'){
+          const clearKey=`vhard_party_tier${tierIdx}`;
+          const fc=c.firstClears||{};
+          if(!fc[clearKey]&&(c.extraPotions||0)<10){
+            upd[`firstClears/${clearKey}`]=true;
+            upd.extraPotions=(c.extraPotions||0)+1;
+          }
+        }
+        update(ref(db,`chars/${p.id}`),upd);
+      });
+      blogAdd(`<span class="l-exp">🎉 ${p.name}: 클리어 보너스 +${bonusGold}G +${bonusExp}EXP</span>`);
+    }
+  }
+
   setTimeout(()=>endBattle(true,false),2000);
 }
 
@@ -3724,6 +3799,7 @@ function endBattle(success,fled){
   battle.done=true;
   battle.ended=true;
   if(battle.timer)clearInterval(battle.timer);
+  if(battle._leaderFallbackTimer){clearTimeout(battle._leaderFallbackTimer);battle._leaderFallbackTimer=null;}
   updateNavLock();
 
   const db2=document.getElementById('dungBattle');
@@ -3731,39 +3807,81 @@ function endBattle(success,fled){
 
   const resultColor=success?'var(--green)':fled?'var(--tx2)':'var(--red)';
   const resultMsg=success?'🏆 던전 클리어!':fled?'💨 도망쳤습니다':'💀 전멸';
+  const isParty=battle.mode!=='solo'&&myPartyId;
+  const memberCount=battle.players.length;
+
   const resultHtml=`
     <div style="text-align:center;padding:24px 0 14px;position:sticky;top:0;background:var(--sf);z-index:10;border-bottom:1px solid var(--bd);margin-bottom:12px">
       <div style="font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:${resultColor};margin-bottom:10px">${resultMsg}</div>
-      <button class="btn btn-gold" style="padding:12px 36px;font-size:15px;font-weight:700" onclick="exitBattle()">← 던전 목록으로</button>
+      ${isParty?`
+        <div id="exitConfirmArea" style="margin-bottom:10px">
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">파티원이 모두 확인해야 종료됩니다</div>
+          <div id="exitConfirmList" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px"></div>
+          <button class="btn btn-gold" id="exitConfirmBtn" style="padding:10px 28px;font-size:13px;font-weight:700" onclick="confirmExitBattle()">✅ 확인</button>
+        </div>`:`
+        <button class="btn btn-gold" style="padding:12px 36px;font-size:15px;font-weight:700" onclick="exitBattle()">← 던전 목록으로</button>`}
     </div>
     <div style="padding:0 4px">
       <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">전투 기록</div>
-      <div class="clog">${(battle.log||[]).map(l=>`<div>${l}</div>`).join('')}</div>
+      <div class="clog" id="resultLog">${(battle.log||[]).map(l=>`<div>${l}</div>`).join('')}</div>
     </div>`;
   db2.innerHTML=resultHtml;
+  // ★ 결과창 로그 스크롤 하단으로
+  setTimeout(()=>{const rl=document.getElementById('resultLog');if(rl)rl.scrollTop=rl.scrollHeight;},50);
 
-  // ★ 파티 모드: 방장이 종료 상태 동기화 후 Firebase 배틀 데이터 정리
-  if(battle.mode!=='solo'&&myPartyId){
+  // ★ 파티 모드: 방장이 결과 + exitConfirm 구조 동기화
+  if(isParty){
+    // exitConfirm 초기화
+    set(ref(db,`parties/${myPartyId}/exitConfirm`),{confirmed:{},total:memberCount});
+    // 실시간 확인 현황 구독
+    window._exitConfirmUnsub=onValue(ref(db,`parties/${myPartyId}/exitConfirm`),sn=>{
+      const ec=sn.val();if(!ec)return;
+      const confirmed=ec.confirmed||{};
+      const confirmList=document.getElementById('exitConfirmList');
+      if(confirmList){
+        confirmList.innerHTML=battle.players.map(p=>{
+          const done=confirmed[p.id];
+          return`<span style="font-size:10px;padding:3px 8px;border-radius:5px;background:${done?'rgba(68,212,136,.15)':'var(--sf2)'};color:${done?'var(--green)':'var(--tx3)'};border:1px solid ${done?'rgba(68,212,136,.3)':'var(--bd)'}">${done?'✅':''} ${p.name}</span>`;
+        }).join('');
+      }
+      // 전원 확인 시 자동 종료
+      if(Object.keys(confirmed).length>=battle.players.length){
+        if(window._exitConfirmUnsub){window._exitConfirmUnsub();window._exitConfirmUnsub=null;}
+        setTimeout(()=>exitBattle(),500);
+      }
+    });
+
+    // 방장이 종료 상태 동기화
     get(ref(db,`parties/${myPartyId}`)).then(ps=>{
       const pd=ps.val();if(!pd||pd.leader!==charId)return;
       set(ref(db,`parties/${myPartyId}/battleState`),{
         done:true,log:battle.log.slice(-60),players:battle.players.map(p=>({id:p.id,hp:p.hp,status:p.status})),
         monsters:[],floor:battle.floor,resultHtml,ts:Date.now()
       }).then(()=>{
-        // 3초 후 battleState 정리
-        setTimeout(()=>set(ref(db,`parties/${myPartyId}/battleState`),null),3000);
+        setTimeout(()=>set(ref(db,`parties/${myPartyId}/battleState`),null),30000);
       });
     });
-    // 파티 액션/상태 구독 해제
     if(window._partyActionUnsub){window._partyActionUnsub();window._partyActionUnsub=null;}
     if(window._partyStateUnsub){window._partyStateUnsub();window._partyStateUnsub=null;}
   }
 }
+
+window.confirmExitBattle=async()=>{
+  if(!myPartyId||!charId)return;
+  await set(ref(db,`parties/${myPartyId}/exitConfirm/confirmed/${charId}`),true);
+  document.getElementById('exitConfirmBtn').disabled=true;
+  document.getElementById('exitConfirmBtn').textContent='✅ 확인 완료';
+};
 window.exitBattle=()=>{
   const pendingLvUps=battle?battle._pendingLvUps:null;
-  // ★ 배틀 관련 Firebase 리스너 정리
   if(window._partyActionUnsub){window._partyActionUnsub();window._partyActionUnsub=null;}
   if(window._partyStateUnsub){window._partyStateUnsub();window._partyStateUnsub=null;}
+  if(window._exitConfirmUnsub){window._exitConfirmUnsub();window._exitConfirmUnsub=null;}
+  // ★ exitConfirm + lobbySignal Firebase 정리
+  if(myPartyId){
+    set(ref(db,`parties/${myPartyId}/exitConfirm`),null);
+    set(ref(db,`parties/${myPartyId}/lobbySignal`),null);
+  }
   battle=null;
   document.getElementById('dungBattle').style.display='none';
   document.getElementById('dungMain').style.display='block';
@@ -3845,9 +3963,12 @@ function renderBattle(){
     <div style="margin-top:10px">
       <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">전투 기록</div>
       <div class="clog" id="battleLog">${battle.log.map(l=>`<div>${l}</div>`).join('')}</div>
-    </div>`;
-  // Scroll log to bottom
+    </div>
+    <!-- 파티 입찰 패널 -->
+    <div id="lootBidPanel"></div>`;
   const el=document.getElementById('battleLog');if(el)el.scrollTop=el.scrollHeight;
+  // ★ 파티 모드: 입찰 패널 리스너 연결
+  if(battle.mode!=='solo'&&myPartyId)renderLootBidPanel();
 }
 
 // ═══ PARTY ═══
@@ -3897,6 +4018,123 @@ function setupPartyDisconnect(){
   onDisconnect(memberRef).remove();
 }
 
+// ═══ 파티 아이템 주사위 입찰 ═══
+// 방장이 드랍 아이템 목록을 Firebase에 기록 → 각자 주사위 → 높은 사람이 획득
+async function startPartyLootBid(items){
+  if(!items||!items.length||!myPartyId)return;
+  // 아이템을 Firebase에 올려 전체 파티원이 볼 수 있게
+  const bidData={
+    items:items.map(it=>({...it})),
+    rolls:{},
+    status:'rolling',
+    ts:Date.now(),
+    floor:battle.floor,
+  };
+  await set(ref(db,`parties/${myPartyId}/lootBid`),bidData);
+  blogAdd(`<span class="l-item">🎲 파티 입찰 시작! 드랍 아이템 ${items.length}개 — 주사위를 굴리세요!</span>`);
+  renderBattle(); // 배틀 UI 갱신하여 입찰 패널 표시
+}
+
+function renderLootBidPanel(){
+  if(!myPartyId||!battle)return;
+  onValue(ref(db,`parties/${myPartyId}/lootBid`),sn=>{
+    const bid=sn.val();
+    const panel=document.getElementById('lootBidPanel');
+    if(!panel)return;
+    if(!bid||bid.status==='done'){panel.innerHTML='';return;}
+
+    const myRoll=bid.rolls?.[charId];
+    const allRolled=battle.players.every(p=>bid.rolls?.[p.id]!==undefined);
+    const items=bid.items||[];
+
+    panel.innerHTML=`
+      <div style="background:rgba(240,192,64,.06);border:2px solid rgba(240,192,64,.35);border-radius:10px;padding:14px;margin-top:10px">
+        <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);margin-bottom:8px">🎲 파티 아이템 입찰 — 층 ${bid.floor}</div>
+        <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">주사위를 굴려서 높은 숫자가 나온 파티원이 아이템을 획득합니다!</div>
+
+        <!-- 드랍 아이템 목록 -->
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">
+          ${items.map(it=>`
+            <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:8px">
+              <span class="icname g-${it.grade}" style="font-size:11px;flex:1">${it.name}</span>
+              <span style="font-size:9px;color:var(--tx3)">${it.slot}${it.hand?' · '+it.hand:''}</span>
+            </div>`).join('')}
+        </div>
+
+        <!-- 주사위 현황 -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          ${battle.players.map(p=>{
+            const roll=bid.rolls?.[p.id];
+            const isMe=p.id===charId;
+            return`<div style="background:var(--sf3);border:1px solid ${roll!==undefined?'rgba(240,192,64,.4)':'var(--bd)'};border-radius:6px;padding:5px 10px;text-align:center;min-width:60px">
+              <div style="font-size:9px;color:${isMe?'var(--gold)':'var(--tx3)'};margin-bottom:2px">${p.name}${isMe?' (나)':''}</div>
+              <div style="font-size:14px;font-weight:700;color:${roll!==undefined?'var(--gold)':'var(--tx3)'}">${roll!==undefined?roll:'?'}</div>
+            </div>`;
+          }).join('')}
+        </div>
+
+        ${!myRoll
+          ?`<button class="btn btn-gold" style="width:100%;font-size:13px" onclick="rollDiceForLoot()">🎲 주사위 굴리기!</button>`
+          :allRolled
+            ?`<div style="text-align:center;font-size:11px;color:var(--green)">✅ 모두 굴렸습니다! 결과 처리 중...</div>`
+            :`<div style="text-align:center;font-size:11px;color:var(--tx3)">⏳ 다른 파티원 대기 중...</div>`}
+      </div>`;
+
+    // 모두 굴렸으면 방장이 결과 처리
+    if(allRolled&&bid.status==='rolling'){
+      get(ref(db,`parties/${myPartyId}`)).then(ps=>{
+        const pd=ps.val();
+        if(!pd||pd.leader!==charId)return;
+        resolveLootBid(bid);
+      });
+    }
+  });
+}
+
+window.rollDiceForLoot=async()=>{
+  if(!myPartyId)return;
+  const roll=Math.floor(Math.random()*100)+1; // 1~100
+  await set(ref(db,`parties/${myPartyId}/lootBid/rolls/${charId}`),roll);
+  blogAdd(`<span class="l-exp">🎲 ${char.name}: 주사위 ${roll}!</span>`);
+};
+
+async function resolveLootBid(bid){
+  if(!myPartyId||bid.status!=='rolling')return;
+  // 상태를 먼저 done으로 변경하여 중복 실행 방지
+  await update(ref(db,`parties/${myPartyId}/lootBid`),{status:'done'});
+
+  const rolls=bid.rolls||{};
+  const items=bid.items||[];
+  if(!items.length){await set(ref(db,`parties/${myPartyId}/lootBid`),null);return;}
+
+  // 높은 주사위 순으로 아이템 순서 배분 (주사위 → 아이템 1:1 매칭, 아이템이 더 많으면 재순환)
+  const sorted=Object.entries(rolls).sort(([,a],[,b])=>b-a);
+  let resultLog='';
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    const winner=sorted[i%sorted.length];
+    if(!winner)continue;
+    const [winnerId]=winner;
+    const winnerName=battle.players.find(p=>p.id===winnerId)?.name||winnerId;
+    const winRoll=winner[1];
+    // 방장 본인이면 직접 addItem
+    if(winnerId===charId){
+      addItem(it);
+      blogAdd(`<span class="l-item">🎲 ${winnerName}(🎯${winRoll}) → ${it.name} 획득!</span>`);
+    }else{
+      // 파티원 인벤에 Firebase 직접 저장
+      set(ref(db,`inv/${winnerId}/${it.id}`),it);
+      blogAdd(`<span class="l-item">🎲 ${winnerName}(🎯${winRoll}) → ${it.name} 획득!</span>`);
+    }
+    resultLog+=`${winnerName}(${winRoll}) → ${it.name}\n`;
+  }
+  await saveInv();
+  // 입찰 데이터 정리 (3초 후)
+  setTimeout(()=>set(ref(db,`parties/${myPartyId}/lootBid`),null),3000);
+  blogAdd(`<span class="l-exp">🎲 아이템 배분 완료!</span>`);
+  syncBattleState();
+}
+
 // ★ 만료 경매 자동 취소 (7일 경과 + 본인 등록 건은 인벤 반환)
 async function cleanExpiredAuctions(){
   const sn=await get(ref(db,'auction'));
@@ -3916,33 +4154,49 @@ async function cleanExpiredAuctions(){
 }
 
 // ★ 파티 배틀 신호 감시 — 방장이 출발 누르면 파티원 전체 동시 입장
+// + 로비 신호 감시 — 방장이 대기실 진입 시 파티원 자동 이동
 let _battleSignalUnsub=null;
 let _lastBattleSignalTs=0;
+let _lastLobbySignalTs=0;
 function startPartyBattleSignalWatcher(){
   if(_battleSignalUnsub)_battleSignalUnsub();
-  // parties 전체를 감시하되, myPartyId가 생기면 해당 파티 신호 감시
   _battleSignalUnsub=onValue(ref(db,'parties'),sn=>{
     if(!myPartyId)return;
     const all=sn.val()||{};
     const pd=all[myPartyId];
+    if(!pd)return;
+
+    // ★ 로비 신호: 방장이 대기실 진입 → 파티원 자동 이동
+    if(pd.lobbySignal&&pd.leader!==charId){
+      const sig=pd.lobbySignal;
+      if(sig.ts>_lastLobbySignalTs&&!(battle&&!battle.done)){
+        _lastLobbySignalTs=sig.ts;
+        // 던전 탭으로 전환
+        document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='dungeon'));
+        document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-dungeon'));
+        // 대기실로 이동 (약간 딜레이)
+        setTimeout(async()=>{
+          document.getElementById('dungMain').style.display='none';
+          document.getElementById('dungMode').style.display='none';
+          document.getElementById('dungLobby').style.display='block';
+          // 파티원도 ready 상태 등록
+          await set(ref(db,`parties/${myPartyId}/lobby/ready/${charId}`),false);
+          toast(`👑 파티장이 던전 대기실에 입장했습니다!`);
+        },300);
+      }
+    }
+
+    // ★ 배틀 신호: 방장이 출발 → 파티원 전체 동시 입장
     if(!pd?.battleSignal)return;
     const sig=pd.battleSignal;
-    // ★ 이미 처리한 신호 or 이미 배틀 중이면 무시
     if(sig.startedAt<=_lastBattleSignalTs)return;
     if(battle&&!battle.done)return;
     _lastBattleSignalTs=sig.startedAt;
-    // 로비 리스너 해제
     if(window._lobbyUnsub){window._lobbyUnsub();window._lobbyUnsub=null;}
-    // 신호에 담긴 players 데이터로 배틀 시작
-    const players=sig.players.map(p=>({
-      ...p,
-      status:'alive',buffs:{},aggro:0,actionChosen:null,defending:false
-    }));
-    // 방장이 이미 배틀 시작했으므로 신호 삭제 (방장만)
     if(pd.leader===charId){
       set(ref(db,`parties/${myPartyId}/battleSignal`),null);
+      set(ref(db,`parties/${myPartyId}/lobbySignal`),null);
     }
-    // 배틀 진입 (모든 파티원이 동일한 players 배열로 시작)
     startBattle(sig.tierIdx,sig.mode,sig.diffKey,sig.players);
   });
 }
