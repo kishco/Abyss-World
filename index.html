@@ -1809,7 +1809,13 @@ window.openEqDetail=function(slotKey){
 
   // 인챈트
   const gM=GRADES[it.grade]?.skillM||0;
-  const encHint={str:v=>`→ATK+${Math.round(v*1.8)}`,dex:v=>`→SPD+${Math.round(v*0.4)}/CRIT+${Math.round(v*0.08)}`,int:v=>`→MATK+${Math.round(v*2)}`,vit:v=>`→HP+${Math.round(v*10)}/DEF+${Math.round(v*0.6)}`,luk:v=>`→CRIT+${Math.round(v*0.08)}`};
+const encHint={
+  str:v=>{const a=Math.round(v*0.8);return a?`→ATK+${a}`:'';}         ,
+  dex:v=>{const s=Math.round(v*0.25),c=Math.round(v*0.06);const parts=[];if(s)parts.push(`SPD+${s}`);if(c)parts.push(`CRIT+${c}`);return parts.length?'→'+parts.join('/'):'';},
+  int:v=>{const m=Math.round(v*1.5);return m?`→MATK+${m}`:'';},
+  vit:v=>{const h=Math.round(v*3),d=Math.round(v*0.3);const parts=[];if(h)parts.push(`HP+${h}`);if(d)parts.push(`DEF+${d}`);return parts.length?'→'+parts.join('/'):'';},
+  luk:v=>{const c=Math.round(v*0.06);return c?`→CRIT+${c}`:'';},
+};
   const enchantHtml=[it.prefix,it.suffix].filter(Boolean).map(enc=>{
     const skInfo=enc.sk&&SKILLS[enc.sk]?SKILLS[enc.sk]:null;
     const encStats=Object.entries(enc.b||{}).filter(([,v])=>v!==0).map(([k,v])=>{
@@ -2365,8 +2371,14 @@ function openIM(it){
     const suf=hint[k]?` <span style="color:var(--tx3);font-size:9px">(${hint[k]})</span>`:'';
     return`${k}${v>0?'+':''}${v}${suf}`;
   }
-  const ph=(!it.prefix||it.grade==='set')?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span><br>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
-  const sh=(!it.suffix||it.grade==='set')?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span><br>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
+  // 인챈트 티어 뱃지 헬퍼
+  function enchTierBadge(name){
+    const tier=getEnchantTier(name)||2;
+    const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
+    return`<span style="font-size:9px;background:${et.color}22;color:${et.color};border:1px solid ${et.color}44;padding:1px 5px;border-radius:4px;margin-left:5px">${et.name}</span>`;
+  }
+  const ph=(!it.prefix||it.grade==='set')?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}<br>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
+  const sh=(!it.suffix||it.grade==='set')?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}<br>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
   const seth=it.grade==='set'?`<div style="margin-top:6px;padding:6px 9px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:11px;color:var(--st)">◆ ${it.setName}</div>`:'';
 
   // 장착 중 아이템 비교 표시
@@ -2411,7 +2423,6 @@ function openIM(it){
       ${it.reqLv?`<span style="font-size:11px;font-weight:700;${lvLock?'color:var(--red)':'color:var(--tx3)'}">Lv.${it.reqLv} 필요${lvLock?' 🔒':''}</span>`:''}
       ${it.tradeable===true?`<span style="font-size:10px;background:rgba(74,143,255,.15);color:var(--blue);padding:2px 6px;border-radius:6px">🏛 거래가능</span>`:''}
     </div>
-    ${it.itemLv?`<div style="font-size:10px;color:var(--tx3);margin-bottom:6px">아이템 레벨 ${it.itemLv}</div>`:''}
     ${sr?`<div class="sgrid" style="margin-bottom:7px">${sr}</div>`:''}
     ${ph}${sh}${seth}
     ${!isAcc?compareHtml:''}
