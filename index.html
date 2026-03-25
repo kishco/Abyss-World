@@ -630,16 +630,69 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
       <!-- 도구 탭 -->
       <div class="acont" id="ac-tools">
-        <div style="font-size:12px;color:var(--tx2);font-weight:700;margin-bottom:12px">⚠️ 전체 유저 일괄 작업</div>
-        <div class="card2" style="margin-bottom:10px">
-          <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">💊 전체 유저 물약 리셋</div>
-          <div style="font-size:10.5px;color:var(--tx3);margin-bottom:10px">모든 유저의 extraPotions를 0으로 초기화합니다. (기본 5개로 리셋)<br>firstClears 기록도 초기화하여 재도전 가능하게 합니다.</div>
-          <button class="btn btn-red" onclick="adminResetAllPotions()">💊 전체 물약 리셋 (extraPotions=0)</button>
+        <div style="font-size:12px;color:var(--tx2);font-weight:700;margin-bottom:14px">⚠️ 전체 유저 일괄 작업</div>
+
+        <!-- ① 점검 선물 지급 -->
+        <div class="card2" style="margin-bottom:12px;border-color:rgba(240,192,64,.35)">
+          <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:2px">🎁 점검 선물 지급</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">선물 단계를 고르고 전체 or 특정 캐릭터에게 아이템·골드를 지급합니다.</div>
+
+          <!-- 단계 선택 -->
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">선물 단계</div>
+          <select id="giftTier" onchange="renderGiftPreview()" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:8px">
+            <option value="1">1단계 — 소규모 점검 (기본 보상)</option>
+            <option value="2">2단계 — 일반 점검 (보통 보상)</option>
+            <option value="3">3단계 — 주요 업데이트 (특별 보상)</option>
+            <option value="4">4단계 — 대규모 패치 (푸짐한 보상)</option>
+            <option value="5">5단계 — 긴급 점검/사과 (최대 보상)</option>
+          </select>
+
+          <!-- 미리보기 -->
+          <div id="giftPreview" style="background:rgba(0,0,0,.35);border:1px solid var(--bd);border-radius:6px;padding:9px;font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:8px"></div>
+
+          <!-- 대상 선택 -->
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">지급 대상</div>
+          <select id="giftTarget" onchange="document.getElementById('giftCharWrap').style.display=this.value==='one'?'block':'none'" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px">
+            <option value="all">👥 전체 유저</option>
+            <option value="one">👤 특정 캐릭터</option>
+          </select>
+          <div id="giftCharWrap" style="display:none;margin-bottom:6px">
+            <input id="giftCharName" placeholder="캐릭터 이름 (정확히 입력)" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
+          </div>
+          <button class="btn btn-gold" style="width:100%" onclick="adminSendGift()">🎁 선물 지급 실행</button>
         </div>
-        <div class="card2" style="margin-bottom:10px">
+
+        <!-- ② 물약 리셋 -->
+        <div class="card2" style="margin-bottom:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">💊 전체 물약 리셋</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">extraPotions=0, firstClears={} 초기화 (기본 5개로 복귀)</div>
+          <button class="btn btn-red" onclick="adminResetAllPotions()">💊 전체 물약 리셋</button>
+        </div>
+
+        <!-- ③ 랭킹 초기화 -->
+        <div class="card2" style="margin-bottom:12px">
           <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">🏆 랭킹 초기화</div>
-          <div style="font-size:10.5px;color:var(--tx3);margin-bottom:10px">vhard 랭킹 데이터를 전체 삭제합니다.</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">vhard 랭킹 데이터를 전체 삭제합니다.</div>
           <button class="btn btn-red" onclick="adminResetRanking()">🗑 랭킹 전체 삭제</button>
+        </div>
+
+        <!-- ④ 하드 리셋 (위험) -->
+        <div class="card2" style="margin-bottom:12px;border-color:rgba(232,68,68,.5);background:rgba(232,68,68,.04)">
+          <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">💥 하드 리셋 <span style="font-size:9px;background:rgba(232,68,68,.2);border:1px solid rgba(232,68,68,.4);padding:1px 5px;border-radius:3px">위험</span></div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:4px;line-height:1.8">
+            선택한 유저의 <b style="color:var(--red)">레벨·경험치·장비·인벤토리·골드 전체 초기화</b><br>
+            캐릭터는 삭제되지 않고 Lv.1 신규 상태로 되돌아갑니다.<br>
+            <span style="color:var(--red);font-size:9.5px">⚠️ 되돌릴 수 없습니다. 반드시 선물 지급 후 사용하세요.</span>
+          </div>
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px;margin-top:6px">리셋 대상</div>
+          <select id="hardResetTarget" onchange="document.getElementById('hardResetCharWrap').style.display=this.value==='one'?'block':'none'" style="width:100%;padding:7px;background:var(--bg);border:1px solid rgba(232,68,68,.3);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px">
+            <option value="all">👥 전체 유저 하드 리셋</option>
+            <option value="one">👤 특정 캐릭터 하드 리셋</option>
+          </select>
+          <div id="hardResetCharWrap" style="display:none;margin-bottom:6px">
+            <input id="hardResetCharName" placeholder="캐릭터 이름 (정확히 입력)" style="width:100%;padding:7px;background:var(--bg);border:1px solid rgba(232,68,68,.3);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
+          </div>
+          <button class="btn btn-red" style="width:100%" onclick="adminHardReset()">💥 하드 리셋 실행</button>
         </div>
       </div>
     </div>
@@ -4093,6 +4146,138 @@ window.adminResetRanking=async()=>{
   if(!confirm('vhard 랭킹을 전체 삭제하시겠습니까?'))return;
   await set(ref(db,'rankings/vhard'),null);
   toast('✅ 랭킹 초기화 완료');
+};
+
+// ═══ 점검 선물 정의 ═══
+const GIFT_TIERS={
+  1:{label:'1단계 — 소규모 점검',gold:500,  items:[{type:'scroll',count:1}],desc:'💰 500G · 인챈트 스크롤 1개'},
+  2:{label:'2단계 — 일반 점검',  gold:1500, items:[{type:'enchant',count:1},{type:'random_rare',count:1}],desc:'💰 1,500G · 인챈트 스크롤 1개 · 레어 아이템 1개'},
+  3:{label:'3단계 — 주요 업데이트',gold:3000,items:[{type:'enchant',count:2},{type:'random_epic',count:1},{type:'potion',count:2}],desc:'💰 3,000G · 인챈트 스크롤 2개 · 에픽 아이템 1개 · 물약 슬롯 +2'},
+  4:{label:'4단계 — 대규모 패치', gold:6000, items:[{type:'enchant',count:3},{type:'random_epic',count:2},{type:'reroll',count:1},{type:'potion',count:3}],desc:'💰 6,000G · 인챈트 스크롤 3개 · 에픽 아이템 2개 · 재조정 주문서 1개 · 물약 슬롯 +3'},
+  5:{label:'5단계 — 긴급 점검/사과', gold:15000,items:[{type:'enchant',count:5},{type:'random_legendary',count:1},{type:'random_epic',count:2},{type:'reroll',count:2},{type:'potion',count:5}],desc:'💰 15,000G · 인챈트 스크롤 5개 · 레전더리 아이템 1개 · 에픽 아이템 2개 · 재조정 주문서 2개 · 물약 슬롯 +5'},
+};
+
+window.renderGiftPreview=function(){
+  const tier=parseInt(document.getElementById('giftTier')?.value||1);
+  const g=GIFT_TIERS[tier];
+  const el=document.getElementById('giftPreview');
+  if(el)el.innerHTML=`<span style="color:var(--gold);font-weight:700">${g.label}</span><br>${g.desc}`;
+};
+// 초기 렌더
+setTimeout(()=>window.renderGiftPreview&&renderGiftPreview(),200);
+
+// 아이템 생성 헬퍼
+function makeGiftItems(tierItems, charLevel){
+  const items=[];
+  const pool=[...WBASES,...ABASES,...ACCBASES];
+  for(const ti of tierItems){
+    const cnt=ti.count||1;
+    for(let i=0;i<cnt;i++){
+      if(ti.type==='enchant')items.push(genEnchantScroll());
+      else if(ti.type==='reroll')items.push(genScrollItem());
+      else if(ti.type==='random_rare')items.push(genItem(pool,'rare',Math.max(1,charLevel)));
+      else if(ti.type==='random_epic')items.push(genItem(pool,'epic',Math.max(1,charLevel)));
+      else if(ti.type==='random_legendary')items.push(genItem(pool,'legendary',Math.max(1,charLevel)));
+    }
+  }
+  return items;
+}
+
+// 단일 캐릭터에 선물 지급
+async function giveGiftToChar(cid, charLevel, tierData){
+  const updates={};
+  // 골드
+  const cSn=await get(ref(db,`chars/${cid}`));
+  const c=cSn.val();if(!c)return;
+  updates[`chars/${cid}/gold`]=(c.gold||0)+tierData.gold;
+  // 물약 슬롯 (potion 타입)
+  const potionBonus=tierData.items.filter(i=>i.type==='potion').reduce((s,i)=>s+(i.count||0),0);
+  if(potionBonus>0){
+    const maxExtra=10;
+    const newExtra=Math.min((c.extraPotions||0)+potionBonus,maxExtra);
+    updates[`chars/${cid}/extraPotions`]=newExtra;
+  }
+  await update(ref(db,'/'),updates);
+  // 아이템
+  const giftItems=makeGiftItems(tierData.items.filter(i=>i.type!=='potion'),charLevel);
+  for(const it of giftItems){
+    await set(ref(db,`inv/${cid}/${it.id}`),it);
+  }
+}
+
+window.adminSendGift=async()=>{
+  const tier=parseInt(document.getElementById('giftTier')?.value||1);
+  const target=document.getElementById('giftTarget')?.value||'all';
+  const tierData=GIFT_TIERS[tier];
+  if(!tierData)return;
+
+  if(target==='one'){
+    const name=(document.getElementById('giftCharName')?.value||'').trim();
+    if(!name){toast('캐릭터 이름을 입력하세요');return;}
+    const cs=await get(ref(db,'chars'));const all=cs.val()||{};
+    const entry=Object.entries(all).find(([,c])=>c.name===name);
+    if(!entry){toast(`'${name}' 캐릭터를 찾을 수 없습니다`);return;}
+    if(!confirm(`[${tierData.label}]\n${tierData.desc}\n\n'${name}'에게 지급하시겠습니까?`))return;
+    await giveGiftToChar(entry[0],entry[1].level||1,tierData);
+    toast(`✅ '${name}'에게 ${tier}단계 선물 지급 완료!`);
+    loadAdmin();
+  }else{
+    if(!confirm(`[${tierData.label}]\n${tierData.desc}\n\n전체 유저에게 지급하시겠습니까?\n⚠️ 캐릭터 수에 따라 시간이 걸릴 수 있습니다.`))return;
+    const cs=await get(ref(db,'chars'));const all=cs.val()||{};
+    const charArr=Object.entries(all);
+    let cnt=0;
+    for(const[cid,c] of charArr){
+      await giveGiftToChar(cid,c.level||1,tierData);
+      cnt++;
+    }
+    toast(`✅ 전체 ${cnt}명에게 ${tier}단계 선물 지급 완료!`,4000);
+    loadAdmin();
+  }
+};
+
+// ═══ 하드 리셋 ═══
+async function doHardResetChar(cid, cname){
+  // 캐릭터를 Lv.1 초기 상태로 리셋 (이름·owner·createdAt 보존)
+  const cSn=await get(ref(db,`chars/${cid}`));
+  const c=cSn.val();if(!c)return;
+  const fresh=mkChar(c.name);
+  fresh.id=cid;fresh.owner=c.owner;fresh.createdAt=c.createdAt||Date.now();
+  await set(ref(db,`chars/${cid}`),fresh);
+  // 인벤토리 전체 삭제
+  await set(ref(db,`inv/${cid}`),null);
+}
+
+window.adminHardReset=async()=>{
+  const target=document.getElementById('hardResetTarget')?.value||'all';
+
+  if(target==='one'){
+    const name=(document.getElementById('hardResetCharName')?.value||'').trim();
+    if(!name){toast('캐릭터 이름을 입력하세요');return;}
+    const cs=await get(ref(db,'chars'));const all=cs.val()||{};
+    const entry=Object.entries(all).find(([,c])=>c.name===name);
+    if(!entry){toast(`'${name}' 캐릭터를 찾을 수 없습니다`);return;}
+    const confirmed=prompt(`⚠️ 되돌릴 수 없습니다!\n'${name}'의 모든 데이터를 초기화합니다.\n확인하려면 캐릭터 이름을 정확히 입력하세요:`);
+    if(confirmed!==name){toast('이름이 일치하지 않습니다. 취소됨');return;}
+    await doHardResetChar(entry[0],name);
+    toast(`💥 '${name}' 하드 리셋 완료`);
+    loadAdmin();
+  }else{
+    const cs=await get(ref(db,'chars'));const all=cs.val()||{};
+    const cnt=Object.keys(all).length;
+    const confirmed=prompt(`⚠️ 전체 ${cnt}명의 모든 데이터를 초기화합니다.\n이 작업은 되돌릴 수 없습니다!\n확인하려면 "전체리셋" 을 입력하세요:`);
+    if(confirmed!=='전체리셋'){toast('입력이 일치하지 않습니다. 취소됨');return;}
+    // 진행 상황 표시
+    toast(`💥 하드 리셋 진행 중... (${cnt}명)`,10000);
+    let done=0;
+    for(const[cid] of Object.entries(all)){
+      await doHardResetChar(cid);
+      done++;
+    }
+    // 랭킹도 초기화
+    await set(ref(db,'rankings/vhard'),null);
+    toast(`💥 전체 하드 리셋 완료! (${done}명 초기화 · 랭킹 삭제)`,5000);
+    loadAdmin();
+  }
 };
 window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref(db,`bans/${uid}`),r);toast('밴 완료');loadAdmin();};
 window.unban=async uid=>{await remove(ref(db,`bans/${uid}`));toast('밴 해제');loadAdmin();};
