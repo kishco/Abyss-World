@@ -986,11 +986,11 @@ const EQSLOTS=[
   {k:'accessory2',l:'장신구2',i:'💍'},{k:'accessory3',l:'장신구3',i:'💍'},
 ];
 const STATS_DEF=[
-  {k:'str',n:'STR',d:'ATK+2.5, 치명피해+0.8%'},
-  {k:'dex',n:'DEX',d:'회피+0.4%, CRIT+0.3%, SPD+1.5'},
-  {k:'int',n:'INT',d:'MATK+3, 스킬발동↑'},
-  {k:'vit',n:'VIT',d:'MaxHP+15, DEF+1.5'},
-  {k:'luk',n:'LUK',d:'골드↑, CRIT+0.2%, 드랍↑'},
+  {k:'str',n:'STR',d:'ATK+0.8, 치명피해+0.4%'},
+  {k:'dex',n:'DEX',d:'회피+0.2%, CRIT+0.15%, SPD+0.5'},
+  {k:'int',n:'INT',d:'MATK+1.5, 스킬발동↑'},
+  {k:'vit',n:'VIT',d:'MaxHP+5(장비), DEF+0.3(장비)'},
+  {k:'luk',n:'LUK',d:'골드↑, CRIT+0.06%, 드랍↑'},
 ];
 const SETS={
   // ─── 딜러 빌드 ────────────────────────────────────────────────────
@@ -1393,11 +1393,11 @@ function mkChar(name){
 }
 
 function calcStats(c){
-  // ★ 기본 스탯 하향: 베이스 낮추고 VIT 효율 감소
-  let atk=c.baseAtk+(c.str||5)*1.8,matk=(c.int||3)*2,def=c.baseDef+(c.vit||5)*1.0;
-  let spd=c.baseSpd+(c.dex||5)*1.0,hp=(c.maxHp||100);
-  let dodge=Math.min((c.dex||5)*0.3,35),crit=8+(c.dex||5)*0.25+(c.luk||2)*0.15;
-  let critDmg=140+(c.str||5)*0.6+(c.luk||2)*0.4;
+  // 스탯 환산율 — 장비 의존도 높이고 스탯 올인 폭발 방지
+  let atk=c.baseAtk+(c.str||5)*0.8,matk=(c.int||3)*1.5,def=c.baseDef+(c.vit||5)*0.35;
+  let spd=c.baseSpd+(c.dex||5)*0.5,hp=(c.maxHp||100);
+  let dodge=Math.min((c.dex||5)*0.2,25),crit=8+(c.dex||5)*0.15+(c.luk||2)*0.1;
+  let critDmg=140+(c.str||5)*0.4+(c.luk||2)*0.25;
   let goldBonus=(c.luk||2)*0.3,skillBonus=0;
   const eq=c.equipment||{};
   for(const it of Object.values(eq)){
@@ -1405,22 +1405,21 @@ function calcStats(c){
     const s=it.stats||{};
     atk+=s.atk||0;def+=s.def||0;spd+=s.spd||0;hp+=s.hp||0;matk+=s.matk||0;crit+=s.crit||0;
     const ab=b=>{if(!b)return;
-      // ★ 비정상적으로 큰 값 차단 (이전 scaleEnchant 버그로 오염된 데이터 방어)
       const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
       atk+=cap(b.atk)||0;def+=cap(b.def)||0;spd+=cap(b.spd)||0;hp+=cap(b.hp)||0;
-      matk+=cap(b.matk)||0;crit+=cap(b.crit)||0; // ★ matk 직접 수치 반영
+      matk+=cap(b.matk)||0;crit+=cap(b.crit)||0;
       goldBonus+=cap(b.goldBonus)||0;skillBonus+=cap(b.skillBonus)||0;
-      if(b.str)atk+=cap(b.str)*1.8;if(b.dex){dodge+=cap(b.dex)*0.25;spd+=cap(b.dex)*0.4;crit+=cap(b.dex)*0.08;}
-      if(b.int)matk+=cap(b.int)*2;if(b.vit){hp+=cap(b.vit)*10;def+=cap(b.vit)*0.6;}
-      if(b.luk){goldBonus+=cap(b.luk)*0.2;crit+=cap(b.luk)*0.08;}
+      if(b.str)atk+=cap(b.str)*0.8;if(b.dex){dodge+=cap(b.dex)*0.15;spd+=cap(b.dex)*0.25;crit+=cap(b.dex)*0.06;}
+      if(b.int)matk+=cap(b.int)*1.5;if(b.vit){hp+=cap(b.vit)*5;def+=cap(b.vit)*0.3;}
+      if(b.luk){goldBonus+=cap(b.luk)*0.2;crit+=cap(b.luk)*0.06;}
     };
     ab(it.prefix?.b);ab(it.suffix?.b);
   }
   const sb=calcSetB(eq);
   atk+=sb.atk||0;def+=sb.def||0;spd+=sb.spd||0;hp+=sb.hp||0;crit+=sb.crit||0;
   return{atk:Math.round(atk),matk:Math.round(matk),def:Math.round(def),spd:Math.round(spd),
-    maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),35),
-    crit:Math.min(Math.round(crit),80),critDmg:Math.round(critDmg),
+    maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),25),
+    crit:Math.min(Math.round(crit),75),critDmg:Math.round(critDmg),
     goldBonus:Math.round(goldBonus),skillBonus:Math.round(skillBonus)};
 }
 function calcSetB(eq){
@@ -1576,19 +1575,25 @@ function gainExp(amt){
   while(char.exp>=char.expNext){
     char.exp-=char.expNext;char.level++;
     char.expNext=expForLevel(char.level);
-    char.baseAtk+=0.7;char.baseDef+=0.3;char.baseSpd+=0.3;char.maxHp+=2;
-    // ★ 하드코어: 레벨업 시 HP 완전 회복 없음 - maxHp만 늘어남 (전투 중엔 더욱 의미있는 생존 도전)
-    const hpGain=2; char.hp=Math.min(char.hp+hpGain, char.maxHp);
-    const totalPts=rand(1,5);
+    // 레벨당 기본 성장 — 장비 의존도 높이기 위해 낮춤
+    char.baseAtk+=0.15;char.baseDef+=0.08;char.baseSpd+=0.12;char.maxHp+=1;
+    const hpGain=1; char.hp=Math.min(char.hp+hpGain, char.maxHp);
+    // 스탯 포인트: 레벨당 1~2pt (기존 1~3에서 하향)
+    const totalPts=rand(1,2);
     const rolled={};
+    // 이전 스탯 스냅샷 (모달 표시용)
+    const before={atk:Math.round(char.baseAtk-0.15+(char.str||5)*0.8),
+                  def:Math.round(char.baseDef-0.08+(char.vit||5)*0.35),
+                  hp:char.maxHp-1};
     for(let i=0;i<totalPts;i++){const k=pick(STATS_DEF.map(s=>s.k));char[k]=(char[k]||1)+1;rolled[k]=(rolled[k]||0)+1;}
-    lvUps.push({level:char.level,pts:totalPts,rolled});
+    const after={atk:Math.round(char.baseAtk+(char.str||5)*0.8),
+                 def:Math.round(char.baseDef+(char.vit||5)*0.35),
+                 hp:char.maxHp};
+    lvUps.push({level:char.level,pts:totalPts,rolled,before,after});
   }
   saveChar();updateTop();
-  // ★ 던전 중 레벨업 모달은 전투 종료 후 표시 (화면 가림 방지)
   if(lvUps.length>0){
     if(battle&&!battle.done){
-      // 전투 중: 로그에만 표시, 나중에 모달
       if(!battle._pendingLvUps)battle._pendingLvUps=[];
       for(const lu of lvUps){
         battle._pendingLvUps.push(lu);
@@ -1605,14 +1610,54 @@ function gainExp(amt){
 }
 function showLvModal(lvUps){
   const last=lvUps[lvUps.length-1];
+  const s=calcStats(char);
+  // 실제 스탯 변화 계산
+  const atkGain=last.after&&last.before ? last.after.atk-last.before.atk : 0;
+  const defGain=last.after&&last.before ? last.after.def-last.before.def : 0;
+  const hpGain=last.after&&last.before ? last.after.hp-last.before.hp : 1;
   document.getElementById('lvBody').innerHTML=`
-    <div style="text-align:center;margin-bottom:14px">
-      <div style="font-family:'Cinzel',serif;font-size:22px;color:var(--gold);font-weight:900">Lv.${last.level}</div>
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:28px;margin-bottom:4px">🎉</div>
+      <div style="font-family:'Cinzel',serif;font-size:24px;color:var(--gold);font-weight:900">Lv.${last.level}</div>
       <div style="font-size:12px;color:var(--tx2);margin-top:4px">레벨이 올랐습니다!</div>
     </div>
-    <div style="font-size:11px;color:var(--tx3);margin-bottom:8px;text-align:center">랜덤으로 <strong style="color:var(--green)">${last.pts}포인트</strong> 배분됨</div>
-    ${Object.entries(last.rolled).map(([k,v])=>{const st=STATS_DEF.find(s=>s.k===k);return`<div class="stat-roll"><span class="stat-roll-name">${st?.n||k}</span><span class="stat-roll-val">+${v}</span><span style="font-size:10px;color:var(--tx3)">${st?.d||''}</span></div>`;}).join('')}
-    <div style="margin-top:14px;text-align:center"><button class="btn btn-gold" onclick="closeLvModal()">확인</button></div>`;
+    <!-- 기본 성장 -->
+    <div style="background:rgba(68,212,136,.06);border:1px solid rgba(68,212,136,.2);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:6px;letter-spacing:.5px">기본 성장</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+        <div style="text-align:center;background:var(--sf3);border-radius:5px;padding:5px 3px">
+          <div style="font-size:9px;color:var(--tx3)">ATK</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--red);font-size:12px">+${atkGain>0?atkGain:'<1'}</div>
+        </div>
+        <div style="text-align:center;background:var(--sf3);border-radius:5px;padding:5px 3px">
+          <div style="font-size:9px;color:var(--tx3)">DEF</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--blue);font-size:12px">+${defGain>0?defGain:'<1'}</div>
+        </div>
+        <div style="text-align:center;background:var(--sf3);border-radius:5px;padding:5px 3px">
+          <div style="font-size:9px;color:var(--tx3)">MaxHP</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--green);font-size:12px">+${hpGain}</div>
+        </div>
+      </div>
+    </div>
+    <!-- 랜덤 스탯 포인트 -->
+    <div style="background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.2);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:6px;letter-spacing:.5px">랜덤 스탯 포인트 <span style="color:var(--gold);font-weight:700">+${last.pts}</span></div>
+      ${Object.entries(last.rolled).map(([k,v])=>{
+        const st=STATS_DEF.find(s=>s.k===k);
+        return`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bd)">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--gold);width:32px">${st?.n||k}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;color:var(--green);font-weight:700">+${v}</span>
+          <span style="font-size:9px;color:var(--tx3);flex:1">${st?.d||''}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <!-- 현재 전투력 -->
+    <div style="display:flex;justify-content:space-between;align-items:center;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 12px;margin-bottom:12px">
+      <span style="font-size:11px;color:var(--tx3)">현재 전투력</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--gold);font-size:14px">${equipScore(char)}</span>
+    </div>
+    ${lvUps.length>1?`<div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:8px">${lvUps.length}레벨 연속 상승! (마지막 레벨 표시 중)</div>`:''}
+    <div style="text-align:center"><button class="btn btn-gold" style="padding:8px 28px" onclick="closeLvModal()">확인</button></div>`;
   document.getElementById('lvModal').classList.add('open');
 }
 window.closeLvModal=()=>document.getElementById('lvModal').classList.remove('open');
@@ -3031,17 +3076,17 @@ function spawnMonsters(b,isBoss){
   const t=b.tier;const d=b.diff;const sm=b.soloMult;
   const lv=t.recLv;const area=pick(t.areas);
   if(isBoss){
-    const bAtk=Math.round((28+lv*4.5)*d.monMult*sm*0.8);
-    const bHp=Math.round((250+lv*50)*d.monMult*sm);
-    const bDef=Math.round((6+lv*1.5)*d.monMult*sm);
-    // ★ 보스는 해당 구역 스킬 전부 장착
+    // 보스: 완만한 레벨 성장, 플레이어 스탯과 균형 맞춤
+    const bAtk=Math.round((25+lv*4.0)*d.monMult*sm*0.85);
+    const bHp=Math.round((280+lv*55)*d.monMult*sm);
+    const bDef=Math.round((8+lv*1.8)*d.monMult*sm);
     const bSkills=MON_SKILLS[area]||MON_SKILLS.cave;
     return[{id:'boss_0',name:BOSSN[t.tier-1],hp:bHp,maxHp:bHp,atk:bAtk,def:bDef,
       isBoss:true,hidden:false,aggro:0,expR:1.5,goldR:2.0,status:'alive',
       skills:bSkills,
       gimmick:{rage50:false,chargeWarn:false,chargeCount:0}}];
   }
-  const cnt=b.mode==='solo'?rand(1,2):rand(2,4);
+  const cnt=rand(1,2);
   const mons=[];
   const areaSkills=MON_SKILLS[area]||MON_SKILLS.cave;
   for(let i=0;i<cnt;i++){
@@ -3051,10 +3096,10 @@ function spawnMonsters(b,isBoss){
     if(roll<0.05){const hp_m=pick(HPFX);mn=hp_m.n+' '+mn;am*=hp_m.am;hm*=hp_m.hm;em*=hp_m.em;gm*=hp_m.gm;hidden=true;}
     else if(roll<0.15){const sfx=pick(MSFX);mn+=' '+sfx.n;am*=sfx.am;hm*=sfx.hm;em*=sfx.em;gm*=sfx.gm||1;}
     else if(roll<0.40){const pfx=pick(MPFX);mn=pfx.n+' '+mn;am*=pfx.am;hm*=pfx.hm;em*=pfx.em;}
-    const hp=Math.round((50+lv*18)*hm*d.monMult*sm);
-    const atk=Math.round((12+lv*4)*am*d.dmgMult*sm);
-    const def=Math.round((2+lv*0.9)*d.monMult*sm);
-    // ★ 몬스터 스킬: 티어에 따라 0~2개 랜덤 부여
+    // 개선된 몬스터 스탯 — 플레이어 성장곡선에 맞게 완만화
+    const hp=Math.round((60+lv*20)*hm*d.monMult*sm);
+    const atk=Math.round((10+lv*3.5)*am*d.dmgMult*sm);
+    const def=Math.round((3+lv*1.2)*hm*d.monMult*sm);
     const skCount=t.tier<=1?rand(0,1):t.tier<=3?rand(1,2):rand(1,3);
     const shuffled=[...areaSkills].sort(()=>Math.random()-0.5);
     const monSkills=shuffled.slice(0,Math.min(skCount,shuffled.length));
@@ -3905,7 +3950,7 @@ window.adminOpenUser=async function(cid){
     <!-- 스탯 탭 -->
     <div id="adt-stat">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
-        ${[['STR',c.str||5,'ATK+2.5, 치명피해+0.8%'],['DEX',c.dex||5,'회피+0.4%, CRIT+0.3%'],['INT',c.int||5,'MATK+3, 스킬발동↑'],['VIT',c.vit||5,'MaxHP+15, DEF+1.5'],['LUK',c.luk||5,'골드↑, CRIT+0.2%']].map(([k,v,d])=>`
+        ${[['STR',c.str||5,'ATK+0.8, 치명피해+0.4%'],['DEX',c.dex||5,'회피+0.2%, CRIT+0.15%'],['INT',c.int||5,'MATK+1.5, 스킬발동↑'],['VIT',c.vit||5,'MaxHP+5, DEF+0.3'],['LUK',c.luk||5,'골드↑, CRIT+0.06%']].map(([k,v,d])=>`
           <div style="background:var(--sf3);border:1px solid var(--bd);border-radius:7px;padding:8px 12px">
             <div style="font-size:10px;color:var(--tx3);margin-bottom:2px">${k}</div>
             <div style="font-size:18px;font-weight:700;color:var(--tx);margin-bottom:2px">${v}</div>
@@ -5121,8 +5166,12 @@ window.enterChampBattle=async function(){
     if(champHp<=0){
       clog(`<span class="l-dead">💀 ${champ.name} 쓰러짐! 당신이 새 챔프!</span>`);
       champDone=true;
-      // Become new champ
-      const newStreak=(champ.streak||0)+1;
+      // 이전 챔프 최고 연승 갱신 (방어 실패한 챔프의 기록)
+      const oldChampFinalStreak=champ.streak||0;
+      const oldWinsRef=ref(db,`champ/wins/${champ.name}`);
+      const oldWSnap=await get(oldWinsRef);
+      await set(oldWinsRef,Math.max(oldWSnap.val()||0, oldChampFinalStreak));
+      // 새 챔프 등극 (streak:1로 시작)
       const myStats2=calcStats(char);
       await set(ref(db,'champ/current'),{
         name:char.name,charId,streak:1,
@@ -5131,10 +5180,10 @@ window.enterChampBattle=async function(){
         baseAtk:char.baseAtk||8,baseDef:char.baseDef||3,baseSpd:char.baseSpd||8,
         maxHp:myStats2.maxHp,level:char.level,ts:Date.now()
       });
-      // Record best win streak
-      const winsRef=ref(db,`champ/wins/${char.name}`);
-      const wSn=await get(winsRef);const prev=wSn.val()||0;
-      await set(winsRef,Math.max(prev,newStreak));
+      // 새 챔프 역대 최고 연승 기록 — 처음이면 1, 이전 기록보다 높으면 갱신
+      const newWinsRef=ref(db,`champ/wins/${char.name}`);
+      const newWSnap=await get(newWinsRef);
+      await set(newWinsRef,Math.max(newWSnap.val()||0, 1));
       await push(ref(db,'chat/world'),{author:'SYSTEM',text:`🥊 ${char.name}이(가) ${champ.name}을(를) 꺾고 새 챔프가 되었습니다!`,ts:Date.now(),isAdmin:true});
       toast('🥊 챔프 등극!',4000);
       renderChampBattle();return;
@@ -5244,26 +5293,38 @@ async function loadRanking(){
   if(rankMode==='champ'){
     const winsSn=await get(ref(db,'champ/wins'));
     const winsData=winsSn.val()||{};
-    const sorted=Object.entries(winsData).sort((a,b)=>(b[1]||0)-(a[1]||0));
     const champSn=await get(ref(db,'champ/current'));
     const champNow=champSn.val();
+    // 현재 챔프의 진행 중 연승도 wins에 반영 (표시용, 저장은 별도)
+    const displayWins={...winsData};
+    if(champNow?.name){
+      // 현재 진행 중인 연승이 역대 최고보다 높으면 표시에만 반영
+      const cur=champNow.streak||0;
+      if(cur>(displayWins[champNow.name]||0)){
+        displayWins[champNow.name]=cur;
+      }
+    }
+    const sorted=Object.entries(displayWins).sort((a,b)=>(b[1]||0)-(a[1]||0));
     rb.innerHTML=`
-      ${champNow?`<div style="background:rgba(255,0,0,.07);border:1px solid rgba(255,0,0,.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px">
+      ${champNow?`<div style="background:rgba(255,0,0,.07);border:1px solid rgba(255,0,0,.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px;display:flex;align-items:center;gap:10px">
         <span style="color:var(--tx3)">현재 챔프</span>
-        <span style="color:var(--red);font-weight:700;font-family:'Cinzel',serif;margin-left:8px">⚔ ${champNow.name}</span>
-        <span style="color:var(--gold);margin-left:8px">${champNow.streak||0}연승 진행 중</span>
+        <span style="color:var(--red);font-weight:700;font-family:'Cinzel',serif">⚔ ${champNow.name}</span>
+        <span style="color:var(--gold)">${champNow.streak||0}연승 진행 중</span>
       </div>`:''}
-      <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">* 역대 최고 연승 기록</div>
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">* 역대 최고 연승 기록 (현재 챔프는 진행 중 연승 포함)</div>
       ${!sorted.length?`<div style="color:var(--tx3);font-size:11px;padding:12px">기록 없음</div>`:`
       <div style="overflow-x:auto">
         <table class="utbl">
           <thead><tr><th>순위</th><th>캐릭터</th><th>최고 연승</th></tr></thead>
-          <tbody>${sorted.map(([name,wins],i)=>`
-            <tr style="${name===char.name?'background:rgba(255,0,0,.05)':''}">
+          <tbody>${sorted.map(([name,wins],i)=>{
+            const isCurChamp=champNow?.name===name;
+            const curStreak=isCurChamp?(champNow.streak||0):0;
+            const isOngoing=isCurChamp&&curStreak>0;
+            return`<tr style="${name===char.name?'background:rgba(255,0,0,.05)':''}">
               <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:${i===0?'var(--red)':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'⚔':i+1}</span></td>
-              <td style="font-family:'Cinzel',serif;font-size:11px;color:${name===char.name?'var(--red)':'var(--tx)'}">${i===0?'⚔ ':''} ${name}</td>
+              <td style="font-family:'Cinzel',serif;font-size:11px;color:${name===char.name?'var(--red)':'var(--tx)'}">${i===0?'⚔ ':''} ${name}${isOngoing?` <span style="font-size:9px;color:var(--gold);font-family:sans-serif">(진행중 ${curStreak}연승)</span>`:''}</td>
               <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold);font-weight:700">${wins}연승</td>
-            </tr>`).join('')}
+            </tr>`;}).join('')}
           </tbody>
         </table>
       </div>`}`;
