@@ -398,7 +398,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="ptag" style="display:none;font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace">👥파티</span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:6px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v1.2</span>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:6px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v1.3</span>
   <button class="tlo" id="tlo">로그아웃</button>
 </header>
 
@@ -407,41 +407,50 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:440px;width:90%;max-height:82vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
-      <span style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:2px 8px;border-radius:5px">v1.2 업데이트</span>
+      <span style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:2px 8px;border-radius:5px">v1.3 업데이트</span>
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🔍 아이템 정보 개선</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">⚔ 장비 시스템 개편</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      📊 인챈트 효과가 <b style="color:var(--green)">실제 스탯 합산</b>으로 표시됩니다<br>
-      <span style="font-size:10.5px;color:var(--tx3)">예시: "str+3 (→ATK+5)" 형태로 계산값을 바로 확인</span><br>
-      📦 인벤토리 카드에서도 인챈트 포함 총합 스탯 확인 가능<br>
-      🔗 목걸이·장신구 장착 비교 시 인챈트 포함 총합으로 비교
+      🗡 <b style="color:var(--tx)">양손(2H) 무기</b>가 방패 조합 대비 <b style="color:var(--green)">명확한 ATK 우위</b><br>
+      📈 아이템 레벨·등급별 스탯 격차 대폭 확대<br>
+      <span style="font-size:10.5px;color:var(--tx3)">티어 전환마다 장비 교체 의무화 수준의 차이</span><br>
+      🔄 <b style="color:var(--green)">기존 보유 장비 전체 자동 수치 재계산</b> 적용됨
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">⚔ 파티 멀티플레이 개선</div>
+    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:7px">⚔ 하드코어 밸런스 개편</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      🚀 파티 배틀 <b style="color:var(--green)">동시 입장</b> 기능 추가<br>
-      <span style="font-size:10.5px;color:var(--tx3)">방장이 출발하면 모든 파티원이 자동으로 던전에 입장</span><br>
-      ⚡ 파티원 행동 선택이 실시간으로 화면에 표시<br>
-      ⏱ 타이머 만료 시 방장이 자동으로 페이즈 진행
+      💀 <b style="color:var(--tx)">vhard 전멸 시</b> 인벤 아이템 최대 50% + 장착 장비 20% 확률 파괴<br>
+      🛡 <b style="color:var(--tx)">회복(포션)</b>이 더 이상 무적이 아님 — 피해 55% 감소로 변경<br>
+      ⚖️ 어려움 dmg 2.2→1.7 / 매우어려움 dmg 5.0→3.5 조정<br>
+      <span style="font-size:10.5px;color:var(--tx3)">중반 즉사 구간 해소 — 단, 여전히 어렵습니다</span>
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🎒 인벤토리 필터 수정</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">⚙️ 전투력 시스템 개편</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      📿 <b style="color:var(--tx)">목걸이</b>가 이제 <b style="color:var(--green)">"장신구"</b> 필터에서 표시됩니다<br>
-      <span style="font-size:10.5px;color:var(--tx3)">기존에는 방어구 필터에 잘못 분류되었습니다</span>
+      📊 <b style="color:var(--tx)">장비점수 → 전투력</b>으로 개편<br>
+      강화·인챈트 포함 실전 ATK/DEF/HP/SPD/CRIT 기반 계산<br>
+      어려움 전투력 <b style="color:#ff9900">120</b> / 매우어려움 <b style="color:var(--red)">250</b> 이상 필요<br>
+      <span style="font-size:10.5px;color:var(--tx3)">솔로도 이제 어려움 이상 진입 시 전투력 체크</span>
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🐛 버그 수정</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">💰 경제 개편</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
+      💵 아이템 판매가 <b style="color:var(--green)">2.5~3배 인상</b><br>
+      🔨 강화 비용 약 <b style="color:var(--green)">40% 절감</b> (강화가 현실적으로 가능해짐)<br>
+      🎰 도박장 레전더리/세트 상자 삭제 — 에픽까지만 구매 가능
+    </div>
+
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">✨ 스킬 시스템 개선</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:18px">
-      🔧 대장간 인챈트 부여 시 장비 레벨이 정확히 반영<br>
-      📈 MATK(마법 공격력) 인챈트 효과가 이제 전투에 적용<br>
-      🛡 관리자 패널 탭 버튼 오작동 수정<br>
-      ♻ 채팅 탭 전환 시 Firebase 연결 중복 생성 수정
+      ❄ 빙결 파편 SPD 감소 효과 실제 적용<br>
+      ☠ 독 중첩 DoT 효과 실제 적용 (매 턴 HP 8% 감소)<br>
+      🛡 신성 방벽 피해 감소 실제 작동<br>
+      🔴 광폭화 ATK 버프 전투에 실제 반영
     </div>
 
-    <div style="background:rgba(74,143,255,.07);border:1px solid rgba(74,143,255,.2);border-radius:8px;padding:10px 14px;font-size:10.5px;color:var(--tx2);line-height:1.9;margin-bottom:18px">
-      💡 <b style="color:var(--tx)">Tip.</b> 장비 슬롯을 클릭하면 인챈트 효과를 포함한 총합 스탯을 한눈에 볼 수 있습니다.
+    <div style="background:rgba(232,68,68,.07);border:1px solid rgba(232,68,68,.25);border-radius:8px;padding:10px 14px;font-size:10.5px;color:var(--tx2);line-height:1.9;margin-bottom:18px">
+      ⚠️ <b style="color:var(--red)">경고.</b> 이번 업데이트로 vhard는 더욱 위험해졌습니다. 전멸 전 도망치는 것도 전략입니다.
     </div>
 
     <div style="display:flex;gap:8px">
@@ -489,7 +498,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <div class="srow"><span class="sn">🌀 회피</span><span class="sv" id="s-dodge">-</span></div>
               <div class="srow"><span class="sn">🔮 MATK</span><span class="sv" id="s-matk">-</span></div>
               <div class="srow"><span class="sn">💀 치명피해</span><span class="sv" id="s-cdmg">-</span></div>
-              <div class="srow" style="border-top:1px solid var(--bd);margin-top:4px;padding-top:4px"><span class="sn" style="color:var(--gold)">⚙️ 장비점수</span><span class="sv" id="s-score" style="color:var(--gold)">-</span></div>
+              <div class="srow" style="border-top:1px solid var(--bd);margin-top:4px;padding-top:4px"><span class="sn" style="color:var(--gold)">⚙️ 전투력</span><span class="sv" id="s-score" style="color:var(--gold)">-</span></div>
             </div>
           </div>
           <div class="card2" style="margin-bottom:9px">
@@ -692,18 +701,22 @@ const ADMIN_EMAIL='aimori1@ag.game';
 
 // ═══ CONSTANTS ═══
 const GRADES={
-  normal:   {name:'노말',    color:'#9d9d9d',w:55,  mult:0.8,skillM:0  },
-  uncommon: {name:'언커먼',  color:'#1eff00',w:25,  mult:1.1,skillM:0.4},
-  rare:     {name:'레어',    color:'#0070dd',w:12,  mult:1.5,skillM:0.8},
-  epic:     {name:'에픽',    color:'#a335ee',w:4,   mult:2.0,skillM:1.2},
-  legendary:{name:'레전더리',color:'#ff8c00',w:0.8, mult:2.8,skillM:2.0},
-  set:      {name:'세트',    color:'#00ffcc',w:0.2, mult:2.5,skillM:2.5},
+  normal:   {name:'노말',    color:'#9d9d9d',w:55,  mult:0.75,skillM:0  },
+  uncommon: {name:'언커먼',  color:'#1eff00',w:25,  mult:1.2, skillM:0.4},
+  rare:     {name:'레어',    color:'#0070dd',w:12,  mult:1.8, skillM:0.8},
+  epic:     {name:'에픽',    color:'#a335ee',w:4,   mult:2.6, skillM:1.2},
+  legendary:{name:'레전더리',color:'#ff8c00',w:0.8, mult:3.8, skillM:2.0},
+  set:      {name:'세트',    color:'#00ffcc',w:0.2, mult:3.0, skillM:2.5},
 };
 const ATTR_N={fire:'🔥화염',ice:'❄냉기',lightning:'⚡번개',dark:'🌑어둠',holy:'✨신성',poison:'☠독'};
 const ATTR_C={fire:'#ff6030',ice:'#60c8ff',lightning:'#ffe040',dark:'#a060ff',holy:'#fff080',poison:'#80ff40'};
 
-// ★ 경험치 테이블 대폭 강화 — 99레벨 매우 오래 걸림
-function expForLevel(lv){return Math.round(500*lv*lv*lv*Math.pow(1.08,lv));}
+// ★ 경험치 테이블: Lv60이하 동일, 이후 지수 완화 (하드코어지만 진행감 유지)
+function expForLevel(lv){
+  if(lv<=60)return Math.round(500*lv*lv*lv*Math.pow(1.08,lv));
+  // 60레벨 이상은 완만하게
+  return Math.round(500*lv*lv*lv*Math.pow(1.05,lv));
+}
 
 // Skills — 전체 하향조정
 const SKILLS={
@@ -844,15 +857,15 @@ const ACCN={
 };
 const WBASES=[
   {id:'sword',    hand:'1H',slot:'weapon',ar:1.0},
-  {id:'staff',    hand:'1H',slot:'weapon',ar:0.7,hr:0.4},
-  {id:'bow',      hand:'2H',slot:'weapon',ar:1.2},
-  {id:'dual',     hand:'2H',slot:'weapon',ar:1.3,sr:0.5},
-  {id:'axe',      hand:'1H',slot:'weapon',ar:1.1},
-  {id:'greataxe', hand:'2H',slot:'weapon',ar:1.5},
-  {id:'dagger',   hand:'1H',slot:'weapon',ar:0.8,sr:0.7},
-  {id:'greatsword',hand:'2H',slot:'weapon',ar:1.6},
-  {id:'spear',    hand:'2H',slot:'weapon',ar:1.2,dr:0.3},
-  {id:'mace',     hand:'1H',slot:'weapon',ar:1.1,dr:0.2},
+  {id:'staff',    hand:'1H',slot:'weapon',ar:0.75,hr:0.5},
+  {id:'bow',      hand:'2H',slot:'weapon',ar:1.6},
+  {id:'dual',     hand:'2H',slot:'weapon',ar:1.75,sr:0.6},
+  {id:'axe',      hand:'1H',slot:'weapon',ar:1.15},
+  {id:'greataxe', hand:'2H',slot:'weapon',ar:2.0},
+  {id:'dagger',   hand:'1H',slot:'weapon',ar:0.85,sr:0.8},
+  {id:'greatsword',hand:'2H',slot:'weapon',ar:2.2},
+  {id:'spear',    hand:'2H',slot:'weapon',ar:1.7,dr:0.35},
+  {id:'mace',     hand:'1H',slot:'weapon',ar:1.15,dr:0.25},
 ];
 const ABASES=[
   {id:'head',   slot:'head',   dr:0.6},
@@ -908,9 +921,9 @@ const DTIERS=[
   {tier:5,n:'신들의 전장',icon:'⚡',minLv:80,floors:12,recLv:85,areas:['abyss']},
 ];
 const DIFF={
-  normal:{name:'노말',color:'var(--green)',minParty:1,maxParty:4,monMult:0.7,dmgMult:0.8,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
-  hard:{name:'어려움',color:'#ff9900',minParty:2,maxParty:4,monMult:1.8,dmgMult:2.2,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:15},
-  vhard:{name:'매우어려움',color:'var(--red)',minParty:2,maxParty:4,monMult:3.5,dmgMult:5.0,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:30,canWipe:true},
+  normal:{name:'노말',color:'var(--green)',minParty:1,maxParty:4,monMult:0.7,dmgMult:0.65,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
+  hard:{name:'어려움',color:'#ff9900',minParty:2,maxParty:4,monMult:1.6,dmgMult:1.7,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:120,canWipe:false},
+  vhard:{name:'매우어려움',color:'var(--red)',minParty:2,maxParty:4,monMult:3.0,dmgMult:3.5,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:250,canWipe:true},
 };
 const MNAMES={
   grassland:['고블린','들쥐','녹색슬라임','도적','들개','메뚜기전사','초원유충','야생멧돼지'],
@@ -1039,7 +1052,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v1.2';
+  const key='abyssworld_update_v1.3';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1050,7 +1063,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v1.2',expire);
+    localStorage.setItem('abyssworld_update_v1.3',expire);
   }
 };
 
@@ -1199,13 +1212,10 @@ function calcSetB(eq){
   const b={};for(const[sid,cnt]of Object.entries(sc)){const sd=SETS[sid];if(!sd)continue;for(const bn of sd.bonuses){if(cnt>=bn.cnt)for(const[k,v]of Object.entries(bn.b))b[k]=(b[k]||0)+v;}}
   return b;
 }
+// ★ 전투력: ATK/DEF/HP/SPD/CRIT 가중 합산 (강화·인챈트·세트 모두 반영)
 function equipScore(c){
-  let score=0;const eq=c.equipment||{};
-  for(const it of Object.values(eq)){
-    if(!it)continue;
-    const gm=GRADES[it.grade]?.mult||1;
-    score+=Object.values(it.stats||{}).reduce((a,v)=>a+(v>0?v:0),0)*gm;
-  }return Math.round(score);
+  const s=calcStats(c);
+  return Math.round(s.atk*1.5 + s.def*0.8 + s.maxHp*0.05 + s.spd*0.3 + s.crit*0.2);
 }
 function getSkills(c_arg){
   const c=c_arg||char;if(!c)return[];
@@ -1271,16 +1281,27 @@ async function selChar(id){
   charId=id;const cs=await get(ref(db,`chars/${id}`));char=cs.val();if(!char)return;
   char.equipment=char.equipment||{};
   EQSLOTS.forEach(s=>{if(!(s.k in char.equipment))char.equipment[s.k]=null;});
-  // ★ 기존 강화 9강 초과 캡
   for(const sl of EQSLOTS){const it=char.equipment[sl.k];if(it&&(it.enhance||0)>9)it.enhance=9;}
-  // ★ setId 없는 가짜 세트 아이템 → 레전더리로 변환
   for(const sl of EQSLOTS){
     const it=char.equipment[sl.k];
     if(it&&it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;}
   }
+  // ★ 최초 로드 시 장비 마이그레이션
+  let equipMigrated=false;
+  for(const sl of EQSLOTS){
+    const it=char.equipment[sl.k];
+    if(it&&(!it._v||it._v<2)){migrateItem(it);equipMigrated=true;}
+  }
   if(!char.str){char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;}
   if(char.extraPotions===undefined)char.extraPotions=0;
   const is=await get(ref(db,`inv/${id}`));inv=is.val()||{};
+  // ★ 인벤 마이그레이션
+  let invMigrated=false;
+  for(const it of Object.values(inv)){
+    if(it&&(!it._v||it._v<2)){migrateItem(it);invMigrated=true;}
+  }
+  if(equipMigrated)await saveChar();
+  if(invMigrated)await saveInv();
   document.getElementById('charScr').classList.remove('open');
   document.getElementById('topbar').style.display='flex';
   document.getElementById('gameLayout').style.display='flex';
@@ -1294,13 +1315,14 @@ async function selChar(id){
   onValue(ref(db,`chars/${id}`),sn=>{
     if(sn.val()){
       char=sn.val();char.equipment=char.equipment||{};if(!char.str)char.str=5;
-      // ★ 강화 9강 캡 + 가짜 세트 변환 → 변경사항 있으면 저장
       let dirty=false;
       for(const sl of EQSLOTS){
         const it=char.equipment[sl.k];
         if(!it)continue;
         if((it.enhance||0)>9){it.enhance=9;dirty=true;}
         if(it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;dirty=true;}
+        // ★ 신규 공식으로 스탯 마이그레이션
+        if(!it._v||it._v<2){migrateItem(it);dirty=true;}
       }
       if(dirty)saveChar();
       updateTop();renderChar();
@@ -1308,11 +1330,12 @@ async function selChar(id){
   });
   onValue(ref(db,`inv/${id}`),sn=>{
     inv=sn.val()||{};
-    // ★ 인벤 가짜 세트 → 레전더리 변환, 강화 9강 캡
     let needSave=false;
     for(const it of Object.values(inv)){
       if(it&&it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;needSave=true;}
       if(it&&(it.enhance||0)>9){it.enhance=9;needSave=true;}
+      // ★ 인벤 아이템도 마이그레이션
+      if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
     }
     if(needSave)saveInv();
     renderInv();
@@ -1342,7 +1365,9 @@ function gainExp(amt){
   while(char.exp>=char.expNext){
     char.exp-=char.expNext;char.level++;
     char.expNext=expForLevel(char.level);
-    char.baseAtk+=0.7;char.baseDef+=0.3;char.baseSpd+=0.3;char.maxHp+=2;char.hp=char.maxHp;
+    char.baseAtk+=0.7;char.baseDef+=0.3;char.baseSpd+=0.3;char.maxHp+=2;
+    // ★ 하드코어: 레벨업 시 HP 완전 회복 없음 - maxHp만 늘어남 (전투 중엔 더욱 의미있는 생존 도전)
+    const hpGain=2; char.hp=Math.min(char.hp+hpGain, char.maxHp);
     const totalPts=rand(1,5);
     const rolled={};
     for(let i=0;i<totalPts;i++){const k=pick(STATS_DEF.map(s=>s.k));char[k]=(char[k]||1)+1;rolled[k]=(rolled[k]||0)+1;}
@@ -1654,7 +1679,7 @@ function getItemName(base,grade){
 // ★ 인챈트 스탯을 아이템 레벨과 등급에 따라 유동적으로 계산
 function scaleEnchant(b, lv, gradeMult){
   const scaled={};
-  const lm=1+(lv-1)*0.03; // 레벨당 3%
+  const lm=1+(lv-1)*0.055; // ★ genItem과 동일한 레벨 배율
   for(const[k,v]of Object.entries(b)){
     if(v===0){scaled[k]=0;continue;}
     const base=Math.abs(v)*lm*gradeMult;
@@ -1667,34 +1692,31 @@ function scaleEnchant(b, lv, gradeMult){
 function genItem(pool,forcedGrade=null,lv=1,hint=false){
   const base=pick(pool);
   let grade=forcedGrade||rollGrade(hint);
-  // ★ 일반 아이템 생성 시 세트 등급이 나오면 레전더리로 변환 (세트는 genSetItem만 생성)
   if(grade==='set')grade='legendary';
-  const mult=GRADES[grade]?.mult||1,lm=1+(lv-1)*0.035; // ★ 레벨 배율 낮춤
+  const mult=GRADES[grade]?.mult||1,lm=1+(lv-1)*0.055; // ★ 레벨 배율 강화
   const stats={};
-  // ★ 기본 스탯 범위 대폭 하향
-  if(base.ar)stats.atk=Math.round(rand(4,10)*base.ar*mult*lm);
-  if(base.dr)stats.def=Math.round(rand(2,7)*base.dr*mult*lm);
-  if(base.hr)stats.hp =Math.round(rand(10,30)*base.hr*mult*lm);
-  if(base.sr)stats.spd=Math.round(rand(2,6)*base.sr*mult*lm);
+  // ★ 스탯 범위 상향 + 2H 무기는 추가 없음 (ar 자체가 높음)
+  if(base.ar)stats.atk=Math.round(rand(5,12)*base.ar*mult*lm);
+  if(base.dr)stats.def=Math.round(rand(3,8)*base.dr*mult*lm);
+  if(base.hr)stats.hp =Math.round(rand(12,32)*base.hr*mult*lm);
+  if(base.sr)stats.spd=Math.round(rand(2,7)*base.sr*mult*lm);
   const gi=Object.keys(GRADES).indexOf(grade);
   const gradeMult=GRADES[grade]?.mult||1;
   const preRaw=gi>=1?wRand(PRE):null;
   const sufRaw=gi>=2?wRand(SUF):null;
-  // ★ 접두/접미: 원본 b 유지, scaledB 따로 계산해서 저장
   const pre=preRaw?{n:preRaw.n,sk:preRaw.sk||null,attr:preRaw.attr||null,
     b:scaleEnchant(preRaw.b,lv,gradeMult)}:null;
   const suf=sufRaw?{n:sufRaw.n,sk:sufRaw.sk||null,
     b:scaleEnchant(sufRaw.b,lv,gradeMult)}:null;
   const attr=pre?.attr||(gi>=4?pick(Object.keys(ATTR_N)):null);
   const bname=getItemName(base,grade);
-  // ★ 이름 구조: [접두] [등급수식어] [장비명]
   const gAdj=grade==='legendary'?'전설의 ':grade==='epic'?'정예 ':grade==='rare'?'강화된 ':grade==='uncommon'?'좋은 ':'';
   const fullN=(pre?pre.n+' ':'')+(suf?suf.n+' ':'')+gAdj+bname;
-  // ★ 레벨 제한: 던전 티어 레벨에 맞게 (최소 1, 던전 권장레벨 기준)
   const reqLv=Math.max(1,Math.floor(lv*0.85));
   return{id:gId(),name:fullN,baseName:bname,baseId:base.id,slot:base.slot,hand:base.hand||null,
     grade,gradeName:GRADES[grade].name,gradeColor:GRADES[grade].color,
     stats,reqLv,itemLv:lv,
+    _v:2, // ★ 마이그레이션 버전 태그
     prefix:pre?{n:pre.n,b:pre.b,sk:pre.sk||null,attr:pre.attr||null}:null,
     suffix:suf?{n:suf.n,b:suf.b,sk:suf.sk||null}:null,
     attr};
@@ -1710,9 +1732,55 @@ function genSetItem(){
     prefix:null,suffix:null,attr:null,
     reqLv,itemLv:reqLv,enhance:0};
 }
-function genShopItem(si){return{id:gId(),name:si.n||si.name,baseId:si.n,slot:si.slot,hand:si.hand||null,grade:'normal',gradeName:'노말',gradeColor:'#9d9d9d',stats:{...si.stats},prefix:null,suffix:null,attr:null};}
-function genScrollItem(){return{id:gId(),name:'능력치 재조정 주문서',baseId:'reroll_scroll',slot:'scroll',hand:null,grade:'legendary',gradeName:'전설',gradeColor:'#ff8c00',stats:{},prefix:null,suffix:null,attr:null,isScroll:true};}
-function genEnchantScroll(){return{id:gId(),name:'인챈트 스크롤',baseId:'enchant_scroll',slot:'scroll',hand:null,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',stats:{},prefix:null,suffix:null,attr:null,isEnchantScroll:true};}
+function genShopItem(si){return{id:gId(),name:si.n||si.name,baseId:si.n,slot:si.slot,hand:si.hand||null,grade:'normal',gradeName:'노말',gradeColor:'#9d9d9d',stats:{...si.stats},prefix:null,suffix:null,attr:null,_v:2};}
+function genScrollItem(){return{id:gId(),name:'능력치 재조정 주문서',baseId:'reroll_scroll',slot:'scroll',hand:null,grade:'legendary',gradeName:'전설',gradeColor:'#ff8c00',stats:{},prefix:null,suffix:null,attr:null,isScroll:true,_v:2};}
+function genEnchantScroll(){return{id:gId(),name:'인챈트 스크롤',baseId:'enchant_scroll',slot:'scroll',hand:null,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',stats:{},prefix:null,suffix:null,attr:null,isEnchantScroll:true,_v:2};}
+
+// ★ 구버전 아이템 → 신규 공식으로 스탯 재계산 마이그레이션
+// 기존 등급 multiplier (구버전 기준)
+const OLD_GRADE_MULT={normal:0.8,uncommon:1.1,rare:1.5,epic:2.0,legendary:2.8,set:2.5};
+function migrateItem(it){
+  if(!it||it._v>=2||it.grade==='set'||it.isScroll||it.isEnchantScroll)return it;
+  const allBases=[...WBASES,...ABASES,...ACCBASES];
+  const base=allBases.find(b=>b.id===it.baseId);
+  if(!base){it._v=2;return it;}
+  const lv=it.itemLv||1;
+  const grade=it.grade||'normal';
+  const newMult=GRADES[grade]?.mult||1;
+  const newLm=1+(lv-1)*0.055;
+  // 신규 공식으로 기본 스탯 재계산 (중간값 사용 — 랜덤 없음)
+  const newBase={};
+  if(base.ar)newBase.atk=Math.round(8.5*base.ar*newMult*newLm);
+  if(base.dr)newBase.def=Math.round(5.5*base.dr*newMult*newLm);
+  if(base.hr)newBase.hp =Math.round(22 *base.hr*newMult*newLm);
+  if(base.sr)newBase.spd=Math.round(4.5*base.sr*newMult*newLm);
+  // 강화 반영
+  const enh=it.enhance||0;
+  const newStats={...newBase};
+  if(enh>0){
+    for(const k of Object.keys(newBase)){
+      if((newBase[k]||0)>0)
+        newStats[k]=Math.round(newBase[k]*(1+Math.pow(enh,1.3)*0.06));
+    }
+  }
+  it.stats=newStats;
+  if(enh>0)it._baseStats={...newBase};
+  // 인챈트 b값 재스케일 (레벨·등급 배율 변화 비율로 조정)
+  const oldMult=OLD_GRADE_MULT[grade]||1;
+  const oldLm=1+(lv-1)*0.03;
+  const ratio=(newMult/oldMult)*(newLm/oldLm);
+  for(const enc of[it.prefix,it.suffix]){
+    if(!enc?.b)continue;
+    for(const k of Object.keys(enc.b)){
+      if(enc.b[k]!==0){
+        enc.b[k]=Math.round(enc.b[k]*ratio);
+        if(Math.abs(enc.b[k])<1)enc.b[k]=enc.b[k]>0?1:-1;
+      }
+    }
+  }
+  it._v=2;
+  return it;
+}
 
 // ═══ INVENTORY ═══
 function renderInv(){
@@ -1965,12 +2033,14 @@ window.closeTownSec=()=>{document.getElementById('townmenu').style.display='grid
 
 // 판매가 계산: 등급 기본값 × 아이템레벨 배율
 function getSellPrice(it){
-  // 등급 기본가 × 레벨 배율 — 저렴하게 유지
-  const BASE={normal:8,uncommon:25,rare:70,epic:180,legendary:450,set:900};
-  const base=BASE[it.grade]||8;
+  // ★ 판매가 인상 - 골드 순환 개선
+  const BASE={normal:20,uncommon:70,rare:200,epic:550,legendary:1400,set:2500};
+  const base=BASE[it.grade]||20;
   const lv=it.itemLv||1;
-  const lvMult=1+(lv-1)*0.04; // 레벨당 4% 증가 (스탯 배율과 동일)
-  return Math.round(base*lvMult);
+  const lvMult=1+(lv-1)*0.05;
+  // ★ 강화 수치 반영 (강화할수록 판매가 증가)
+  const enhBonus=1+((it.enhance||0)*0.15);
+  return Math.round(base*lvMult*enhBonus);
 }
 
 function renderSell(sb){
@@ -2061,11 +2131,9 @@ window.buyShop=async i=>{
 };
 function renderGamble(sb){
   const boxes=[
-    {n:'노말 상자',desc:'노말~언커먼',price:200,g:['normal','normal','uncommon']},
-    {n:'레어 상자',desc:'언커먼~레어',price:800,g:['uncommon','uncommon','rare']},
-    {n:'에픽 상자',desc:'레어~에픽',price:2500,g:['rare','epic']},
-    {n:'레전더리 상자',desc:'에픽~레전더리',price:6000,g:['epic','legendary']},
-    {n:'세트 상자',desc:'레어~세트 확률',price:10000,g:['rare','epic','legendary','set'],sw:0.3},
+    {n:'노말 상자',desc:'노말~언커먼',price:300,g:['normal','normal','uncommon']},
+    {n:'레어 상자',desc:'언커먼~레어',price:1200,g:['uncommon','uncommon','rare']},
+    {n:'에픽 상자',desc:'레어~에픽',price:4000,g:['rare','rare','epic']},
   ];
   sb.innerHTML=`<div class="ggrid">${boxes.map((b,i)=>`<div class="gbox"><div style="font-size:20px;margin-bottom:5px">📦</div><div style="font-family:'Cinzel',serif;font-size:11.5px;font-weight:700;color:var(--gold);margin-bottom:2px">${b.n}</div><div style="font-size:10px;color:var(--tx2);margin-bottom:7px">${b.desc}</div><div style="font-size:11px;color:var(--gold);margin-bottom:6px">💰${b.price}</div><button class="btn btn-gold btn-sm" onclick="openBox(${i})">개봉</button></div>`).join('')}</div>`;
   sb.__boxes=boxes;
@@ -2101,18 +2169,17 @@ window.doEnchant=async(sl,type)=>{
   else{const en=wRand(SUF);it.suffix={n:en.n,b:scaleEnchant(en.b,lv,gradeMult),sk:en.sk||null};toast(it.name+'에 접미 '+en.n+' 추가!');}
   await saveChar();updateTop();renderChar();
 };
-// ★ 강화 비용 계산 (장비레벨 + 등급 + 인챈트 가치 반영)
+// ★ 강화 비용 (절감: 골드 수입 대비 현실적 수준)
 function getForgeCost(it){
-  const gradeMult={normal:1,uncommon:2,rare:4,epic:10,legendary:25,set:40};
+  const gradeMult={normal:1,uncommon:1.8,rare:3.5,epic:8,legendary:20,set:32};
   const lv=it.itemLv||1;
-  const enh=(it.enhance||0)+1; // 다음 강화 단계
+  const enh=(it.enhance||0)+1;
   const gm=gradeMult[it.grade]||1;
-  // 인챈트 가치 (접두+접미 스탯 합산)
   const enchantVal=Object.values(it.prefix?.b||{}).reduce((s,v)=>s+Math.abs(v||0),0)
     +Object.values(it.suffix?.b||{}).reduce((s,v)=>s+Math.abs(v||0),0);
-  const enchBonus=Math.round(enchantVal*5);
-  const base=Math.round(200*gm*(1+(lv-1)*0.08)*Math.pow(1.4,enh-1));
-  return Math.max(500,base+enchBonus);
+  const enchBonus=Math.round(enchantVal*3);
+  const base=Math.round(120*gm*(1+(lv-1)*0.07)*Math.pow(1.35,enh-1));
+  return Math.max(300,base+enchBonus);
 }
 
 // 강화 단계별 성공률과 파괴율
@@ -2264,27 +2331,36 @@ window.backToDungMain=()=>{
   document.getElementById('dungBattle').style.display='none';
 };
 window.selectMode=async function(tierIdx,mode){
-  // ★ innerHTML+= 대신 기존 diffSel 제거 후 새로 추가
   const old=document.getElementById('diffSel');
   if(old)old.remove();
   const t=DTIERS[tierIdx];
+  const myScore=equipScore(char);
   const div=document.createElement('div');div.id='diffSel';
   div.innerHTML=`
-    <div style="font-size:11.5px;font-weight:700;color:var(--tx);margin-bottom:9px">난이도 선택</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="font-size:11.5px;font-weight:700;color:var(--tx)">난이도 선택</div>
+      <div style="font-size:10px;color:var(--tx3);background:var(--sf2);border:1px solid var(--bd);padding:2px 8px;border-radius:5px">
+        내 전투력: <span style="color:var(--gold);font-weight:700;font-family:'IBM Plex Mono',monospace">${myScore}</span>
+      </div>
+    </div>
     ${Object.entries(DIFF).map(([dk,dv])=>{
-      // 솔로 전용 설명 / 파티 전용 설명 분리
+      const meets=myScore>=dv.reqScore;
       let msg;
       if(mode==='solo'){
-        msg=dk==='normal'?'혼자 도전 — 몬스터 55% 조정':
-            dk==='hard'?`장비점수 ${dv.reqScore}+ 권장 — 솔로 도전`:
-            `장비점수 ${dv.reqScore}+ 필요 ⚠️ 와이프 가능`;
+        msg=dk==='normal'?'혼자 도전 — 몬스터 보정 적용':
+            dk==='hard'?`전투력 ${dv.reqScore} 이상 필요`:
+            `전투력 ${dv.reqScore} 이상 필요 ⚠️ 장비 손실 가능`;
       }else{
-        msg=dk==='normal'?'2인 이상, 무난한 난이도':
-            dk==='hard'?`4인 필수, 장비점수 ${dv.reqScore}+`:
-            `4인 필수, 장비점수 ${dv.reqScore}+ ⚠️ 와이프 가능`;
+        msg=dk==='normal'?'2인 이상, 협력 도전':
+            dk==='hard'?`전투력 ${dv.reqScore} 이상 (파티 리더 기준)`:
+            `전투력 ${dv.reqScore} 이상 ⚠️ 장비 손실 가능`;
       }
-      return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between">
-        <div><div style="font-weight:700;color:${dv.color};margin-bottom:2px">${dv.name}</div><div style="font-size:10px;color:var(--tx3)">${msg}</div></div>
+      const locked=dk!=='normal'&&!meets;
+      return`<div style="background:var(--sf2);border:1px solid ${locked?'var(--bd)':dv.color+'44'};border-radius:8px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;${locked?'opacity:.55':''}">
+        <div>
+          <div style="font-weight:700;color:${dv.color};margin-bottom:2px">${dv.name} ${locked?`<span style="font-size:9px;color:var(--red)">[전투력 부족]</span>`:''}</div>
+          <div style="font-size:10px;color:var(--tx3)">${msg}</div>
+        </div>
         <button class="diff-btn diff-${dk==='normal'?'normal':dk==='hard'?'hard':'vhard'}" onclick="startDungeon(${tierIdx},'${mode}','${dk}')">${dv.name}</button>
       </div>`;
     }).join('')}`;
@@ -2294,8 +2370,13 @@ window.selectMode=async function(tierIdx,mode){
 window.startDungeon=async function(tierIdx,mode,diffKey){
   const t=DTIERS[tierIdx];const d=DIFF[diffKey];
   const s=calcStats(char);
+  const score=equipScore(char);
   if(mode==='solo'){
     if(char.level<t.minLv){toast(`레벨 부족! 최소 Lv.${t.minLv} 필요`);return;}
+    // ★ 솔로도 hard/vhard 장비점수 체크
+    if(diffKey!=='normal'&&score<d.reqScore){
+      toast(`⚠️ 장비 전투력 부족! 현재: ${score} / 필요: ${d.reqScore}`);return;
+    }
     startBattle(tierIdx,mode,diffKey,[{id:charId,name:char.name,charData:char,stats:s,hp:s.maxHp,maxHp:s.maxHp,potions:5+(char.extraPotions||0)}]);
   }else{
     if(!myPartyId){toast('파티가 없습니다. 파티 탭에서 생성하세요.');return;}
@@ -2306,7 +2387,7 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
     if((diffKey==='hard'||diffKey==='vhard')&&memArr.length<2){toast('어려움 이상은 2인 이상 필요');return;}
     if(diffKey!=='normal'){
       const score=equipScore(char);
-      if(score<d.reqScore){toast(`장비 점수 부족! 현재: ${score}, 필요: ${d.reqScore}`);return;}
+      if(score<d.reqScore){toast(`전투력 부족! 현재: ${score} / 필요: ${d.reqScore}`);return;}
     }
     // ★ 파티원 전체 레벨 체크 — 한 명이라도 부족하면 입장 불가
     const underLevel=memArr.filter(m=>m.level<t.minLv);
@@ -2490,29 +2571,36 @@ function nextFloor(){
   if(!battle)return;
   battle.floor++;
   if(battle.floor>battle.floors){dungeonClear();return;}
-  // Check revive queue from previous floor
+  // 부활 큐 처리 (파티)
   for(const pid of battle.reviveQueue){
     const pm=battle.players.find(p=>p.id===pid);if(!pm)continue;
-    // Cost 1 potion from alive party member
     const donor=battle.players.find(p=>p.status==='alive'&&p.id!==pid);
     if(donor&&donor.potions>0){
       donor.potions--;pm.status='alive';pm.hp=Math.round(pm.maxHp*0.3);
-      blogAdd(`🔄 <span class="l-revive">${pm.name}이 ${donor.name}의 포션으로 부활했습니다! (HP:${pm.hp})</span>`);
+      blogAdd(`🔄 <span class="l-revive">${pm.name}이 ${donor.name}의 포션으로 부활! (HP:${pm.hp})</span>`);
     }
   }
   battle.reviveQueue.clear();
-  // Restore 1 potion per alive player after phase
+  // ★ 층 클리어 후 HP 소량 회복 (하드코어: 15%, 전층 보스 직전엔 25%)
+  const nextIsBoss=(battle.floor===battle.floors);
+  const healRate=nextIsBoss?0.25:0.15;
+  for(const p of battle.players.filter(p=>p.status==='alive')){
+    const healAmt=Math.round(p.maxHp*healRate);
+    p.hp=Math.min(p.hp+healAmt,p.maxHp);
+    blogAdd(`<span class="l-heal">🌿 ${p.name} 층 클리어 회복 +${healAmt}HP${nextIsBoss?' (보스 전 회복)':''}</span>`);
+  }
+  // 포션 +1 (2층 이상부터)
   if(battle.floor>1){
     for(const p of battle.players.filter(p=>p.status==='alive')){
       const mx=5+(p.charData?.extraPotions||0);
-      if(p.potions<mx){p.potions++;blogAdd(`<span class="l-heal">💊 ${p.name}의 포션 +1 (${p.potions}/${mx})</span>`);}
+      if(p.potions<mx){p.potions++;blogAdd(`<span class="l-heal">💊 ${p.name} 포션 +1 (${p.potions}/${mx})</span>`);}
     }
   }
   // Spawn monsters
   const isBoss=battle.floor===battle.floors;
   battle.monsters=spawnMonsters(battle,isBoss);
-  // ★ 히든 상인 등장 (보스 층 제외, 5% 확률, 배틀 진행 중일 때만)
-  if(battle.floor<battle.floors&&!battle.done&&Math.random()<0.05){
+  // ★ 히든 상인 등장 (보스 층 제외, 8% 확률)
+  if(battle.floor<battle.floors&&!battle.done&&Math.random()<0.08){
     showHiddenMerchant();
     return; // 히든 상인 보여주고 거기서 다음 층 진행
   }
@@ -2567,7 +2655,7 @@ function showHiddenMerchant(){
   for(let i=0;i<rand(2,3);i++){
     const g=pick(gradePool);
     const it=genItem(pool,g,lv+rand(0,5));
-    const price=Math.round(getSellPrice(it)*8); // 판매가의 8배
+    const price=Math.round(getSellPrice(it)*4); // 판매가의 4배
     items.push({it,price});
   }
   const itemsHtml=items.map((x,i)=>`
@@ -2700,10 +2788,19 @@ function updateActionButtons(chosen){
 function resolvePhase(){
   if(!battle)return;
   battle.phase=2;
-  // ★ 이 페이즈의 전투 시간 누적 (선택 대기 시간 제외, 실제 행동까지의 시간만)
   if(battle._phaseStart){
     battle.combatMs=(battle.combatMs||0)+(Date.now()-battle._phaseStart);
     battle._phaseStart=null;
+  }
+  // ★ DoT(독) 틱 처리
+  for(const m of battle.monsters.filter(m=>m.status==='alive')){
+    if(m._dot&&m._dot>0){
+      const dotDmg=Math.round(m.maxHp*0.08);
+      m.hp=Math.max(0,m.hp-dotDmg);
+      m._dot--;
+      blogAdd(`<span class="l-skill">☠ ${m.name} 독 피해 -${dotDmg}HP (남은 턴: ${m._dot})</span>`);
+      if(m.hp<=0){m.status='dead';blogAdd(`<span class="l-dead">💀 ${m.name} 독으로 처치!</span>`);}
+    }
   }
   const alive=battle.players.filter(p=>p.status==='alive');
   // Check flee (all alive must choose flee)
@@ -2730,24 +2827,26 @@ function resolvePhase(){
       // Update aggro from damage
       const aliveM=battle.monsters.filter(m=>m.status==='alive');
       if(!aliveM.length)continue;
-      // target highest aggro monster? No: players attack highest aggro monster
-      const target=aliveM[0]; // simplified: attack first monster
+      const target=aliveM[0];
       let dmg=calcPlayerDmg(p,s);
+      // ★ ATK 버프 반영
+      if(p._atkBuff&&p._atkBuffTurns>0){dmg=Math.round(dmg*(1+p._atkBuff));p._atkBuffTurns--;if(p._atkBuffTurns<=0)p._atkBuff=0;}
       let isCrit=Math.random()*100<s.crit;
       if(isCrit)dmg=Math.round(dmg*s.critDmg/100);
-      if(Math.random()*100<target.dodge||0)dmg=0;
+      if(Math.random()*100<(target.dodge||0))dmg=0;
       target.hp=Math.max(0,target.hp-dmg);
       p.aggro=(p.aggro||0)+(isCrit?dmg*1.5:dmg);
       if(isCrit)blogAdd(`<span class="l-crit">⚔ ${p.name} → ${target.name} 치명! <strong>${dmg}</strong></span>`);
       else blogAdd(`<span class="l-dmg">⚔ ${p.name} → ${target.name} <strong>${dmg}</strong>`+(dmg===0?' (빗나감)':'')+'</span>');
       if(target.hp<=0){target.status='dead';blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
-      // Skill proc
       trySkillProc(p,s,target,aliveM);
     }
   }
   // Monsters attack
   const aliveM=battle.monsters.filter(m=>m.status==='alive');
   for(const m of aliveM){
+    // ★ 마비(stun) 처리
+    if(m._stunned&&m._stunned>0){m._stunned--;blogAdd(`<span class="l-sys">🧊 ${m.name} 마비로 행동 불가!</span>`);continue;}
     const aliveP=battle.players.filter(p=>p.status==='alive');if(!aliveP.length)break;
     aliveP.sort((a,b)=>(b.aggro||0)-(a.aggro||0));
     const tgt=aliveP[0];
@@ -2787,9 +2886,11 @@ function resolvePhase(){
 
     let dmg=Math.max(1,m.atk-calcStats(tgt.charData||char).def);
     if(tgt.defending)dmg=Math.round(dmg*0.5);
+    if(tgt._shield){dmg=Math.round(dmg*0.5);tgt._shield=false;} // ★ 신성 방벽
     if(tgt.healing){
-      if(battle.mode==='solo'){blogAdd(`<span class="l-sys">💊 ${tgt.name} 회복 중 — 공격 무효!</span>`);continue;}
-      else dmg=Math.round(dmg*0.7); // 파티: 30% 감소
+      // ★ 솔로도 완전 무적 아닌 55% 감소 (하드코어 유지)
+      dmg=Math.round(dmg*(battle.mode==='solo'?0.45:0.65));
+      if(dmg<1)dmg=1;
     }
     const dodge=calcStats(tgt.charData||char).dodge;
     if(Math.random()*100<dodge){blogAdd(`<span class="l-sys">🌀 ${tgt.name} 회피!</span>`);continue;}
@@ -2804,9 +2905,9 @@ function resolvePhase(){
   // Check wipe (all dead)
   const anyAlive=battle.players.some(p=>p.status==='alive');
   if(!anyAlive){
-    blogAdd('<span class="l-dead">⚠️ 파티 전멸!</span>');
-    if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 아이템 손실 가능!</span>');maybeLoseItem();}
-    syncBattleState(); // ★ 파티원에게 상태 동기화
+    blogAdd(battle.mode==='solo'?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
+    if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');maybeLoseItem();}
+    syncBattleState();
     setTimeout(()=>endBattle(false,false),1500);return;
   }
   // Check monsters dead
@@ -2852,7 +2953,6 @@ function trySkillProc(p,s,target,allM){
       if(fx.dmg)fx.dmg=Math.min(Math.round(fx.dmg),99999);
       if(fx.taunt){p.aggro=(p.aggro||0)+9999;blogAdd(`<span class="l-skill">😤 ${p.name}: ${fx.msg}</span>`);}
       else if(fx.disperseAggro){
-        // Distribute p's aggro among all alive players
         const aP=battle.players.filter(x=>x.status==='alive');
         const share=Math.round((p.aggro||0)/aP.length);
         for(const x of aP){x.aggro=(x.aggro||0)+share;}
@@ -2868,16 +2968,44 @@ function trySkillProc(p,s,target,allM){
         const hits=fx.hits||1;
         let totalDmg=0;
         for(let h=0;h<hits;h++){const hd=Math.round(dmg/hits);target.hp=Math.max(0,target.hp-hd);totalDmg+=hd;}
+        // ★ SPD 디버프 (ice_shard 등) 실제 적용
+        if(fx.debuff==='spd'&&target.status==='alive'){
+          target._spdDebuff=(target._spdDebuff||0)+1;
+          const origAtk=target._origAtk||target.atk;
+          if(!target._origAtk)target._origAtk=target.atk;
+          target.atk=Math.max(1,Math.round(origAtk*(1-target._spdDebuff*0.12)));
+          blogAdd(`<span class="l-skill">❄ ${target.name} 둔화! ATK -${target._spdDebuff*12}%</span>`);
+        }
+        if(fx.stun&&target.status==='alive'){
+          target._stunned=1;
+          blogAdd(`<span class="l-skill">🧊 ${target.name} 마비!</span>`);
+        }
         if(fx.heal){const hm=Math.round(p.maxHp*fx.heal);p.hp=Math.min(p.hp+hm,p.maxHp);blogAdd(`<span class="l-heal"> 흡수 +${hm}HP</span>`);}
         if(fx.selfDmg){const sd=Math.round(p.maxHp*fx.selfDmg);p.hp=Math.max(1,p.hp-sd);blogAdd(`<span class="l-dmg"> 자신에게 -${sd}</span>`);}
+        // ★ DoT 적용 (독 등)
+        if(fx.dot&&target.status==='alive'){
+          target._dot=(target._dot||0)+fx.dot;
+          blogAdd(`<span class="l-skill">☠ ${target.name}에게 독 부여! (${fx.dot}턴)</span>`);
+        }
         p.aggro=(p.aggro||0)+totalDmg*1.3;
         blogAdd(`<span class="l-skill">⚡ ${p.name}: ${fx.msg} <strong>${totalDmg}</strong></span>`);
         if(target.hp<=0&&target.status==='alive'){target.status='dead';blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
       }else{
-        // Buff
-        blogAdd(`<span class="l-skill">✨ ${p.name}: ${fx.msg}</span>`);
+        // buff (berserk, mana_surge 등 dmg=0인 스킬)
+        if(fx.buffAtk&&fx.buffTurns){
+          p._atkBuff=(p._atkBuff||0)+fx.buffAtk;p._atkBuffTurns=(fx.buffTurns||2);
+          blogAdd(`<span class="l-skill">🔴 ${p.name}: ${fx.msg} ATK +${Math.round(fx.buffAtk*100)}% ${fx.buffTurns}턴</span>`);
+        }else if(fx.buffSkill){
+          p._skillBuff=(p._skillBuff||0)+fx.buffSkill;p._skillBuffTurns=(fx.buffTurns||2);
+          blogAdd(`<span class="l-skill">🔮 ${p.name}: ${fx.msg} 스킬발동 +${Math.round(fx.buffSkill*100)}% ${fx.buffTurns}턴</span>`);
+        }else if(fx.shield){
+          p._shield=true;
+          blogAdd(`<span class="l-skill">🛡 ${p.name}: ${fx.msg} 이번 턴 피해 50% 추가 감소</span>`);
+        }else{
+          blogAdd(`<span class="l-skill">✨ ${p.name}: ${fx.msg}</span>`);
+        }
       }
-      break; // one skill per turn
+      break;
     }
   }
 }
@@ -2894,15 +3022,14 @@ function lootPhase(){
     const dropR=d.dropMult*(1+char.luk*0.003);
     // ★ 등급별 드랍 확률 (노말 위주, 높은 등급 매우 희박)
     const dropRoll=Math.random();
-    if(dropRoll<0.30*dropR){
+    if(dropRoll<0.35*dropR){
       const pool=[...WBASES,...ABASES,...ACCBASES];
-      // 등급 강제 적용으로 분배 조정
       let forcedGrade=null;
       const gr=Math.random();
-      if(gr<0.60)forcedGrade='normal';
-      else if(gr<0.85)forcedGrade='uncommon';
-      else if(gr<0.96)forcedGrade='rare';
-      else if(gr<0.993)forcedGrade='epic';
+      if(gr<0.55)forcedGrade='normal';
+      else if(gr<0.80)forcedGrade='uncommon';
+      else if(gr<0.94)forcedGrade='rare';
+      else if(gr<0.992)forcedGrade='epic';
       else forcedGrade='legendary';
       const it=genItem(pool,forcedGrade,t.recLv+rand(-5,5));
       addItem(it);blogAdd(`<span class="l-item">🎁 드랍: ${it.name}</span>`);
@@ -2921,13 +3048,30 @@ function lootPhase(){
 }
 
 function maybeLoseItem(){
-  const allItems=Object.values(inv);
-  if(!allItems.length)return;
-  if(Math.random()<0.3){
-    const lost=pick(allItems);delete inv[lost.id];
-    blogAdd(`<span class="l-dead">💥 ${lost.name} 소실!</span>`);
-    saveInv();
+  // ★ 하드코어: 인벤토리뿐 아니라 장착 장비도 손실 대상 (50% 확률)
+  const invItems=Object.values(inv).filter(i=>!i.isScroll&&!i.isEnchantScroll);
+  const eqItems=Object.values(char.equipment||{}).filter(Boolean);
+  const allLosable=[...invItems,...eqItems];
+  if(!allLosable.length)return;
+  // vhard 전멸 시 인벤은 50%, 장착 장비는 20%로 각각 체크
+  let lostCount=0;
+  for(const it of invItems){
+    if(Math.random()<0.5){
+      delete inv[it.id];
+      blogAdd(`<span class="l-dead">💥 인벤 아이템 소실: ${it.name}</span>`);
+      lostCount++;
+    }
   }
+  for(const[slot,it] of Object.entries(char.equipment||{})){
+    if(!it)continue;
+    if(Math.random()<0.20){
+      char.equipment[slot]=null;
+      blogAdd(`<span class="l-dead">💥 장착 장비 파괴: ${it.name}</span>`);
+      lostCount++;
+    }
+  }
+  if(lostCount>0){saveInv();saveChar();}
+  else blogAdd(`<span class="l-sys">💀 전멸... 장비는 지켰다.</span>`);
 }
 
 async function dungeonClear(){
@@ -2935,6 +3079,14 @@ async function dungeonClear(){
   const mode=battle.mode;
   const tierIdx=battle.tierIdx;
   blogAdd(`<span class="l-exp">🏆 던전 클리어! 난이도: ${d.name}</span>`);
+
+  // ★ 보스 클리어 보너스 드랍 (난이도별 등급 보장)
+  const bonusPool=[...WBASES,...ABASES,...ACCBASES];
+  const bonusGrade=dk==='vhard'?pick(['epic','epic','legendary']):dk==='hard'?pick(['rare','rare','epic']):'rare';
+  const bonusLv=battle.tier.recLv+rand(0,8);
+  const bonusItem=genItem(bonusPool,bonusGrade,bonusLv);
+  await addItem(bonusItem);
+  blogAdd(`<span class="l-set">🎁 보스 클리어 보너스: ${bonusItem.name}</span>`);
 
   // ★ 물약 +1: vhard 최초 1회만 (솔로/파티 각각 별도, 최대 15개 = 기본5 + 최대10)
   if(dk==='vhard'){
@@ -3105,7 +3257,7 @@ function renderBattle(){
       <div class="act-btns">
         <button id="actbtn-atk" class="act-btn act-atk" onclick="chooseAction('attack')">⚔ 공격</button>
         <button id="actbtn-def" class="act-btn act-def" onclick="chooseAction('defend')">🛡 방어<br><span style="font-size:9px">피해 50% 감소</span></button>
-        <button id="actbtn-heal" class="act-btn act-heal" onclick="chooseAction('heal')">💊 회복<br><span style="font-size:9px">HP 50% 회복${isSolo?' · 무적':' · 피해30%↓'} (포션 ${myP.potions}개)</span></button>
+        <button id="actbtn-heal" class="act-btn act-heal" onclick="chooseAction('heal')">💊 회복<br><span style="font-size:9px">HP 50% 회복${isSolo?' · 피해 55%↓':' · 피해 35%↓'} (포션 ${myP.potions}개)</span></button>
         <button id="actbtn-flee" class="act-btn act-flee" onclick="chooseAction('flee')">💨 도망<br><span style="font-size:9px">${isSolo?'즉시 도망':'전원 선택 시'}</span></button>
       </div>`:
     myP&&myP.status==='alive'&&battle.phase===1&&myP.actionChosen?
@@ -3548,7 +3700,7 @@ window.adminOpenUser=async function(cid){
           <div style="font-size:11px;color:var(--blue)">${(c.exp||0).toLocaleString()}</div>
         </div>
         <div style="background:var(--sf3);border:1px solid var(--bd);border-radius:7px;padding:8px 12px;text-align:center">
-          <div style="font-size:9px;color:var(--tx3)">장비점수</div>
+          <div style="font-size:9px;color:var(--tx3)">전투력</div>
           <div style="font-size:11px;color:var(--gold)">${equipScore(c)}</div>
         </div>
         <div style="background:var(--sf3);border:1px solid var(--bd);border-radius:7px;padding:8px 12px;text-align:center">
