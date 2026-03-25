@@ -3012,7 +3012,18 @@ async function renderAuction(sb){
                     ${isMine?`<span style="font-size:9px;color:var(--gold)">[내 등록]</span>`:''}
                   </div>
                   ${statStr?`<div style="font-size:10px;color:var(--green);margin-bottom:2px">${statStr}</div>`:''}
-                  ${it.isEnchantScroll?`<div style="font-size:9.5px;color:var(--purple)">📜 ${it.enchantIsPrefix!==false?'[접두]':'[접미]'} ${it.enchantData?.n||''} · 성공률 ${Math.round((it.successRate||0.7)*100)}%</div>`:''}
+                  ${it.isEnchantScroll?`
+                  <div style="background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.25);border-radius:5px;padding:5px 8px;margin-bottom:3px">
+                    <div style="font-size:10px;font-weight:700;color:var(--purple);margin-bottom:3px">📜 ${it.enchantIsPrefix!==false?'[접두]':'[접미]'} ${it.enchantData?.n||''} <span style="font-size:9px;font-weight:400;color:var(--tx3)">성공률 ${Math.round((it.successRate||0.7)*100)}%</span></div>
+                    ${(()=>{
+                      const b=it.enchantData?.b||{};
+                      const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드보너스',skillBonus:'스킬발동'};
+                      const parts=Object.entries(b).filter(([,v])=>v!==0&&isFinite(v)&&Math.abs(v)<=9999)
+                        .map(([k,v])=>`<span style="color:${v>0?'var(--green)':'var(--red)'}">${labelMap[k]||k}${v>0?'+':''}${v}</span>`);
+                      return parts.length?`<div style="font-size:10px;display:flex;flex-wrap:wrap;gap:5px">${parts.join('')}</div>`:'';
+                    })()}
+                    ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<div style="font-size:9.5px;color:var(--gold);margin-top:2px">⚡ ${SKILLS[it.enchantData.sk].name} — ${SKILLS[it.enchantData.sk].desc}</div>`:''}
+                  </div>`:''}
                   ${!it.isEnchantScroll&&(it.prefix||it.suffix)?`<div style="font-size:9.5px;color:var(--tx3)">${it.prefix?`[접두:${it.prefix.n}]`:''} ${it.suffix?`[접미:${it.suffix.n}]`:''}</div>`:''}
                   <div style="font-size:9.5px;color:var(--tx3);margin-top:2px">판매자: ${v.sellerName||'?'}</div>
                 </div>
@@ -5034,10 +5045,15 @@ function formatTimeLeft(ms){
 }
 
 function startSubjugationWatcher(){
-  // ★ weekMeta에서 bossIdx 로드
+  // ★ weekMeta에서 bossIdx 로드 — 로드 완료 후 토벌전 탭 갱신
   get(ref(db,'subjugation/weekMeta')).then(sn=>{
     const meta=sn.val()||{};
-    if(meta.bossIdx!==undefined)window._subjBossIdx=meta.bossIdx;
+    if(meta.bossIdx!==undefined){
+      window._subjBossIdx=meta.bossIdx;
+      // 탭이 열려있으면 즉시 갱신
+      const sm=document.getElementById('subjMain');
+      if(sm&&sm.style.display!=='none')renderSubjugation();
+    }
   });
   // Listen for boss kill banner
   onValue(ref(db,'subjugation/bossKill'),sn=>{
@@ -5080,11 +5096,19 @@ async function checkSubjWeeklyReset(){
   const now=Date.now();
   const nextMon=getNextMonday().getTime();
   const lastReset=meta.lastReset||0;
-  // If it's past Monday and we haven't reset this week
   const thisMonday=nextMon-7*24*60*60*1000;
+
+  // ★ weekMeta가 없으면 초기화만 하고 리셋은 하지 않음
+  if(!sn.val()){
+    const initBossIdx=getCurSubjBossIdx();
+    await set(ref(db,'subjugation/weekMeta'),{lastReset:thisMonday,bossIdx:initBossIdx});
+    window._subjBossIdx=initBossIdx;
+    return;
+  }
+
+  // ★ 이번 주 월요일 이후로 리셋된 적 없고, 관리자만 리셋 실행
   if(lastReset<thisMonday&&curUser?.email===ADMIN_EMAIL){
-    // Admin triggers reset
-    doSubjWeeklyReset();
+    await doSubjWeeklyReset();
   }
 }
 
@@ -5128,9 +5152,11 @@ async function doSubjWeeklyReset(){
   await set(ref(db,'subjugation/bossHp'),null);
   await set(ref(db,'subjugation/bossKilled'),null);
   await set(ref(db,'subjugation/bossKill'),null);
-  await set(ref(db,'subjugation/weekMeta'),{lastReset:Date.now(),bossIdx:(bossIdx+1)%3});
-  window._subjBossIdx=(bossIdx+1)%3; // ★ 로컬도 즉시 갱신
-  toast('✅ 토벌전 주간 갱신 완료!',4000);
+  // ★ nextBossIdx: 다음 주에 사용할 보스. 현재 주 표시는 bossIdx 유지
+  const nextBossIdx=(bossIdx+1)%3;
+  await set(ref(db,'subjugation/weekMeta'),{lastReset:Date.now(),bossIdx:nextBossIdx});
+  window._subjBossIdx=nextBossIdx; // ★ 리셋 직후 다음 주 보스로 전환
+  toast('✅ 토벌전 주간 갱신 완료! 다음 보스: '+SUBJ_BOSSES[nextBossIdx].name,4000);
 }
 
 function genSubjBox(charLevel){
