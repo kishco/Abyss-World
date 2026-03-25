@@ -663,12 +663,36 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
         <!-- ③ 랭킹 초기화 -->
         <div class="card2" style="margin-bottom:12px">
-          <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">🏆 랭킹 초기화</div>
-          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">vhard 랭킹 데이터를 전체 삭제합니다.</div>
-          <button class="btn btn-red" onclick="adminResetRanking()">🗑 랭킹 전체 삭제</button>
+          <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">🏆 던전 랭킹 초기화</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">vhard 던전 클리어 랭킹 데이터를 전체 삭제합니다.</div>
+          <button class="btn btn-red" onclick="adminResetRanking()">🗑 던전 랭킹 삭제</button>
         </div>
 
-        <!-- ④ 하드 리셋 (위험) -->
+        <!-- ④ 토벌전 기록 리셋 -->
+        <div class="card2" style="margin-bottom:12px;border-color:rgba(255,140,0,.4)">
+          <div style="font-size:11px;font-weight:700;color:var(--lg);margin-bottom:4px">🐉 토벌전 주간 기록 리셋</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.8">
+            이번 주 토벌전 누적 데미지 랭킹을 초기화하고<br>
+            <b style="color:var(--green)">보스 HP를 최대치로 완전 회복</b>합니다.<br>
+            <span style="font-size:9.5px;color:var(--tx3)">* 보상은 별도로 지급되지 않습니다 (강제 리셋 용도)</span>
+          </div>
+          <button class="btn btn-gold" onclick="adminResetSubjugation()">🐉 토벌전 기록 리셋 + 보스 회복</button>
+        </div>
+
+        <!-- ⑤ 챔프전 리셋 -->
+        <div class="card2" style="margin-bottom:12px;border-color:rgba(232,68,68,.4)">
+          <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">⚔️ 챔프전 리셋</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.8">
+            현재 챔프를 초기화하고 연승 기록을 전부 삭제합니다.<br>
+            <span style="font-size:9.5px;color:var(--tx3)">* 다음 도전자가 바로 챔프 등극 가능 상태가 됩니다</span>
+          </div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <button class="btn btn-red" onclick="adminResetChamp(false)">⚔️ 현재 챔프만 제거</button>
+            <button class="btn btn-red" onclick="adminResetChamp(true)">🗑 챔프 + 연승 기록 전부 삭제</button>
+          </div>
+        </div>
+
+        <!-- ⑥ 하드 리셋 (위험) -->
         <div class="card2" style="margin-bottom:12px;border-color:rgba(232,68,68,.5);background:rgba(232,68,68,.04)">
           <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">💥 하드 리셋 <span style="font-size:9px;background:rgba(232,68,68,.2);border:1px solid rgba(232,68,68,.4);padding:1px 5px;border-radius:3px">위험</span></div>
           <div style="font-size:10px;color:var(--tx3);margin-bottom:4px;line-height:1.8">
@@ -3201,6 +3225,7 @@ function resolvePhase(){
   // Monsters attack
   const aliveM=battle.monsters.filter(m=>m.status==='alive');
   for(const m of aliveM){
+    try{
     // ★ 마비(stun) 처리
     if(m._stunned&&m._stunned>0){m._stunned--;blogAdd(`<span class="l-sys">🧊 ${m.name} 마비로 행동 불가!</span>`);continue;}
     const aliveP=battle.players.filter(p=>p.status==='alive');if(!aliveP.length)break;
@@ -3240,7 +3265,8 @@ function resolvePhase(){
       }
     }
 
-    let dmg=Math.max(1,m.atk-(p.stats?p.stats.def:calcStats(tgt.charData||char)).def);
+    let dmg=Math.max(1,m.atk-(tgt.stats?tgt.stats.def:calcStats(tgt.charData||char).def));
+    if(isNaN(dmg))dmg=Math.max(1,m.atk-3);
     if(tgt.defending)dmg=Math.round(dmg*0.5);
     if(tgt._shield){dmg=Math.round(dmg*0.5);tgt._shield=false;} // ★ 신성 방벽
     if(tgt.healing){
@@ -3248,7 +3274,7 @@ function resolvePhase(){
       if(dmg<1)dmg=1;
     }
     // ★ 블라인드: 회피율 무력화 (2턴)
-    const dodge=tgt._blind?0:(tgt.stats?tgt.stats.dodge:calcStats(tgt.charData||char).dodge);
+    const dodge=tgt._blind?0:(tgt.stats?tgt.stats.dodge:calcStats(tgt.charData||char).dodge)||0;
     if(tgt._blind>0)tgt._blind--;
 
     // ★ 몬스터 스킬 발동 체크 (기본 공격 전 또는 대신)
@@ -3289,6 +3315,7 @@ function resolvePhase(){
       blogAdd(`<span class="l-dead">💀 ${tgt.name} 사망!</span>`);
       battle.reviveQueue.add(tgt.id);
     }
+    }catch(e){console.error('Monster attack error:',e);}
   }
   // Check wipe (all dead)
   const anyAlive=battle.players.some(p=>p.status==='alive');
@@ -4109,7 +4136,42 @@ window.adminResetAllPotions=async()=>{
 window.adminResetRanking=async()=>{
   if(!confirm('vhard 랭킹을 전체 삭제하시겠습니까?'))return;
   await set(ref(db,'rankings/vhard'),null);
-  toast('✅ 랭킹 초기화 완료');
+  toast('✅ 던전 랭킹 초기화 완료');
+};
+
+// 토벌전 기록 리셋 + 보스 HP 완전 회복
+window.adminResetSubjugation=async()=>{
+  const bossIdx=getCurSubjBossIdx();
+  const boss=SUBJ_BOSSES[bossIdx];
+  if(!confirm(`토벌전 기록을 리셋하고 ${boss.name}의 HP를 완전 회복하시겠습니까?\n\n• 이번 주 누적 데미지 랭킹 초기화\n• 보스 HP ${boss.hp.toLocaleString()} 완전 회복\n• 보스 처치 기록 초기화\n\n⚠️ 보상은 지급되지 않습니다.`))return;
+  await set(ref(db,'subjugation/weeklyRanking'),null);
+  await set(ref(db,'subjugation/bossHp'),boss.hp);  // 최대 HP로 완전 회복
+  await set(ref(db,'subjugation/bossKilled'),null);
+  await set(ref(db,'subjugation/bossKill'),null);
+  toast(`✅ 토벌전 리셋 완료! ${boss.name} HP ${boss.hp.toLocaleString()} 완전 회복`,4000);
+  // 현재 토벌전 탭 열려있으면 새로고침
+  const subjMain=document.getElementById('subjMain');
+  if(subjMain&&subjMain.style.display!=='none')renderSubjugation();
+};
+
+// 챔프전 리셋
+window.adminResetChamp=async(fullReset)=>{
+  const champSn=await get(ref(db,'champ/current'));
+  const champ=champSn.val();
+  const msg=fullReset
+    ?'챔프 + 연승 기록 전부를 삭제하시겠습니까?\n\n⚠️ 모든 연승 기록이 사라집니다.'
+    :`현재 챔프 ${champ?champ.name:'(없음)'}를 제거하시겠습니까?\n연승 기록은 유지됩니다.`;
+  if(!confirm(msg))return;
+  await set(ref(db,'champ/current'),null);
+  if(fullReset){
+    await set(ref(db,'champ/wins'),null);
+    toast('✅ 챔프 + 전체 연승 기록 삭제 완료');
+  }else{
+    toast('✅ 현재 챔프 제거 완료 — 다음 도전자가 챔프 등극 가능');
+  }
+  // 챔프전 탭 열려있으면 새로고침
+  const champMain=document.getElementById('champMain');
+  if(champMain&&champMain.style.display!=='none')renderChamp();
 };
 
 // ═══ 점검 선물 정의 ═══
@@ -4519,7 +4581,14 @@ window.openSubjBox=async function(boxId){
   else gear=genItem(pool,grade,box.forLevel||char.level);
   gear.tradeable=true;
   rewards.push(gear);
-  for(const r of rewards)await addItem(r);
+  for(const r of rewards){
+    const ok=await addItem(r);
+    if(!ok){
+      // 인벤 가득 찬 경우 Firebase에 직접 저장
+      await set(ref(db,`inv/${charId}/${r.id}`),r);
+      toast('⚠️ 인벤토리가 가득 차 창고에 저장했습니다.',3000);
+    }
+  }
   await saveInv();updateTop();renderInv();
   const gNames={normal:'노말',uncommon:'언커먼',rare:'레어',epic:'에픽',legendary:'레전더리',set:'유일'};
   alert(`📦 토벌전 보상 상자 개봉!\n\n획득 아이템:\n• [에픽] 인챈트 스크롤\n• [${gNames[gear.grade]}] ${gear.name}`);
@@ -4605,6 +4674,7 @@ window.renderSubjugation=renderSubjugation;
 
 window.enterSubjBattle=function(){
   if(char.level<50){toast('⚠️ Lv.50 이상만 참여 가능합니다');return;}
+  if(battle&&!battle.done){toast('⚔️ 던전 진행 중에는 참여할 수 없습니다');return;}
   const bossIdx=getCurSubjBossIdx();
   const boss=SUBJ_BOSSES[bossIdx];
   const sm=document.getElementById('subjMain');
@@ -4743,9 +4813,11 @@ window.enterSubjBattle=function(){
       await set(ref(db,'subjugation/bossKilled'),true);
       await set(ref(db,'subjugation/bossKill'),{name:boss.name,killerName:char.name,ts:Date.now()});
       toast(`🎉 ${boss.name} 처치! 추가 보상 상자 지급!`,5000);
-      // Extra box
+      // Extra box - 인벤 가득차도 보관
       const extraBox=genSubjBox(char.level);
-      await addItem(extraBox);await saveInv();
+      const ok=await addItem(extraBox);
+      if(!ok)await set(ref(db,`inv/${charId}/${extraBox.id}`),extraBox);
+      await saveInv();
       // Broadcast banner
       await push(ref(db,'chat/world'),{author:'SYSTEM',text:`🎉 ${boss.name}가 처치되었습니다!! 처치자: ${char.name}`,ts:Date.now(),isAdmin:true});
     }
@@ -4821,6 +4893,7 @@ async function renderChamp(){
 window.renderChamp=renderChamp;
 
 window.enterChampBattle=async function(){
+  if(battle&&!battle.done){toast('⚔️ 던전 진행 중에는 참여할 수 없습니다');return;}
   const champSn=await get(ref(db,'champ/current'));
   const champ=champSn.val();
   const cm=document.getElementById('champMain');
@@ -4834,11 +4907,13 @@ window.enterChampBattle=async function(){
 
   // If no champ, just become champ
   if(!champ){
+    const myStats=calcStats(char);
     await set(ref(db,'champ/current'),{
       name:char.name,charId,streak:1,
-      stats:calcStats(char),equipment:char.equipment,
+      stats:myStats,equipment:char.equipment,
       str:char.str,dex:char.dex,int:char.int,vit:char.vit,luk:char.luk,
-      level:char.level,ts:Date.now()
+      baseAtk:char.baseAtk||8,baseDef:char.baseDef||3,baseSpd:char.baseSpd||8,
+      maxHp:myStats.maxHp,level:char.level,ts:Date.now()
     });
     // Record win streak
     const winsRef=ref(db,`champ/wins/${char.name}`);
@@ -4853,13 +4928,40 @@ window.enterChampBattle=async function(){
     toast('👑 챔프 등극!',4000);return;
   }
 
-  // Build champ as boss
-  const champStats=champ.stats||calcStats(champ);
-  // Reconstruct champ char for calcStats if needed
-  const champChar={...champ,equipment:champ.equipment||{}};
-  const cs=calcStats(champChar);
+  // Build champ as boss — stats는 저장된 값 사용 (calcStats 재계산 시 baseAtk 등 없어 NaN 발생)
+  // champ.stats가 있으면 그대로 사용, 없으면 현재 캐릭터 데이터로 재구성
+  let cs;
+  if(champ.stats&&champ.stats.atk&&!isNaN(champ.stats.atk)){
+    // 저장된 스탯 직접 사용
+    cs={
+      atk:champ.stats.atk||10,
+      def:champ.stats.def||5,
+      spd:champ.stats.spd||5,
+      maxHp:champ.stats.maxHp||100,
+      crit:champ.stats.crit||8,
+      critDmg:champ.stats.critDmg||140,
+      dodge:champ.stats.dodge||0,
+      matk:champ.stats.matk||0,
+    };
+  }else{
+    // baseAtk 등 기본값 추가해서 calcStats 호출
+    const champChar={
+      ...champ,
+      baseAtk:champ.baseAtk||8,
+      baseDef:champ.baseDef||3,
+      baseSpd:champ.baseSpd||8,
+      maxHp:champ.maxHp||100,
+      hp:champ.maxHp||100,
+      equipment:champ.equipment||{}
+    };
+    cs=calcStats(champChar);
+  }
+  // NaN 방어
+  if(!cs||isNaN(cs.atk)){
+    cs={atk:50,def:20,spd:10,maxHp:500,crit:10,critDmg:150,dodge:5,matk:10};
+  }
 
-  let champHp=cs.maxHp,champMaxHp=cs.maxHp;
+  let champHp=cs.maxHp||500,champMaxHp=cs.maxHp||500;
 
   function clog(html){
     champLog.push(html);
@@ -4934,11 +5036,13 @@ window.enterChampBattle=async function(){
       champDone=true;
       // Become new champ
       const newStreak=(champ.streak||0)+1;
+      const myStats2=calcStats(char);
       await set(ref(db,'champ/current'),{
         name:char.name,charId,streak:1,
-        stats:calcStats(char),equipment:char.equipment,
+        stats:myStats2,equipment:char.equipment,
         str:char.str,dex:char.dex,int:char.int,vit:char.vit,luk:char.luk,
-        level:char.level,ts:Date.now()
+        baseAtk:char.baseAtk||8,baseDef:char.baseDef||3,baseSpd:char.baseSpd||8,
+        maxHp:myStats2.maxHp,level:char.level,ts:Date.now()
       });
       // Record best win streak
       const winsRef=ref(db,`champ/wins/${char.name}`);
@@ -5006,8 +5110,9 @@ async function loadRanking(){
   if(rankMode==='level'||rankMode==='gold'){
     const cs=await get(ref(db,'chars'));
     const chars=Object.values(cs.val()||{}).filter(c=>c.owner!==undefined);
-    // Hide admin from ranking
-    const nonAdmin=chars.filter(c=>!c._isAdmin);
+    // 어드민 계정은 랭킹에서 제외 (현재 로그인한 어드민 UID 기준)
+    const adminUid=(curUser?.email===ADMIN_EMAIL_CHECK)?curUser.uid:null;
+    const nonAdmin=adminUid?chars.filter(c=>c.owner!==adminUid):chars;
     const sorted=rankMode==='level'
       ?nonAdmin.sort((a,b)=>(b.level||1)-(a.level||1))
       :nonAdmin.sort((a,b)=>(b.gold||0)-(a.gold||0));
