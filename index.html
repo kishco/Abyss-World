@@ -2861,7 +2861,7 @@ async function renderAuction(sb){
   // 탭: 내 등록 / 전체 경매
   const myListings=[];
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
-  const sellable=Object.values(inv).filter(it=>it.tradeable===true&&!equippedIds.has(it.id)&&!it.isScroll&&!it.isEnchantScroll);
+  const sellable=Object.values(inv).filter(it=>it.tradeable===true&&!equippedIds.has(it.id)&&!it.isScroll);
 
   function renderAuctionMain(tab='browse'){
     sb.innerHTML=`
@@ -2939,7 +2939,7 @@ async function renderAuction(sb){
       }).join('')}</div>`;
     }else if(tab==='sell'){
       const eq2=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
-      const tradeable=Object.values(inv).filter(it=>it.tradeable===true&&!eq2.has(it.id)&&!it.isScroll&&!it.isEnchantScroll);
+      const tradeable=Object.values(inv).filter(it=>it.tradeable===true&&!eq2.has(it.id)&&!it.isScroll);
       if(!tradeable.length){
         ac.innerHTML=`<div style="font-size:11.5px;color:var(--tx3);text-align:center;padding:24px">
           거래 가능한 아이템 없음<br>
