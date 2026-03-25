@@ -3008,6 +3008,8 @@ window.launchPartyBattle=async(tierIdx,mode,diffKey)=>{
 // ═══ BATTLE ENGINE ═══
 let battle=null;
 function startBattle(tierIdx,mode,diffKey,players){
+  // ★ 이전 배틀 리스너 전부 정리
+  if(_lootBidUnsub){_lootBidUnsub();_lootBidUnsub=null;}
   const t=DTIERS[tierIdx];const d=DIFF[diffKey];
   const soloMult=mode==='solo'?0.55:1.0;
   battle={
@@ -3064,24 +3066,54 @@ function startBattle(tierIdx,mode,diffKey,players){
     if(window._partyStateUnsub)window._partyStateUnsub();
     window._partyStateUnsub=onValue(ref(db,`parties/${myPartyId}/battleState`),sn=>{
       const bs=sn.val();if(!bs||!battle)return;
-      // 방장은 자신이 직접 계산하므로 상태 수신 불필요
       get(ref(db,`parties/${myPartyId}`)).then(ps=>{
         const pd=ps.val();if(!pd||pd.leader===charId)return;
-        // 비방장: 배틀 상태 동기화
-        if(bs.log){const newLogs=bs.log.slice(battle.log.length);newLogs.forEach(l=>blogAdd(l));}
+
+        // ★ 로그 동기화 - 이미 표시한 로그는 제외 (중복 방지)
+        if(bs.log){
+          // battle.log와 bs.log의 실제 내용 비교로 새 로그만 추가
+          const logEl=document.getElementById('battleLog');
+          for(let i=battle.log.length;i<bs.log.length;i++){
+            const l=bs.log[i];
+            battle.log.push(l);
+            if(logEl){
+              const d=document.createElement('div');d.innerHTML=l;logEl.appendChild(d);
+            }
+          }
+          // 스크롤: 거의 맨 아래일 때만 자동 이동
+          if(logEl){
+            const atBottom=logEl.scrollHeight-logEl.scrollTop-logEl.clientHeight<60;
+            if(atBottom)logEl.scrollTop=logEl.scrollHeight;
+          }
+        }
+
+        // ★ 플레이어 HP/상태만 부분 업데이트 (innerHTML 재생성 없이)
         if(bs.players){
           for(const sp of bs.players){
             const lp=battle.players.find(p=>p.id===sp.id);
             if(lp){lp.hp=sp.hp;lp.status=sp.status;lp.potions=sp.potions;lp.aggro=sp.aggro||0;}
           }
+          // 플레이어 카드만 부분 갱신
+          for(const sp of bs.players){
+            const cardEl=document.getElementById(`pcard-${sp.id}`);
+            if(cardEl){
+              const hpPct=Math.max(0,Math.min(100,Math.round(sp.hp/(sp.maxHp||1)*100)));
+              const hpBar=cardEl.querySelector('.php-bar');
+              const hpText=cardEl.querySelector('.php-text');
+              if(hpBar)hpBar.style.width=hpPct+'%';
+              if(hpText)hpText.textContent=`${sp.hp}/${sp.maxHp||'?'} | 💊${sp.potions}`;
+              if(sp.status==='dead')cardEl.style.opacity='0.4';
+            }
+          }
         }
+
         if(bs.monsters)battle.monsters=bs.monsters;
         if(bs.floor!==undefined)battle.floor=bs.floor;
-        if(bs.done){battle.done=true;battle.ended=true;}
-        renderBattle();
-        if(bs.done){
-          const db2=document.getElementById('dungBattle');
-          if(db2&&bs.resultHtml)db2.innerHTML=bs.resultHtml;
+
+        // ★ done: 방장이 endBattle 신호 보낼 때만 처리
+        if(bs.done&&!battle.done){
+          battle.done=true;battle.ended=true;
+          endBattle(bs.success||false,bs.fled||false);
         }
       });
     });
@@ -3490,7 +3522,7 @@ function resolvePhase(){
   if(!anyAlive){
     blogAdd(battle.mode==='solo'?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
     if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');maybeLoseItem();}
-    syncBattleState();
+    syncBattleState({success:false,fled:false});
     setTimeout(()=>endBattle(false,false),1500);return;
   }
   // Check monsters dead
@@ -3514,17 +3546,18 @@ function calcPlayerDmg(p,s){
 }
 
 // ★ 방장이 배틀 상태를 Firebase에 동기화 (파티원 화면 업데이트용)
-function syncBattleState(){
+function syncBattleState(opts={}){
   if(!battle||battle.mode==='solo'||!myPartyId)return;
-  // 방장만 기록
   get(ref(db,`parties/${myPartyId}`)).then(ps=>{
     const pd=ps.val();if(!pd||pd.leader!==charId)return;
     set(ref(db,`parties/${myPartyId}/battleState`),{
       floor:battle.floor,
       done:battle.done||false,
-      players:battle.players.map(p=>({id:p.id,hp:p.hp,status:p.status,potions:p.potions,aggro:p.aggro||0})),
+      success:opts.success||false,
+      fled:opts.fled||false,
+      players:battle.players.map(p=>({id:p.id,hp:p.hp,maxHp:p.maxHp,status:p.status,potions:p.potions,aggro:p.aggro||0})),
       monsters:battle.monsters?battle.monsters.map(m=>({id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,status:m.status,isBoss:m.isBoss||false,hidden:m.hidden||false})):null,
-      log:battle.log.slice(-60), // 최근 60줄만
+      log:battle.log.slice(-80),
       ts:Date.now(),
     });
   });
@@ -3855,8 +3888,10 @@ function endBattle(success,fled){
     get(ref(db,`parties/${myPartyId}`)).then(ps=>{
       const pd=ps.val();if(!pd||pd.leader!==charId)return;
       set(ref(db,`parties/${myPartyId}/battleState`),{
-        done:true,log:battle.log.slice(-60),players:battle.players.map(p=>({id:p.id,hp:p.hp,status:p.status})),
-        monsters:[],floor:battle.floor,resultHtml,ts:Date.now()
+        done:true,success,fled,
+        log:battle.log.slice(-80),
+        players:battle.players.map(p=>({id:p.id,hp:p.hp,maxHp:p.maxHp,status:p.status,potions:p.potions||0})),
+        monsters:[],floor:battle.floor,ts:Date.now()
       }).then(()=>{
         setTimeout(()=>set(ref(db,`parties/${myPartyId}/battleState`),null),30000);
       });
@@ -3877,6 +3912,7 @@ window.exitBattle=()=>{
   if(window._partyActionUnsub){window._partyActionUnsub();window._partyActionUnsub=null;}
   if(window._partyStateUnsub){window._partyStateUnsub();window._partyStateUnsub=null;}
   if(window._exitConfirmUnsub){window._exitConfirmUnsub();window._exitConfirmUnsub=null;}
+  if(_lootBidUnsub){_lootBidUnsub();_lootBidUnsub=null;}
   // ★ exitConfirm + lobbySignal Firebase 정리
   if(myPartyId){
     set(ref(db,`parties/${myPartyId}/exitConfirm`),null);
@@ -3897,7 +3933,12 @@ function blogAdd(html){
   if(!battle)return;
   battle.log.push(html);
   const el=document.getElementById('battleLog');
-  if(el){const d=document.createElement('div');d.innerHTML=html;el.appendChild(d);el.scrollTop=el.scrollHeight;}
+  if(el){
+    const d=document.createElement('div');d.innerHTML=html;el.appendChild(d);
+    // ★ 맨 아래 근처일 때만 자동 스크롤 (유저가 위로 읽는 중이면 유지)
+    const atBottom=el.scrollHeight-el.scrollTop-el.clientHeight<60;
+    if(atBottom)el.scrollTop=el.scrollHeight;
+  }
 }
 
 function renderBattle(){
@@ -3933,12 +3974,12 @@ function renderBattle(){
     <!-- Party members -->
     <div style="margin-bottom:10px">${battle.players.map(p=>{
       const pct=Math.round(p.hp/p.maxHp*100);const aggroPct=Math.round((p.aggro||0)/maxAggro*100);
-      return`<div class="pmember ${p.status==='dead'?'opacity:.4':''}">
+      return`<div class="pmember" id="pcard-${p.id}" style="${p.status==='dead'?'opacity:.4':''}">
         <div class="pmav">${p.name[0]}</div>
         <div style="flex:1;min-width:0">
           <div class="pmname">${p.name} ${p.status==='dead'?'💀':p.actionChosen?'✅':''}</div>
-          <div class="pmhpb"><div class="pmhpf ${pct<30?'low':''}" style="width:${pct}%"></div></div>
-          <div class="pminfo">${p.hp}/${p.maxHp} | 💊${p.potions}</div>
+          <div class="pmhpb"><div class="pmhpf ${pct<30?'low':''} php-bar" style="width:${pct}%"></div></div>
+          <div class="pminfo php-text">${p.hp}/${p.maxHp} | 💊${p.potions}</div>
           <div style="font-size:8px;color:var(--gold);margin-top:1px">적개심 ${aggroPct}%</div>
           <div class="aggro-bar"><div class="aggro-fill" style="width:${aggroPct}%"></div></div>
         </div>
@@ -4032,12 +4073,15 @@ async function startPartyLootBid(items){
   };
   await set(ref(db,`parties/${myPartyId}/lootBid`),bidData);
   blogAdd(`<span class="l-item">🎲 파티 입찰 시작! 드랍 아이템 ${items.length}개 — 주사위를 굴리세요!</span>`);
-  renderBattle(); // 배틀 UI 갱신하여 입찰 패널 표시
+  // 로그 동기화 후 lootBidPanel은 onValue로 자동 업데이트됨
 }
 
+let _lootBidUnsub=null;
 function renderLootBidPanel(){
   if(!myPartyId||!battle)return;
-  onValue(ref(db,`parties/${myPartyId}/lootBid`),sn=>{
+  // ★ 이미 등록된 리스너가 있으면 재등록 안 함
+  if(_lootBidUnsub)return;
+  _lootBidUnsub=onValue(ref(db,`parties/${myPartyId}/lootBid`),sn=>{
     const bid=sn.val();
     const panel=document.getElementById('lootBidPanel');
     if(!panel)return;
@@ -4174,14 +4218,41 @@ function startPartyBattleSignalWatcher(){
         // 던전 탭으로 전환
         document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='dungeon'));
         document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-dungeon'));
-        // 대기실로 이동 (약간 딜레이)
         setTimeout(async()=>{
           document.getElementById('dungMain').style.display='none';
           document.getElementById('dungMode').style.display='none';
-          document.getElementById('dungLobby').style.display='block';
+          const lb=document.getElementById('dungLobby');
+          lb.style.display='block';
           // 파티원도 ready 상태 등록
           await set(ref(db,`parties/${myPartyId}/lobby/ready/${charId}`),false);
           toast(`👑 파티장이 던전 대기실에 입장했습니다!`);
+
+          // ★ 파티원도 로비 onValue 리스너 연결 → 대기실 UI 렌더링
+          if(window._lobbyUnsub){window._lobbyUnsub();window._lobbyUnsub=null;}
+          const t=DTIERS[sig.tierIdx];const d=DIFF[sig.diffKey];
+          window._lobbyUnsub=onValue(ref(db,`parties/${myPartyId}/lobby`),async sn2=>{
+            const ld=sn2.val();if(!ld)return;
+            const mems_sn=await get(ref(db,`parties/${myPartyId}/members`));
+            const mems=mems_sn.val()||{};const memArr=Object.entries(mems);
+            const readyMap=ld.ready||{};
+            const allReady=memArr.length>=2&&memArr.every(([id])=>readyMap[id]===true);
+            lb.innerHTML=`
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+                <button class="btn btn-ghost btn-sm" onclick="cancelLobby()">← 취소</button>
+                <div class="ptitle" style="margin:0">파티 대기실 — ${t.icon} ${t.n} [<span style="color:${d.color}">${d.name}</span>]</div>
+              </div>
+              <div style="font-size:11px;color:var(--tx3);margin-bottom:10px">모든 파티원이 준비 완료해야 입장 가능 (2인 이상)</div>
+              <div id="lobbyMems">${memArr.map(([id,m])=>`
+                <div class="lobby-member">
+                  <div><div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--gold)">${m.charName}</div><div style="font-size:10px;color:var(--tx3)">Lv.${m.level}</div></div>
+                  <span class="ready-badge ${readyMap[id]?'ready-yes':'ready-no'}">${readyMap[id]?'✅ 준비완료':'대기중'}</span>
+                </div>`).join('')}</div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn ${readyMap[charId]?'btn-ghost':'btn-gold'}" style="flex:1" onclick="toggleReady('${sig.tierIdx}','${sig.diffKey}')">
+                  ${readyMap[charId]?'✕ 준비 취소':'✅ 준비 완료'}
+                </button>
+              </div>`;
+          });
         },300);
       }
     }
