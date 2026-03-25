@@ -398,7 +398,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="ptag" style="display:none;font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace">👥파티</span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:6px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v1.5</span>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:6px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v1.6</span>
   <button class="tlo" id="tlo">로그아웃</button>
 </header>
 
@@ -407,34 +407,32 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:440px;width:90%;max-height:82vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
-      <span style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:2px 8px;border-radius:5px">v1.5 업데이트</span>
+      <span style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:2px 8px;border-radius:5px">v1.6 업데이트</span>
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🎲 파티 아이템 주사위 입찰</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">⚔️ 레이드 시스템 추가</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      파티 던전에서 몬스터를 처치하면 드랍 아이템을 <b style="color:var(--gold)">주사위로 배분</b>합니다<br>
-      🎯 1~100 주사위를 굴려 <b style="color:var(--green)">높은 숫자</b>가 나온 파티원이 아이템 획득<br>
-      🏆 아이템이 여러 개면 순위순으로 각자 배분<br>
-      <span style="font-size:10px;color:var(--tx3)">더 이상 방장만 아이템을 독식하지 않습니다</span>
+      <b style="color:var(--gold)">T1~T5 레이드 보스</b> 5종 추가 — 사이드바 <b style="color:var(--blue)">레이드 탭</b>에서 도전!<br>
+      👥 2~4인 파티 구성 → 대기실 → 순서 턴제 전투<br>
+      🎁 클리어 시 <b style="color:var(--green)">레이드 보상 상자</b> 전원 지급 → 인벤에서 개봉<br>
+      📦 상자 개봉 시 보스 레벨 기준 <b style="color:var(--st)">노말~유일</b> 1~3개 드랍
     </div>
 
-    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:7px">👥 파티 플레이 개선</div>
+    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:7px">🗡️ 솔로 플레이 강화</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      🚪 파티장이 대기실 입장 시 <b style="color:var(--green)">파티원 자동 이동</b><br>
-      ✅ 결과창 <b style="color:var(--gold)">전원 확인</b> 후 자동 종료 — 혼자 나가지 않아도 됩니다<br>
-      ⏱ 타이머 만료 시 방장 오프라인 → <b style="color:var(--tx)">비방장 자동 처리</b> (5초 fallback)<br>
-      💰 파티원 골드·경험치 정상 지급 버그 수정
+      솔로 몬스터 강도 <b style="color:var(--red)">55% → 85%</b>로 상향 (더 어려워짐)<br>
+      보스 스킬 발동 확률 <b style="color:var(--purple)">×1.5배</b> 강화<br>
+      파티 탭 제거 — 던전은 <b style="color:var(--blue)">솔로 전용</b>으로 변경
     </div>
 
-    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:7px">🐛 버그 수정</div>
+    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:7px">🛡 무기 착용 규칙 개선</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:18px">
-      📜 전투 기록 스크롤이 항상 최신 로그로 이동<br>
-      🧙 히든 상인에서 구매한 아이템 즉시 목록 제거<br>
-      💊 선물 지급에서 포션 슬롯 증가 제거 (기본 5개 유지)
+      1H+방패 착용 중 2H 장착 시도 → <b style="color:var(--red)">방패를 해제해주세요!</b><br>
+      2H 착용 중 방패 착용 시도 → <b style="color:var(--red)">2H 무기를 해제해주세요!</b>
     </div>
 
     <div style="background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.25);border-radius:8px;padding:10px 14px;font-size:10.5px;color:var(--tx2);line-height:1.9;margin-bottom:18px">
-      🎲 <b style="color:var(--gold)">Tip.</b> 주사위 입찰은 페이즈(층) 종료 시마다 진행됩니다. 주사위를 빨리 굴릴수록 다음 층으로 빠르게 진행됩니다.
+      🎲 <b style="color:var(--gold)">Tip.</b> 레이드는 파티 탭이 아닌 레이드 보스 입장 화면 안에서 파티를 생성하세요!
     </div>
 
     <div style="display:flex;gap:8px">
@@ -451,7 +449,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <button class="nbtn" data-tab="inventory"><div class="ni">🎒</div><div class="nl">인벤</div></button>
     <button class="nbtn" data-tab="town"><div class="ni">🏘️</div><div class="nl">마을</div></button>
     <button class="nbtn" data-tab="dungeon"><div class="ni">🏰</div><div class="nl">던전</div></button>
-    <button class="nbtn" data-tab="party"><div class="ni">👥</div><div class="nl">파티</div></button>
+    <button class="nbtn" data-tab="raid"><div class="ni">⚔️</div><div class="nl">레이드</div></button>
     <button class="nbtn" data-tab="ranking"><div class="ni">🏆</div><div class="nl">랭킹</div></button>
     <button class="nbtn" data-tab="admin" id="adminNav" style="display:none"><div class="ni">⚙️</div><div class="nl">관리자</div></button>
   </nav>
@@ -542,25 +540,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div id="dungBattle" style="display:none"></div>
     </div>
 
-    <!-- PARTY -->
-    <div class="pane" id="pane-party">
-      <div class="ptitle">파티</div>
-      <div class="playout">
-        <div>
-          <div class="card" style="margin-bottom:10px">
-            <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">내 파티</div>
-            <div id="myparty"></div>
-          </div>
-          <div class="card">
-            <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">파티원</div>
-            <div id="partymems"></div>
-          </div>
-        </div>
-        <div class="card">
-          <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">공개 파티 목록</div>
-          <div id="pubparties"></div>
-        </div>
-      </div>
+    <!-- RAID -->
+    <div class="pane" id="pane-raid">
+      <div class="ptitle">⚔️ 레이드</div>
+      <div id="raidMain"></div>
+      <div id="raidLobby" style="display:none"></div>
+      <div id="raidBattle" style="display:none"></div>
     </div>
 
     <!-- RANKING -->
@@ -1230,7 +1215,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v1.5';
+  const key='abyssworld_update_v1.6';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1241,7 +1226,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v1.5',expire);
+    localStorage.setItem('abyssworld_update_v1.6',expire);
   }
 };
 
@@ -1526,6 +1511,7 @@ async function selChar(id){
   // ★ 만료 경매 자동 취소 (7일)
   cleanExpiredAuctions();
   startPartyBattleSignalWatcher();
+  startRaidSignalWatcher();
 }
 
 // ═══ TOPBAR ═══
@@ -1840,16 +1826,28 @@ async function equipItem(it){
   // ★ 레벨 제한 체크
   if(it.reqLv&&char.level<it.reqLv){toast(`⚠️ Lv.${it.reqLv} 이상이어야 장착 가능합니다 (현재 Lv.${char.level})`);return;}
   let sl=it.slot==='accessory'?['accessory1','accessory2','accessory3'].find(k=>!char.equipment[k])||'accessory1':it.slot;
+
+  // ★ 2H 무기 착용 시도 → 방패(offhand) 착용 중이면 차단
   if(it.slot==='weapon'&&it.hand==='2H'){
-    // ★ 방패 착용 중이면 2H 장비 착용 차단
     if(char.equipment.offhand){
-      toast('⚠️ 보조 장비(방패)를 먼저 해제해주세요!',3000);
+      toast(`⚠️ 방패를 해제해주세요!`,3000);
       return;
     }
   }
+
+  // ★ 방패(offhand) 착용 시도 → 2H 무기 착용 중이면 차단
+  if(it.slot==='offhand'){
+    if(char.equipment.weapon&&char.equipment.weapon.hand==='2H'){
+      toast(`⚠️ 2H 무기를 해제해주세요!`,3000);
+      return;
+    }
+  }
+
   const prev=char.equipment[sl];if(prev)inv[prev.id]=prev;
   char.equipment[sl]=it;delete inv[it.id];
-  await saveChar();await saveInv();closeIM();toast(it.name+' 장착!');
+  await saveChar();await saveInv();closeIM();
+  renderChar();renderEq();renderSetPanel();
+  toast(it.name+' 장착!');
 }
 
 // ═══ ITEM GENERATION ═══
@@ -2036,11 +2034,12 @@ function renderInv(){
       ${it.grade==='set'?`<div style="font-size:8.5px;color:var(--st);font-weight:700;margin-bottom:2px">◆ 유일 · ${it.setName||''}</div>`:''}
       ${it.isScroll?`<div style="font-size:8.5px;color:var(--lg);margin-bottom:2px">📜 주문서</div>`:''}
       ${it.isEnchantScroll?`<div style="font-size:8.5px;color:var(--purple);margin-bottom:2px">✨ 인챈트 스크롤</div>`:''}
+      ${it.isRaidBox?`<div style="font-size:8.5px;color:var(--gold);margin-bottom:2px">📦 레이드 상자 T${it.raidTier}</div>`:''}
       ${it.tradeable===true?`<div style="font-size:8px;color:var(--blue);background:rgba(74,143,255,.12);border:1px solid rgba(74,143,255,.25);border-radius:3px;padding:1px 4px;display:inline-block;margin-bottom:2px">🏛 거래가능</div>`:''}
       <div class="icname g-${it.grade}">${itName(it)}</div>
       <div style="display:flex;align-items:center;gap:2px;margin-bottom:1px">
-        ${buildTag}
-        <span class="ictype" style="font-size:9px">${it.slot}${it.hand?' · '+it.hand:''}</span>
+        ${it.isRaidBox?'':`${buildTag}`}
+        <span class="ictype" style="font-size:9px">${it.isRaidBox?`T${it.raidTier} 레이드 보상`:`${it.slot}${it.hand?' · '+it.hand:''}`}</span>
       </div>
       ${it.reqLv?`<div style="font-size:9px;${lvLock?'color:var(--red)':'color:var(--tx3)'}">Lv.${it.reqLv} 필요${lvLock?' 🔒':''}</div>`:''}
       ${ss?`<div class="icstat">${ss}</div>`:''}
@@ -2053,6 +2052,23 @@ function renderInv(){
 
 function openIM(it){
   if(!it)return;
+  // ★ 레이드 상자 처리
+  if(it.isRaidBox){
+    document.getElementById('imtitle').innerHTML=`<span class="g-epic">📦 T${it.raidTier} 레이드 상자</span>`;
+    document.getElementById('imbody').innerHTML=`
+      <div style="text-align:center;padding:14px 0">
+        <div style="font-size:36px;margin-bottom:10px">📦</div>
+        <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--gold);margin-bottom:6px">T${it.raidTier} 레이드 보상 상자</div>
+        <div style="font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+          레이드 보스 격파 보상입니다<br>
+          개봉 시 <b style="color:var(--gold)">1~3개</b>의 아이템 획득<br>
+          <span style="font-size:10px;color:var(--tx3)">보스 티어에 맞는 등급으로 드랍됩니다</span>
+        </div>
+        <button class="btn btn-gold" style="padding:10px 28px;font-size:13px" onclick="openRaidBox('${it.id}');document.getElementById('imodal').classList.remove('open')">📦 개봉하기</button>
+      </div>`;
+    document.getElementById('imodal').classList.add('open');
+    return;
+  }
   if(it.isEnchantScroll){
     const eqItems=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it&&x.it.grade!=='set');
     document.getElementById('imtitle').innerHTML=`<span class="g-epic">✨ 인챈트 스크롤</span>`;
@@ -2836,18 +2852,8 @@ window.selectDungeon=function(tierIdx){
       <button class="btn btn-ghost btn-sm" onclick="backToDungMain()">← 던전 목록</button>
       <div class="ptitle" style="margin:0">${t.icon} ${t.n}</div>
     </div>
-    <div class="mode-grid" style="margin-bottom:16px">
-      <div class="mode-card solo" onclick="selectMode(${tierIdx},'solo')">
-        <div class="mode-icon">🗡️</div>
-        <div class="mode-name">솔로</div>
-        <div class="mode-desc">혼자 도전<br>몬스터가 약하게 조정됨</div>
-      </div>
-      <div class="mode-card party" onclick="selectMode(${tierIdx},'party')">
-        <div class="mode-icon">👥</div>
-        <div class="mode-name">파티</div>
-        <div class="mode-desc">파티원과 함께<br>더 강한 적, 더 큰 보상</div>
-      </div>
-    </div>`;
+    <div id="diffSel"></div>`;
+  selectMode(tierIdx,'solo');
 };
 window.backToDungMain=()=>{
   document.getElementById('dungMain').style.display='block';
@@ -2870,23 +2876,16 @@ window.selectMode=async function(tierIdx,mode){
     </div>
     ${Object.entries(DIFF).map(([dk,dv])=>{
       const meets=myScore>=dv.reqScore;
-      let msg;
-      if(mode==='solo'){
-        msg=dk==='normal'?'혼자 도전 — 몬스터 보정 적용':
+      const msg=dk==='normal'?'혼자 도전 — 몬스터 보정 적용':
             dk==='hard'?`전투력 ${dv.reqScore} 이상 필요`:
             `전투력 ${dv.reqScore} 이상 필요 ⚠️ 장비 손실 가능`;
-      }else{
-        msg=dk==='normal'?'2인 이상, 협력 도전':
-            dk==='hard'?`전투력 ${dv.reqScore} 이상 (파티 리더 기준)`:
-            `전투력 ${dv.reqScore} 이상 ⚠️ 장비 손실 가능`;
-      }
       const locked=dk!=='normal'&&!meets;
       return`<div style="background:var(--sf2);border:1px solid ${locked?'var(--bd)':dv.color+'44'};border-radius:8px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;${locked?'opacity:.55':''}">
         <div>
           <div style="font-weight:700;color:${dv.color};margin-bottom:2px">${dv.name} ${locked?`<span style="font-size:9px;color:var(--red)">[전투력 부족]</span>`:''}</div>
           <div style="font-size:10px;color:var(--tx3)">${msg}</div>
         </div>
-        <button class="diff-btn diff-${dk==='normal'?'normal':dk==='hard'?'hard':'vhard'}" onclick="startDungeon(${tierIdx},'${mode}','${dk}')">${dv.name}</button>
+        <button class="diff-btn diff-${dk==='normal'?'normal':dk==='hard'?'hard':'vhard'}" onclick="startDungeon(${tierIdx},'solo','${dk}')">${dv.name}</button>
       </div>`;
     }).join('')}`;
   document.getElementById('dungMode').appendChild(div);
@@ -2896,33 +2895,11 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
   const t=DTIERS[tierIdx];const d=DIFF[diffKey];
   const s=calcStats(char);
   const score=equipScore(char);
-  if(mode==='solo'){
-    if(char.level<t.minLv){toast(`레벨 부족! 최소 Lv.${t.minLv} 필요`);return;}
-    // ★ 솔로도 hard/vhard 장비점수 체크
-    if(diffKey!=='normal'&&score<d.reqScore){
-      toast(`⚠️ 장비 전투력 부족! 현재: ${score} / 필요: ${d.reqScore}`);return;
-    }
-    startBattle(tierIdx,mode,diffKey,[{id:charId,name:char.name,charData:char,stats:s,hp:s.maxHp,maxHp:s.maxHp,potions:5+(char.extraPotions||0)}]);
-  }else{
-    if(!myPartyId){toast('파티가 없습니다. 파티 탭에서 생성하세요.');return;}
-    const ps=await get(ref(db,`parties/${myPartyId}`));
-    const pd=ps.val();if(!pd){toast('파티 없음');return;}
-    const mems=pd.members||{};const memArr=Object.values(mems);
-    if(diffKey==='normal'&&memArr.length<2){toast('노말은 2인 이상 필요');return;}
-    if((diffKey==='hard'||diffKey==='vhard')&&memArr.length<2){toast('어려움 이상은 2인 이상 필요');return;}
-    if(diffKey!=='normal'){
-      const score=equipScore(char);
-      if(score<d.reqScore){toast(`전투력 부족! 현재: ${score} / 필요: ${d.reqScore}`);return;}
-    }
-    // ★ 파티원 전체 레벨 체크 — 한 명이라도 부족하면 입장 불가
-    const underLevel=memArr.filter(m=>m.level<t.minLv);
-    if(underLevel.length>0){
-      const names=underLevel.map(m=>m.charName).join(', ');
-      toast(`⚠️ ${names} — Lv.${t.minLv} 미달! 파티원 전원이 최소 레벨을 충족해야 입장 가능합니다.`,4000);
-      return;
-    }
-    showPartyLobby(tierIdx,mode,diffKey);
+  if(char.level<t.minLv){toast(`레벨 부족! 최소 Lv.${t.minLv} 필요`);return;}
+  if(diffKey!=='normal'&&score<d.reqScore){
+    toast(`⚠️ 장비 전투력 부족! 현재: ${score} / 필요: ${d.reqScore}`);return;
   }
+  startBattle(tierIdx,'solo',diffKey,[{id:charId,name:char.name,charData:char,stats:s,hp:s.maxHp,maxHp:s.maxHp,potions:5+(char.extraPotions||0)}]);
 };
 
 async function showPartyLobby(tierIdx,mode,diffKey){
@@ -3011,7 +2988,7 @@ function startBattle(tierIdx,mode,diffKey,players){
   // ★ 이전 배틀 리스너 전부 정리
   if(_lootBidUnsub){_lootBidUnsub();_lootBidUnsub=null;}
   const t=DTIERS[tierIdx];const d=DIFF[diffKey];
-  const soloMult=mode==='solo'?0.55:1.0;
+  const soloMult=mode==='solo'?0.85:1.0; // 솔로: 몬스터 85% 강도 (기존 55% → 상향)
   battle={
     tierIdx,tier:t,mode,diffKey,diff:d,
     players:players.map(p=>({...p,status:'alive',buffs:{},aggro:0,actionChosen:null,defending:false})),
@@ -3471,7 +3448,7 @@ function resolvePhase(){
       }
     }
 
-    let dmg=Math.max(1,m.atk-calcStats(tgt.charData||char).def);
+    let dmg=Math.max(1,m.atk-(p.stats?p.stats.def:calcStats(tgt.charData||char)).def);
     if(tgt.defending)dmg=Math.round(dmg*0.5);
     if(tgt._shield){dmg=Math.round(dmg*0.5);tgt._shield=false;} // ★ 신성 방벽
     if(tgt.healing){
@@ -3479,14 +3456,15 @@ function resolvePhase(){
       if(dmg<1)dmg=1;
     }
     // ★ 블라인드: 회피율 무력화 (2턴)
-    const dodge=tgt._blind?0:calcStats(tgt.charData||char).dodge;
+    const dodge=tgt._blind?0:(tgt.stats?tgt.stats.dodge:calcStats(tgt.charData||char).dodge);
     if(tgt._blind>0)tgt._blind--;
 
     // ★ 몬스터 스킬 발동 체크 (기본 공격 전 또는 대신)
     const monSkills=m.skills||[];
     let skillFired=false;
     for(const sk of monSkills){
-      if(Math.random()<(sk.prob||0)){
+      const prob=m.isBoss?(sk.prob||0)*1.5:(sk.prob||0); // 보스 스킬 확률 1.5배
+      if(Math.random()<prob){
         try{
           const aliveP=battle.players.filter(p=>p.status==='alive');
           // 전체 공격형(모래폭풍, 화염숨결 등)은 aliveP 전달, 단체 버프형은 aliveM 전달
@@ -4923,23 +4901,18 @@ async function loadRanking(){
 
   // 던전 탭
   const tierBtns=DTIERS.map((t,i)=>({idx:i,n:`${t.icon} T${t.tier}`}));
-  const modeBtns=[{k:'all',n:'전체'},{k:'solo',n:'솔로'},{k:'party',n:'파티'}];
 
   const filterHtml=`
-    <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">* 매우어려움 기준 / 동일 캐릭터(또는 파티구성)는 최단시간만 표시</div>
-    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+    <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">* 매우어려움 기준 · 동일 캐릭터는 최단시간만 표시</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px">
       ${tierBtns.map(t=>`
         <button class="btn btn-sm ${selTier===t.idx?'btn-gold':'btn-ghost'}" onclick="setRankTier(${t.idx})" style="font-size:10px;min-width:58px">
           ${t.n}<br><span style="font-size:8px;opacity:.7">${DTIERS[t.idx].n}</span>
         </button>`).join('')}
-    </div>
-    <div style="display:flex;gap:4px;margin-bottom:12px">
-      ${modeBtns.map(m=>`<button class="btn btn-xs ${selMode===m.k?'btn-blue':'btn-ghost'}" onclick="setRankMode('${m.k}')">${m.n}</button>`).join('')}
     </div>`;
 
   // 필터 적용
-  let filtered=deduped.filter(r=>r.tierIdx===selTier);
-  if(selMode!=='all')filtered=filtered.filter(r=>r.mode===selMode);
+  let filtered=deduped.filter(r=>r.tierIdx===selTier&&r.mode==='solo');
   filtered.sort((a,b)=>a.combatSec-b.combatSec);
 
   const myRecord=filtered.find(r=>r.charName===char.name);
@@ -4948,18 +4921,17 @@ async function loadRanking(){
   rb.innerHTML=filterHtml+(
     !filtered.length
     ? `<div style="color:var(--tx3);font-size:11px;padding:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;text-align:center">
-        ${DTIERS[selTier].icon} ${DTIERS[selTier].n} — ${selMode==='solo'?'솔로':selMode==='party'?'파티':'전체'} 기록 없음
+        ${DTIERS[selTier].icon} ${DTIERS[selTier].n} — 기록 없음
        </div>`
     : `${myRecord?`<div style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="color:var(--gold)">나의 기록</span>
         <span style="font-family:'IBM Plex Mono',monospace;color:var(--green);font-weight:700">${formatSec(myRecord.combatSec)}</span>
         <span style="color:var(--tx3)">${myRank+1}위</span>
-        <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${myRecord.mode==='solo'?'rgba(74,143,255,.15)':'rgba(240,192,64,.15)'};color:${myRecord.mode==='solo'?'var(--blue)':'var(--gold)'}">${myRecord.mode==='solo'?'솔로':'파티'}</span>
        </div>`:''}
       <div style="overflow-x:auto">
         <table class="utbl">
           <thead>
-            <tr><th>순위</th><th>캐릭터</th><th>전투시간</th><th>파티원</th><th>날짜</th></tr>
+            <tr><th>순위</th><th>캐릭터</th><th>전투시간</th><th>날짜</th></tr>
           </thead>
           <tbody>
             ${filtered.map((r,i)=>`
@@ -4967,10 +4939,8 @@ async function loadRanking(){
                 <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span></td>
                 <td>
                   <div style="font-family:'Cinzel',serif;font-size:11px;color:${r.charName===char.name?'var(--gold)':'var(--tx)'}">${r.charName}${r.charName===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:3px">나</span>':''}</div>
-                  <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${r.mode==='solo'?'rgba(74,143,255,.15)':'rgba(240,192,64,.15)'};color:${r.mode==='solo'?'var(--blue)':'var(--gold)'}">${r.mode==='solo'?'솔로':'파티'}</span>
                 </td>
                 <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--green);font-weight:700">${formatSec(r.combatSec)}</td>
-                <td style="font-size:10px;color:var(--tx2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.mode==='party'?(r.members||'-'):'-'}</td>
                 <td style="font-size:9.5px;color:var(--tx3);white-space:nowrap">${r.ts?new Date(r.ts).toLocaleDateString('ko'):'-'}</td>
               </tr>`).join('')}
           </tbody>
@@ -4978,7 +4948,6 @@ async function loadRanking(){
       </div>`
   );
   rb.__selTier=selTier;
-  rb.__selMode=selMode;
 }
 
 function formatSec(s){
@@ -4990,11 +4959,6 @@ window.loadRanking=loadRanking;
 window.setRankTier=function(tierIdx){
   const rb=document.getElementById('rankBody');
   if(rb)rb.__selTier=tierIdx;
-  loadRanking();
-};
-window.setRankMode=function(mode){
-  const rb=document.getElementById('rankBody');
-  if(rb)rb.__selMode=mode;
   loadRanking();
 };
 
@@ -5155,14 +5119,19 @@ window.delChat=async mid=>{await remove(ref(db,`chat/world/${mid}`));loadAdmin()
 window.clearChat=async()=>{if(!confirm('전체 삭제?'))return;await set(ref(db,'chat/world'),null);toast('채팅 삭제');loadAdmin();};
 
 // ═══ NAVIGATION ═══
-function isInBattle(){return battle&&!battle.done;}
+function isInBattle(){return (battle&&!battle.done)||(raidBattle&&!raidBattle.done);}
 
 document.querySelectorAll('.nbtn').forEach(b=>{
   b.addEventListener('click',()=>{
     const tab=b.dataset.tab;
     // ★ 던전 진행 중이면 던전 탭 외 이동 차단
-    if(isInBattle()&&tab!=='dungeon'){
+    if(battle&&!battle.done&&tab!=='dungeon'){
       toast('⚔️ 던전 진행 중에는 이동할 수 없습니다!');
+      return;
+    }
+    // ★ 레이드 진행 중이면 레이드 탭 외 이동 차단
+    if(raidBattle&&!raidBattle.done&&tab!=='raid'){
+      toast('⚔️ 레이드 진행 중에는 이동할 수 없습니다!');
       return;
     }
     document.querySelectorAll('.nbtn').forEach(x=>x.classList.remove('on'));
@@ -5174,6 +5143,7 @@ document.querySelectorAll('.nbtn').forEach(b=>{
     else document.querySelector('.main')?.classList.remove('admin-open');
     if(tab==='ranking')loadRanking();
     if(tab==='dungeon'){renderDungeon();document.getElementById('dungMain').style.display='block';document.getElementById('dungMode').style.display='none';document.getElementById('dungLobby').style.display='none';document.getElementById('dungBattle').style.display='none';}
+    if(tab==='raid'){renderRaid();}
   });
 });
 window.navTo=tab=>{
@@ -5184,17 +5154,716 @@ window.navTo=tab=>{
 
 // 사이드바 버튼 잠금 시각화
 function updateNavLock(){
-  const locked=isInBattle();
+  const dungLocked=battle&&!battle.done;
+  const raidLocked=raidBattle&&!raidBattle.done;
   document.querySelectorAll('.nbtn').forEach(b=>{
     const isDung=b.dataset.tab==='dungeon';
-    b.style.opacity=locked&&!isDung?'0.35':'';
-    b.title=locked&&!isDung?'던전 진행 중':'';
+    const isRaid=b.dataset.tab==='raid';
+    const locked=(dungLocked&&!isDung)||(raidLocked&&!isRaid);
+    b.style.opacity=locked?'0.35':'';
+    b.title=locked?(dungLocked?'던전 진행 중':'레이드 진행 중'):'';
   });
 }
 // startBattle, endBattle 이후 navLock 갱신은 아래에서 호출
 
-// expbar SP indicator
-setInterval(()=>{
+// ═══ RAID SYSTEM ═══
+const RAID_BOSSES=[
+  {tier:1,name:'어비스의 문지기',icon:'👹',minLv:5,reqScore:0,hp:1200,atk:55,def:15,rewards:'T1',desc:'레이드 티어 1 — 입문 보스',color:'var(--green)'},
+  {tier:2,name:'어둠의 수호자 카론',icon:'💀',minLv:20,reqScore:150,hp:3500,atk:110,def:30,rewards:'T2',desc:'레이드 티어 2 — 중급 보스',color:'#ff9900'},
+  {tier:3,name:'고대 원소 지배자',icon:'🌑',minLv:40,reqScore:400,hp:9000,atk:220,def:60,rewards:'T3',desc:'레이드 티어 3 — 고급 보스',color:'var(--red)'},
+  {tier:4,name:'심연의 군주 말가론',icon:'👁️',minLv:65,reqScore:900,hp:22000,atk:420,def:120,rewards:'T4',desc:'레이드 티어 4 — 영웅 보스',color:'var(--purple)'},
+  {tier:5,name:'태초의 심연 아비소스',icon:'🕳️',minLv:90,reqScore:2000,hp:55000,atk:800,def:250,rewards:'T5',desc:'레이드 티어 5 — 전설 보스',color:'var(--lg)'},
+];
+
+// 레이드 보스 스킬 풀
+const RAID_BOSS_SKILLS=[
+  {id:'rb_slam',n:'대지 강타',prob:0.25,fx:(m,tgts)=>{let log='';for(const p of tgts){const d=Math.round(m.atk*0.8);p.hp-=d;log+=`${p.name}-${d} `;}return`<span class="l-skill">💥 ${m.name}의 대지 강타! 전체: ${log}</span>`}},
+  {id:'rb_rage',n:'격노',prob:0.15,fx:(m)=>{m.atk=Math.round(m.atk*1.2);return`<span class="l-warn">💢 ${m.name} 격노! ATK+20%</span>`}},
+  {id:'rb_drain',n:'생명 흡수',prob:0.20,fx:(m,tgts)=>{const tgt=tgts[0];const d=Math.round(m.atk*0.7);tgt.hp-=d;m.hp=Math.min(m.hp+Math.round(d*0.4),m.maxHp);return`<span class="l-skill">🩸 ${m.name}의 흡수! ${tgt.name} -${d} 자신 +${Math.round(d*0.4)}HP</span>`}},
+  {id:'rb_curse',n:'어비스 저주',prob:0.18,fx:(m,tgts)=>{for(const p of tgts){p._dot=(p._dot||0)+3;}return`<span class="l-skill">🌑 ${m.name}의 저주! 전체 3턴 독</span>`}},
+  {id:'rb_shield',n:'방어막',prob:0.10,fx:(m)=>{m.def=Math.round(m.def*1.4);return`<span class="l-skill">🛡 ${m.name}의 방어막! DEF+40%</span>`}},
+  {id:'rb_annihilate',n:'소멸 일격',prob:0.12,fx:(m,tgts)=>{let log='';for(const p of tgts){const d=Math.round(p.maxHp*0.25);p.hp-=d;log+=`${p.name}-${d} `;}return`<span class="l-dead">☄️ ${m.name}의 소멸 일격! 전체 최대HP 25%: ${log}</span>`}},
+];
+
+let raidBattle=null;
+let myRaidId=null;
+let _raidSignalUnsub=null;
+
+function renderRaid(){
+  const rm=document.getElementById('raidMain');
+  if(!rm)return;
+  document.getElementById('raidLobby').style.display='none';
+  document.getElementById('raidBattle').style.display='none';
+  rm.style.display='block';
+  rm.innerHTML=`
+    <div style="font-size:11px;color:var(--tx3);margin-bottom:12px;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;line-height:1.9">
+      ⚔️ 레이드는 <b style="color:var(--gold)">2~4인 파티</b>로 단 하나의 강력한 보스와 싸웁니다<br>
+      👥 파티 생성 후 멤버를 모아 입장하세요 · 턴제 전투 (1→2→3→4 플레이어 순서)
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+      ${RAID_BOSSES.map((b,i)=>{
+        const lk=char.level<b.minLv;
+        return`<div style="background:var(--sf2);border:2px solid ${lk?'var(--bd)':b.color+'66'};border-radius:12px;padding:14px;cursor:${lk?'not-allowed':'pointer'};transition:.2s;position:relative;overflow:hidden;${lk?'opacity:.45':''}">
+          <div style="font-size:24px;margin-bottom:6px">${b.icon}</div>
+          <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:${b.color};margin-bottom:2px">T${b.tier} ${b.name}</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:6px">${b.desc}</div>
+          <div style="font-size:9.5px;color:var(--tx2);margin-bottom:8px;line-height:1.8">
+            최소 Lv.${b.minLv} · HP ${b.hp.toLocaleString()} · ATK ${b.atk}
+          </div>
+          ${lk
+            ?`<div style="font-size:10px;color:var(--red)">🔒 Lv.${b.minLv} 필요</div>`
+            :`<button class="btn btn-sm" style="width:100%;border-color:${b.color};color:${b.color};background:${b.color}11" onclick="openRaidBoss(${i})">파티 구성 →</button>`
+          }
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+window.openRaidBoss=function(bossIdx){
+  const boss=RAID_BOSSES[bossIdx];
+  const rm=document.getElementById('raidMain');
+  rm.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <button class="btn btn-ghost btn-sm" onclick="renderRaid()">← 레이드 목록</button>
+      <div class="ptitle" style="margin:0">${boss.icon} ${boss.name}</div>
+    </div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:14px;padding:10px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;line-height:1.9">
+      <b style="color:${boss.color}">T${boss.tier} ${boss.name}</b><br>
+      HP: <span style="color:var(--red)">${boss.hp.toLocaleString()}</span> · ATK: ${boss.atk} · DEF: ${boss.def}<br>
+      <span style="font-size:10px;color:var(--tx3)">2~4인 파티 · 순서 턴제 · 클리어 시 레이드 보상 상자 지급</span>
+    </div>
+    <div class="ptitle" style="font-size:12px">파티 구성</div>
+    <div id="raidPartySection">
+      ${myRaidId?`<div style="background:rgba(68,212,136,.08);border:1px solid rgba(68,212,136,.3);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--green)">✅ 레이드 파티 참여 중</div>`:''}
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <input id="raidPartyName" style="flex:1;padding:7px 10px;background:var(--sf2);border:1.5px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:12px;outline:none" placeholder="파티 이름 입력"/>
+        <button class="btn btn-gold btn-sm" onclick="createRaidParty(${bossIdx})">파티 생성</button>
+      </div>
+    </div>
+    <div class="ptitle" style="font-size:12px;margin-top:14px">공개 레이드 파티</div>
+    <div id="raidPartyList"></div>`;
+  loadRaidParties(bossIdx);
+};
+
+async function loadRaidParties(bossIdx){
+  const boss=RAID_BOSSES[bossIdx];
+  const el=document.getElementById('raidPartyList');
+  if(!el)return;
+  const sn=await get(ref(db,`raidParties`));
+  const all=sn.val()||{};
+  const filtered=Object.entries(all).filter(([,p])=>p.bossIdx===bossIdx&&p.status==='waiting');
+  if(!filtered.length){el.innerHTML='<div style="font-size:11px;color:var(--tx3);padding:8px">모집 중인 파티 없음</div>';return;}
+  el.innerHTML=filtered.map(([pid,pd])=>{
+    const cnt=Object.keys(pd.members||{}).length;
+    const full=cnt>=4;
+    return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--gold)">${pd.name}</div>
+        <div style="font-size:10px;color:var(--tx2)">파티원 ${cnt}/4명</div>
+      </div>
+      ${full?'<span style="font-size:10px;color:var(--tx3)">만원</span>'
+        :myRaidId===pid?'<span style="font-size:10px;color:var(--green)">✅ 참여 중</span>'
+        :`<button class="btn btn-blue btn-sm" onclick="joinRaidParty('${pid}',${bossIdx})">참가</button>`}
+    </div>`;
+  }).join('');
+}
+
+window.createRaidParty=async function(bossIdx){
+  const name=(document.getElementById('raidPartyName')?.value||'').trim();
+  if(!name){toast('파티 이름을 입력하세요');return;}
+  if(myRaidId){toast('이미 레이드 파티에 참여 중');return;}
+  const pid=push(ref(db,'raidParties')).key;
+  const boss=RAID_BOSSES[bossIdx];
+  await set(ref(db,`raidParties/${pid}`),{
+    name,bossIdx,bossName:boss.name,
+    leader:charId,
+    members:{[charId]:{charName:char.name,level:char.level,score:equipScore(char)}},
+    status:'waiting',
+    createdAt:Date.now(),
+  });
+  myRaidId=pid;
+  toast(`✅ '${name}' 레이드 파티 생성!`);
+  showRaidLobby(bossIdx,pid);
+};
+
+window.joinRaidParty=async function(pid,bossIdx){
+  if(myRaidId){toast('이미 레이드 파티에 참여 중');return;}
+  const sn=await get(ref(db,`raidParties/${pid}`));
+  const pd=sn.val();if(!pd){toast('파티 없음');return;}
+  const cnt=Object.keys(pd.members||{}).length;
+  if(cnt>=4){toast('파티 만원');return;}
+  await update(ref(db,`raidParties/${pid}/members`),{[charId]:{charName:char.name,level:char.level,score:equipScore(char)}});
+  myRaidId=pid;
+  toast('✅ 레이드 파티 참가!');
+  showRaidLobby(bossIdx,pid);
+};
+
+function showRaidLobby(bossIdx,pid){
+  const boss=RAID_BOSSES[bossIdx];
+  document.getElementById('raidMain').style.display='none';
+  document.getElementById('raidLobby').style.display='block';
+  document.getElementById('raidBattle').style.display='none';
+
+  // Navigate to raid tab
+  document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='raid'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-raid'));
+
+  const lb=document.getElementById('raidLobby');
+  if(window._raidLobbyUnsub){window._raidLobbyUnsub();window._raidLobbyUnsub=null;}
+
+  window._raidLobbyUnsub=onValue(ref(db,`raidParties/${pid}`),sn=>{
+    const pd=sn.val();
+    if(!pd){lb.innerHTML='<div style="color:var(--tx3)">파티가 해산되었습니다</div>';myRaidId=null;return;}
+    const mems=Object.entries(pd.members||{});
+    const isLeader=pd.leader===charId;
+    const readyMap=pd.ready||{};
+    const canStart=mems.length>=2&&mems.every(([id])=>readyMap[id]===true);
+    lb.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <button class="btn btn-ghost btn-sm" onclick="leaveRaidLobby()">← 나가기</button>
+        <div class="ptitle" style="margin:0">${boss.icon} ${boss.name} 대기실</div>
+      </div>
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:10px;padding:8px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px">
+        2~4인 · 모두 준비 완료 후 파티장이 출발 가능
+      </div>
+      <div style="margin-bottom:12px">${mems.map(([id,m])=>`
+        <div style="background:var(--sf2);border:1px solid ${readyMap[id]?'rgba(68,212,136,.4)':'var(--bd)'};border-radius:8px;padding:9px 12px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pd.leader===id?'var(--gold)':'var(--tx)'}">${pd.leader===id?'👑 ':''}${m.charName}</div>
+            <div style="font-size:10px;color:var(--tx3)">Lv.${m.level}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            ${isLeader&&id!==charId?`<button class="btn btn-red btn-xs" onclick="raidKick('${pid}','${id}')">추방</button>`:''}
+            <span style="font-size:10px;padding:3px 8px;border-radius:5px;background:${readyMap[id]?'rgba(68,212,136,.15)':'var(--sf3)'};color:${readyMap[id]?'var(--green)':'var(--tx3)'};">${readyMap[id]?'✅ 준비완료':'대기중'}</span>
+          </div>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px">
+        ${canStart&&isLeader?`<button class="btn btn-green" style="flex:1;padding:10px" onclick="launchRaid('${pid}',${bossIdx})">🚀 레이드 출발!</button>`:''}
+        <button class="btn ${readyMap[charId]?'btn-ghost':'btn-gold'}" style="flex:1;padding:10px" onclick="toggleRaidReady('${pid}')">
+          ${readyMap[charId]?'✕ 준비 취소':'✅ 준비 완료'}
+        </button>
+      </div>`;
+  });
+}
+
+window.toggleRaidReady=async(pid)=>{
+  const sn=await get(ref(db,`raidParties/${pid}/ready/${charId}`));
+  await set(ref(db,`raidParties/${pid}/ready/${charId}`),!sn.val());
+};
+
+window.raidKick=async(pid,mid)=>{
+  await remove(ref(db,`raidParties/${pid}/members/${mid}`));
+  await remove(ref(db,`raidParties/${pid}/ready/${mid}`));
+  toast('추방 완료');
+};
+
+window.leaveRaidLobby=async()=>{
+  if(window._raidLobbyUnsub){window._raidLobbyUnsub();window._raidLobbyUnsub=null;}
+  if(!myRaidId)return;
+  const sn=await get(ref(db,`raidParties/${myRaidId}`));
+  const pd=sn.val();
+  if(pd&&pd.leader===charId){
+    // 리더 나가면 파티 해산
+    await remove(ref(db,`raidParties/${myRaidId}`));
+  }else{
+    await remove(ref(db,`raidParties/${myRaidId}/members/${charId}`));
+    await remove(ref(db,`raidParties/${myRaidId}/ready/${charId}`));
+  }
+  myRaidId=null;
+  renderRaid();
+  document.getElementById('raidLobby').style.display='none';
+  document.getElementById('raidMain').style.display='block';
+};
+
+window.launchRaid=async(pid,bossIdx)=>{
+  if(window._raidLobbyUnsub){window._raidLobbyUnsub();window._raidLobbyUnsub=null;}
+  const sn=await get(ref(db,`raidParties/${pid}`));
+  const pd=sn.val();if(!pd)return;
+  const mems=Object.entries(pd.members||{});
+  const players=[];
+  for(const[id,m]of mems){
+    const cs=await get(ref(db,`chars/${id}`));
+    const cd=cs.val();if(!cd)continue;
+    const st=calcStats(cd);
+    players.push({id,name:cd.name,charData:cd,stats:st,hp:st.maxHp,maxHp:st.maxHp,potions:5+(cd.extraPotions||0)});
+  }
+  // 플레이어 순서 결정 (SPD 기준)
+  players.sort((a,b)=>(b.stats?.spd||0)-(a.stats?.spd||0));
+  // Signal all members to start
+  await set(ref(db,`raidParties/${pid}/battleSignal`),{
+    bossIdx,players:players.map(p=>({
+      id:p.id,name:p.name,stats:p.stats,hp:p.hp,maxHp:p.maxHp,potions:p.potions,
+      charData:{level:p.charData.level,equipment:p.charData.equipment,str:p.charData.str,dex:p.charData.dex,int:p.charData.int,vit:p.charData.vit,luk:p.charData.luk,extraPotions:p.charData.extraPotions},
+    })),
+    startedAt:Date.now(),
+  });
+  await set(ref(db,`raidParties/${pid}/status`),'battling');
+};
+
+function startRaidSignalWatcher(){
+  if(_raidSignalUnsub){_raidSignalUnsub();_raidSignalUnsub=null;}
+  _raidSignalUnsub=onValue(ref(db,'raidParties'),sn=>{
+    if(!myRaidId)return;
+    const all=sn.val()||{};
+    const pd=all[myRaidId];
+    if(!pd||!pd.battleSignal)return;
+    const sig=pd.battleSignal;
+    if(raidBattle&&!raidBattle.done)return;
+    if(window._raidLobbyUnsub){window._raidLobbyUnsub();window._raidLobbyUnsub=null;}
+    // clear signal so it doesn't fire again
+    if(pd.leader===charId)remove(ref(db,`raidParties/${myRaidId}/battleSignal`));
+    startRaidBattle(sig.bossIdx,sig.players);
+  });
+}
+
+// ═══ RAID BATTLE ENGINE (턴제: 플레이어 차례 순서대로) ═══
+function startRaidBattle(bossIdx,playerData){
+  const boss=RAID_BOSSES[bossIdx];
+  const bHp=Math.round(boss.hp*(1+playerData.length*0.3)); // 인원수 비례 HP
+  const bossObj={
+    name:boss.name,icon:boss.icon,hp:bHp,maxHp:bHp,
+    atk:boss.atk,def:boss.def,
+    skills:[...RAID_BOSS_SKILLS],
+    gimmick:{rage50:false,chargeWarn:false,chargeCount:0},
+    status:'alive',isBoss:true,
+    _dot:0,_stunned:0,
+  };
+  raidBattle={
+    bossIdx,boss:bossObj,
+    players:playerData.map(p=>({...p,status:'alive',aggro:0,actionChosen:null,defending:false,healing:false})),
+    log:[],done:false,
+    turn:0, // 현재 행동할 플레이어 인덱스
+    phase:'player', // 'player' | 'boss'
+    combatMs:0,_phaseStart:Date.now(),
+    myTurn:false,
+  };
+  updateNavLock();
+  // Navigate to raid tab
+  document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='raid'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-raid'));
+  document.getElementById('raidMain').style.display='none';
+  document.getElementById('raidLobby').style.display='none';
+  document.getElementById('raidBattle').style.display='block';
+
+  // Subscribe to raid actions from firebase
+  if(window._raidActionUnsub)window._raidActionUnsub();
+  window._raidActionUnsub=onValue(ref(db,`raidParties/${myRaidId}/raidAction`),sn=>{
+    const data=sn.val();
+    if(!data||!raidBattle||raidBattle.done)return;
+    // Apply the action to raidBattle state
+    raidApplyAction(data);
+  });
+
+  raidBlogAdd(`<span class="l-sys">⚔️ 레이드 시작! ${boss.icon} ${boss.name} (HP: ${bHp.toLocaleString()})</span>`);
+  raidBlogAdd(`<span class="l-sys">👥 참여자: ${raidBattle.players.map(p=>p.name).join(', ')}</span>`);
+  raidBlogAdd(`<span class="l-sys">📋 행동 순서: ${raidBattle.players.map((p,i)=>`${i+1}.${p.name}`).join(' → ')}</span>`);
+  renderRaidBattle();
+  raidNextTurn();
+}
+
+function raidBlogAdd(msg){
+  if(!raidBattle)return;
+  raidBattle.log.push(msg);
+  const el=document.getElementById('raidBattleLog');
+  if(el){const d=document.createElement('div');d.innerHTML=msg;el.appendChild(d);if(el.scrollHeight-el.scrollTop-el.clientHeight<80)el.scrollTop=el.scrollHeight;}
+}
+
+function raidNextTurn(){
+  if(!raidBattle||raidBattle.done)return;
+  const alivePlayers=raidBattle.players.filter(p=>p.status==='alive');
+  if(!alivePlayers.length){raidEnd(false);return;}
+  if(raidBattle.boss.status==='dead'){raidEnd(true);return;}
+
+  // DoT on boss
+  if(raidBattle.boss._dot>0){
+    const dot=Math.round(raidBattle.boss.maxHp*0.06);
+    raidBattle.boss.hp=Math.max(0,raidBattle.boss.hp-dot);
+    raidBattle.boss._dot--;
+    raidBlogAdd(`<span class="l-skill">☠ ${raidBattle.boss.name} 독 -${dot}HP</span>`);
+    if(raidBattle.boss.hp<=0){raidBattle.boss.status='dead';raidBlogAdd(`<span class="l-dead">💀 ${raidBattle.boss.name} 처치!</span>`);raidEnd(true);return;}
+  }
+
+  // DoT on players
+  for(const p of raidBattle.players.filter(p=>p.status==='alive'&&p._dot>0)){
+    const dot=Math.round(p.maxHp*0.05);
+    p.hp=Math.max(0,p.hp-dot);p._dot--;
+    raidBlogAdd(`<span class="l-skill">☠ ${p.name} 독 -${dot}HP</span>`);
+    if(p.hp<=0){p.status='dead';raidBlogAdd(`<span class="l-dead">💀 ${p.name} 전투 불능!</span>`);}
+  }
+  const stillAlive=raidBattle.players.filter(p=>p.status==='alive');
+  if(!stillAlive.length){raidEnd(false);return;}
+
+  // Find the current turn player (alive, round-robin)
+  let attempts=0;
+  while(attempts<raidBattle.players.length){
+    const p=raidBattle.players[raidBattle.turn%raidBattle.players.length];
+    if(p.status==='alive'){break;}
+    raidBattle.turn++;
+    attempts++;
+  }
+  if(attempts>=raidBattle.players.length){raidEnd(false);return;}
+
+  const curIdx=raidBattle.turn%raidBattle.players.length;
+  const curPlayer=raidBattle.players[curIdx];
+  raidBattle.phase='player';
+  raidBattle.myTurn=(curPlayer.id===charId);
+
+  raidBlogAdd(`<span class="l-sys">━━ ${curPlayer.name}의 차례 ━━</span>`);
+  renderRaidBattle();
+
+  // Sync state to firebase so all players can see
+  syncRaidState();
+
+  if(raidBattle.myTurn){
+    // My turn - wait for action button click
+    raidBlogAdd(`<span class="l-heal">👉 당신의 차례입니다! 행동을 선택하세요.</span>`);
+    renderRaidBattle();
+  }else{
+    // Not my turn - wait for firebase action
+    raidBlogAdd(`<span class="l-sys">⏳ ${curPlayer.name} 행동 대기 중...</span>`);
+    renderRaidBattle();
+  }
+}
+
+function syncRaidState(){
+  if(!raidBattle||!myRaidId)return;
+  const pid=raidBattle.players[raidBattle.turn%raidBattle.players.length];
+  if(!pid||pid.id!==charId)return; // only current turn player syncs
+  set(ref(db,`raidParties/${myRaidId}/raidState`),{
+    turn:raidBattle.turn,
+    bossHp:raidBattle.boss.hp,bossMaxHp:raidBattle.boss.maxHp,bossAtk:raidBattle.boss.atk,bossDef:raidBattle.boss.def,bossDot:raidBattle.boss._dot||0,bossStatus:raidBattle.boss.status,
+    players:raidBattle.players.map(p=>({id:p.id,hp:p.hp,maxHp:p.maxHp,status:p.status,potions:p.potions,_dot:p._dot||0})),
+    log:raidBattle.log.slice(-60),
+    phase:raidBattle.phase,
+    done:raidBattle.done,
+  });
+}
+
+function raidApplyAction(data){
+  if(!raidBattle||raidBattle.done)return;
+  const curIdx=data.turnIdx%raidBattle.players.length;
+  const actor=raidBattle.players[curIdx];
+  if(!actor||actor.status!=='alive')return;
+  if(data.turnIdx!==raidBattle.turn)return; // stale action
+
+  const s=calcStats(actor.charData||char);
+  const action=data.action;
+
+  if(action==='attack'){
+    let dmg=Math.max(1,Math.round((s.atk||10)-raidBattle.boss.def*0.4));
+    const variance=Math.round(dmg*0.12);
+    dmg=Math.max(1,dmg+rand(-variance,variance));
+    const isCrit=Math.random()*100<(s.crit||8);
+    if(isCrit)dmg=Math.round(dmg*(s.critDmg||140)/100);
+    raidBattle.boss.hp=Math.max(0,raidBattle.boss.hp-dmg);
+    actor.aggro=(actor.aggro||0)+dmg;
+    if(isCrit)raidBlogAdd(`<span class="l-crit">⚔ ${actor.name} → ${raidBattle.boss.name} 치명! <strong>${dmg}</strong></span>`);
+    else raidBlogAdd(`<span class="l-dmg">⚔ ${actor.name} → ${raidBattle.boss.name} <strong>${dmg}</strong></span>`);
+    tryRaidSkillProc(actor,s);
+    if(raidBattle.boss.hp<=0){raidBattle.boss.status='dead';raidBlogAdd(`<span class="l-dead">💀 ${raidBattle.boss.name} 처치!</span>`);}
+  }else if(action==='defend'){
+    actor.defending=true;
+    raidBlogAdd(`<span class="l-sys">🛡 ${actor.name} 방어 자세 (다음 보스 공격 50%↓)</span>`);
+  }else if(action==='heal'){
+    if(actor.potions>0){
+      actor.potions--;
+      const heal=Math.round(actor.maxHp*0.5);
+      actor.hp=Math.min(actor.hp+heal,actor.maxHp);
+      raidBlogAdd(`<span class="l-heal">💊 ${actor.name} 포션! +${heal}HP (${actor.hp}/${actor.maxHp})</span>`);
+    }else{
+      raidBlogAdd(`<span class="l-warn">⚠ ${actor.name} 포션 없음!</span>`);
+    }
+  }else if(action==='flee'){
+    raidBlogAdd(`<span class="l-warn">💨 ${actor.name} 이번 턴 패스</span>`);
+  }
+
+  // 보스 사망 체크
+  if(raidBattle.boss.status==='dead'){renderRaidBattle();raidEnd(true);return;}
+
+  // 현재 플레이어 턴 종료 후 보스 공격 (매 플레이어 턴마다 보스도 반격)
+  raidBossAttack(actor);
+
+  // 전멸 체크
+  const anyAlive=raidBattle.players.some(p=>p.status==='alive');
+  if(!anyAlive){renderRaidBattle();raidEnd(false);return;}
+  if(raidBattle.boss.status==='dead'){renderRaidBattle();raidEnd(true);return;}
+
+  // 다음 플레이어
+  raidBattle.turn++;
+  renderRaidBattle();
+  syncRaidState();
+  setTimeout(()=>raidNextTurn(),600);
+}
+
+function raidBossAttack(lastActor){
+  const boss=raidBattle.boss;
+  if(boss.status==='dead')return;
+
+  // 격노 체크
+  if(!boss.gimmick.rage50&&boss.hp/boss.maxHp<=0.5){
+    boss.gimmick.rage50=true;boss.atk=Math.round(boss.atk*1.5);
+    raidBlogAdd(`<span class="l-dead">💢 ${boss.name} 격노! ATK×1.5</span>`);
+  }
+  // 마비
+  if(boss._stunned>0){boss._stunned--;raidBlogAdd(`<span class="l-sys">🧊 ${boss.name} 마비로 행동 불가!</span>`);return;}
+
+  // 스킬 발동 (확률)
+  const alivePlayers=raidBattle.players.filter(p=>p.status==='alive');
+  let skillFired=false;
+  for(const sk of boss.skills){
+    if(Math.random()<(sk.prob||0)*0.8){
+      try{
+        const res=sk.fx(boss,alivePlayers);
+        if(res){
+          raidBlogAdd(res);
+          for(const p of alivePlayers){if(p.hp<=0&&p.status==='alive'){p.hp=0;p.status='dead';raidBlogAdd(`<span class="l-dead">💀 ${p.name} 전투 불능!</span>`);}}
+          skillFired=true;
+        }
+      }catch(e){}
+      if(skillFired)break;
+    }
+  }
+  if(!skillFired){
+    // 어그로 높은 대상 공격
+    const tgt=alivePlayers.sort((a,b)=>(b.aggro||0)-(a.aggro||0))[0]||lastActor;
+    if(tgt&&tgt.status==='alive'){
+      const cs=calcStats(tgt.charData||char);
+      let dmg=Math.max(1,Math.round(boss.atk-cs.def*0.5));
+      if(tgt.defending)dmg=Math.round(dmg*0.5);
+      const dodge=cs.dodge||0;
+      if(Math.random()*100<dodge){raidBlogAdd(`<span class="l-sys">🌀 ${tgt.name} 회피!</span>`);}
+      else{
+        tgt.hp=Math.max(0,tgt.hp-dmg);
+        raidBlogAdd(`<span class="l-dmg">👹 ${boss.name} → ${tgt.name} <strong>-${dmg}</strong>${tgt.defending?' (방어)':''}</span>`);
+        if(tgt.hp<=0){tgt.status='dead';raidBlogAdd(`<span class="l-dead">💀 ${tgt.name} 전투 불능!</span>`);}
+      }
+      tgt.defending=false;
+    }
+  }
+}
+
+function tryRaidSkillProc(p,s){
+  const skills=getSkills(p.charData||char);
+  for(const sk of skills){
+    if(Math.random()<sk.proc){
+      const fx=sk.fx(s.atk,s);
+      if(fx.dmg>0){
+        let dmg=Math.max(1,Math.round(fx.dmg-raidBattle.boss.def*0.3));
+        raidBattle.boss.hp=Math.max(0,raidBattle.boss.hp-dmg);
+        raidBlogAdd(`<span class="l-skill">⚡ ${p.name}: ${fx.msg} <strong>${dmg}</strong></span>`);
+        if(raidBattle.boss.hp<=0){raidBattle.boss.status='dead';raidBlogAdd(`<span class="l-dead">💀 ${raidBattle.boss.name} 처치!</span>`);}
+      }else if(fx.heal){
+        const hm=Math.round(p.maxHp*fx.heal);p.hp=Math.min(p.hp+hm,p.maxHp);
+        raidBlogAdd(`<span class="l-heal">⚡ ${p.name}: ${fx.msg} +${hm}HP</span>`);
+      }
+      break;
+    }
+  }
+}
+
+window.chooseRaidAction=async function(action){
+  if(!raidBattle||raidBattle.done)return;
+  if(!raidBattle.myTurn){toast('당신의 차례가 아닙니다!');return;}
+  const curIdx=raidBattle.turn%raidBattle.players.length;
+  const me=raidBattle.players[curIdx];
+  if(!me||me.id!==charId||me.status!=='alive')return;
+  if(action==='heal'&&me.potions<=0){toast('포션 없음!');return;}
+  raidBattle.myTurn=false;
+  renderRaidBattle(); // disable buttons immediately
+  // Push action to firebase so all see it
+  await set(ref(db,`raidParties/${myRaidId}/raidAction`),{
+    action,turnIdx:raidBattle.turn,actorId:charId,ts:Date.now(),
+  });
+  // Apply locally immediately
+  raidApplyAction({action,turnIdx:raidBattle.turn,actorId:charId});
+};
+
+function renderRaidBattle(){
+  const rb=document.getElementById('raidBattle');
+  if(!rb||!raidBattle)return;
+  const boss=raidBattle.boss;
+  const curIdx=raidBattle.turn%raidBattle.players.length;
+  const curP=raidBattle.players[curIdx];
+  const isMyTurn=raidBattle.myTurn&&!raidBattle.done;
+  const me=raidBattle.players.find(p=>p.id===charId);
+  const bHpPct=Math.max(0,Math.min(100,Math.round(boss.hp/boss.maxHp*100)));
+
+  rb.innerHTML=`
+    <div style="position:sticky;top:0;background:var(--sf);border-bottom:1px solid var(--bd);padding:8px;z-index:10;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--red)">${boss.icon} ${boss.name}</div>
+        <div style="font-size:10px;color:var(--tx3)">${boss.hp.toLocaleString()} / ${boss.maxHp.toLocaleString()}</div>
+      </div>
+      <div style="height:10px;background:rgba(0,0,0,.5);border-radius:5px;overflow:hidden;border:1px solid var(--bd)">
+        <div style="height:100%;background:linear-gradient(90deg,#801010,var(--red));width:${bHpPct}%;transition:width .4s;border-radius:5px"></div>
+      </div>
+      ${raidBattle.done?'':`<div style="font-size:10px;color:var(--tx3);margin-top:5px;text-align:center">
+        ${raidBattle.phase==='player'&&curP?`⚔️ ${curP.name}의 차례${curP.id===charId?' <span style="color:var(--green)">← 나</span>':''}`:''}
+      </div>`}
+    </div>
+    <!-- Players -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-bottom:10px">
+      ${raidBattle.players.map((p,i)=>{
+        const pct=Math.max(0,Math.min(100,Math.round(p.hp/p.maxHp*100)));
+        const isCur=i===curIdx&&!raidBattle.done;
+        return`<div style="background:var(--sf2);border:1.5px solid ${isCur?'var(--blue)':p.status==='dead'?'rgba(232,68,68,.3)':'var(--bd)'};border-radius:8px;padding:8px;${p.status==='dead'?'opacity:.4':''}">
+          <div style="font-family:'Cinzel',serif;font-size:10px;font-weight:700;color:${isCur?'var(--blue)':p.id===charId?'var(--gold)':'var(--tx)'};margin-bottom:3px">${isCur?'▶ ':''}${p.name}</div>
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">${i+1}번 · 💊${p.potions}</div>
+          <div style="height:4px;background:rgba(0,0,0,.5);border-radius:2px;overflow:hidden;margin-bottom:2px">
+            <div style="height:100%;background:${pct<30?'var(--red)':'var(--green)'};width:${pct}%;transition:width .3s"></div>
+          </div>
+          <div style="font-size:9px;color:var(--tx2)">${p.hp}/${p.maxHp}</div>
+        </div>`;}).join('')}
+    </div>
+    <!-- Action buttons (only on my turn) -->
+    ${isMyTurn&&me&&me.status==='alive'?`
+    <div style="position:sticky;bottom:0;background:var(--sf);border-top:1px solid var(--bd);padding:8px 0 4px">
+      <div class="act-btns">
+        <button class="act-btn act-atk" onclick="chooseRaidAction('attack')">⚔ 공격</button>
+        <button class="act-btn act-def" onclick="chooseRaidAction('defend')">🛡 방어<br><span style="font-size:9px">피해50%↓</span></button>
+        <button class="act-btn act-heal" onclick="chooseRaidAction('heal')">💊 회복<br><span style="font-size:9px">HP50% (포션${me.potions})</span></button>
+        <button class="act-btn act-flee" onclick="chooseRaidAction('flee')">⏭ 패스<br><span style="font-size:9px">이번 턴 건너뜀</span></button>
+      </div>
+    </div>`:
+    !raidBattle.done?`<div style="padding:9px;text-align:center;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;font-size:11px;color:var(--tx3)">
+      ${me&&me.status==='dead'?'💀 전투 불능':'⏳ 다른 플레이어의 차례입니다...'}
+    </div>`:''}
+    <!-- Log -->
+    <div style="margin-top:10px">
+      <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">전투 기록</div>
+      <div class="clog" id="raidBattleLog">${raidBattle.log.map(l=>`<div>${l}</div>`).join('')}</div>
+    </div>`;
+  const el=document.getElementById('raidBattleLog');if(el)el.scrollTop=el.scrollHeight;
+}
+
+async function raidEnd(success){
+  if(!raidBattle||raidBattle.done)return;
+  raidBattle.done=true;
+  updateNavLock();
+  if(window._raidActionUnsub){window._raidActionUnsub();window._raidActionUnsub=null;}
+
+  const rb=document.getElementById('raidBattle');
+  const resultColor=success?'var(--green)':'var(--red)';
+  const resultMsg=success?'🏆 레이드 클리어!':'💀 레이드 실패';
+
+  raidBlogAdd(`<span style="color:${resultColor};font-weight:700">${resultMsg}</span>`);
+
+  if(success){
+    // Give raid box to each participant
+    for(const p of raidBattle.players){
+      const box=genRaidBox(raidBattle.bossIdx);
+      box.tradeable=true;
+      if(p.id===charId){
+        await addItem(box);await saveChar();
+        raidBlogAdd(`<span class="l-item">🎁 ${char.name}: 레이드 보상 상자 획득! → 인벤토리에서 개봉</span>`);
+        toast(`🏆 레이드 클리어! 보상 상자 획득`,3000);
+      }else{
+        await set(ref(db,`inv/${p.id}/${box.id}`),box);
+        raidBlogAdd(`<span class="l-item">🎁 ${p.name}: 레이드 보상 상자 지급 완료</span>`);
+      }
+    }
+    // Record raid clear
+    await set(ref(db,`raidParties/${myRaidId}/lastResult`),{success:true,ts:Date.now()});
+  }
+
+  renderRaidBattle();
+
+  // Show exit button
+  const rb2=document.getElementById('raidBattle');
+  if(rb2){
+    rb2.innerHTML+=`<div style="text-align:center;padding:16px 0 4px">
+      <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:${resultColor};margin-bottom:12px">${resultMsg}</div>
+      ${success?`<div style="font-size:11px;color:var(--tx2);margin-bottom:12px">보상 상자가 인벤토리에 추가되었습니다<br><span style="color:var(--tx3);font-size:10px">인벤토리에서 개봉 후 아이템 획득!</span></div>`:''}
+      <button class="btn btn-gold" style="padding:10px 28px;font-size:13px" onclick="exitRaid()">← 레이드 목록으로</button>
+    </div>`;
+  }
+  // Cleanup raid party
+  if(myRaidId){
+    await set(ref(db,`raidParties/${myRaidId}/status`),'done');
+    // after 10s remove
+    setTimeout(()=>{if(myRaidId)remove(ref(db,`raidParties/${myRaidId}`));},10000);
+  }
+}
+
+window.exitRaid=()=>{
+  if(window._raidActionUnsub){window._raidActionUnsub();window._raidActionUnsub=null;}
+  myRaidId=null;
+  raidBattle=null;
+  updateNavLock();
+  document.getElementById('raidBattle').style.display='none';
+  document.getElementById('raidMain').style.display='block';
+  renderRaid();
+  renderInv();updateTop();
+};
+
+// ═══ RAID BOX GENERATION ═══
+function genRaidBox(bossIdx){
+  const tier=bossIdx+1; // T1~T5
+  const id=gId();
+  return{
+    id,name:`T${tier} 레이드 상자`,grade:'epic',slot:'box',
+    isRaidBox:true,raidTier:tier,
+    itemLv:tier*10,tradeable:true,
+    stats:{},enhance:0,
+    icon:'📦',
+  };
+}
+
+// Override renderInv to handle raid box
+const _origRenderInv=window.renderInv||null;
+
+// ═══ RAID BOX OPEN ═══
+// 티어별 보스 레벨 기준 (아이템 레벨 산정용)
+const RAID_TIER_LEVEL=[15,30,50,70,95]; // T1~T5 기준 레벨
+
+window.openRaidBox=async function(boxId){
+  const box=inv[boxId];
+  if(!box||!box.isRaidBox){toast('레이드 상자가 아닙니다');return;}
+  const tier=box.raidTier;
+  const bossLv=RAID_TIER_LEVEL[Math.min(tier-1,4)];
+  if(!confirm(`T${tier} 레이드 상자를 개봉하시겠습니까?\n보스 레벨(${bossLv}) 기준 1~3개의 아이템을 획득합니다!`))return;
+  delete inv[boxId];
+  const cnt=rand(1,3);
+  const items=[];
+  const pool=[...WBASES,...ABASES,...ACCBASES];
+  for(let i=0;i<cnt;i++){
+    const grade=rollRaidGrade(tier);
+    let finalIt;
+    if(grade==='set'){
+      finalIt=genSetItem(bossLv+rand(0,5));
+    }else{
+      finalIt=genItem(pool,grade,bossLv+rand(-3,5));
+      // 레전더리·에픽 인챈트 보장
+      if((grade==='legendary'||grade==='epic')&&!finalIt.prefix){
+        const preRaw=pick(PRE);
+        finalIt.prefix={n:preRaw.n,sk:preRaw.sk||null,attr:preRaw.attr||null,
+          b:scaleEnchant(preRaw.b,finalIt.itemLv||bossLv,GRADES[grade].mult||1)};
+      }
+    }
+    finalIt.tradeable=true;
+    items.push(finalIt);
+    await addItem(finalIt);
+  }
+  await saveInv();updateTop();renderInv();
+  const gradeNames={normal:'노말',uncommon:'언커먼',rare:'레어',epic:'에픽',legendary:'레전더리',set:'유일'};
+  const msg=items.map(it=>`• [${gradeNames[it.grade]||it.grade}] ${it.name}`).join('\n');
+  alert(`📦 T${tier} 레이드 상자 개봉!\n\n획득 아이템 (${cnt}개):\n${msg}`);
+  for(const it of items)openIM(it);
+};
+
+// 티어별 등급 가중치 — 모든 티어에서 노말~유일 가능, 티어가 높을수록 고등급 확률↑
+function rollRaidGrade(tier){
+  const pools={
+    1:['normal','normal','normal','uncommon','uncommon','rare'],
+    2:['normal','uncommon','uncommon','rare','rare','epic'],
+    3:['uncommon','rare','rare','epic','epic','legendary'],
+    4:['rare','epic','epic','legendary','legendary','set'],
+    5:['epic','legendary','legendary','legendary','set','set'],
+  };
+  return pick(pools[Math.min(Math.max(tier,1),5)]);
+}
+
   if(!char)return;
   const sp=document.getElementById('tsp');
   if(char.exp>=char.expNext*0.95){sp.style.display='inline';sp.textContent='⬆LV UP SOON';}
