@@ -1360,9 +1360,9 @@ function startPresence(){
     const ps=sn.val()||{};
     const now=Date.now();
     const valid=Object.entries(ps).filter(([,p])=>p.lastSeen>now-60000);
-    // 만료된 항목 삭제 (어드민만 정리, 일반은 스킵)
+    // ★ 만료 항목 삭제: 본인 것 또는 어드민만
     Object.entries(ps).forEach(([uid,p])=>{
-      if(p.lastSeen<=now-60000)remove(ref(db,`presence/${uid}`));
+      if(p.lastSeen<=now-60000&&(uid===curUser.uid||isAdmin))remove(ref(db,`presence/${uid}`));
     });
     document.getElementById('cwOnline').textContent=valid.length;
   });
@@ -1370,6 +1370,8 @@ function startPresence(){
 
 // ═══ CHAT RESET (weekly) ═══
 async function checkChatReset(){
+  // ★ 관리자만 채팅 리셋 실행
+  if(curUser?.email!==ADMIN_EMAIL)return;
   const snap=await get(ref(db,'chat/lastReset'));
   const last=snap.val()||0;
   if(Date.now()-last>7*24*60*60*1000){
@@ -1379,7 +1381,7 @@ async function checkChatReset(){
 }
 
 // ═══ CHARACTER ═══
-let char=null,charId=null,inv={},warehouse={};
+let char=null,charId=null,inv={},warehouse={},isAdmin=false;
 
 function mkChar(name){
   return{id:gId(),owner:curUser.uid,name:name.trim(),level:1,exp:0,expNext:expForLevel(1),
@@ -1518,7 +1520,7 @@ async function selChar(id){
   document.getElementById('chatToggleBtn').style.display='flex';
   // 채팅창 숨김 상태 복원
   if(localStorage.getItem('chatHidden')==='1') toggleChat(true);
-  const isAdmin=curUser.email===ADMIN_EMAIL;
+  isAdmin=curUser.email===ADMIN_EMAIL;
   document.getElementById('adminNav').style.display=isAdmin?'flex':'none';
   onValue(ref(db,`chars/${id}`),sn=>{
     if(sn.val()){
@@ -1564,7 +1566,7 @@ async function selChar(id){
 function updateTop(){
   if(!char)return;
   const s=calcStats(char);
-  const isAdmin=curUser?.email===ADMIN_EMAIL;
+  if(curUser)isAdmin=curUser.email===ADMIN_EMAIL;
   document.getElementById('tname').innerHTML=char.name+(isAdmin?` <span style="font-size:8px;background:rgba(240,192,64,.2);border:1px solid rgba(240,192,64,.4);color:var(--gold);padding:1px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace">ADMIN</span>`:'');
   document.getElementById('tlv').textContent='Lv.'+char.level;
   document.getElementById('tgold').textContent=char.gold;
@@ -1978,10 +1980,10 @@ function scaleEnchant(b, lv, gradeMult){
 function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   const base=pick(pool);
   let grade=forcedGrade||rollGrade(hint);
-  // 유일은 T5 vhard에서만, Lv90+
+  // 유일은 T5(tierIdx=4) vhard에서만, Lv90+
   if(grade==='set'){
-    if(dungeonTier<5||lv<90)grade='legendary';
-    else return genSetItem(lv); // T5 vhard에서만 유일 생성
+    if(dungeonTier<4||lv<90)grade='legendary';
+    else return genSetItem(lv); // T5(tierIdx=4) vhard에서만 유일 생성
   }
   const mult=GRADES[grade]?.mult||1,lm=1+(lv-1)*0.055;
   // 등급에 따라 스탯 범위 상한치 편향 (높은 등급 = 더 좋은 값 나올 확률 높음)
@@ -2318,6 +2320,63 @@ function openIM(it){
     renderEnchantTarget2();
     document.getElementById('imodal').classList.add('open');return;
   }
+  // ★ 인챈트 추출 스크롤
+  if(it.isExtractScroll){
+    const eqItemsEx=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it&&(x.it.prefix||x.it.suffix)&&x.it.grade!=='set');
+    document.getElementById('imtitle').innerHTML=`<span style="color:var(--ep)">💎 인챈트 추출 스크롤</span>`;
+    function renderExtractTargets(){
+      document.getElementById('imbody').innerHTML=`
+        <div style="background:rgba(163,53,238,.07);border:1px solid rgba(163,53,238,.3);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--tx2)">
+          장비에서 인챈트를 추출합니다. 추출된 인챈트는 스크롤로 인벤에 추가되고, 장비의 인챈트는 사라집니다.
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">추출할 장비를 선택하세요:</div>
+        ${!eqItemsEx.length?'<div style="color:var(--tx3);font-size:11px;padding:12px 0">인챈트가 있는 장착 장비 없음</div>':
+        `<div style="display:flex;flex-direction:column;gap:6px">
+          ${eqItemsEx.map(x=>`
+            <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:9px 11px">
+              <div class="icname g-${x.it.grade}" style="font-size:11px;margin-bottom:4px">${x.it.name}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                ${x.it.prefix?`<button class="btn btn-blue btn-xs" onclick="doExtractEnchant('${it.id}','${x.sl}','prefix')">접두 추출: ${x.it.prefix.n}</button>`:''}
+                ${x.it.suffix?`<button class="btn btn-purple btn-xs" onclick="doExtractEnchant('${it.id}','${x.sl}','suffix')">접미 추출: ${x.it.suffix.n}</button>`:''}
+              </div>
+            </div>`).join('')}
+        </div>`}`;
+    }
+    window.doExtractEnchant=async function(scrollId,slotKey,which){
+      const sc=inv[scrollId];if(!sc)return;
+      const eq=char.equipment[slotKey];if(!eq)return;
+      const enchObj=which==='prefix'?eq.prefix:eq.suffix;
+      if(!enchObj){toast('해당 인챈트 없음');return;}
+      if(!confirm(`${eq.name}에서\n[${enchObj.n}] 인챈트를 추출합니까?\n장비에서 해당 인챈트가 제거됩니다.`))return;
+      delete inv[scrollId];
+      if(which==='prefix')eq.prefix=null;else eq.suffix=null;
+      const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
+      // ★ baseName이 있으면 사용, 없으면 현재 이름에서 접두/접미 제거 시도
+      const baseN=eq.baseName||(eq.name.replace(/^(?:.*\s)?(\S+)$/,'$1'));
+      eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+gAdj+baseN;
+      const isPrefix=(which==='prefix');
+      // ★ tier는 enchObj에서 직접 못 가져오므로 이름으로 조회
+      const tier=getEnchantTier(enchObj.n)||2;
+      const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
+      const newScroll={
+        id:gId(),
+        name:`[${enchObj.n}] 인챈트 스크롤`,
+        grade:et?.grade||'rare',gradeName:et?.name||'레어',gradeColor:et?.color||'#0070dd',
+        slot:'scroll',stats:{},
+        isEnchantScroll:true,
+        enchantData:enchObj,
+        enchantIsPrefix:isPrefix,
+        enchantTier:tier,
+        successRate:et?.successRate||0.7,
+        tradeable:false,_v:2
+      };
+      await addItem(newScroll);
+      await saveChar();await saveInv();closeIM();updateTop();renderChar();
+      toast(`💎 [${enchObj.n}] 인챈트 추출 완료! 스크롤로 인벤에 추가됨`,4000);
+    };
+    renderExtractTargets();
+    document.getElementById('imodal').classList.add('open');return;
+  }
   if(it.isScroll){
     document.getElementById('imtitle').innerHTML=`<span class="g-legendary">📜 ${it.name}</span>`;
     document.getElementById('imbody').innerHTML=`
@@ -2446,10 +2505,10 @@ function openIM(it){
     // 경매장 섹션 열기
     setTimeout(()=>townSec('auction'),50);
   });
-  // ★ 버리기: 경매 등록 중이면 차단
+  // 버리기
   document.getElementById('discBtn').onclick=async()=>{
     if(!confirm('버리시겠습니까?'))return;
-    delete inv[it.id];await saveInv();closeIM();toast('버림');
+    delete inv[it.id];await saveInv();closeIM();renderInv();toast('버림');
   };
   document.getElementById('imodal').classList.add('open');
 }
@@ -2485,14 +2544,15 @@ window.useEnchantScroll=async(scrollId,slotKey,type)=>{
 
 async function useRerollScroll(scrollId){
   if(!confirm('능력치를 랜덤으로 재배분합니다. 계속하시겠습니까?'))return;
-  // Calculate total invested points above base (5 each)
-  const base=5,total=(char.str-base)+(char.dex-base)+(char.int-base)+(char.vit-base)+(char.luk-base);
+  // 기본값: str=5, dex=5, int=3, vit=5, luk=2 (캐릭터 생성값)
+  const BASE={str:5,dex:5,int:3,vit:5,luk:2};
+  const total=(char.str-BASE.str)+(char.dex-BASE.dex)+(char.int-BASE.int)+(char.vit-BASE.vit)+(char.luk-BASE.luk);
   if(total<=0){toast('재배분할 포인트가 없습니다');return;}
-  // Reset to base
-  char.str=base;char.dex=base;char.int=base;char.vit=base;char.luk=base;
-  // Randomly distribute
+  // 기본값으로 리셋
+  char.str=BASE.str;char.dex=BASE.dex;char.int=BASE.int;char.vit=BASE.vit;char.luk=BASE.luk;
+  // 랜덤 배분
   const keys=STATS_DEF.map(s=>s.k);
-  for(let i=0;i<total;i++){const k=pick(keys);char[k]=(char[k]||base)+1;}
+  for(let i=0;i<total;i++){const k=pick(keys);char[k]=(char[k]||BASE[k]||1)+1;}
   delete inv[scrollId];
   await saveChar();await saveInv();closeIM();
   toast(`✨ 능력치 재조정 완료! STR:${char.str} DEX:${char.dex} INT:${char.int} VIT:${char.vit} LUK:${char.luk}`,4000);
@@ -2530,7 +2590,7 @@ function getSellPrice(it){
 }
 
 function renderSell(sb){
-  const items=Object.values(inv).filter(i=>!i.isScroll&&!i.isEnchantScroll);
+  const items=Object.values(inv).filter(i=>!i.isScroll&&!i.isEnchantScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox);
   if(!items.length){sb.innerHTML='<div class="iempty">판매할 아이템 없음</div>';return;}
   const gColors={normal:'#9d9d9d',uncommon:'#1eff00',rare:'#0070dd',epic:'#a335ee',legendary:'#ff8c00',set:'#00ffcc'};
   const gNames={normal:'노말',uncommon:'언커먼',rare:'레어',epic:'에픽',legendary:'레전더리',set:'유일'};
@@ -2608,7 +2668,7 @@ window.sellItem=async id=>{
 
 window.sellByGrade=async grade=>{
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
-  const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!it.isEnchantScroll&&!equippedIds.has(it.id));
+  const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!equippedIds.has(it.id));
   if(!toSell.length){toast('판매할 아이템 없음');return;}
   const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
   if(!confirm(`${toSell.length}개를 ${total.toLocaleString()}G에 판매?`))return;
@@ -2707,10 +2767,16 @@ window.bmBuy=async(i)=>{
   if(!confirm(`${item.name}을 ${item.price.toLocaleString()}G에 구매하시겠습니까?`))return;
   char.gold-=item.price;
   if(item.id==='bm_reroll'){
-    const totalPts=(char.str||5)+(char.dex||5)+(char.int||3)+(char.vit||5)+(char.luk||2)-20;
-    char._pendingStatPts=(char._pendingStatPts||0)+totalPts;
-    char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;
-    toast(`🔮 ${totalPts}포인트 재분배 가능! 캐릭터 탭에서 확인하세요.`,5000);renderChar();
+    const BASE={str:5,dex:5,int:3,vit:5,luk:2};
+    const totalPts=(char.str-BASE.str)+(char.dex-BASE.dex)+(char.int-BASE.int)+(char.vit-BASE.vit)+(char.luk-BASE.luk);
+    if(totalPts<=0){toast('재배분할 포인트가 없습니다 (기본값 이하)');char.gold+=item.price;return;}
+    // 기본값으로 리셋 후 랜덤 배분
+    char.str=BASE.str;char.dex=BASE.dex;char.int=BASE.int;char.vit=BASE.vit;char.luk=BASE.luk;
+    const keys=STATS_DEF.map(s=>s.k);
+    for(let i=0;i<totalPts;i++){const k=pick(keys);char[k]=(char[k]||BASE[k]||1)+1;}
+    // _pendingStatPts 제거 (더 이상 사용 안 함)
+    delete char._pendingStatPts;
+    toast(`🔮 능력치 재분배 완료! STR:${char.str} DEX:${char.dex} INT:${char.int} VIT:${char.vit} LUK:${char.luk}`,5000);renderChar();
   }else if(item.id==='bm_protect'){
     const si={id:gId(),name:'파괴 방지 스크롤',icon:'🛡',isProtectScroll:true,grade:'rare',gradeName:'레어',gradeColor:'#0070dd',slot:'scroll',stats:{},_v:2};
     await addItem(si);await saveInv();toast('🛡 파괴 방지 스크롤 획득!');
@@ -2718,8 +2784,20 @@ window.bmBuy=async(i)=>{
     const si={id:gId(),name:'인챈트 추출 스크롤',icon:'💎',isExtractScroll:true,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',slot:'scroll',stats:{},_v:2};
     await addItem(si);await saveInv();toast('💎 인챈트 추출 스크롤 획득!');
   }else if(item.id==='bm_candy'){
-    if(Math.random()<0.5){char.level=Math.min(99,char.level+1);char.exp=0;char.expNext=expForLevel(char.level);toast('🍬 레벨 +1! 🎉');}
-    else{if(char.level>1){char.level--;char.exp=0;char.expNext=expForLevel(char.level);}toast('🍬 레벨 -1... 😢');}
+    if(Math.random()<0.5){
+      char.level=Math.min(99,char.level+1);char.exp=0;char.expNext=expForLevel(char.level);
+      char.maxHp+=1;char.baseAtk+=0.15;char.baseDef+=0.08;char.baseSpd+=0.12;
+      char.hp=Math.min(char.hp+1,char.maxHp);
+      toast('🍬 레벨 +1! 🎉');
+    }else{
+      if(char.level>1){
+        char.level--;char.exp=0;char.expNext=expForLevel(char.level);
+        char.maxHp=Math.max(1,char.maxHp-1);char.baseAtk=Math.max(1,char.baseAtk-0.15);
+        char.baseDef=Math.max(0,char.baseDef-0.08);char.baseSpd=Math.max(1,char.baseSpd-0.12);
+        char.hp=Math.min(char.hp,char.maxHp);
+      }
+      toast('🍬 레벨 -1... 😢');
+    }
     renderChar();
   }else if(item.id==='bm_deathward'){
     char._deathWard=(char._deathWard||0)+1;
@@ -2811,6 +2889,16 @@ window.doForge=async sl=>{
     toast(`🔨 강화 성공! +${it.enhance}`,'3000');
     blogAdd&&blogAdd(`<span class="l-exp">🔨 ${it.name} +${it.enhance} 강화 성공!</span>`);
   }else if(roll<table.succ+table.destroy){
+    // ★ 파괴 방지 스크롤 체크
+    const protectScroll=Object.values(inv).find(i=>i.isProtectScroll);
+    if(protectScroll){
+      delete inv[protectScroll.id];
+      await saveChar();await saveInv();updateTop();renderChar();
+      toast(`🛡 파괴 방지 스크롤 발동! ${it.name} 보호됨! (+${enh} 유지)`,4000);
+      blogAdd&&blogAdd(`<span class="l-heal">🛡 파괴 방지 스크롤이 ${it.name}을(를) 지켰습니다! (+${enh} 유지)</span>`);
+      const sb2=document.getElementById('secbody');if(sb2)renderForge(sb2);
+      return;
+    }
     // ★ 파괴
     char.equipment[sl]=null;
     await saveChar();await saveInv();updateTop();renderChar();
@@ -3164,6 +3252,7 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
   if(diffKey!=='normal'&&score<d.reqScore){
     toast(`⚠️ 장비 전투력 부족! 현재: ${score} / 필요: ${d.reqScore}`);return;
   }
+  if(Object.keys(inv).length>=100){toast('⚠️ 인벤토리가 가득 찼습니다! 먼저 정리해 주세요.');return;}
   startBattle(tierIdx,'solo',diffKey,[{id:charId,name:char.name,charData:char,stats:s,hp:s.maxHp,maxHp:s.maxHp,potions:5+(char.extraPotions||0)}]);
 };
 
@@ -3396,6 +3485,8 @@ window.closeMerchant=()=>{
 
 function startActionPhase(){
   if(!battle)return;
+  // ★ 기존 타이머 먼저 정리
+  if(battle.timer){clearInterval(battle.timer);battle.timer=null;}
   battle.phase=1;battle.timerVal=10;
   battle._phaseStart=Date.now();
   battle.players.forEach(p=>{p.actionChosen=null;p.defending=false;p.healing=false;});
@@ -3427,6 +3518,7 @@ window.chooseAction=function(action){
   if(!myP||myP.status!=='alive')return;
   if(myP.actionChosen){toast('이미 선택함');return;}
   if(action==='heal'&&myP.potions<=0){toast('포션 없음!');return;}
+  if(action==='heal'&&battle._potionSealed){toast('🔒 포션이 봉인되어 있습니다!');return;}
   myP.actionChosen=action;
   if(action==='flee'){
     battle.fleeVotes.add(charId);
@@ -3449,7 +3541,7 @@ function updateActionButtons(chosen){
   });
 }
 
-function resolvePhase(){
+async function resolvePhase(){
   if(!battle)return;
   // ★ 중복 실행 완벽 차단
   if(battle._resolving){return;}
@@ -3486,6 +3578,7 @@ function resolvePhase(){
     (battle.mode==='solo'&&alive[0]?.actionChosen==='flee')){
     blogAdd('<span class="l-warn">💨 도망쳤습니다!</span>');
     battle.done=true;
+    battle._resolving=false;
     setTimeout(()=>endBattle(false,true),1200);return;
   }
   // Players act
@@ -3495,7 +3588,10 @@ function resolvePhase(){
     if(!s||isNaN(s.atk)){blogAdd(`<span class="l-sys">⚠️ ${p.name} 스탯 오류 — 공격 건너뜀</span>`);continue;}
     if(p.actionChosen==='defend'){p.defending=true;blogAdd(`<span class="l-sys">🛡 ${p.name} 방어 자세</span>`);}
     else if(p.actionChosen==='heal'){
-      if(p.potions>0){
+      if(battle._potionSealed){
+        blogAdd(`<span class="l-warn">🔒 ${p.name}: 포션 봉인 — 회복 불가!</span>`);
+        p.actionChosen='attack'; // 봉인 시 공격으로 전환
+      }else if(p.potions>0){
         p.potions--;const heal=Math.round(p.maxHp*0.4);p.hp=Math.min(p.hp+heal,p.maxHp);
         p.healing=true;
         p.aggro=Math.max(0,(p.aggro||0)*0.3);
@@ -3619,8 +3715,9 @@ function resolvePhase(){
   const anyAlive=battle.players.some(p=>p.status==='alive');
   if(!anyAlive){
     blogAdd(battle.mode==='solo'?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
-    if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');maybeLoseItem();}
+    if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');await maybeLoseItem();}
     syncBattleState({success:false,fled:false});
+    battle._resolving=false;
     setTimeout(()=>endBattle(false,false),1500);return;
   }
   // Check monsters dead
@@ -3647,8 +3744,10 @@ function calcPlayerDmg(p,s){
 function syncBattleState(opts={}){}
 function trySkillProc(p,s,target,allM){
   const skills=getSkills(p.charData||char);
+  // ★ skillBonus: 스킬 발동률 보너스 반영 (예: skillBonus=10 → +10%)
+  const skillBonusMult=1+(s.skillBonus||0)/100;
   for(const sk of skills){
-    if(Math.random()<sk.proc){
+    if(Math.random()<sk.proc*skillBonusMult){
       const fx=sk.fx(s.atk,s);
       if(fx.dmg)fx.dmg=Math.min(Math.round(fx.dmg),99999);
       if(fx.counter){
@@ -3771,23 +3870,27 @@ function lootPhase(){
     }
   }
   // ★ 방장 골드·경험치
-  char.gold+=totalGold;
+  // goldBonus: 장비 인챈트 골드 보너스 반영
+  const cs=calcStats(char);
+  const goldMult=1+(cs.goldBonus||0)/100;
+  const finalGold=Math.round(totalGold*goldMult);
+  char.gold+=finalGold;
   const lvUp=gainExp(totalExp);
-  blogAdd(`<span class="l-exp">📊 EXP +${totalExp} | 💰 +${totalGold}G</span>`);
+  blogAdd(`<span class="l-exp">📊 EXP +${totalExp} | 💰 +${finalGold.toLocaleString()}G${goldMult>1?` <span style="color:var(--gold);font-size:9px">(골드보너스 +${Math.round((goldMult-1)*100)}%)</span>`:''}</span>`);
   if(!lvUp)saveChar();updateTop();
 
   // 솔로: 드랍 아이템 바로 인벤에
   for(const it of droppedItems)addItem(it);
 }
 
-function maybeLoseItem(){
+async function maybeLoseItem(){
   // 죽음 방지 부적 체크
   if(char._deathWard&&char._deathWard>0){
     char._deathWard--;
     blogAdd(`<span class="l-set">🧿 죽음 방지 부적 발동! 아이템 손실을 막았습니다. (남은 횟수: ${char._deathWard})</span>`);
-    saveChar();return;
+    await saveChar();return;
   }
-  const invItems=Object.values(inv).filter(i=>!i.isScroll&&!i.isEnchantScroll);
+  const invItems=Object.values(inv).filter(i=>!i.isScroll&&!i.isEnchantScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox);
   const eqItems=Object.values(char.equipment||{}).filter(Boolean);
   const allLosable=[...invItems,...eqItems];
   if(!allLosable.length)return;
@@ -3808,7 +3911,7 @@ function maybeLoseItem(){
       lostCount++;
     }
   }
-  if(lostCount>0){saveInv();saveChar();}
+  if(lostCount>0){await saveInv();await saveChar();}
   else blogAdd(`<span class="l-sys">💀 전멸... 장비는 지켰다.</span>`);
 }
 
@@ -3942,9 +4045,13 @@ window.exitBattle=()=>{
 function blogAdd(html){
   if(!battle)return;
   battle.log.push(html);
+  // ★ 로그 최대 300개로 제한 (메모리 누수 방지)
+  if(battle.log.length>300)battle.log.shift();
   const el=document.getElementById('battleLog');
   if(el){
     const d=document.createElement('div');d.innerHTML=html;el.appendChild(d);
+    // ★ DOM 노드도 300개로 제한
+    while(el.children.length>300)el.removeChild(el.firstChild);
     // ★ 맨 아래 근처일 때만 자동 스크롤 (유저가 위로 읽는 중이면 유지)
     const atBottom=el.scrollHeight-el.scrollTop-el.clientHeight<60;
     if(atBottom)el.scrollTop=el.scrollHeight;
@@ -3967,6 +4074,11 @@ function renderBattle(){
     </div>
     <!-- Floor dots -->
     <div class="fdots">${Array.from({length:battle.floors},(_,i)=>`<div class="fdot ${i<battle.floor-1?'done':i===battle.floor-1?'cur':''} ${i===battle.floors-1?'boss':''}">${i===battle.floors-1?'👑':i+1}</div>`).join('')}</div>
+    <!-- 디버프 표시 -->
+    ${(battle._dungDebuff||battle._potionSealed)?`<div style="background:rgba(232,68,68,.08);border:1px solid rgba(232,68,68,.3);border-radius:6px;padding:5px 10px;margin-bottom:8px;font-size:10px;color:var(--red);display:flex;gap:8px;flex-wrap:wrap">
+      ${battle._dungDebuff?`<span>⚠️ 저주: <b>${battle._dungDebuff}</b></span>`:''}
+      ${battle._potionSealed?`<span>🔒 포션 봉인 중</span>`:''}
+    </div>`:''}
     <!-- Timer -->
     ${!isSolo&&battle.phase===1?`<div class="timer-bar"><div class="timer-fill" id="battleTimerBar" style="width:100%"></div></div><div style="text-align:right;font-size:10px;color:var(--tx3);margin-bottom:5px" id="battleTimerTxt">${battle.timerVal}s</div>`:''}
     <!-- Enemies -->
@@ -4106,9 +4218,16 @@ function renderChatMsgs(msgs,type){
 }
 function escapeHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+let _lastChatTs=0;
 async function cwSendMsg(){
   const inp=document.getElementById('cwInput');const txt=inp.value.trim();if(!txt)return;
-  const ts=Date.now();const author=char.name;
+  // ★ 길이 제한: 200자
+  if(txt.length>200){toast('⚠️ 메시지는 200자 이내로 입력해주세요.');return;}
+  // ★ 도배 방지: 1.5초 쿨다운
+  const now=Date.now();
+  if(now-_lastChatTs<1500){toast('⚠️ 너무 빠릅니다. 잠시 후 다시 입력해주세요.');return;}
+  _lastChatTs=now;
+  const ts=now;const author=char.name;
   const isAdminMsg=curUser?.email===ADMIN_EMAIL;
   // Build chat metadata
   const meta={author,text:txt,ts,isAdmin:isAdminMsg};
@@ -4142,6 +4261,7 @@ function atab(id,btn){
 window.atab=atab;
 
 async function loadAdmin(){
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const [cs,is,bans]=await Promise.all([get(ref(db,'chars')),get(ref(db,'inv')),get(ref(db,'bans'))]);
   const chars=cs.val()||{},invs=is.val()||{},bansD=bans.val()||{};
   const charArr=Object.entries(chars);const allInv=Object.values(invs).flatMap(i=>Object.values(i));
@@ -4188,6 +4308,13 @@ async function loadAdmin(){
 }
 
 // ── 유저 상세 패널 ──
+// ★ 관리자 함수 가드 래퍼 — 모든 window.adminXxx 함수에 isAdmin 체크
+function _adminGuard(fn){
+  return async function(...args){
+    if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
+    return fn.apply(this,args);
+  };
+}
 window.adminOpenUser=async function(cid){
   const el=document.getElementById('adminUserDetail');
   el.style.display='block';
@@ -4585,7 +4712,7 @@ function makeGiftItems(tierItems, charLevel){
   for(const ti of tierItems){
     const cnt=ti.count||1;
     for(let i=0;i<cnt;i++){
-      if(ti.type==='enchant')items.push(genEnchantScroll());
+      if(ti.type==='enchant'||ti.type==='scroll')items.push(genEnchantScroll());
       else if(ti.type==='reroll')items.push(genScrollItem());
       else if(ti.type==='random_rare')items.push(genItem(pool,'rare',Math.max(1,charLevel)));
       else if(ti.type==='random_epic')items.push(genItem(pool,'epic',Math.max(1,charLevel)));
@@ -4745,6 +4872,27 @@ window.navTo=function(tab){
   if(battle&&!battle.done&&tab!=='dungeon'){toast('⚔️ 던전 진행 중에는 이동할 수 없습니다!');return;}
   document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab===tab));
   document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-'+tab));
+  if(tab==='town'){
+    document.getElementById('townmenu').style.display='grid';
+    document.getElementById('townsec').style.display='none';
+  }
+  if(tab==='dungeon'){
+    if(battle&&!battle.done){
+      document.getElementById('dungMain').style.display='none';
+      document.getElementById('dungMode').style.display='none';
+      document.getElementById('dungLobby').style.display='none';
+      document.getElementById('dungBattle').style.display='block';
+    }else{
+      renderDungeon();
+      document.getElementById('dungMain').style.display='block';
+      document.getElementById('dungMode').style.display='none';
+      document.getElementById('dungLobby').style.display='none';
+      document.getElementById('dungBattle').style.display='none';
+    }
+  }
+  if(tab==='ranking')loadRanking();
+  if(tab==='subjugation'){renderSubjugation();}
+  if(tab==='champ'){renderChamp();}
 };
 
 
@@ -4858,9 +5006,11 @@ const SUBJ_BOSSES=[
 
 // 주간 보스 로테이션: 기준 월요일 기준 주차 index % 3
 function getCurSubjBossIdx(){
+  // ★ weekMeta.bossIdx가 있으면 그걸 우선 사용, 없으면 날짜 기반 폴백
+  if(window._subjBossIdx!==undefined)return window._subjBossIdx%3;
   const now=new Date();
   const mon=new Date(now);mon.setHours(0,0,0,0);
-  mon.setDate(mon.getDate()-((mon.getDay()+6)%7)); // 이번 주 월요일
+  mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
   const weekNum=Math.floor(mon.getTime()/(7*24*60*60*1000));
   return weekNum%3;
 }
@@ -4884,6 +5034,11 @@ function formatTimeLeft(ms){
 }
 
 function startSubjugationWatcher(){
+  // ★ weekMeta에서 bossIdx 로드
+  get(ref(db,'subjugation/weekMeta')).then(sn=>{
+    const meta=sn.val()||{};
+    if(meta.bossIdx!==undefined)window._subjBossIdx=meta.bossIdx;
+  });
   // Listen for boss kill banner
   onValue(ref(db,'subjugation/bossKill'),sn=>{
     const d=sn.val();if(!d)return;
@@ -4974,6 +5129,7 @@ async function doSubjWeeklyReset(){
   await set(ref(db,'subjugation/bossKilled'),null);
   await set(ref(db,'subjugation/bossKill'),null);
   await set(ref(db,'subjugation/weekMeta'),{lastReset:Date.now(),bossIdx:(bossIdx+1)%3});
+  window._subjBossIdx=(bossIdx+1)%3; // ★ 로컬도 즉시 갱신
   toast('✅ 토벌전 주간 갱신 완료!',4000);
 }
 
@@ -5157,15 +5313,22 @@ window.enterSubjBattle=function(){
       if(isCrit)slog(`<span class="l-crit">⚔ 치명타! → ${boss.name} <b>${dmg}</b></span>`);
       else slog(`<span class="l-dmg">⚔ ${char.name} → ${boss.name} <b>${dmg}</b></span>`);
       // Skill procs
+      const subjSkillBonusMult=1+(s.skillBonus||0)/100;
       for(const sl of Object.values(char.equipment||{})){
         if(!sl)continue;
         for(const enc of[sl.prefix,sl.suffix]){
           if(!enc?.sk)continue;
           const sk=SKILLS[enc.sk];if(!sk)continue;
-          const proc=sk.base*(GRADES[sl.grade]?.skillM||0)*(1+(char.int||3)*0.005);
+          const proc=sk.base*(GRADES[sl.grade]?.skillM||0)*(1+(char.int||3)*0.005)*subjSkillBonusMult;
           if(Math.random()<proc&&sk.fx){
             const dummy={hp:1000000,maxHp:boss.hp,status:'alive',_dot:0};
             const res=sk.fx({atk:s.atk,name:char.name},dummy,[dummy]);
+            // ★ 스킬 데미지도 총 데미지에 합산
+            const fx=sk.fx(s.atk,s);
+            if(fx&&fx.dmg>0){
+              const skDmg=Math.min(Math.round(fx.dmg),99999);
+              totalDmgDealt+=skDmg;
+            }
             if(res){slog(`<span class="l-skill">${res}</span>`);}
           }
         }
@@ -5519,13 +5682,12 @@ async function loadRanking(){
   const rb=document.getElementById('rankBody');
   if(!rb)return;
   rb.innerHTML=`<div style="color:var(--tx3);font-size:11px;padding:12px">로딩 중...</div>`;
-  const ADMIN_EMAIL_CHECK='aimori1@ag.game';
 
   if(rankMode==='level'||rankMode==='gold'){
     const cs=await get(ref(db,'chars'));
     const chars=Object.values(cs.val()||{}).filter(c=>c.owner!==undefined);
-    // 어드민 계정은 랭킹에서 제외 (현재 로그인한 어드민 UID 기준)
-    const adminUid=(curUser?.email===ADMIN_EMAIL_CHECK)?curUser.uid:null;
+    // 어드민 계정은 랭킹에서 제외
+    const adminUid=(curUser?.email===ADMIN_EMAIL)?curUser.uid:null;
     const nonAdmin=adminUid?chars.filter(c=>c.owner!==adminUid):chars;
     const sorted=rankMode==='level'
       ?nonAdmin.sort((a,b)=>(b.level||1)-(a.level||1))
@@ -5698,6 +5860,14 @@ window.buyFromMerchant=async(idx)=>{
   }
 };
 
+
+// ★ 모든 관리자 함수에 isAdmin 가드 일괄 적용
+['adminOpenUser','adminUpdateItemSelect','adminGiveItem','adminGiveGold',
+ 'adminResetAllPotions','adminResetRanking','adminMigrateSkills',
+ 'adminResetSubjugation','adminResetChamp','adminSendGift','adminHardReset',
+ 'adminSetLevel','banU','unban','delChat','clearChat'].forEach(fn=>{
+  if(typeof window[fn]==='function')window[fn]=_adminGuard(window[fn]);
+});
 
 // LV SOON indicator
 setInterval(()=>{
