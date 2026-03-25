@@ -5864,11 +5864,17 @@ function rollRaidGrade(tier){
   return pick(pools[Math.min(Math.max(tier,1),5)]);
 }
 
-  if(!char)return;
-  const sp=document.getElementById('tsp');
-  if(char.exp>=char.expNext*0.95){sp.style.display='inline';sp.textContent='⬆LV UP SOON';}
-  else sp.style.display='none';
-},5000);
+// 5초마다 레벨업 임박 상태를 체크하는 타이머 복구 완료!
+setInterval(function() {
+  if(!char) return;
+  const sp = document.getElementById('tsp');
+  if(char.exp >= char.expNext * 0.95) {
+    sp.style.display = 'inline';
+    sp.textContent = '⬆LV UP SOON';
+  } else {
+    sp.style.display = 'none';
+  }
+}, 5000);
 </script>
 </body>
 </html>
