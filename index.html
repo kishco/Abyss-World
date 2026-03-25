@@ -398,7 +398,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="ptag" style="display:none;font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace">👥파티</span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:6px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v1.3</span>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:6px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v1.4</span>
   <button class="tlo" id="tlo">로그아웃</button>
 </header>
 
@@ -407,50 +407,40 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:440px;width:90%;max-height:82vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
-      <span style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:2px 8px;border-radius:5px">v1.3 업데이트</span>
+      <span style="font-size:11px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:2px 8px;border-radius:5px">v1.4 업데이트</span>
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">⚔ 장비 시스템 개편</div>
+    <div style="font-size:11px;color:var(--st);font-weight:700;margin-bottom:7px">◆ 유일 장비 시스템</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      🗡 <b style="color:var(--tx)">양손(2H) 무기</b>가 방패 조합 대비 <b style="color:var(--green)">명확한 ATK 우위</b><br>
-      📈 아이템 레벨·등급별 스탯 격차 대폭 확대<br>
-      <span style="font-size:10.5px;color:var(--tx3)">티어 전환마다 장비 교체 의무화 수준의 차이</span><br>
-      🔄 <b style="color:var(--green)">기존 보유 장비 전체 자동 수치 재계산</b> 적용됨
+      ✨ '세트 장비' → <b style="color:var(--st)">유일 장비</b>로 명칭 변경<br>
+      🎲 <b style="color:var(--red)">매우어려움 전용</b> 드랍 — 확률 0.1% (매우 희귀)<br>
+      📈 <b style="color:var(--green)">레벨 스케일링</b> 적용 — 높은 레벨에서 드랍될수록 강해짐<br>
+      🔗 여러 유일 장비 조합으로 <b style="color:var(--st)">2조합·3조합·5조합</b> 강력한 보너스 발동
     </div>
 
-    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:7px">⚔ 하드코어 밸런스 개편</div>
+    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:7px">🔮 빌드 시스템 강화</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      💀 <b style="color:var(--tx)">vhard 전멸 시</b> 인벤 아이템 최대 50% + 장착 장비 20% 확률 파괴<br>
-      🛡 <b style="color:var(--tx)">회복(포션)</b>이 더 이상 무적이 아님 — 피해 55% 감소로 변경<br>
-      ⚖️ 어려움 dmg 2.2→1.7 / 매우어려움 dmg 5.0→3.5 조정<br>
-      <span style="font-size:10.5px;color:var(--tx3)">중반 즉사 구간 해소 — 단, 여전히 어렵습니다</span>
+      ⚔ <b style="color:#ff6060">딜러</b> · 🛡 <b style="color:var(--blue)">탱커</b> · 🔮 <b style="color:var(--purple)">마법사</b> · 💚 <b style="color:var(--green)">힐러</b> 빌드 특화 인챈트 추가<br>
+      인벤토리 카드에 <b style="color:var(--tx)">빌드 태그</b> 자동 표시<br>
+      극고위험 인챈트 추가 (절멸, 마력폭주, 광전사의…)
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">⚙️ 전투력 시스템 개편</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🐉 던전·몬스터 개편</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      📊 <b style="color:var(--tx)">장비점수 → 전투력</b>으로 개편<br>
-      강화·인챈트 포함 실전 ATK/DEF/HP/SPD/CRIT 기반 계산<br>
-      어려움 전투력 <b style="color:#ff9900">120</b> / 매우어려움 <b style="color:var(--red)">250</b> 이상 필요<br>
-      <span style="font-size:10.5px;color:var(--tx3)">솔로도 이제 어려움 이상 진입 시 전투력 체크</span>
+      🏜️ Tier3 → <b style="color:var(--tx)">오염된 사막</b> / 🏰 Tier4 → <b style="color:var(--tx)">요새</b> / 🐉 Tier5 → <b style="color:var(--tx)">용의 둥지</b><br>
+      몬스터마다 <b style="color:var(--green)">랜덤 스킬 1~3개</b> 부여 (모래폭풍, 화염 숨결, 군단 규합…)<br>
+      🐉 용의 둥지 보스 <b style="color:var(--red)">아르카낙스</b> — 모든 구역 스킬 보유
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">💰 경제 개편</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      💵 아이템 판매가 <b style="color:var(--green)">2.5~3배 인상</b><br>
-      🔨 강화 비용 약 <b style="color:var(--green)">40% 절감</b> (강화가 현실적으로 가능해짐)<br>
-      🎰 도박장 레전더리/유일 상자 삭제 — 에픽까지만 구매 가능
-    </div>
-
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">✨ 스킬 시스템 개선</div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🏛️ 경매장 오픈</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:18px">
-      ❄ 빙결 파편 SPD 감소 효과 실제 적용<br>
-      ☠ 독 중첩 DoT 효과 실제 적용 (매 턴 HP 8% 감소)<br>
-      🛡 신성 방벽 피해 감소 실제 작동<br>
-      🔴 광폭화 ATK 버프 전투에 실제 반영
+      🗡 던전 드랍 아이템만 거래 가능<br>
+      💰 구매 후 재판매 불가 · 점검 선물 거래 불가<br>
+      📦 7일 경과 미판매 시 자동 인벤 반환
     </div>
 
-    <div style="background:rgba(232,68,68,.07);border:1px solid rgba(232,68,68,.25);border-radius:8px;padding:10px 14px;font-size:10.5px;color:var(--tx2);line-height:1.9;margin-bottom:18px">
-      ⚠️ <b style="color:var(--red)">경고.</b> 이번 업데이트로 vhard는 더욱 위험해졌습니다. 전멸 전 도망치는 것도 전략입니다.
+    <div style="background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.25);border-radius:8px;padding:10px 14px;font-size:10.5px;color:var(--tx2);line-height:1.9;margin-bottom:18px">
+      💡 <b style="color:var(--st)">Tip.</b> 유일 장비는 서로 다른 세트를 조합해도 각각의 보너스가 별도로 발동됩니다. 2조합 + 2조합 크로스 빌드를 노려보세요.
     </div>
 
     <div style="display:flex;gap:8px">
@@ -1246,7 +1236,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v1.3';
+  const key='abyssworld_update_v1.4';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1257,7 +1247,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v1.3',expire);
+    localStorage.setItem('abyssworld_update_v1.4',expire);
   }
 };
 
