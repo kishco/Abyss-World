@@ -4945,7 +4945,7 @@ async function saveWarehouse(){if(db&&charId)await set(ref(db,`warehouse/${charI
 
 async function renderWarehouse(sb){
   const wCnt=Object.keys(warehouse).length;
-  const invItems=Object.values(inv).filter(i=>!i.isScroll&&!i.isEnchantScroll&&!i.isSubjBox);
+  const invItems=Object.values(inv).filter(i=>!i.isSubjBox);
   const GRADE_ORDER_W=['set','legendary','epic','rare','uncommon','normal'];
 
   function whStatStr(it){
@@ -4969,16 +4969,29 @@ async function renderWarehouse(sb){
     const ss=whStatStr(it);
     const lvStr=it.itemLv?`Lv.${it.itemLv}`:'';
     const gradeTag=it.grade==='set'?`<span style="font-size:8px;color:var(--st)">◆${it.setName||'유일'}</span>`:'';
+    // ★ 스크롤 타입 표시
+    const scrollTag=it.isEnchantScroll?`<span style="font-size:8px;color:var(--purple)">📜 ${it.enchantIsPrefix!==false?'[접두]':'[접미]'} 성공률${Math.round((it.successRate||0.7)*100)}%</span>`
+      :it.isScroll?`<span style="font-size:8px;color:var(--lg)">📜 능력치 재조정</span>`
+      :it.isProtectScroll?`<span style="font-size:8px;color:var(--ra)">🛡 파괴 방지</span>`
+      :it.isExtractScroll?`<span style="font-size:8px;color:var(--ep)">💎 인챈트 추출</span>`:'';
     return`<div style="background:var(--sf2);border:1px solid var(--bd${it.grade!=='normal'?'2':''});border-left:3px solid ${GRADES[it.grade]?.color||'#9d9d9d'};border-radius:6px;padding:7px 11px;display:flex;align-items:center;gap:8px">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
           ${gradeTag}
           <span class="icname g-${it.grade}" style="font-size:11px">${enhStr}${it.name}</span>
         </div>
-        <div style="display:flex;gap:8px;font-size:9px;color:var(--tx3)">
-          ${lvStr?`<span>${lvStr}</span>`:''}
-          ${it.slot?`<span>${it.slot}${it.hand?' · '+it.hand:''}</span>`:''}
+        <div style="display:flex;gap:8px;font-size:9px;color:var(--tx3);flex-wrap:wrap">
+          ${scrollTag}
+          ${!scrollTag&&lvStr?`<span>${lvStr}</span>`:''}
+          ${!scrollTag&&it.slot?`<span>${it.slot}${it.hand?' · '+it.hand:''}</span>`:''}
           ${ss?`<span style="color:var(--green)">${ss}</span>`:''}
+          ${it.isEnchantScroll&&it.enchantData?.b?(()=>{
+            const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드',skillBonus:'스킬발동'};
+            const parts=Object.entries(it.enchantData.b).filter(([,v])=>v!==0&&isFinite(v)&&Math.abs(v)<=9999)
+              .map(([k,v])=>`${labelMap[k]||k}${v>0?'+':''}${v}`).join(' ');
+            return parts?`<span style="color:var(--purple)">${parts}</span>`:'';
+          })():''}
+          ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<span style="color:var(--gold)">⚡${SKILLS[it.enchantData.sk].name}</span>`:''}
         </div>
       </div>
       ${btnHtml}
@@ -4986,29 +4999,34 @@ async function renderWarehouse(sb){
   }
 
   sb.innerHTML=`
-    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-      <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 14px;font-size:11px">
-        <span style="color:var(--tx3)">인벤토리</span> <b style="color:${Object.keys(inv).length>=90?'var(--red)':'var(--gold)'}">${Object.keys(inv).length}/100</b>
-      </div>
-      <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 14px;font-size:11px">
-        <span style="color:var(--tx3)">창고</span> <b style="color:var(--green)">${wCnt}/200</b>
-      </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button id="whtab-deposit" class="btn btn-blue btn-sm" style="flex:1" onclick="whTab('deposit')">🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.keys(inv).length}/100</span></button>
+      <button id="whtab-withdraw" class="btn btn-ghost btn-sm" style="flex:1" onclick="whTab('withdraw')">🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${wCnt}/200</span></button>
     </div>
-    <div style="font-size:11px;color:var(--tx2);margin-bottom:10px;padding:8px 12px;background:rgba(68,212,136,.05);border:1px solid rgba(68,212,136,.2);border-radius:7px">
-      💡 인벤토리 아이템을 창고에 맡기거나, 창고에서 꺼낼 수 있습니다. 창고 최대 200개, 인벤 최대 100개.
-    </div>
-    <div class="ptitle" style="font-size:12px;margin-bottom:8px">인벤토리 → 창고로 맡기기</div>
-    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:16px">
-      ${invItems.length===0?'<div style="color:var(--tx3);font-size:11px;padding:6px">인벤에 맡길 아이템 없음</div>':
-        invItems.sort((a,b)=>GRADE_ORDER_W.indexOf(a.grade)-GRADE_ORDER_W.indexOf(b.grade))
-          .map(it=>whCard(it,`<button class="btn btn-blue btn-xs" style="white-space:nowrap" onclick="whDeposit('${it.id}')">창고↓</button>`)).join('')}
-    </div>
-    <div class="ptitle" style="font-size:12px;margin-bottom:8px">창고 → 인벤토리로 꺼내기</div>
-    <div style="display:flex;flex-direction:column;gap:4px">
-      ${wCnt===0?'<div style="color:var(--tx3);font-size:11px;padding:6px">창고가 비어 있습니다</div>':
-        Object.values(warehouse).sort((a,b)=>GRADE_ORDER_W.indexOf(a.grade)-GRADE_ORDER_W.indexOf(b.grade))
-          .map(it=>whCard(it,`<button class="btn btn-green btn-xs" style="white-space:nowrap" onclick="whWithdraw('${it.id}')">인벤↑</button>`)).join('')}
-    </div>`;
+    <div id="whContent"></div>`;
+
+  window.whTab=function(tab){
+    document.getElementById('whtab-deposit').className=`btn ${tab==='deposit'?'btn-blue':'btn-ghost'} btn-sm`;
+    document.getElementById('whtab-deposit').style.flex='1';
+    document.getElementById('whtab-withdraw').className=`btn ${tab==='withdraw'?'btn-green':'btn-ghost'} btn-sm`;
+    document.getElementById('whtab-withdraw').style.flex='1';
+    const wc=document.getElementById('whContent');
+    if(!wc)return;
+    if(tab==='deposit'){
+      const items=Object.values(inv).filter(i=>!i.isSubjBox)
+        .sort((a,b)=>GRADE_ORDER_W.indexOf(a.grade)-GRADE_ORDER_W.indexOf(b.grade));
+      wc.innerHTML=items.length===0
+        ?'<div style="color:var(--tx3);font-size:11px;padding:12px;text-align:center">인벤에 맡길 아이템 없음</div>'
+        :`<div style="display:flex;flex-direction:column;gap:4px">${items.map(it=>whCard(it,`<button class="btn btn-blue btn-xs" style="white-space:nowrap" onclick="whDeposit('${it.id}')">창고↓</button>`)).join('')}</div>`;
+    }else{
+      const items=Object.values(warehouse)
+        .sort((a,b)=>GRADE_ORDER_W.indexOf(a.grade)-GRADE_ORDER_W.indexOf(b.grade));
+      wc.innerHTML=items.length===0
+        ?'<div style="color:var(--tx3);font-size:11px;padding:12px;text-align:center">창고가 비어 있습니다</div>'
+        :`<div style="display:flex;flex-direction:column;gap:4px">${items.map(it=>whCard(it,`<button class="btn btn-green btn-xs" style="white-space:nowrap" onclick="whWithdraw('${it.id}')">인벤↑</button>`)).join('')}</div>`;
+    }
+  };
+  window.whTab('deposit');
 }
 
 window.whDeposit=async function(id){
@@ -5017,7 +5035,9 @@ window.whDeposit=async function(id){
   warehouse[id]=it;delete inv[id];
   await saveWarehouse();await saveInv();updateTop();
   toast(`🏦 ${it.name} → 창고에 보관`);
-  const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);
+  // ★ 탭 유지하며 새로고침
+  if(window.whTab)window.whTab('deposit');
+  else{const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);}
   renderInv();
 };
 
@@ -5027,7 +5047,9 @@ window.whWithdraw=async function(id){
   inv[id]=it;delete warehouse[id];
   await saveInv();await saveWarehouse();updateTop();
   toast(`🎒 ${it.name} → 인벤토리로 이동`);
-  const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);
+  // ★ 탭 유지하며 새로고침
+  if(window.whTab)window.whTab('withdraw');
+  else{const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);}
   renderInv();
 };
 
