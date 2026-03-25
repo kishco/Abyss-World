@@ -3284,6 +3284,7 @@ function startActionPhase(){
     updateTimerBar();
     if(battle.timerVal<=0){
       clearInterval(battle.timer);
+      if(battle._resolving)return; // ★ 이미 처리 중이면 skip
       for(const p of battle.players.filter(p=>p.status==='alive'&&!p.actionChosen)){p.actionChosen='attack';}
       battle.fleeVotes.clear();
       if(battle.mode!=='solo'&&myPartyId){
@@ -3369,7 +3370,9 @@ function updateActionButtons(chosen){
 
 function resolvePhase(){
   if(!battle)return;
-  // ★ fallback 타이머 정리
+  // ★ 중복 실행 완벽 차단
+  if(battle._resolving){return;}
+  battle._resolving=true;
   if(battle._leaderFallbackTimer){clearTimeout(battle._leaderFallbackTimer);battle._leaderFallbackTimer=null;}
   battle.phase=2;
   if(battle._phaseStart){
@@ -3530,12 +3533,12 @@ function resolvePhase(){
   if(allMDead){
     lootPhase();
     syncBattleState();
-    // ★ 로그 읽을 시간 - 파티는 2.5초, 솔로는 1.5초
+    battle._resolving=false;
     setTimeout(()=>{battle.phase=0;nextFloor();},battle.mode==='solo'?1500:2500);return;
   }
   syncBattleState();
+  battle._resolving=false;
   renderBattle();
-  // ★ 턴 사이 짧은 딜레이 (로그 확인용) - 파티 2초, 솔로 0.8초
   setTimeout(()=>startActionPhase(), battle.mode==='solo'?800:2000);
 }
 
@@ -3555,7 +3558,7 @@ function syncBattleState(opts={}){
       done:battle.done||false,
       success:opts.success||false,
       fled:opts.fled||false,
-      players:battle.players.map(p=>({id:p.id,hp:p.hp,maxHp:p.maxHp,status:p.status,potions:p.potions,aggro:p.aggro||0})),
+      players:battle.players.map(p=>({id:p.id,hp:isNaN(p.hp)?p.maxHp:(p.hp||0),maxHp:p.maxHp||0,status:p.status,potions:p.potions,aggro:p.aggro||0})),
       monsters:battle.monsters?battle.monsters.map(m=>({id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,status:m.status,isBoss:m.isBoss||false,hidden:m.hidden||false})):null,
       log:battle.log.slice(-80),
       ts:Date.now(),
@@ -3864,6 +3867,8 @@ function endBattle(success,fled){
 
   // ★ 파티 모드: 방장이 결과 + exitConfirm 구조 동기화
   if(isParty){
+    // ★ 먼저 done 상태를 파티원에게 전파 (success/fled 포함)
+    syncBattleState({success,fled});
     // exitConfirm 초기화
     set(ref(db,`parties/${myPartyId}/exitConfirm`),{confirmed:{},total:memberCount});
     // 실시간 확인 현황 구독
