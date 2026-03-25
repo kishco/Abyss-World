@@ -3054,9 +3054,11 @@ async function renderAuction(sb){
     // 골드 차감 + 판매자에게 지급
     char.gold-=v.price;
     await saveChar();
-    // 판매자 골드 지급
-    const selSn=await get(ref(db,`chars/${v.sellerCharId}`));const sel=selSn.val();
-    if(sel)await update(ref(db,`chars/${v.sellerCharId}`),{gold:(sel.gold||0)+v.price});
+    // 판매자 골드 지급 (본인 캐릭터면 제외)
+    if(v.sellerCharId && v.sellerCharId!==charId){
+      const selSn=await get(ref(db,`chars/${v.sellerCharId}`));const sel=selSn.val();
+      if(sel)await update(ref(db,`chars/${v.sellerCharId}`),{gold:(sel.gold||0)+v.price});
+    }
     // 구매한 아이템은 재판매 불가
     const bought={...v.item,tradeable:false};
     inv[bought.id]=bought;
