@@ -1119,29 +1119,34 @@ const MNAMES={
 const MON_SKILLS={
   // tier1 cave
   cave:[
-    {id:'m_bite',n:'강화 물기',prob:0.20,fx:(m,tgt)=>{const d=Math.round(m.atk*0.8);tgt.hp-=d;return`<span class="l-dmg">🦷 ${m.name}의 강화 물기! -${d}</span>`}},
+    {id:'m_bite',n:'강화 물기',prob:0.20,fx:(m,tgt)=>{const d=Math.max(1,Math.round(m.atk*0.8*100/(100+(tgt.stats?.def||3))));tgt.hp-=d;return`<span class="l-dmg">🦷 ${m.name}의 강화 물기! -${d}</span>`}},
     {id:'m_poison',n:'독 가시',prob:0.15,fx:(m,tgt)=>{tgt._dot=(tgt._dot||0)+1;return`<span class="l-skill">☠ ${m.name}의 독 가시! 독 부여</span>`}},
-    {id:'m_flee_debuff',n:'점액 투척',prob:0.12,fx:(m,tgt)=>{tgt.defending=false;tgt.healing=false;return`<span class="l-warn">🟢 ${m.name}의 점액! ${tgt.name} 행동 취소</span>`}},
+    {id:'m_flee_debuff',n:'점액 투척',prob:0.12,fx:(m,tgt)=>{
+      const prev=tgt.actionChosen;
+      tgt.actionChosen='attack';tgt.defending=false;tgt.healing=false;
+      const cancelled=(prev==='defend'||prev==='heal')?` (${prev==='defend'?'방어':'회복'} 취소!)`:'';
+      return`<span class="l-warn">🟢 ${m.name}의 점액! ${tgt.name} 행동 취소${cancelled} → 공격으로 강제 전환</span>`;
+    }},
   ],
   darkforest:[
     {id:'m_curse',n:'저주',prob:0.18,fx:(m,tgt)=>{const d=Math.round(tgt.maxHp*0.08);tgt.hp-=d;tgt._dot=(tgt._dot||0)+2;return`<span class="l-skill">🌑 ${m.name}의 저주! -${d}HP +2턴 독</span>`}},
-    {id:'m_drain',n:'생명 흡수',prob:0.15,fx:(m,tgt)=>{const d=Math.round(m.atk*0.6);tgt.hp-=d;m.hp=Math.min(m.hp+(d>>1),m.maxHp);return`<span class="l-skill">🩸 ${m.name}의 생명 흡수! -${d} 자신 +${d>>1}</span>`}},
+    {id:'m_drain',n:'생명 흡수',prob:0.15,fx:(m,tgt)=>{const d=Math.max(1,Math.round(m.atk*0.6*100/(100+(tgt.stats?.def||3))));tgt.hp-=d;m.hp=Math.min(m.hp+(d>>1),m.maxHp);return`<span class="l-skill">🩸 ${m.name}의 생명 흡수! -${d} 자신 +${d>>1}</span>`}},
     {id:'m_blind',n:'눈멀게 하기',prob:0.12,fx:(m,tgt)=>{tgt._blind=2;return`<span class="l-warn">🌑 ${m.name}의 암흑! ${tgt.name} 2턴 회피 불가</span>`}},
   ],
   desert:[
     {id:'m_sand',n:'모래 폭풍',prob:0.18,fx:(m,tgts)=>{let log='';for(const p of tgts.filter(p=>p.status==='alive')){const d=Math.round(m.atk*0.35);p.hp-=d;log+=`${p.name}-${d} `;}return`<span class="l-skill">🌪 ${m.name}의 모래 폭풍! 전체: ${log}</span>`}},
-    {id:'m_poison2',n:'독침',prob:0.20,fx:(m,tgt)=>{const d=Math.round(m.atk*0.5);tgt.hp-=d;tgt._dot=(tgt._dot||0)+3;return`<span class="l-skill">☠ ${m.name}의 독침! -${d} +3턴 독</span>`}},
+    {id:'m_poison2',n:'독침',prob:0.20,fx:(m,tgt)=>{const d=Math.max(1,Math.round(m.atk*0.5*100/(100+(tgt.stats?.def||3))));tgt.hp-=d;tgt._dot=(tgt._dot||0)+3;return`<span class="l-skill">☠ ${m.name}의 독침! -${d} +3턴 독</span>`}},
     {id:'m_burn',n:'작열',prob:0.15,fx:(m,tgt)=>{const d=Math.round(tgt.maxHp*0.12);tgt.hp-=d;return`<span class="l-skill">🔥 ${m.name}의 작열! -${d}HP (최대HP 12%)</span>`}},
   ],
   fortress:[
-    {id:'m_shield_bash',n:'방패 강타',prob:0.20,fx:(m,tgt)=>{const d=Math.round(m.atk*1.1);tgt.hp-=d;tgt._stunned=1;return`<span class="l-skill">🛡 ${m.name}의 방패 강타! -${d} 1턴 마비</span>`}},
+    {id:'m_shield_bash',n:'방패 강타',prob:0.20,fx:(m,tgt)=>{const d=Math.max(1,Math.round(m.atk*1.1*100/(100+(tgt.stats?.def||3))));tgt.hp-=d;tgt._stunned=1;return`<span class="l-skill">🛡 ${m.name}의 방패 강타! -${d} 1턴 마비</span>`}},
     {id:'m_rally',n:'군단 규합',prob:0.12,fx:(m,mons)=>{let log='';for(const x of mons.filter(x=>x.status==='alive')){x.atk=Math.round(x.atk*1.15);log+=x.name+' ';}return`<span class="l-warn">⚔ ${m.name}의 규합! 전체 ATK +15%: ${log}</span>`}},
     {id:'m_execute',n:'처형',prob:0.15,fx:(m,tgt)=>{if(tgt.hp/tgt.maxHp<0.3){const d=Math.round(tgt.maxHp*0.40);tgt.hp-=d;return`<span class="l-skill">💀 ${m.name}의 처형! HP 30% 미만 대상 -${d}</span>`}return null}},
     {id:'m_fortify',n:'요새화',prob:0.10,fx:(m)=>{m.def=Math.round(m.def*1.3);return`<span class="l-skill">🏰 ${m.name}의 요새화! DEF +30%</span>`}},
   ],
   dragon:[
     {id:'m_fire_breath',n:'화염 숨결',prob:0.22,fx:(m,tgts)=>{let log='';for(const p of tgts.filter(p=>p.status==='alive')){const d=Math.round(m.atk*0.6);p.hp-=d;p._dot=(p._dot||0)+2;log+=`${p.name}-${d} `;}return`<span class="l-skill">🔥 ${m.name}의 화염 숨결! 전체: ${log}+2턴 화상</span>`}},
-    {id:'m_tail',n:'꼬리 일격',prob:0.18,fx:(m,tgt)=>{const d=Math.round(m.atk*1.4);tgt.hp-=d;tgt._stunned=1;return`<span class="l-skill">🐉 ${m.name}의 꼬리 일격! -${d} 마비</span>`}},
+    {id:'m_tail',n:'꼬리 일격',prob:0.18,fx:(m,tgt)=>{const d=Math.max(1,Math.round(m.atk*1.4*100/(100+(tgt.stats?.def||3))));tgt.hp-=d;tgt._stunned=1;return`<span class="l-skill">🐉 ${m.name}의 꼬리 일격! -${d} 마비</span>`}},
     {id:'m_roar',n:'용의 포효',prob:0.15,fx:(m,tgts)=>{for(const p of tgts.filter(p=>p.status==='alive')){p.aggro=0;}return`<span class="l-warn">🔊 ${m.name}의 포효! 모든 플레이어 적개심 초기화</span>`}},
     {id:'m_scale',n:'용린 강화',prob:0.10,fx:(m)=>{m.def=Math.round(m.def*1.25);m.hp=Math.min(m.hp+Math.round(m.maxHp*0.08),m.maxHp);return`<span class="l-skill">✨ ${m.name}의 용린! DEF↑ HP +8% 회복</span>`}},
   ],
@@ -3604,6 +3609,19 @@ async function resolvePhase(){
     battle._resolving=false;
     setTimeout(()=>endBattle(false,true),1200);return;
   }
+  // ★ 선제 몬스터 스킬 처리 (행동 취소형: m_flee_debuff 등) — 플레이어 행동 이전에 발동
+  const aliveMpre=battle.monsters.filter(m=>m.status==='alive');
+  for(const m of aliveMpre){
+    const aliveP2=battle.players.filter(p=>p.status==='alive');if(!aliveP2.length)break;
+    const cancelSkills=(m.skills||[]).filter(sk=>sk.id==='m_flee_debuff');
+    for(const sk of cancelSkills){
+      if(Math.random()<(m.isBoss?(sk.prob||0)*1.5:(sk.prob||0))){
+        aliveP2.sort((a,b)=>(b.aggro||0)-(a.aggro||0));
+        const res=sk.fx(m,aliveP2[0]);
+        if(res)blogAdd(res);
+      }
+    }
+  }
   // Players act
   for(const p of alive){
     if(!p.actionChosen||p.actionChosen==='flee')p.actionChosen='attack';
@@ -3682,8 +3700,8 @@ async function resolvePhase(){
       }
     }
 
-    let dmg=Math.max(1,m.atk-(tgt.stats?tgt.stats.def:calcStats(tgt.charData||char).def));
-    if(isNaN(dmg))dmg=Math.max(1,m.atk-3);
+    let dmg=Math.max(1,Math.round(m.atk*100/(100+(tgt.stats?tgt.stats.def:calcStats(tgt.charData||char).def))));
+    if(isNaN(dmg))dmg=Math.max(1,Math.round(m.atk*0.5));
     if(tgt.defending)dmg=Math.round(dmg*0.5);
     if(tgt._shield){dmg=Math.round(dmg*0.5);tgt._shield=false;} // ★ 신성 방벽
     if(tgt.healing){
@@ -3695,7 +3713,7 @@ async function resolvePhase(){
     if(tgt._blind>0)tgt._blind--;
 
     // ★ 몬스터 스킬 발동 체크 (기본 공격 전 또는 대신)
-    const monSkills=m.skills||[];
+    const monSkills=(m.skills||[]).filter(sk=>sk.id!=='m_flee_debuff'); // ★ 행동취소 스킬은 선제 처리됨
     let skillFired=false;
     for(const sk of monSkills){
       const prob=m.isBoss?(sk.prob||0)*1.5:(sk.prob||0); // 보스 스킬 확률 1.5배
@@ -5380,7 +5398,7 @@ window.enterSubjBattle=function(){
       slog(`<span class="l-heal">💊 포션 사용! +${heal}HP (${myHp}/${s.maxHp})</span>`);
     }
     // Boss counter-attack
-    let bDmg=Math.max(1,Math.round(boss.atk-s.def*0.35));
+    let bDmg=Math.max(1,Math.round(boss.atk*100/(100+s.def)));
     const bVariance=Math.round(bDmg*0.2);bDmg=Math.max(1,bDmg+rand(-bVariance,bVariance));
     if(defending)bDmg=Math.round(bDmg*0.5);
     // Dodge
@@ -5668,7 +5686,7 @@ window.enterChampBattle=async function(){
       renderChampBattle();return;
     }
     // Champ counter-attack
-    let cDmg=Math.max(1,Math.round(cs.atk-s.def*0.4));
+    let cDmg=Math.max(1,Math.round(cs.atk*100/(100+s.def)));
     const cv=Math.round(cDmg*0.15);cDmg=Math.max(1,cDmg+rand(-cv,cv));
     if(defending)cDmg=Math.round(cDmg*0.5);
     const cCrit=Math.random()*100<cs.crit;
