@@ -4236,7 +4236,7 @@ async function cwSendMsg(){
   if(txt.length>200){toast('⚠️ 메시지는 200자 이내로 입력해주세요.');return;}
   // ★ 도배 방지: 1.5초 쿨다운
   const now=Date.now();
-  if(now-_lastChatTs<1500){toast('⚠️ 너무 빠릅니다. 잠시 후 다시 입력해주세요.');return;}
+  if(now-_lastChatTs<500){toast('⚠️ 너무 빠릅니다. 잠시 후 다시 입력해주세요.');return;}
   _lastChatTs=now;
   const ts=now;const author=char.name;
   const isAdminMsg=curUser?.email===ADMIN_EMAIL;
