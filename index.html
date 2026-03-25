@@ -1990,8 +1990,13 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   if(base.sr)stats.spd=rollStat(rand(2,6)*base.sr*mult*lm);
   const gi=Object.keys(GRADES).indexOf(grade);
   const gradeMult=GRADES[grade]?.mult||1;
-  const preRaw=gi>=1?wRand(PRE):null;
-  const sufRaw=gi>=2?wRand(SUF):null;
+  // 장비 등급에 따라 인챈트 tier 상한 제한
+  // normal:tier1, uncommon:tier1~2, rare:tier1~3, epic:tier1~4, legendary:tier1~5
+  const maxEnchTier=Math.min(5, gi+1); // gi: 0=normal→1, 1=uncommon→2 ...
+  const prePool=PRE.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
+  const sufPool=SUF.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
+  const preRaw=gi>=1?wRand(prePool.length?prePool:PRE):null;
+  const sufRaw=gi>=2?wRand(sufPool.length?sufPool:SUF):null;
   // 인챈트 스탯도 등급 편향 적용
   function scaleE(b){
     const scaled={};const lm2=1+(lv-1)*0.055;
