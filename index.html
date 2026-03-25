@@ -3777,12 +3777,21 @@ async function dungeonClear(){
   const tierIdx=battle.tierIdx;
   blogAdd(`<span class="l-exp">🏆 던전 클리어! 난이도: ${d.name}</span>`);
 
-  // ★ 보스 클리어 보너스 드랍 (난이도별 등급 보장)
+  // ★ 보스 클리어 보너스 드랍 (난이도+티어별 등급 보장)
   const bonusPool=[...WBASES,...ABASES,...ACCBASES];
-  const bonusGrade=dk==='vhard'?pick(['epic','epic','legendary']):dk==='hard'?pick(['rare','rare','epic']):'rare';
+  // 티어별 최대 등급: T1=uncommon, T2=rare, T3=epic, T4=legendary, T5=legendary
+  const tierMaxGrade=['uncommon','rare','epic','legendary','legendary'][tierIdx]||'uncommon';
+  const gradeList=['normal','uncommon','rare','epic','legendary'];
+  const tierMaxIdx=gradeList.indexOf(tierMaxGrade);
+  // 난이도별 보너스 등급 (티어 최대치 이내로 제한)
+  let bonusGradeIdx;
+  if(dk==='vhard')     bonusGradeIdx=Math.min(tierMaxIdx, 3+Math.round(Math.random())); // epic~legendary (티어 제한)
+  else if(dk==='hard') bonusGradeIdx=Math.min(tierMaxIdx, 2+Math.round(Math.random())); // rare~epic (티어 제한)
+  else                 bonusGradeIdx=Math.min(tierMaxIdx, tierIdx+1); // 노말: 해당 티어 최대 등급
+  const bonusGrade=gradeList[bonusGradeIdx]||'uncommon';
   const bonusLv=battle.tier.recLv+rand(0,8);
   const bonusItem=genItem(bonusPool,bonusGrade,bonusLv);
-  bonusItem.tradeable=true; // ★ 드랍 아이템은 1회 거래 가능
+  bonusItem.tradeable=true;
   await addItem(bonusItem);
   blogAdd(`<span class="l-set">🎁 보스 클리어 보너스: ${bonusItem.name}</span>`);
 
