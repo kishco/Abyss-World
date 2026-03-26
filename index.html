@@ -300,6 +300,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .cw-msgs::-webkit-scrollbar-thumb{background:var(--bd2);}
 .cw-msg{background:rgba(0,0,0,.3);border-radius:6px;padding:5px 7px;}
 .cw-admin-msg{background:rgba(240,192,64,.06)!important;border-left:2px solid var(--gold);}
+.cw-notice-msg{background:rgba(74,143,255,.08)!important;border-left:3px solid var(--blue);border-radius:6px;}
 .cw-author{font-family:'Cinzel',serif;font-size:9.5px;font-weight:700;color:var(--gold);}
 .cw-time{font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--tx3);margin-left:5px;}
 .cw-text{font-size:11px;color:var(--tx);line-height:1.5;margin-top:1px;}
@@ -600,12 +601,18 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="atabs">
         <button class="atab on" onclick="atab('users',this)">👤 유저관리</button>
         <button class="atab" onclick="atab('achat',this)">💬 채팅</button>
-        <button class="atab" onclick="atab('game',this)">📊 통계</button>
+        <button class="atab" onclick="atab('monitor',this)">📡 모니터링</button>
+        <button class="atab" onclick="atab('auction_admin',this)">🏛 경매장</button>
         <button class="atab" onclick="atab('tools',this)">🔧 도구</button>
       </div>
 
       <!-- 유저 관리 탭 -->
       <div class="acont on" id="ac-users">
+        <!-- 검색 -->
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <input id="adminSearchInput" placeholder="🔍 캐릭터 이름 검색..." style="flex:1;padding:7px 10px;background:var(--sf2);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:11px;outline:none"
+            oninput="adminFilterUsers(this.value)"/>
+        </div>
         <div style="overflow-x:auto"><table class="utbl"><thead><tr><th>이름</th><th>레벨</th><th>골드</th><th>UID</th><th>상태</th><th>관리</th></tr></thead><tbody id="utblbody"></tbody></table></div>
         <!-- 유저 상세 패널 -->
         <div id="adminUserDetail" style="display:none;position:fixed;top:0;right:0;bottom:0;width:680px;max-width:95vw;background:var(--sf);border-left:1px solid var(--bd2);padding:18px;overflow-y:auto;z-index:1000"></div>
@@ -613,12 +620,50 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
       <!-- 채팅 탭 -->
       <div class="acont" id="ac-achat">
-        <div style="display:flex;gap:7px;margin-bottom:7px"><button class="btn btn-red btn-xs" onclick="clearChat()">전체 삭제</button></div>
+        <!-- 공지 발송 -->
+        <div class="card2" style="margin-bottom:10px;border-color:rgba(240,192,64,.3)">
+          <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:6px">📢 전체 공지 발송</div>
+          <input id="adminNoticeInput" placeholder="공지 내용 입력..." style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px"/>
+          <button class="btn btn-gold btn-sm" onclick="adminSendNotice()">📢 공지 발송</button>
+        </div>
+        <div style="display:flex;gap:7px;margin-bottom:7px">
+          <button class="btn btn-red btn-xs" onclick="clearChat()">채팅 전체 삭제</button>
+        </div>
         <div id="adminchat" style="max-height:350px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:7px;padding:8px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;"></div>
       </div>
 
-      <!-- 통계 탭 -->
-      <div class="acont" id="ac-game"><div id="gamestat" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div></div>
+      <!-- 모니터링 탭 -->
+      <div class="acont" id="ac-monitor">
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <button class="btn btn-blue btn-sm" onclick="loadMonitor()">🔄 새로고침</button>
+          <!-- 루팡 확률 조정 -->
+          <div style="display:flex;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd2);border-radius:6px;padding:5px 10px">
+            <span style="font-size:10px;color:var(--gold)">👔 루팡 확률</span>
+            <select id="lupangRate" style="background:var(--bg);border:1px solid var(--bd2);border-radius:4px;color:var(--tx);font-size:10px;padding:2px 5px;outline:none">
+              <option value="0.001">기본 0.1%</option>
+              <option value="0.01">이벤트 1%</option>
+              <option value="0.05">이벤트 5%</option>
+              <option value="0.1">이벤트 10%</option>
+            </select>
+            <button class="btn btn-gold btn-xs" onclick="adminSetLupangRate()">적용</button>
+          </div>
+        </div>
+        <!-- 접속 현황 -->
+        <div class="card2" style="margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:8px">🟢 현재 접속 중</div>
+          <div id="monitorOnline" style="font-size:11px;color:var(--tx3)">로딩 중...</div>
+        </div>
+        <!-- 게임 통계 -->
+        <div id="gamestat" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+      </div>
+
+      <!-- 경매장 관리 탭 -->
+      <div class="acont" id="ac-auction_admin">
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <button class="btn btn-blue btn-sm" onclick="loadAdminAuction()">🔄 목록 새로고침</button>
+        </div>
+        <div id="adminAuctionList" style="font-size:11px;color:var(--tx3)">로딩 중...</div>
+      </div>
 
       <!-- 도구 탭 -->
       <div class="acont" id="ac-tools">
@@ -628,21 +673,15 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="card2" style="margin-bottom:12px;border-color:rgba(240,192,64,.35)">
           <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:2px">🎁 점검 선물 지급</div>
           <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">선물 단계를 고르고 전체 or 특정 캐릭터에게 아이템·골드를 지급합니다.</div>
-
-          <!-- 단계 선택 -->
           <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">선물 단계</div>
           <select id="giftTier" onchange="renderGiftPreview()" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:8px">
-            <option value="1">1단계 — 소규모 점검 (기본 보상)</option>
-            <option value="2">2단계 — 일반 점검 (보통 보상)</option>
-            <option value="3">3단계 — 주요 업데이트 (특별 보상)</option>
-            <option value="4">4단계 — 대규모 패치 (푸짐한 보상)</option>
-            <option value="5">5단계 — 긴급 점검/사과 (최대 보상)</option>
+            <option value="1">1단계 — 소규모 점검</option>
+            <option value="2">2단계 — 일반 점검</option>
+            <option value="3">3단계 — 주요 업데이트</option>
+            <option value="4">4단계 — 대규모 패치</option>
+            <option value="5">5단계 — 긴급 점검/사과</option>
           </select>
-
-          <!-- 미리보기 -->
           <div id="giftPreview" style="background:rgba(0,0,0,.35);border:1px solid var(--bd);border-radius:6px;padding:9px;font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:8px"></div>
-
-          <!-- 대상 선택 -->
           <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">지급 대상</div>
           <select id="giftTarget" onchange="document.getElementById('giftCharWrap').style.display=this.value==='one'?'block':'none'" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px">
             <option value="all">👥 전체 유저</option>
@@ -657,64 +696,45 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <!-- ② 물약 리셋 -->
         <div class="card2" style="margin-bottom:12px">
           <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">💊 전체 물약 리셋</div>
-          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">extraPotions=0, firstClears={} 초기화 (기본 5개로 복귀)</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">extraPotions=0, firstClears={} 초기화</div>
           <button class="btn btn-red" onclick="adminResetAllPotions()">💊 전체 물약 리셋</button>
         </div>
 
         <!-- ③ 랭킹 초기화 -->
         <div class="card2" style="margin-bottom:12px">
           <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">🏆 던전 랭킹 초기화</div>
-          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">vhard 던전 클리어 랭킹 데이터를 전체 삭제합니다.</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">vhard 던전 클리어 랭킹 전체 삭제</div>
           <button class="btn btn-red" onclick="adminResetRanking()">🗑 던전 랭킹 삭제</button>
         </div>
 
         <!-- ④ 토벌전 기록 리셋 -->
         <div class="card2" style="margin-bottom:12px;border-color:rgba(255,140,0,.4)">
           <div style="font-size:11px;font-weight:700;color:var(--lg);margin-bottom:4px">🐉 토벌전 주간 기록 리셋</div>
-          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.8">
-            이번 주 토벌전 누적 데미지 랭킹을 초기화하고<br>
-            <b style="color:var(--green)">보스 HP를 최대치로 완전 회복</b>합니다.<br>
-            <span style="font-size:9.5px;color:var(--tx3)">* 보상은 별도로 지급되지 않습니다 (강제 리셋 용도)</span>
-          </div>
-          <button class="btn btn-gold" onclick="adminResetSubjugation()">🐉 토벌전 기록 리셋 + 보스 회복</button>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.8">이번 주 토벌전 랭킹 초기화 + 보스 HP 완전 회복</div>
+          <button class="btn btn-gold" onclick="adminResetSubjugation()">🐉 토벌전 리셋 + 보스 회복</button>
         </div>
 
         <!-- ⑤ 챔프전 리셋 -->
         <div class="card2" style="margin-bottom:12px;border-color:rgba(232,68,68,.4)">
           <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">⚔️ 챔프전 리셋</div>
-          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.8">
-            현재 챔프를 초기화하고 연승 기록을 전부 삭제합니다.<br>
-            <span style="font-size:9.5px;color:var(--tx3)">* 다음 도전자가 바로 챔프 등극 가능 상태가 됩니다</span>
-          </div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px">
             <button class="btn btn-red" onclick="adminResetChamp(false)">⚔️ 현재 챔프만 제거</button>
             <button class="btn btn-red" onclick="adminResetChamp(true)">🗑 챔프 + 연승 기록 전부 삭제</button>
           </div>
         </div>
 
-        <!-- ⑦ 인챈트 스킬 마이그레이션 -->
-        <div class="card2" style="margin-bottom:12px;border-color:rgba(176,96,255,.4)">
-          <div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:4px">🔮 인챈트 스킬 마이그레이션</div>
-          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.8">
-            파티 전용 스킬(taunt/shadow_step/holy_light/heal_on_hit)을<br>솔로용 스킬로 전체 유저 아이템에 자동 변환합니다.<br>
-            <span style="color:var(--tx3);font-size:9.5px">* 인벤토리 + 착용 장비 모두 업데이트</span>
-          </div>
-          <button class="btn btn-purple" onclick="adminMigrateSkills()">🔮 전체 유저 스킬 마이그레이션 실행</button>
-        </div>
+        <!-- ⑥ 하드 리셋 -->
         <div class="card2" style="margin-bottom:12px;border-color:rgba(232,68,68,.5);background:rgba(232,68,68,.04)">
           <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">💥 하드 리셋 <span style="font-size:9px;background:rgba(232,68,68,.2);border:1px solid rgba(232,68,68,.4);padding:1px 5px;border-radius:3px">위험</span></div>
           <div style="font-size:10px;color:var(--tx3);margin-bottom:4px;line-height:1.8">
-            선택한 유저의 <b style="color:var(--red)">레벨·경험치·장비·인벤토리·골드 전체 초기화</b><br>
-            캐릭터는 삭제되지 않고 Lv.1 신규 상태로 되돌아갑니다.<br>
-            <span style="color:var(--red);font-size:9.5px">⚠️ 되돌릴 수 없습니다. 반드시 선물 지급 후 사용하세요.</span>
+            레벨·경험치·장비·인벤 전체 초기화. <span style="color:var(--red)">되돌릴 수 없습니다.</span>
           </div>
-          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px;margin-top:6px">리셋 대상</div>
           <select id="hardResetTarget" onchange="document.getElementById('hardResetCharWrap').style.display=this.value==='one'?'block':'none'" style="width:100%;padding:7px;background:var(--bg);border:1px solid rgba(232,68,68,.3);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px">
-            <option value="all">👥 전체 유저 하드 리셋</option>
-            <option value="one">👤 특정 캐릭터 하드 리셋</option>
+            <option value="all">👥 전체 유저</option>
+            <option value="one">👤 특정 캐릭터</option>
           </select>
           <div id="hardResetCharWrap" style="display:none;margin-bottom:6px">
-            <input id="hardResetCharName" placeholder="캐릭터 이름 (정확히 입력)" style="width:100%;padding:7px;background:var(--bg);border:1px solid rgba(232,68,68,.3);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
+            <input id="hardResetCharName" placeholder="캐릭터 이름" style="width:100%;padding:7px;background:var(--bg);border:1px solid rgba(232,68,68,.3);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
           </div>
           <button class="btn btn-red" style="width:100%" onclick="adminHardReset()">💥 하드 리셋 실행</button>
         </div>
@@ -2225,7 +2245,7 @@ function renderInv(){
   if(sortMode==='atk') fil.sort((a,b)=>((b.stats?.atk||0)+(b.prefix?.b?.atk||0))-((a.stats?.atk||0)+(a.prefix?.b?.atk||0)));
   else if(sortMode==='def') fil.sort((a,b)=>((b.stats?.def||0)+(b.prefix?.b?.def||0))-((a.stats?.def||0)+(a.prefix?.b?.def||0)));
   else if(sortMode==='grade') fil.sort((a,b)=>GRADE_ORDER.indexOf(a.grade)-GRADE_ORDER.indexOf(b.grade));
-  // newest = default (by id timestamp)
+  else fil.sort((a,b)=>(b.id||'').localeCompare(a.id||'')); // ★ newest: 최신이 위로
   const gr=document.getElementById('invgrid');
   if(!fil.length){gr.innerHTML='<div class="iempty">🎒 아이템 없음</div>';return;}
   gr.innerHTML=fil.map(it=>{
@@ -3407,7 +3427,7 @@ function spawnMonsters(b,isBoss){
   const areaSkills=MON_SKILLS[area]||MON_SKILLS.cave;
 
   // ★ 0.1% 확률로 월급루팡하던 고블린 등장 (던전당 1회, 보스층 제외)
-  if(!battle._lupangSpawned&&Math.random()<0.001){
+  if(!battle._lupangSpawned&&Math.random()<(typeof _lupangRate!=='undefined'?_lupangRate:0.001)){
     battle._lupangSpawned=true; // ★ 이번 던전에서 다시 등장 안 함
     const lupangHp=Math.round((30+lv*5)*d.monMult*sm*0.3);
     const lupangAtk=Math.round((5+lv*1)*d.dmgMult*sm*0.3);
@@ -4280,9 +4300,18 @@ function renderChatMsgs(msgs,type){
   el.innerHTML=arr.map(m=>{
     const isAdmin=m.isAdmin;
     const isChamp1=m.champRank===1;
+    const isNotice=m.isNotice===true;
     const subjTitle=m.subjTitle?`<span style="font-size:8px;background:rgba(240,192,64,.2);border:1px solid rgba(240,192,64,.4);color:${m.subjTitleColor||'var(--gold)'};padding:1px 5px;border-radius:3px;margin-right:3px;font-family:'IBM Plex Mono',monospace">${m.subjTitle}</span>`:'';
     const champBadge=isChamp1?`<span style="font-size:8px;margin-right:2px">⚔</span>`:'';
     const nameColor=isChamp1?'var(--red)':isAdmin?'var(--gold)':'';
+    // ★ 공지 메시지 특별 처리
+    if(isNotice){
+      return`<div class="cw-msg cw-notice-msg">
+        <div style="font-size:9px;color:var(--blue);font-weight:700;margin-bottom:2px">📢 공지</div>
+        <div class="cw-text" style="color:var(--tx);font-weight:600">${escapeHtml(m.text)}</div>
+        <div style="font-size:8.5px;color:var(--tx3);margin-top:2px">${new Date(m.ts||Date.now()).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`;
+    }
     return`<div class="cw-msg${isAdmin?' cw-admin-msg':''}">
     <div>
       ${champBadge}${subjTitle}
@@ -4341,6 +4370,9 @@ function atab(id,btn){
   if(btn)btn.classList.add('on');
   document.querySelectorAll('.acont').forEach(c=>c.classList.remove('on'));
   const el=document.getElementById('ac-'+id);if(el)el.classList.add('on');
+  // ★ 탭 진입 시 자동 로드
+  if(id==='monitor')loadMonitor();
+  if(id==='auction_admin')loadAdminAuction();
 }
 window.atab=atab;
 
@@ -4384,11 +4416,26 @@ async function loadAdmin(){
     </div>`).join('');
 
   // 통계
+  const maxLv=charArr.length?Math.max(...charArr.map(([,c])=>c.level||1)):0;
+  const avgLv=charArr.length?Math.round(charArr.reduce((s,[,c])=>s+(c.level||1),0)/charArr.length):0;
+  const maxGold=charArr.length?Math.max(...charArr.map(([,c])=>c.gold||0)):0;
+  const lv99cnt=charArr.filter(([,c])=>c.level>=99).length;
+  const auctSn=await get(ref(db,'auction'));
+  const auctActive=Object.values(auctSn.val()||{}).filter(v=>v&&v.status==='active').length;
+  const subjSn=await get(ref(db,'subjugation/bossHp'));
+  const bossHpNow=subjSn.val()??'?';
+  const bossIdx=getCurSubjBossIdx();
+  const bossMaxHp=SUBJ_BOSSES[bossIdx]?.hp||50000000;
+  const bossHpPct=bossHpNow!=='?'?Math.round(bossHpNow/bossMaxHp*100):100;
   document.getElementById('gamestat').innerHTML=`
-    <div class="akpi ak1"><div class="aklbl">평균 레벨</div><div class="akval">${charArr.length?Math.round(charArr.reduce((s,[,c])=>s+(c.level||1),0)/charArr.length):0}</div></div>
-    <div class="akpi ak2"><div class="aklbl">최고 레벨</div><div class="akval">${charArr.length?Math.max(...charArr.map(([,c])=>c.level||1)):0}</div></div>
-    <div class="akpi ak3"><div class="aklbl">총 캐릭터</div><div class="akval">${charArr.length}</div></div>
-    <div class="akpi ak4"><div class="aklbl">총 아이템</div><div class="akval">${allInv.length}</div></div>`;
+    <div class="akpi ak1"><div class="aklbl">평균 레벨</div><div class="akval">${avgLv}</div></div>
+    <div class="akpi ak2"><div class="aklbl">최고 레벨</div><div class="akval">${maxLv}</div></div>
+    <div class="akpi ak3"><div class="aklbl">Lv.99 캐릭</div><div class="akval">${lv99cnt}</div></div>
+    <div class="akpi ak4"><div class="aklbl">최고 골드</div><div class="akval">${maxGold.toLocaleString()}</div></div>
+    <div class="akpi ak1"><div class="aklbl">경매 등록</div><div class="akval">${auctActive}건</div></div>
+    <div class="akpi ak2"><div class="aklbl">토벌 보스HP</div><div class="akval">${bossHpPct}%</div></div>
+    <div class="akpi ak3"><div class="aklbl">채팅 메시지</div><div class="akval">${Object.keys(chatD).length}</div></div>
+    <div class="akpi ak4"><div class="aklbl">창고 아이템</div><div class="akval">${Object.values(invs).flatMap(i=>Object.values(i)).length}</div></div>`;
 }
 
 // ── 유저 상세 패널 ──
@@ -4906,6 +4953,73 @@ window.banU=async uid=>{const r=prompt('밴 사유:');if(!r)return;await set(ref
 window.unban=async uid=>{await remove(ref(db,`bans/${uid}`));toast('밴 해제');loadAdmin();};
 window.delChat=async mid=>{await remove(ref(db,`chat/world/${mid}`));loadAdmin();};
 window.clearChat=async()=>{if(!confirm('전체 삭제?'))return;await set(ref(db,'chat/world'),null);toast('채팅 삭제');loadAdmin();};
+
+// ★ 유저 검색 필터
+window.adminFilterUsers=function(q){
+  document.querySelectorAll('#utblbody tr').forEach(r=>{
+    const name=r.querySelector('td')?.textContent||'';
+    r.style.display=(!q||name.toLowerCase().includes(q.toLowerCase()))?'':'none';
+  });
+};
+
+// ★ 전체 공지 발송
+window.adminSendNotice=async function(){
+  if(!isAdmin){toast('⛔ 관리자 권한 필요');return;}
+  const txt=document.getElementById('adminNoticeInput')?.value.trim();
+  if(!txt){toast('공지 내용을 입력하세요');return;}
+  if(!confirm(`전체 공지를 발송합니다:\n"${txt}"`))return;
+  await push(ref(db,'chat/world'),{author:'📢 공지',text:txt,ts:Date.now(),isAdmin:true,isNotice:true});
+  document.getElementById('adminNoticeInput').value='';
+  toast('📢 공지 발송 완료!');
+};
+
+// ★ 모니터링 탭 로드
+window.loadMonitor=async function(){
+  if(!isAdmin)return;
+  const el=document.getElementById('monitorOnline');if(!el)return;
+  const pSn=await get(ref(db,'presence'));
+  const ps=pSn.val()||{};const now=Date.now();
+  const valid=Object.entries(ps).filter(([,p])=>p.lastSeen>now-60000);
+  if(!valid.length){el.innerHTML='<span style="color:var(--tx3)">현재 접속자 없음</span>';return;}
+  el.innerHTML=valid.map(([uid,p])=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)">
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
+      <span style="font-family:'Cinzel',serif;font-size:11px;color:var(--tx)">${escapeHtml(p.charName||'?')}</span>
+      <span style="font-size:9px;color:var(--tx3);margin-left:auto">${Math.floor((now-(p.lastSeen||now))/1000)}초 전</span>
+    </div>`).join('');
+};
+
+// ★ 경매장 관리
+window.loadAdminAuction=async function(){
+  if(!isAdmin)return;
+  const el=document.getElementById('adminAuctionList');if(!el)return;
+  el.innerHTML='<span style="color:var(--tx3)">로딩 중...</span>';
+  const sn=await get(ref(db,'auction'));const all=sn.val()||{};
+  const active=Object.entries(all).filter(([,v])=>v&&v.status==='active');
+  if(!active.length){el.innerHTML='<span style="color:var(--tx3)">등록된 경매 없음</span>';return;}
+  el.innerHTML=`<div style="font-size:10px;color:var(--tx3);margin-bottom:8px">총 ${active.length}건 등록 중</div>`+
+    active.map(([lid,v])=>{
+      const it=v.item||{};
+      return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:700;color:var(--tx)">${escapeHtml(it.name||'?')}</div>
+          <div style="font-size:9.5px;color:var(--tx3)">판매자: ${escapeHtml(v.sellerName||'?')} · 💰${(v.price||0).toLocaleString()}G</div>
+        </div>
+        <button class="btn btn-red btn-xs" onclick="adminDeleteAuction('${lid}')">🗑삭제</button>
+      </div>`;
+    }).join('');
+};
+
+// ★ 루팡 확률 — DB에서 로드해서 모든 클라이언트에 실시간 반영
+let _lupangRate=0.001;
+get(ref(db,'admin/lupangRate')).then(sn=>{if(sn.val()!==null)_lupangRate=sn.val();});
+onValue(ref(db,'admin/lupangRate'),sn=>{if(sn.val()!==null)_lupangRate=sn.val();});
+window.adminSetLupangRate=async function(){
+  if(!isAdmin)return;
+  const rate=parseFloat(document.getElementById('lupangRate')?.value||'0.001');
+  await set(ref(db,'admin/lupangRate'),rate);
+  toast(`👔 루팡 출현율 → ${(rate*100).toFixed(1)}% 적용!`);
+};
 
 // ═══ NAVIGATION ═══
 function isInBattle(){return battle&&!battle.done;}
@@ -5992,9 +6106,50 @@ window.buyFromMerchant=async(idx)=>{
 ['adminOpenUser','adminUpdateItemSelect','adminGiveItem','adminGiveGold',
  'adminResetAllPotions','adminResetRanking','adminMigrateSkills',
  'adminResetSubjugation','adminResetChamp','adminSendGift','adminHardReset',
- 'adminSetLevel','banU','unban','delChat','clearChat'].forEach(fn=>{
+ 'adminSetLevel','banU','unban','delChat','clearChat',
+ 'adminSendNotice','loadMonitor','loadAdminAuction','adminSetLupangRate'].forEach(fn=>{
   if(typeof window[fn]==='function')window[fn]=_adminGuard(window[fn]);
 });
+
+// ═══ 보안 강화 ═══
+// ★ 콘솔 경고 메시지
+console.log('%c⚠️ ABYSS WORLD 보안 경고', 'color:#ff4444;font-size:20px;font-weight:900');
+console.log('%c이 콘솔을 통한 임의 조작은 계정 정지 사유입니다.\n게임 데이터 위변조는 서버에서 감지됩니다.', 'color:#ff9900;font-size:13px');
+
+// ★ 저장 전 수치 검증 — 비정상적인 값 차단
+const _origSaveChar=saveChar;
+async function saveChar(){
+  if(!char)return;
+  // 골드 상한 체크 (1억 이상이면 비정상)
+  if(char.gold>99999999){char.gold=99999999;}
+  // 레벨 상한
+  if(char.level>99){char.level=99;}
+  // 스탯 상한 (각 스탯 최대 200 — 레벨업으로 쌓을 수 있는 최대치보다 훨씬 큼)
+  for(const k of['str','dex','int','vit','luk']){
+    if((char[k]||0)>200)char[k]=200;
+    if((char[k]||0)<1)char[k]=1;
+  }
+  // HP 상한
+  char.gold=Math.floor(char.gold||0);
+  char.level=Math.max(1,Math.min(99,char.level||1));
+  char.exp=Math.max(0,char.exp||0);
+  if(!db||!charId)return;
+  await set(ref(db,`chars/${charId}`),char);
+}
+
+// ★ 인벤 저장 전 검증 — 비정상 스탯 아이템 차단
+const _origSaveInv=saveInv;
+async function saveInv(){
+  if(!db||!charId)return;
+  // 아이템 스탯 상한 검증
+  for(const it of Object.values(inv)){
+    if(!it||!it.stats)continue;
+    for(const k of Object.keys(it.stats)){
+      if(Math.abs(it.stats[k]||0)>99999)it.stats[k]=99999;
+    }
+  }
+  await set(ref(db,`inv/${charId}`),inv);
+}
 
 // LV SOON indicator
 setInterval(()=>{
