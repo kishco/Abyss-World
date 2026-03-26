@@ -1472,10 +1472,29 @@ function getSkills(c_arg){
 }
 async function saveChar(){
   if(!db||!charId)return;
-  char.gold=Math.floor(char.gold||0); // ★ 골드 항상 정수
+  // ★ 저장 전 수치 검증
+  if(char){
+    char.gold=Math.min(Math.floor(char.gold||0),99999999);
+    char.level=Math.max(1,Math.min(99,char.level||1));
+    char.exp=Math.max(0,char.exp||0);
+    for(const k of['str','dex','int','vit','luk']){
+      if((char[k]||0)>200)char[k]=200;
+      if((char[k]||0)<1)char[k]=1;
+    }
+  }
   await set(ref(db,`chars/${charId}`),char);
 }
-async function saveInv(){if(db&&charId)await set(ref(db,`inv/${charId}`),inv);}
+async function saveInv(){
+  if(!db||!charId)return;
+  // ★ 비정상 스탯 상한 검증
+  for(const it of Object.values(inv)){
+    if(!it?.stats)continue;
+    for(const k of Object.keys(it.stats)){
+      if(Math.abs(it.stats[k]||0)>99999)it.stats[k]=99999;
+    }
+  }
+  await set(ref(db,`inv/${charId}`),inv);
+}
 async function addItem(item){
   const cnt=Object.keys(inv).length;
   if(cnt>=100){
@@ -6115,41 +6134,6 @@ window.buyFromMerchant=async(idx)=>{
 // ★ 콘솔 경고 메시지
 console.log('%c⚠️ ABYSS WORLD 보안 경고', 'color:#ff4444;font-size:20px;font-weight:900');
 console.log('%c이 콘솔을 통한 임의 조작은 계정 정지 사유입니다.\n게임 데이터 위변조는 서버에서 감지됩니다.', 'color:#ff9900;font-size:13px');
-
-// ★ 저장 전 수치 검증 — 비정상적인 값 차단
-const _origSaveChar=saveChar;
-async function saveChar(){
-  if(!char)return;
-  // 골드 상한 체크 (1억 이상이면 비정상)
-  if(char.gold>99999999){char.gold=99999999;}
-  // 레벨 상한
-  if(char.level>99){char.level=99;}
-  // 스탯 상한 (각 스탯 최대 200 — 레벨업으로 쌓을 수 있는 최대치보다 훨씬 큼)
-  for(const k of['str','dex','int','vit','luk']){
-    if((char[k]||0)>200)char[k]=200;
-    if((char[k]||0)<1)char[k]=1;
-  }
-  // HP 상한
-  char.gold=Math.floor(char.gold||0);
-  char.level=Math.max(1,Math.min(99,char.level||1));
-  char.exp=Math.max(0,char.exp||0);
-  if(!db||!charId)return;
-  await set(ref(db,`chars/${charId}`),char);
-}
-
-// ★ 인벤 저장 전 검증 — 비정상 스탯 아이템 차단
-const _origSaveInv=saveInv;
-async function saveInv(){
-  if(!db||!charId)return;
-  // 아이템 스탯 상한 검증
-  for(const it of Object.values(inv)){
-    if(!it||!it.stats)continue;
-    for(const k of Object.keys(it.stats)){
-      if(Math.abs(it.stats[k]||0)>99999)it.stats[k]=99999;
-    }
-  }
-  await set(ref(db,`inv/${charId}`),inv);
-}
 
 // LV SOON indicator
 setInterval(()=>{
