@@ -1610,7 +1610,7 @@ async function selChar(id){
   for(const sl of EQSLOTS){
     const it=char.equipment[sl.k];
     if(it&&(!it._v||it._v<2)){migrateItem(it);equipMigrated=true;}
-    if(it&&(!it._esv||it._esv<1)){
+    if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){
       if(autoMigrateEnchantStats(it))equipMigrated=true; // 실제 스탯 변화 → 반드시 저장
       else equipStatsDirty=true; // 스탯 변화 없지만 _esv:1 플래그는 DB에 써야 중복체크 방지
     }
@@ -1624,7 +1624,7 @@ async function selChar(id){
   let invStatsDirty=false;
   for(const it of Object.values(inv)){
     if(it&&(!it._v||it._v<2)){migrateItem(it);invMigrated=true;}
-    if(it&&(!it._esv||it._esv<1)){
+    if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){
       if(autoMigrateEnchantStats(it))invMigrated=true;
       else invStatsDirty=true;
     }
@@ -1633,7 +1633,7 @@ async function selChar(id){
   let whMigrated=false;
   let whStatsDirty=false;
   for(const it of Object.values(warehouse)){
-    if(it&&(!it._esv||it._esv<1)){
+    if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){
       if(autoMigrateEnchantStats(it))whMigrated=true;
       else whStatsDirty=true;
     }
@@ -1667,7 +1667,7 @@ async function selChar(id){
         if((it.enhance||0)>9){it.enhance=9;dirty=true;}
         if(it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;dirty=true;}
         if(!it._v||it._v<2){migrateItem(it);dirty=true;}
-        if(!it._esv||it._esv<1){if(autoMigrateEnchantStats(it))dirty=true;else it._esv=1;}
+        if(!it._esv||it._esv<ENCHANT_STAT_VER){if(autoMigrateEnchantStats(it))dirty=true;else it._esv=ENCHANT_STAT_VER;}
         // ★ balance 마이그레이션 — 무기인데 balance 없으면 baseId 기준으로 부여
         if(it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
           const wb=WBASES.find(b=>b.id===it.baseId);
@@ -1688,7 +1688,7 @@ async function selChar(id){
       if(it&&it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;needSave=true;}
       if(it&&(it.enhance||0)>9){it.enhance=9;needSave=true;}
       if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
-      if(it&&(!it._esv||it._esv<1)){if(autoMigrateEnchantStats(it))needSave=true;else it._esv=1;}
+      if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){if(autoMigrateEnchantStats(it))needSave=true;else it._esv=ENCHANT_STAT_VER;}
       // ★ 인벤 무기 balance 마이그레이션
       if(it&&it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
         const wb=WBASES.find(b=>b.id===it.baseId);
@@ -2393,9 +2393,12 @@ const ENCHANT_STAT_MAP={
   '성스러움':  {hp:50,vit:5,dex:3},
 };
 
+// ★ 이 숫자만 올리면 다음 접속 시 모든 유저 아이템 재마이그레이션
+const ENCHANT_STAT_VER=1;
+
 function autoMigrateEnchantStats(it){
   // 이미 마이그레이션됐거나, 스크롤 류는 스킵
-  if(!it||it._esv>=1||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
+  if(!it||it._esv>=ENCHANT_STAT_VER||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
   const lv=it.itemLv||it.reqLv||1;
   const g=it.grade==='set'?'legendary':it.grade;
   const gm=GRADES[g]?.mult||1;
@@ -2407,7 +2410,7 @@ function autoMigrateEnchantStats(it){
     enc.b=scaleEnchant(newBase,lv,gm);
     changed=true;
   }
-  it._esv=1; // 마이그레이션 완료 플래그 (변경 여부와 무관하게 항상 세팅)
+  it._esv=ENCHANT_STAT_VER; // 마이그레이션 완료 플래그 (변경 여부와 무관하게 항상 세팅)
   return changed; // 실제 스탯이 바뀐 경우만 true
 }
 
