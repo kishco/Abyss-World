@@ -1361,8 +1361,9 @@ window.toggleChat=function(forceHide){
     btn.innerHTML='✕<div class="unread-dot" id="unreadDot"></div>';
     btn.title='채팅 숨기기';
     if(main)main.classList.remove('chat-hidden');
-    // ★ 모바일에서만 딤 오버레이 표시 + 버튼 숨김
-    if(window.innerWidth<=768){overlay.style.display='block';btn.style.display='none';}
+    // ★ 채팅 열리면 모든 디바이스에서 버튼 숨김
+    if(window.innerWidth<=768){overlay.style.display='block';}
+    btn.style.display='none';
     localStorage.setItem('chatHidden','0');
     document.getElementById('unreadDot').style.display='none';
     const msgs=document.getElementById('cwMsgs');if(msgs)msgs.scrollTop=msgs.scrollHeight;
@@ -1599,7 +1600,12 @@ async function selChar(id){
   // 채팅 토글 버튼 표시
   document.getElementById('chatToggleBtn').style.display='flex';
   // 채팅창 숨김 상태 복원
-  if(localStorage.getItem('chatHidden')==='1') toggleChat(true);
+  if(localStorage.getItem('chatHidden')==='1'){
+    toggleChat(true);
+  }else{
+    // ★ 채팅 열려있으면 버튼 숨김
+    document.getElementById('chatToggleBtn').style.display='none';
+  }
   isAdmin=curUser.email===ADMIN_EMAIL;
   document.getElementById('adminNav').style.display=isAdmin?'flex':'none';
   onValue(ref(db,`chars/${id}`),sn=>{
@@ -1830,7 +1836,7 @@ function renderEq(){
       const lvStr=it.reqLv?`<div style="font-size:9px;color:${char.level<it.reqLv?'var(--red)':'var(--tx3)'}">필요 Lv.${it.reqLv}</div>`:'';
       const setTag=it.grade==='set'?`<div style="font-size:8px;color:${GRADES.set.color}">◆ ${it.setName||'유일'}</div>`:'';
       tooltip=`<div class="sk-tooltip">
-        <div style="font-size:9px;color:${it.gradeColor};font-weight:700;margin-bottom:4px">${it.gradeName} · 아이템Lv.${it.itemLv||1}</div>
+        <div style="font-size:9px;color:${it.gradeColor};font-weight:700;margin-bottom:4px">${it.gradeName}</div>
         ${setTag}
         <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:5px">${itName(it)}</div>
         ${lvStr}
@@ -2772,7 +2778,7 @@ function renderSell(sb){
           <span class="icname g-${it.grade}" style="font-size:11px">${it.name}${isEq?' 🔒':''}</span>
           ${isTrade?`<span style="font-size:8px;background:rgba(74,143,255,.15);color:var(--blue);padding:1px 4px;border-radius:3px;white-space:nowrap">거래가능</span>`:''}
         </div>
-        <div style="font-size:9px;color:var(--tx3)">아이템Lv.${it.itemLv||1} · ${it.slot}</div>
+        <div style="font-size:9px;color:var(--tx3)">${it.slot}</div>
       </div>
       <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
         <span style="font-size:11px;color:var(--gold)">💰${price}</span>
@@ -3242,7 +3248,7 @@ async function renderAuction(sb){
               <div style="display:flex;align-items:flex-start;gap:8px">
                 <div style="flex:1;min-width:0">
                   <div class="icname g-${it.grade}" style="font-size:11px;margin-bottom:2px">${it.name}${it.enhance>0?` <span style="color:var(--gold)">+${it.enhance}</span>`:''}</div>
-                  <div style="font-size:9px;color:var(--tx3)">${it.slot} · Lv.${it.itemLv||1}${statStr?' · '+statStr:''}</div>
+                  <div style="font-size:9px;color:var(--tx3)">${it.slot}${statStr?' · '+statStr:''}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
                   <input id="ap_${it.id}" type="number" min="1" value="${suggestPrice}" style="width:80px;padding:4px 6px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--gold);font-size:11px;outline:none;font-family:'IBM Plex Mono',monospace"/>
@@ -4680,7 +4686,7 @@ window.adminOpenUser=async function(cid){
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
         <div>
-          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">아이템Lv</div>
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">필요 Lv</div>
           <input id="giLv" type="number" min="1" max="99" value="${c.level}" style="width:100%;padding:6px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
         </div>
         <div>
@@ -4775,15 +4781,20 @@ window.adminGiveItem=async function(cid){
     const [sid,pid]=sub.split('::');
     const sd=SETS[sid];const pd=sd?.pcs[pid];
     if(!pd){toast('유일 피스 없음');return;}
+    const SET_LV_MAP={crimson_blade:90,shadow_hunter:90,iron_fortress:90,stone_guardian:90,divine_light:90,arcane_scholar:90,dragon_sovereign:90,frost:90,flame:90};
+    const reqLv=SET_LV_MAP[sid]||90;
+    const scaledStats={};
+    for(const[k,v]of Object.entries(pd.stats))scaledStats[k]=Math.round(v);
     it={id:gId(),name:pd.n,baseId:pid,slot:pd.slot,hand:pd.hand||null,grade:'set',
       gradeName:'유일',gradeColor:sd.col,setId:sid,setName:sd.name,
-      stats:{...pd.stats},prefix:null,suffix:null,attr:null,reqLv:1,itemLv:lv};
+      stats:scaledStats,prefix:null,suffix:null,attr:null,reqLv,itemLv:reqLv,enhance:0,tradeable:true};
   }else{
     let base;
     if(type==='weapon') base=WBASES.find(b=>b.id===sub)||WBASES[0];
     else if(type==='accessory') base=ACCBASES.find(b=>b.id===sub)||ACCBASES[0];
     else base=ABASES.find(b=>b.slot===sub)||ABASES[0];
     it=genItem([base],grade,lv);
+    it.reqLv=lv; // ★ 필요Lv = 입력값으로 고정
   }
 
   // 강화 적용
@@ -5250,7 +5261,7 @@ async function renderWarehouse(sb){
     const enh=it.enhance||0;
     const enhStr=enh>0?`<span style="color:var(--gold);font-weight:700">+${enh}</span> `:'';
     const ss=whStatStr(it);
-    const lvStr=it.itemLv?`Lv.${it.itemLv}`:'';
+    const lvStr=it.reqLv?`필요Lv.${it.reqLv}`:'';
     const gradeTag=it.grade==='set'?`<span style="font-size:8px;color:var(--st)">◆${it.setName||'유일'}</span>`:'';
     // ★ 스크롤 타입 표시
     const scrollTag=it.isEnchantScroll?`<span style="font-size:8px;color:var(--purple)">📜 ${it.enchantIsPrefix!==false?'[접두]':'[접미]'} 성공률${Math.round((it.successRate||0.7)*100)}%</span>`
@@ -6249,9 +6260,36 @@ window.setRankTier=function(tierIdx){const rb=document.getElementById('rankBody'
 window.adminSetLevel=async function(cid){
   const newLv=parseInt(prompt('새 레벨 입력 (1~99):'));
   if(!newLv||newLv<1||newLv>99){toast('잘못된 레벨');return;}
+  // ★ 현재 캐릭 데이터 가져와서 레벨 차이만큼 스탯 성장/감소 적용
+  const sn=await get(ref(db,`chars/${cid}`));
+  const c=sn.val();if(!c)return;
+  const curLv=c.level||1;
+  const diff=newLv-curLv;
+  let {baseAtk=8,baseDef=3,baseSpd=5,maxHp=60,str=5,dex=5,int:INT=3,vit=5,luk=5}=c;
+  if(diff>0){
+    // 레벨업: 차이만큼 성장 적용
+    for(let i=0;i<diff;i++){
+      baseAtk+=0.15;baseDef+=0.08;baseSpd+=0.12;maxHp+=1;
+      const pts=Math.floor(Math.random()*2)+1; // 1~2pt
+      const stats=['str','dex','int','vit','luk'];
+      for(let p=0;p<pts;p++){
+        const k=stats[Math.floor(Math.random()*stats.length)];
+        if(k==='str')str++;else if(k==='dex')dex++;else if(k==='int')INT++;else if(k==='vit')vit++;else luk++;
+      }
+    }
+  }else if(diff<0){
+    // 레벨다운: 차이만큼 역성장
+    for(let i=0;i<Math.abs(diff);i++){
+      baseAtk=Math.max(1,baseAtk-0.15);baseDef=Math.max(0,baseDef-0.08);
+      baseSpd=Math.max(1,baseSpd-0.12);maxHp=Math.max(60,maxHp-1);
+    }
+  }
   const newExpNext=expForLevel(newLv);
-  await update(ref(db,`chars/${cid}`),{level:newLv,exp:0,expNext:newExpNext});
-  toast(`✅ 레벨 → ${newLv} 변경 완료`);
+  await update(ref(db,`chars/${cid}`),{
+    level:newLv,exp:0,expNext:newExpNext,
+    baseAtk,baseDef,baseSpd,maxHp,str,dex,int:INT,vit,luk
+  });
+  toast(`✅ 레벨 → ${newLv} 변경 완료 (스탯 성장 반영)`);
   loadAdmin();
 };
 
