@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ABYSS WORLD 2.0 - 다크 판타지 RPG</title>
+<title>ABYSS WORLD 2.1 - 다크 판타지 RPG</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
@@ -16,7 +16,7 @@
 
 <!-- Open Graph (카카오톡·디스코드·SNS 링크 공유 미리보기) -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="ABYSS WORLD 2.0 — 다크 판타지 RPG">
+<meta property="og:title" content="ABYSS WORLD 2.1 — 다크 판타지 RPG">
 <meta property="og:description" content="설치 없이 브라우저에서 바로! 5개 던전, 토벌전, 챔프전, 유일 아이템, 99레벨 육성. 무료 온라인 텍스트 RPG.">
 <meta property="og:url" content="https://kishco.github.io/Abyss-World/">
 <meta property="og:locale" content="ko_KR">
@@ -24,7 +24,7 @@
 
 <!-- Twitter 카드 -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ABYSS WORLD 2.0 — 다크 판타지 RPG">
+<meta name="twitter:title" content="ABYSS WORLD 2.1 — 다크 판타지 RPG">
 <meta name="twitter:description" content="설치 없이 브라우저에서 바로! 5개 던전, 토벌전, 챔프전. 무료 온라인 텍스트 RPG.">
 
 <!-- 구글 검색엔진에 크롤링 허용 -->
@@ -288,7 +288,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   .tlogo{font-size:11px;letter-spacing:1px;padding-right:7px;margin-right:6px;}
   .tname{font-size:11px;}
   .tlo{padding:2px 5px;font-size:9px;}
-  /* v2.0 배지 모바일에서 숨김 */
+  /* v2.1 배지 모바일에서 숨김 */
   .v2badge{display:none!important;}
   /* 골드 폰트 살짝 줄임 */
   .tg{font-size:9.5px;}
@@ -370,7 +370,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div id="loginScr">
   <div class="lwrap">
     <div class="llogo">⚔ ABYSS WORLD</div>
-    <div class="lsub">DARK FANTASY RPG v2.0</div>
+    <div class="lsub">DARK FANTASY RPG v2.1</div>
     <div class="ltabs">
       <button class="ltab on" id="tlogin" onclick="swTab('login')">로그인</button>
       <button class="ltab" id="treg" onclick="swTab('register')">회원가입</button>
@@ -428,40 +428,50 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
 </div>
 
-<!-- 업데이트 팝업 v2.0 -->
+<!-- 업데이트 팝업 v2.1 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
-  <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:480px;width:90%;max-height:85vh;overflow-y:auto">
+  <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:500px;width:90%;max-height:88vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
-      <span style="font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:3px 10px;border-radius:5px;font-weight:700">v2.0 대규모 업데이트</span>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+      <span style="font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:3px 10px;border-radius:5px;font-weight:700">v2.1 밸런스 패치</span>
     </div>
 
-    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:7px">🔥 토벌전 오픈</div>
+    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:7px">🔫 신규 무기 — 듀얼건 추가</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      Lv.50 이상 전 플레이어가 참여하는 <b style="color:var(--gold)">주간 토벌전</b> 오픈!<br>
-      🐉 심연의 군주 아비도스 / 불의 정령 라바돈 / 영원의 기사 루 로테이션<br>
-      📊 누적 데미지 랭킹 → <b style="color:var(--gold)">매주 월요일 갱신</b> & 보상 지급<br>
-      🏆 1위 보상상자 4개, 2위 3개, 3위 2개, 참여자 1개
+      마법 원거리 2H 무기 <b style="color:var(--purple)">듀얼건</b>이 추가되었습니다!<br>
+      🔫 낡은듀얼건 / 불꽃듀얼건 / 냉기듀얼건 / 번개듀얼건 / 심연듀얼건 / 전설의듀얼건 등<br>
+      ✨ 공격력: <b style="color:var(--gold)">MATK + INT + SPD</b> 동시 반영<br>
+      ⚡ 마법 스킬 발동률 <b style="color:var(--gold)">+15%</b> (지팡이보다 5%p 높음)<br>
+      🛡 2H 무기 — 방패 착용 불가 · 지팡이보다 높은 순수 딜 특화
     </div>
 
-    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:7px">⚔️ 챔프전 오픈</div>
+    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:7px">✨ 지팡이 상향</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      도전자가 <b style="color:var(--gold)">현 챔프</b>의 스탯·장비로 구현된 보스와 싸우는 PVP 시스템!<br>
-      🥊 이기면 다음 챔프로 등극 · 챔프 연승 기록 랭킹<br>
-      🔴 챔프전 1위는 채팅에 <b style="color:var(--red)">붉은 이름</b>으로 표시
+      지팡이 기본 MATK가 대폭 상향되었습니다.<br>
+      기존 지팡이 소지 시 <b style="color:var(--green)">접속 시 자동으로 스탯이 재계산</b>됩니다.
     </div>
 
-    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:7px">🏛️ 창고 시스템 오픈</div>
+    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:7px">🔮 마법 인챈트 대폭 강화</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      마을에 창고가 생겼습니다! 인벤 100개 제한, 창고 200개 보관 가능
+      기존 마법 인챈트(번개의/독의/현자의/냉기 등)가 <b style="color:var(--purple)">INT → MATK 직접 부여</b>로 변경<br>
+      신규 마법 인챈트 추가: <b style="color:var(--purple)">타오르는 · 신비로운 · 격류의 · 파멸의주문 (접두)</b><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="color:var(--purple)">마력 · 주문 · 격노의주문 (접미)</b><br>
+      기존 보유 인챈트 장비는 <b style="color:var(--green)">접속 시 자동으로 재조정</b>됩니다.
+    </div>
+
+    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:7px">⚔️ 전투 밸런스 조정</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
+      몬스터 회피율 대폭 상향 — 밸런스 스탯 체감 강화<br>
+      &nbsp;&nbsp;일반 몹: T1 <b style="color:var(--tx)">8~12%</b> → T5 <b style="color:var(--tx)">33~42%</b><br>
+      &nbsp;&nbsp;보스: T1 <b style="color:var(--tx)">17%</b> → T5 <b style="color:var(--tx)">47%</b><br>
+      밸런스 낮은 장비 착용 시 고티어에서 공격이 자주 빗나갑니다.
     </div>
 
     <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🛠 기타 개선</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:18px">
-      파티 시스템 제거 → 솔로 던전 중심으로 전면 개편<br>
-      인벤토리 정렬 기능 추가 (최신순/공격력/방어력/등급)<br>
-      아이템 등급별 텍스트 효과 강화<br>
-      비밀상점 구매 후 아이템 제거 버그 수정
+    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:20px">
+      던전 입구컷 티어·난이도별 현실적으로 재조정 (T1 vhard 400→280 등)<br>
+      던전 카드에 최대 드랍 등급 + 요구 전투력 미리보기 표시<br>
+      인챈트 스크롤은 <b style="color:var(--tx)">붙이는 장비 레벨·등급 기준</b>으로 스탯 계산 (경매장 안전)
     </div>
 
     <div style="display:flex;gap:8px">
@@ -825,7 +835,156 @@ const app=initializeApp({apiKey:"AIzaSyAUkBrBb9UFj-kC45vJ-T3eiFwh8tCT1Hw",authDo
 const auth=getAuth(app),db=getDatabase(app),gp=new GoogleAuthProvider();
 const ADMIN_EMAIL='aimori1@ag.game';
 
-// ═══ CONSTANTS ═══
+// ═══ 효과음 시스템 (Web Audio API — 외부 파일 없음) ═══
+const SFX=(()=>{
+  let ctx=null,muted=false;
+  // localStorage에서 음소거 상태 복원
+  try{muted=localStorage.getItem('sfx_muted')==='1';}catch(e){}
+
+  function ac(){
+    if(!ctx){try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+    // 모바일: suspended 상태면 resume
+    if(ctx&&ctx.state==='suspended')ctx.resume();
+    return ctx;
+  }
+
+  // 기본 재생 헬퍼: oscillator + envelope
+  function play(type,freq,dur,vol=0.18,freqEnd=null,delay=0){
+    const c=ac();if(!c||muted)return;
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type=type;o.frequency.setValueAtTime(freq,c.currentTime+delay);
+    if(freqEnd)o.frequency.exponentialRampToValueAtTime(freqEnd,c.currentTime+delay+dur);
+    g.gain.setValueAtTime(0,c.currentTime+delay);
+    g.gain.linearRampToValueAtTime(vol,c.currentTime+delay+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+delay+dur);
+    o.start(c.currentTime+delay);o.stop(c.currentTime+delay+dur+0.01);
+  }
+
+  // 노이즈 버스트 헬퍼 (타격감)
+  function noise(dur,vol=0.12,delay=0){
+    const c=ac();if(!c||muted)return;
+    const buf=c.createBuffer(1,Math.floor(c.sampleRate*dur),c.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+    const src=c.createBufferSource(),g=c.createGain(),flt=c.createBiquadFilter();
+    flt.type='bandpass';flt.frequency.value=800;flt.Q.value=1.5;
+    src.buffer=buf;src.connect(flt);flt.connect(g);g.connect(c.destination);
+    g.gain.setValueAtTime(0,c.currentTime+delay);
+    g.gain.linearRampToValueAtTime(vol,c.currentTime+delay+0.005);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+delay+dur);
+    src.start(c.currentTime+delay);src.stop(c.currentTime+delay+dur+0.01);
+  }
+
+  const sounds={
+    // ── 플레이어 행동 ──
+    attack(){
+      noise(0.06,0.15);
+      play('sawtooth',220,0.08,0.12,120);
+    },
+    crit(){
+      noise(0.05,0.25);
+      play('sawtooth',440,0.06,0.20,200);
+      play('square',880,0.08,0.10,600,0.03);
+    },
+    miss(){
+      play('sine',300,0.12,0.08,200);
+    },
+    defend(){
+      noise(0.04,0.18);
+      play('square',180,0.10,0.14,150);
+      play('sine',400,0.08,0.08,350,0.03);
+    },
+    heal(){
+      play('sine',523,0.12,0.12,784);
+      play('sine',659,0.10,0.10,880,0.08);
+      play('sine',784,0.08,0.12,1046,0.16);
+    },
+    flee(){
+      play('sine',400,0.06,0.10,600);
+      play('sine',600,0.06,0.06,900,0.05);
+      play('sine',300,0.10,0.15,150,0.10);
+    },
+    // ── 스킬 ──
+    skill_physical(){
+      noise(0.04,0.20);
+      play('sawtooth',350,0.10,0.18,200);
+      play('square',700,0.06,0.08,400,0.04);
+    },
+    skill_magic(){
+      play('sine',880,0.08,0.12,1200);
+      play('sine',660,0.10,0.14,1000,0.05);
+      play('triangle',440,0.08,0.18,800,0.08);
+    },
+    skill_special(){
+      play('triangle',600,0.06,0.14,900);
+      play('sine',900,0.08,0.10,1200,0.04);
+      noise(0.03,0.08,0.02);
+    },
+    // ── 몬스터/전투 이벤트 ──
+    monster_hit(){
+      noise(0.07,0.12);
+      play('sawtooth',150,0.10,0.14,80);
+    },
+    monster_boss_hit(){
+      noise(0.10,0.20);
+      play('sawtooth',100,0.14,0.18,60);
+      play('square',200,0.08,0.10,100,0.05);
+    },
+    kill(){
+      noise(0.05,0.15);
+      play('sawtooth',300,0.06,0.16,150);
+      play('sine',200,0.08,0.12,100,0.04);
+    },
+    death(){
+      play('sine',300,0.20,0.16,80);
+      play('sine',200,0.18,0.20,60,0.15);
+    },
+    boss_rage(){
+      play('square',80,0.25,0.22,60);
+      noise(0.15,0.18,0.05);
+      play('sawtooth',120,0.20,0.18,80,0.10);
+    },
+    // ── 아이템/전투 결과 ──
+    item_drop(){
+      play('sine',880,0.06,0.12,1046);
+      play('sine',1046,0.05,0.08,1318,0.05);
+    },
+    levelup(){
+      [0,0.08,0.16,0.24,0.32].forEach((d,i)=>{
+        play('sine',[523,659,784,1046,1318][i],0.18,0.15,null,d);
+      });
+    },
+    clear(){
+      play('sine',523,0.15,0.18,null,0);
+      play('sine',659,0.14,0.15,null,0.12);
+      play('sine',784,0.13,0.18,null,0.24);
+      play('sine',1046,0.16,0.30,null,0.36);
+    },
+    dot_tick(){
+      play('sine',200,0.08,0.07,160);
+    },
+    potion_plus(){
+      play('sine',660,0.07,0.10,880);
+      play('sine',880,0.06,0.08,1046,0.07);
+    },
+  };
+
+  // 공개 API
+  return{
+    play(name){if(sounds[name])sounds[name]();},
+    toggle(){
+      muted=!muted;
+      try{localStorage.setItem('sfx_muted',muted?'1':'0');}catch(e){}
+      return muted;
+    },
+    isMuted(){return muted;},
+    init(){ac();} // 첫 유저 상호작용 시 컨텍스트 생성
+  };
+})();
+window.SFX=SFX;
+
+
 const GRADES={
   normal:   {name:'노말',    color:'#9d9d9d',w:55,  mult:0.75,skillM:0  },
   uncommon: {name:'언커먼',  color:'#1eff00',w:25,  mult:1.2, skillM:0.4},
@@ -899,88 +1058,95 @@ const SKILLS={
     fx:(a,s)=>({dmg:a*1.0,heal:0.04,type:'holy',msg:'🌟 생명 흡수!'})},
 };
 
-// 50 Enchants (25 prefix + 25 suffix) — 솔로 전용
+// Enchants — 솔로 전용 (물리9/마법9 PRE, 물리9/마법8 SUF 밸런스)
 const PRE=[
-  // ─── 딜러 특화 (physical: ATK/STR/CRIT 위주) ───
-  {n:'불타는',     attr:'fire',      b:{atk:4},              sk:'flame_burst',    w:14}, // physical ✓
-  {n:'어둠의',     attr:'dark',      b:{atk:3,str:2},        sk:'shadow_strike',  w:10}, // physical: spd→str
-  {n:'피의',       attr:null,        b:{atk:4,crit:2},       sk:'vampiric',       w:9},  // physical ✓
-  {n:'저주받은',   attr:null,        b:{atk:8,def:-3},       sk:null,             w:6},  // none ✓
-  {n:'폭풍의',     attr:'lightning', b:{atk:4,str:2,crit:2}, sk:'storm_strike',   w:7},  // physical: spd+4→str+2,crit+2
-  {n:'심판의',     attr:'holy',      b:{atk:4,str:2},        sk:'holy_judgment',  w:6},  // physical: atk만→atk+str
-  {n:'심연의',     attr:'dark',      b:{atk:7,str:3},        sk:'shadow_strike',  w:6},  // physical: spd→str
-  {n:'광전사의',   attr:null,        b:{dex:4,spd:3,crit:4,hp:-20},sk:'berserk',  w:4},  // special: atk→dex+spd
-  {n:'파멸의',     attr:'dark',      b:{atk:12,def:-5},      sk:'doom_strike',    w:3},  // physical ✓
+  // ─── 물리 딜러 (physical: ATK/STR/CRIT) — 9개 ───
+  {n:'불타는',     attr:'fire',      b:{atk:4},               sk:'flame_burst',    w:14},
+  {n:'어둠의',     attr:'dark',      b:{atk:3,str:2},         sk:'shadow_strike',  w:10},
+  {n:'피의',       attr:null,        b:{atk:4,crit:2},        sk:'vampiric',       w:9},
+  {n:'저주받은',   attr:null,        b:{atk:8,def:-3},        sk:null,             w:6},
+  {n:'폭풍의',     attr:'lightning', b:{atk:4,str:2,crit:2},  sk:'storm_strike',   w:7},
+  {n:'심판의',     attr:'holy',      b:{atk:4,str:2},         sk:'holy_judgment',  w:6},
+  {n:'심연의',     attr:'dark',      b:{atk:7,str:3},         sk:'shadow_strike',  w:6},
+  {n:'광전사의',   attr:null,        b:{dex:4,spd:3,crit:4,hp:-20},sk:'berserk',   w:4},
+  {n:'파멸의',     attr:'dark',      b:{atk:12,def:-5},       sk:'doom_strike',    w:3},
+  // ─── 마법 딜러 (magic: MATK/skillBonus) — 9개 ───
+  {n:'번개의',     attr:'lightning', b:{matk:4,spd:2},        sk:'lightning',      w:12},
+  {n:'독의',       attr:'poison',    b:{matk:5},              sk:'poison_stack',   w:11},
+  {n:'현자의',     attr:null,        b:{matk:5,int:1},        sk:'arcane_burst',   w:9},
+  {n:'마법의',     attr:null,        b:{matk:4,skillBonus:4}, sk:'mana_surge',     w:8},
+  {n:'혼돈의',     attr:null,        b:{matk:5,skillBonus:3}, sk:'chaos_blast',    w:5},
+  {n:'타오르는',   attr:'fire',      b:{matk:4},              sk:'flame_burst',    w:12},
+  {n:'신비로운',   attr:null,        b:{matk:6,int:1},        sk:'arcane_burst',   w:9},
+  {n:'격류의',     attr:'ice',       b:{matk:5,skillBonus:2}, sk:'blizzard',       w:7},
+  {n:'파멸의주문', attr:'dark',      b:{matk:11,hp:-20},      sk:'chaos_blast',    w:3},
   // ─── 탱커 특화 ───
-  {n:'강철의',     attr:null,        b:{def:6},              sk:null,             w:12}, // none ✓
-  {n:'강인한',     attr:null,        b:{vit:4,hp:25},        sk:null,             w:9},  // none ✓
-  {n:'불멸의',     attr:null,        b:{vit:5,hp:40},        sk:null,             w:5},  // none ✓
-  {n:'축복받은',   attr:'holy',      b:{hp:30,def:4,dex:2},  sk:'divine_shield',  w:7},  // special: dex 추가
-  {n:'얼어붙은',   attr:'ice',       b:{def:6,dex:2},        sk:'frozen',         w:7},  // special: spd-1패널티→dex+2
-  {n:'철벽의',     attr:null,        b:{vit:6,def:8,hp:30},  sk:'counter_strike', w:4},  // physical ✓ (STR은 vit로 탱 성향)
-  {n:'수호자의',   attr:'holy',      b:{def:10,hp:50,vit:3,dex:2},sk:'divine_shield',w:3},// special: dex 추가
-  // ─── 생존/회복 특화 (special: DEX/SPD 위주) ───
-  {n:'신성한',     attr:'holy',      b:{hp:20,atk:3},        sk:'holy_judgment',  w:10}, // physical: atk 추가
-  {n:'생명의',     attr:null,        b:{hp:35,vit:3},        sk:'regen',          w:6},  // special ✓
-  {n:'치유자의',   attr:'holy',      b:{hp:50,vit:4,dex:2},  sk:'lifesteal',      w:4},  // special: int→dex
-  // ─── 마법 특화 (magic: MATK/INT/skillBonus 위주) ───
-  {n:'번개의',     attr:'lightning', b:{int:2,spd:2},        sk:'lightning',      w:12}, // magic: int 추가
-  {n:'독의',       attr:'poison',    b:{int:3},              sk:'poison_stack',   w:11}, // magic: atk→int
-  {n:'바람의',     attr:null,        b:{spd:4,dex:2},        sk:'wind_slash',     w:10}, // special ✓
-  {n:'현자의',     attr:null,        b:{int:3},              sk:'arcane_burst',   w:9},  // magic ✓
-  {n:'마법의',     attr:null,        b:{int:2,skillBonus:3}, sk:'mana_surge',     w:8},  // magic ✓
-  {n:'혼돈의',     attr:null,        b:{int:3,skillBonus:2}, sk:'chaos_blast',    w:5},  // magic: str/dex→int+skillBonus
-  // ─── 범용 ───
-  {n:'황금의',     attr:null,        b:{goldBonus:8,luk:2},  sk:null,             w:9},  // none ✓
-  {n:'고대의',     attr:null,        b:{atk:5,def:3},        sk:null,             w:7},  // none ✓
-  {n:'용사의',     attr:null,        b:{str:3,vit:2},        sk:'counter_strike', w:9},  // physical ✓
-  {n:'민첩한',     attr:null,        b:{dex:3,spd:2},        sk:'evasion',        w:10}, // special ✓
-  {n:'운명의',     attr:null,        b:{luk:4,crit:3},       sk:null,             w:4},  // none ✓
-  {n:'서리의',     attr:'ice',       b:{def:4,dex:3},        sk:'ice_shard',      w:14}, // special: dex 추가
+  {n:'강철의',     attr:null,        b:{def:6},               sk:null,             w:12},
+  {n:'강인한',     attr:null,        b:{vit:4,hp:25},         sk:null,             w:9},
+  {n:'불멸의',     attr:null,        b:{vit:5,hp:40},         sk:null,             w:5},
+  {n:'축복받은',   attr:'holy',      b:{hp:30,def:4,dex:2},   sk:'divine_shield',  w:7},
+  {n:'얼어붙은',   attr:'ice',       b:{def:6,dex:2},         sk:'frozen',         w:7},
+  {n:'철벽의',     attr:null,        b:{vit:6,def:8,hp:30},   sk:'counter_strike', w:4},
+  {n:'수호자의',   attr:'holy',      b:{def:10,hp:50,vit:3,dex:2},sk:'divine_shield',w:3},
+  // ─── 생존/회복 ───
+  {n:'신성한',     attr:'holy',      b:{hp:20,atk:3},         sk:'holy_judgment',  w:10},
+  {n:'생명의',     attr:null,        b:{hp:35,vit:3},         sk:'regen',          w:6},
+  {n:'치유자의',   attr:'holy',      b:{hp:50,vit:4,dex:2},   sk:'lifesteal',      w:4},
+  // ─── 특수/범용 ───
+  {n:'바람의',     attr:null,        b:{spd:4,dex:2},         sk:'wind_slash',     w:10},
+  {n:'황금의',     attr:null,        b:{goldBonus:8,luk:2},   sk:null,             w:9},
+  {n:'고대의',     attr:null,        b:{atk:5,def:3},         sk:null,             w:7},
+  {n:'용사의',     attr:null,        b:{str:3,vit:2},         sk:'counter_strike', w:9},
+  {n:'민첩한',     attr:null,        b:{dex:3,spd:2},         sk:'evasion',        w:10},
+  {n:'운명의',     attr:null,        b:{luk:4,crit:3},        sk:null,             w:4},
+  {n:'서리의',     attr:'ice',       b:{def:4,dex:3},         sk:'ice_shard',      w:14},
 ];
 const SUF=[
-  // ─── 딜러 특화 (physical: ATK/STR/CRIT 위주) ───
-  {n:'힘',       b:{str:3,atk:5},              sk:null,             w:14}, // none ✓
-  {n:'광기',     b:{dex:4,spd:3,crit:3},       sk:'berserk',        w:9},  // special: atk→dex+spd
-  {n:'파멸',     b:{atk:9,def:-3},             sk:'doom_strike',    w:6},  // physical ✓
-  {n:'심연',     b:{atk:9,crit:4},             sk:'void_slash',     w:6},  // physical ✓
-  {n:'분노',     b:{dex:3,spd:2,crit:4},       sk:'berserk',        w:7},  // special: str→dex+spd
-  {n:'폭발',     b:{atk:7,crit:3},             sk:'explosion',      w:6},  // physical ✓
-  {n:'재앙',     b:{atk:11,hp:-30},            sk:'catastrophe',    w:4},  // physical ✓
-  {n:'절멸',     b:{atk:15,hp:-50,def:-5},     sk:'doom_strike',    w:2},  // physical ✓
-  {n:'어둠',     b:{atk:6,str:4},              sk:'shadow_strike',  w:7},  // physical: spd→str
+  // ─── 물리 딜러 (physical: ATK/STR/CRIT) — 9개 ───
+  {n:'힘',        b:{str:3,atk:5},               sk:null,             w:14},
+  {n:'광기',      b:{dex:4,spd:3,crit:3},        sk:'berserk',        w:9},
+  {n:'파멸',      b:{atk:9,def:-3},              sk:'doom_strike',    w:6},
+  {n:'심연',      b:{atk:9,crit:4},              sk:'void_slash',     w:6},
+  {n:'분노',      b:{dex:3,spd:2,crit:4},        sk:'berserk',        w:7},
+  {n:'폭발',      b:{atk:7,crit:3},              sk:'explosion',      w:6},
+  {n:'재앙',      b:{atk:11,hp:-30},             sk:'catastrophe',    w:4},
+  {n:'절멸',      b:{atk:15,hp:-50,def:-5},      sk:'doom_strike',    w:2},
+  {n:'어둠',      b:{atk:6,str:4},               sk:'shadow_strike',  w:7},
+  // ─── 마법 딜러 (magic: MATK/skillBonus) — 8개 ───
+  {n:'마력',      b:{matk:6},                    sk:null,             w:13},
+  {n:'냉기',      b:{matk:6,spd:2},              sk:'blizzard',       w:6},
+  {n:'지혜',      b:{matk:7},                    sk:'arcane_burst',   w:9},
+  {n:'주문',      b:{matk:8,skillBonus:3},       sk:'arcane_burst',   w:8},
+  {n:'신비',      b:{matk:8,skillBonus:6},       sk:'mana_surge',     w:6},
+  {n:'예지',      b:{matk:5,luk:2},              sk:null,             w:9},
+  {n:'격노의주문',b:{matk:10,crit:3,hp:-20},     sk:'chaos_blast',    w:4},
+  {n:'마력폭주',  b:{matk:12,skillBonus:14,hp:-20},sk:'chaos_blast',  w:3},
   // ─── 탱커 특화 ───
-  {n:'수호',     b:{def:4,hp:15},              sk:null,             w:14}, // none ✓
-  {n:'투지',     b:{hp:20,def:4},              sk:null,             w:11}, // none ✓
-  {n:'영원',     b:{hp:40,atk:4},              sk:null,             w:7},  // none ✓
-  {n:'평온',     b:{vit:3,def:5},              sk:null,             w:9},  // none ✓
-  {n:'냉기',     b:{int:4,spd:2},              sk:'blizzard',       w:6},  // magic: def→int
-  {n:'난공불락', b:{def:12,hp:60,vit:4,dex:2}, sk:'divine_shield',  w:3},  // special: dex 추가
-  {n:'용기',     b:{str:3,vit:2},              sk:'counter_strike', w:10}, // physical ✓
-  // ─── 생존/회복 특화 (special: DEX/SPD 위주) ───
-  {n:'생명',     b:{hp:30,vit:3},              sk:null,             w:13}, // none ✓
-  {n:'축복',     b:{hp:25},                    sk:'regen',          w:8},  // special ✓
-  {n:'빛',       b:{dex:3,hp:20},              sk:'lifesteal',      w:7},  // special: def→dex
-  {n:'성스러움', b:{hp:50,vit:5,dex:3},        sk:'lifesteal',      w:4},  // special: int→dex
-  {n:'소생',     b:{hp:35,vit:4},              sk:'regen',          w:5},  // special ✓
-  // ─── 마법/스킬 특화 (magic: INT/MATK/skillBonus 위주) ───
-  {n:'질풍',     b:{spd:5,dex:2},              sk:null,             w:12}, // none ✓
-  {n:'지혜',     b:{int:4},                    sk:'arcane_burst',   w:9},  // magic ✓
-  {n:'신비',     b:{int:5,skillBonus:5},       sk:'mana_surge',     w:6},  // magic ✓
-  {n:'예지',     b:{int:3,luk:2},              sk:null,             w:9},  // none ✓
-  {n:'전설',     b:{str:2,dex:2,int:2},        sk:null,             w:5},  // none ✓
-  {n:'마력폭주', b:{int:8,skillBonus:12,hp:-20},sk:'chaos_blast',   w:3},  // magic ✓
-  {n:'민첩',     b:{dex:4,spd:3},              sk:'quick_strike',   w:9},  // special ✓
-  // ─── 범용 ───
-  {n:'행운',     b:{goldBonus:8,luk:3},        sk:null,             w:12}, // none ✓
-  {n:'번영',     b:{goldBonus:10,luk:3},       sk:null,             w:8},  // none ✓
-  {n:'전설급',   b:{str:3,dex:3,int:3,vit:3},  sk:null,             w:3},  // none ✓
+  {n:'수호',      b:{def:4,hp:15},               sk:null,             w:14},
+  {n:'투지',      b:{hp:20,def:4},               sk:null,             w:11},
+  {n:'영원',      b:{hp:40,atk:4},               sk:null,             w:7},
+  {n:'평온',      b:{vit:3,def:5},               sk:null,             w:9},
+  {n:'난공불락',  b:{def:12,hp:60,vit:4,dex:2},  sk:'divine_shield',  w:3},
+  {n:'용기',      b:{str:3,vit:2},               sk:'counter_strike', w:10},
+  // ─── 생존/회복 ───
+  {n:'생명',      b:{hp:30,vit:3},               sk:null,             w:13},
+  {n:'축복',      b:{hp:25},                     sk:'regen',          w:8},
+  {n:'빛',        b:{dex:3,hp:20},               sk:'lifesteal',      w:7},
+  {n:'성스러움',  b:{hp:50,vit:5,dex:3},         sk:'lifesteal',      w:4},
+  {n:'소생',      b:{hp:35,vit:4},               sk:'regen',          w:5},
+  // ─── 특수/범용 ───
+  {n:'질풍',      b:{spd:5,dex:2},               sk:null,             w:12},
+  {n:'민첩',      b:{dex:4,spd:3},               sk:'quick_strike',   w:9},
+  {n:'전설',      b:{str:2,dex:2,int:2},         sk:null,             w:5},
+  {n:'행운',      b:{goldBonus:8,luk:3},         sk:null,             w:12},
+  {n:'번영',      b:{goldBonus:10,luk:3},        sk:null,             w:8},
+  {n:'전설급',    b:{str:3,dex:3,int:3,vit:3},   sk:null,             w:3},
 ];
-
 // Weapon / Armor names (10 each)
 const WN={
   sword:['단검','롱소드','세이버','팔콘블레이드','글래디우스','바스타드소드','크림슨엣지','세인트블레이드','데몬슬레이어','카오스엣지'],
   staff:['목재지팡이','수정지팡이','달빛지팡이','현자의지팡이','용의지팡이','심연지팡이','성스러운지팡이','폭풍지팡이','혼돈지팡이','운명의지팡이'],
+  dualgun:['낡은듀얼건','은제듀얼건','마력의듀얼건','수정듀얼건','불꽃듀얼건','냉기듀얼건','번개듀얼건','심연듀얼건','혼돈의듀얼건','전설의듀얼건'],
   bow:  ['단궁','장궁','엘프의활','사냥꾼활','크로스보우','은빛활','폭풍의활','심연의활','천상의활','전설각궁'],
   dual: ['나이트크롤러','트윈팡','쌍두사','회오리쌍검','그림자쌍검','번개쌍검','불꽃쌍검','심연쌍검','독의쌍검','전설쌍검'],
   axe:  ['손도끼','전투도끼','나무꾼도끼','오크도끼','강철도끼','폭풍도끼','달빛도끼','불꽃도끼','심연도끼','전설도끼'],
@@ -1006,7 +1172,8 @@ const ACCN={
 };
 const WBASES=[
   {id:'sword',    hand:'1H',slot:'weapon',ar:1.0,   balMin:50,balMax:70}, // 한손검
-  {id:'staff',    hand:'1H',slot:'weapon',mr:0.75,hr:0.5,balMin:30,balMax:50}, // 지팡이
+  {id:'staff',    hand:'1H',slot:'weapon',mr:1.05,hr:0.4,balMin:30,balMax:50}, // 지팡이
+  {id:'dualgun',  hand:'2H',slot:'weapon',mr:1.55,sr:0.5,balMin:40,balMax:65}, // 듀얼건 — 마법 원거리 2H. MATK 최고, 스킬발동 +15%
   {id:'bow',      hand:'2H',slot:'weapon',ar:1.6,   balMin:60,balMax:80}, // 활
   {id:'dual',     hand:'2H',slot:'weapon',ar:1.75,sr:0.6,balMin:35,balMax:55}, // 쌍검
   {id:'axe',      hand:'1H',slot:'weapon',ar:1.15,  balMin:40,balMax:60}, // 도끼
@@ -1236,6 +1403,7 @@ const SHOP_ITEMS=[
   {n:'목검',slot:'weapon',hand:'1H',stats:{atk:12},price:80},
   {n:'사냥꾼의 활',slot:'weapon',hand:'2H',stats:{atk:16},price:100},
   {n:'견습생 지팡이',slot:'weapon',hand:'1H',baseId:'staff',stats:{matk:8,hp:20},price:90},
+  {n:'낡은 듀얼건 (2H)',slot:'weapon',hand:'2H',baseId:'dualgun',stats:{matk:12,spd:3},price:100},
   {n:'전투 도끼',slot:'weapon',hand:'1H',stats:{atk:14},price:85},
   {n:'가죽 투구',slot:'head',stats:{def:6},price:40},
   {n:'가죽 갑옷',slot:'chest',stats:{def:12},price:70},
@@ -1334,7 +1502,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v2.0';
+  const key='abyssworld_update_v2.1';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1345,7 +1513,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v2.0',expire);
+    localStorage.setItem('abyssworld_update_v2.1',expire);
   }
 };
 
@@ -1515,8 +1683,8 @@ function equipScore(c){
   const s=calcStats(c);
   const eq=c.equipment||{};
   const wt=getWeaponTraits(eq);
-  // ★ 지팡이 장착 시 MATK 기준, 그 외 ATK 기준
-  const dmgScore=wt.isStaff?s.matk*1.5:s.atk*1.5;
+  // ★ 지팡이/듀얼건 장착 시 MATK 기준, 그 외 ATK 기준
+  const dmgScore=(wt.isStaff||wt.isDualgun)?s.matk*1.5:s.atk*1.5;
   return Math.round(dmgScore + s.def*0.8 + s.maxHp*0.05 + s.spd*0.3 + s.crit*0.2);
 }
 function getSkills(c_arg){
@@ -1614,6 +1782,7 @@ async function selChar(id){
       if(autoMigrateEnchantStats(it))equipMigrated=true; // 실제 스탯 변화 → 반드시 저장
       else equipStatsDirty=true; // 스탯 변화 없지만 _esv:1 플래그는 DB에 써야 중복체크 방지
     }
+    if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))equipMigrated=true;else{it._smv=1;equipStatsDirty=true;}}
   }
   if(!char.str){char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;}
   if(char.extraPotions===undefined)char.extraPotions=0;
@@ -1628,6 +1797,7 @@ async function selChar(id){
       if(autoMigrateEnchantStats(it))invMigrated=true;
       else invStatsDirty=true;
     }
+    if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))invMigrated=true;else{it._smv=1;invStatsDirty=true;}}
   }
   // ★ 창고 마이그레이션
   let whMigrated=false;
@@ -1637,6 +1807,7 @@ async function selChar(id){
       if(autoMigrateEnchantStats(it))whMigrated=true;
       else whStatsDirty=true;
     }
+    if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))whMigrated=true;else{it._smv=1;whStatsDirty=true;}}
   }
   // ★ 스탯 변화 OR 플래그만 변화 모두 저장 (플래그 미저장 시 매 로그인 재체크 방지)
   if(equipMigrated||equipStatsDirty)await saveChar();
@@ -1668,6 +1839,7 @@ async function selChar(id){
         if(it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;dirty=true;}
         if(!it._v||it._v<2){migrateItem(it);dirty=true;}
         if(!it._esv||it._esv<ENCHANT_STAT_VER){if(autoMigrateEnchantStats(it))dirty=true;else it._esv=ENCHANT_STAT_VER;}
+        if(!it._smv||it._smv<1){if(autoMigrateStaffMatk(it))dirty=true;else it._smv=1;}
         // ★ balance 마이그레이션 — 무기인데 balance 없으면 baseId 기준으로 부여
         if(it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
           const wb=WBASES.find(b=>b.id===it.baseId);
@@ -1689,6 +1861,7 @@ async function selChar(id){
       if(it&&(it.enhance||0)>9){it.enhance=9;needSave=true;}
       if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
       if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){if(autoMigrateEnchantStats(it))needSave=true;else it._esv=ENCHANT_STAT_VER;}
+      if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))needSave=true;else it._smv=1;}
       // ★ 인벤 무기 balance 마이그레이션
       if(it&&it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
         const wb=WBASES.find(b=>b.id===it.baseId);
@@ -1754,6 +1927,7 @@ function gainExp(amt){
       for(const lu of lvUps){
         battle._pendingLvUps.push(lu);
         blogAdd(`<span class="l-exp">🎉 레벨 업! Lv.${lu.level} (+${lu.pts}pts)</span>`);
+        SFX.play('levelup');
       }
     }else{
       renderChar();
@@ -2248,18 +2422,24 @@ const ENCHANT_TIERS={
 // PRE/SUF 각 인챈트에 tier 속성 추가 (기존 배열에 병합)
 // tier 기준: 단순 스탯은 낮은 tier, 강력한 스킬+스탯 조합은 높은 tier
 const ENCHANT_TIER_MAP={
-  // 접두
+  // 접두 — 물리
   '불타는':2,'어둠의':2,'피의':3,'저주받은':3,'폭풍의':3,'심판의':3,'심연의':3,
-  '광전사의':4,'파멸의':5,'강철의':1,'강인한':1,'불멸의':2,'축복받은':2,'얼어붙은':2,
+  '광전사의':4,'파멸의':5,
+  // 접두 — 마법
+  '번개의':2,'독의':2,'현자의':2,'마법의':2,'혼돈의':3,
+  '타오르는':1,'신비로운':2,'격류의':3,'파멸의주문':5,
+  // 접두 — 탱/생존/특수/범용
+  '강철의':1,'강인한':1,'불멸의':2,'축복받은':2,'얼어붙은':2,
   '철벽의':4,'수호자의':5,'신성한':1,'생명의':2,'치유자의':3,
-  '번개의':2,'독의':2,'바람의':2,'현자의':2,'마법의':2,'혼돈의':3,
-  '황금의':1,'고대의':2,'용사의':2,'민첩한':1,'운명의':3,'서리의':1,
-  // 접미
+  '바람의':2,'황금의':1,'고대의':2,'용사의':2,'민첩한':1,'운명의':3,'서리의':1,
+  // 접미 — 물리
   '힘':1,'광기':2,'파멸':3,'심연':3,'분노':3,'폭발':3,'재앙':5,'절멸':5,'어둠':2,
-  '수호':1,'투지':1,'영원':2,'평온':2,'냉기':3,'난공불락':5,'용기':2,
+  // 접미 — 마법
+  '마력':1,'냉기':2,'지혜':2,'주문':2,'신비':3,'예지':2,'격노의주문':4,'마력폭주':5,
+  // 접미 — 탱/생존/특수/범용
+  '수호':1,'투지':1,'영원':2,'평온':2,'난공불락':5,'용기':2,
   '생명':1,'축복':2,'빛':2,'성스러움':4,'소생':2,
-  '질풍':1,'지혜':2,'신비':3,'예지':2,'전설':3,'마력폭주':5,'민첩':2,
-  '행운':1,'번영':2,'전설급':5,
+  '질풍':1,'민첩':2,'전설':3,'행운':1,'번영':2,'전설급':5,
 };
 function getEnchantTier(enchantName){return ENCHANT_TIER_MAP[enchantName]||2;}
 
@@ -2368,7 +2548,7 @@ function migrateItem(it){
 // ═══ 인챈트 스탯 자동 마이그레이션 (접속 시 자동 실행, _esv:1 플래그로 중복 방지) ═══
 // 스킬 타입에 맞게 b 기반값을 수정하고 scaleEnchant로 재계산
 const ENCHANT_STAT_MAP={
-  // 접두
+  // ── 접두 (물리→물리, 마법→마법 스탯 정합)
   '어둠의':    {atk:3,str:2},
   '폭풍의':    {atk:4,str:2,crit:2},
   '심판의':    {atk:4,str:2},
@@ -2379,22 +2559,36 @@ const ENCHANT_STAT_MAP={
   '수호자의':  {def:10,hp:50,vit:3,dex:2},
   '신성한':    {hp:20,atk:3},
   '치유자의':  {hp:50,vit:4,dex:2},
-  '번개의':    {int:2,spd:2},
-  '독의':      {int:3},
-  '혼돈의':    {int:3,skillBonus:2},
+  // 마법 (int→matk)
+  '번개의':    {matk:4,spd:2},
+  '독의':      {matk:5},
+  '현자의':    {matk:5,int:1},
+  '마법의':    {matk:4,skillBonus:4},
+  '혼돈의':    {matk:5,skillBonus:3},
+  '타오르는':  {matk:4},
+  '신비로운':  {matk:6,int:1},
+  '격류의':    {matk:5,skillBonus:2},
+  '파멸의주문':{matk:11,hp:-20},
   '서리의':    {def:4,dex:3},
-  // 접미
+  // ── 접미 (물리→물리, 마법→matk)
   '광기':      {dex:4,spd:3,crit:3},
   '분노':      {dex:3,spd:2,crit:4},
   '어둠':      {atk:6,str:4},
-  '냉기':      {int:4,spd:2},
+  '마력':      {matk:6},
+  '냉기':      {matk:6,spd:2},
+  '지혜':      {matk:7},
+  '주문':      {matk:8,skillBonus:3},
+  '신비':      {matk:8,skillBonus:6},
+  '예지':      {matk:5,luk:2},
+  '격노의주문':{matk:10,crit:3,hp:-20},
+  '마력폭주':  {matk:12,skillBonus:14,hp:-20},
   '난공불락':  {def:12,hp:60,vit:4,dex:2},
   '빛':        {dex:3,hp:20},
   '성스러움':  {hp:50,vit:5,dex:3},
 };
 
 // ★ 이 숫자만 올리면 다음 접속 시 모든 유저 아이템 재마이그레이션
-const ENCHANT_STAT_VER=1;
+const ENCHANT_STAT_VER=2;
 
 function autoMigrateEnchantStats(it){
   // 이미 마이그레이션됐거나, 스크롤 류는 스킵
@@ -2412,6 +2606,42 @@ function autoMigrateEnchantStats(it){
   }
   it._esv=ENCHANT_STAT_VER; // 마이그레이션 완료 플래그 (변경 여부와 무관하게 항상 세팅)
   return changed; // 실제 스탯이 바뀐 경우만 true
+}
+
+// ═══ 지팡이 MATK 상향 마이그레이션 (_smv 플래그) ═══
+// mr: 0.75 → 1.3 변경에 따라 기존 지팡이 스탯 재계산
+function autoMigrateStaffMatk(it){
+  if(!it||it._smv>=1||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
+  if(it.baseId!=='staff'||!it.stats)return false; // 지팡이만
+  const lv=it.itemLv||it.reqLv||1;
+  const g=it.grade==='set'?'legendary':it.grade;
+  const mult=GRADES[g]?.mult||1;
+  const lm=1+(lv-1)*0.055;
+  const gradeIdx=Object.keys(GRADES).indexOf(g);
+  const biasMin=0.6+(gradeIdx*0.07);
+  const biasMax=1.0+(gradeIdx*0.08);
+  // 새 공식으로 MATK 재계산 (중간값 사용)
+  const newBase=Math.round(7*1.05*mult*lm); // rand(4,10) 중간값 7, mr:1.05 기준
+  const newMatk=Math.round(newBase*((biasMin+biasMax)/2));
+  it.stats.matk=newMatk;
+  // HP도 hr:0.5→0.4 기준 재계산
+  if(it.stats.hp){
+    const newHp=Math.round(15*0.4*mult*lm);
+    it.stats.hp=newHp;
+  }
+  // 강화 반영
+  const enh=it.enhance||0;
+  if(enh>0&&it._baseStats){
+    it._baseStats.matk=newMatk;
+    it.stats.matk=Math.round(newMatk*(1+Math.pow(enh,1.3)*0.06));
+    if(it.stats.hp&&it._baseStats.hp){
+      const newHpBase=Math.round(15*0.4*mult*lm);
+      it._baseStats.hp=newHpBase;
+      it.stats.hp=Math.round(newHpBase*(1+Math.pow(enh,1.3)*0.06));
+    }
+  }
+  it._smv=1;
+  return true;
 }
 
 // ═══ INVENTORY ═══
@@ -3457,6 +3687,7 @@ async function renderAuction(sb){
     // 구매한 아이템은 재판매 불가
     const bought={...v.item,tradeable:false};
     autoMigrateEnchantStats(bought); // ★ 경매장 구매 시 즉시 인챈트 스탯 마이그레이션
+    autoMigrateStaffMatk(bought);    // ★ 지팡이 MATK 마이그레이션
     inv[bought.id]=bought;
     await saveInv();
     // 경매 상태 완료 처리
@@ -3954,6 +4185,7 @@ async function resolvePhase(){
   // Check flee (all alive must choose flee)
   if(alive.every(p=>p.actionChosen==='flee')||
     (battle.mode==='solo'&&alive[0]?.actionChosen==='flee')){
+    SFX.play('flee');
     blogAdd('<span class="l-warn">💨 도망쳤습니다!</span>');
     battle.done=true;
     battle._resolving=false;
@@ -3977,7 +4209,7 @@ async function resolvePhase(){
     if(!p.actionChosen||p.actionChosen==='flee')p.actionChosen='attack';
     const s=p.stats||calcStats(p.charData||char); // ★ 배틀 시작 시 계산된 스탯 사용
     if(!s||isNaN(s.atk)){blogAdd(`<span class="l-sys">⚠️ ${p.name} 스탯 오류 — 공격 건너뜀</span>`);continue;}
-    if(p.actionChosen==='defend'){p.defending=true;blogAdd(`<span class="l-sys">🛡 ${p.name} 방어 자세</span>`);}
+    if(p.actionChosen==='defend'){p.defending=true;SFX.play('defend');blogAdd(`<span class="l-sys">🛡 ${p.name} 방어 자세</span>`);}
     else if(p.actionChosen==='heal'){
       if(battle._potionSealed){
         blogAdd(`<span class="l-warn">🔒 ${p.name}: 포션 봉인 — 회복 불가!</span>`);
@@ -3986,6 +4218,7 @@ async function resolvePhase(){
         p.potions--;const heal=Math.round(p.maxHp*0.4);p.hp=Math.min(p.hp+heal,p.maxHp);
         p.healing=true;
         p.aggro=Math.max(0,(p.aggro||0)*0.3);
+        SFX.play('heal');
         blogAdd(`<span class="l-heal">💊 ${p.name} 포션 사용! +${heal}HP (${p.hp}/${p.maxHp}) — 회복 자세 (피해 30%↓)</span>`);
       }
     }else if(p.actionChosen==='attack'){
@@ -4007,7 +4240,7 @@ async function resolvePhase(){
       // ★ 밸런스로 몬스터 회피 상쇄
       const effDodge=Math.max(0,(target.dodge||0)*(1-(s.balance||0)/100));
       const isMiss=Math.random()*100<effDodge;
-      if(isMiss)dmg=0;
+      if(isMiss){dmg=0;SFX.play('miss');}
       else target.hp=Math.max(0,target.hp-dmg);
       // ★ 메이스: DEF 5% 감소 디버프
       if(wt.isMace&&!isMiss&&target.status==='alive'){
@@ -4015,8 +4248,9 @@ async function resolvePhase(){
         target.def=Math.round((target.def||0)*0.95);
       }
       p.aggro=(p.aggro||0)+(isCrit?dmg*1.5:dmg);
+      if(!isMiss){isCrit?SFX.play('crit'):SFX.play('attack');}
       blogAdd(getWeaponAttackMsg(p,target,dmg,isCrit&&!isMiss,isMiss));
-      if(target.hp<=0){target.status='dead';blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
+      if(target.hp<=0){target.status='dead';SFX.play('kill');blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
       // ★ 쌍검: 5% 추가타
       if(wt.isDual&&!isMiss&&target.status==='alive'&&Math.random()<0.05){
         const bonusDmg=Math.round(dmg*0.5);
@@ -4043,6 +4277,7 @@ async function resolvePhase(){
       // 격노 (체력 50% 이하)
       if(!m.gimmick.rage50&&hpPct<=0.5){
         m.gimmick.rage50=true;m.atk=Math.round(m.atk*1.5);
+        SFX.play('boss_rage');
         blogAdd(`<span class="l-dead">💢 ${m.name}이(가) 격노했습니다! ATK 50% 증가!</span>`);
       }
       // 차지 어택 (2턴 예고)
@@ -4114,9 +4349,11 @@ async function resolvePhase(){
 
     if(Math.random()*100<dodge){blogAdd(`<span class="l-sys">🌀 ${tgt.name} 회피!</span>`);continue;}
     tgt.hp=Math.max(0,tgt.hp-dmg);
+    tgt.isBoss?SFX.play('monster_boss_hit'):SFX.play('monster_hit'); // 몬스터 공격 효과음은 없고, 플레이어가 맞는 소리
     blogAdd(`<span class="l-dmg">👹 ${m.name} → ${tgt.name} <strong>-${dmg}</strong>${tgt.defending?' (방어)':''}</span>`);
     if(tgt.hp<=0){
       tgt.hp=0;tgt.status='dead';
+      SFX.play('death');
       blogAdd(`<span class="l-dead">💀 ${tgt.name} 사망!</span>`);
       battle.reviveQueue.add(tgt.id);
     }
@@ -4152,6 +4389,7 @@ function getWeaponTraits(eq){
   return{
     wid,
     isStaff:   wid==='staff',
+    isDualgun: wid==='dualgun',
     isBow:     wid==='bow',
     isDagger:  wid==='dagger',
     isDual:    wid==='dual',
@@ -4170,6 +4408,8 @@ function calcPlayerDmg(p,s){
   let base;
   if(t.isStaff){
     base=Math.round((s.matk||10)*(1+(s.int||3)*0.004)); // 지팡이: MATK + INT
+  }else if(t.isDualgun){
+    base=Math.round((s.matk||10)*(1+(s.int||3)*0.004+(s.spd||5)*0.002)); // 듀얼건: MATK+INT+SPD
   }else if(t.isBow){
     base=Math.round((s.atk||10)*(1+(s.dex||5)*0.004));
   }else if(t.isDagger||t.isDual){
@@ -4191,7 +4431,7 @@ function getWeaponAttackMsg(p,target,dmg,isCrit,isMiss){
   const tn=target.name;
   const pn=p.name;
   if(isMiss){
-    const missMsg={bow:'🏹 화살이 빗나갔다!',staff:'✨ 마력이 흩어졌다!',dagger:'🗡 빈틈을 놓쳤다!'}[wid]||'💨 공격이 빗나갔다!';
+    const missMsg={bow:'🏹 화살이 빗나갔다!',staff:'✨ 마력이 흩어졌다!',dagger:'🗡 빈틈을 놓쳤다!',dualgun:'🔫 탄환이 빗나갔다!'}[wid]||'💨 공격이 빗나갔다!';
     return`<span class="l-dmg">${missMsg}</span>`;
   }
   if(isCrit){
@@ -4201,6 +4441,7 @@ function getWeaponAttackMsg(p,target,dmg,isCrit,isMiss){
       dagger:`<span class="l-crit">🗡 ${pn}의 연속 찌르기! ${tn} 급소 <strong>${dmg}</strong>!</span>`,
       bow:`<span class="l-crit">🏹 ${pn}의 화살이 ${tn}의 급소를 꿰뚫었다! <strong>${dmg}</strong>!</span>`,
       staff:`<span class="l-crit">✨ ${pn}의 마력이 폭발! ${tn}에게 <strong>${dmg}</strong> 마법 피해!</span>`,
+      dualgun:`<span class="l-crit">🔫 ${pn}의 듀얼건이 ${tn}을 집중 사격! <strong>${dmg}</strong> 마법 피해!</span>`,
       axe:`<span class="l-crit">🪓 ${pn}의 도끼가 ${tn}을 갈랐다! <strong>${dmg}</strong>!</span>`,
       greataxe:`<span class="l-crit">🪓 ${pn}의 대도끼가 ${tn}을 박살냈다! <strong>${dmg}</strong>!</span>`,
       spear:`<span class="l-crit">🔱 ${pn}의 창이 ${tn}을 꿰뚫었다! <strong>${dmg}</strong>!</span>`,
@@ -4213,6 +4454,7 @@ function getWeaponAttackMsg(p,target,dmg,isCrit,isMiss){
     dagger:`<span class="l-dmg">🗡 ${pn}이 ${tn}을 빠르게 찔렀다. <strong>${dmg}</strong></span>`,
     bow:`<span class="l-dmg">🏹 ${pn}의 화살이 ${tn}에게 적중! <strong>${dmg}</strong></span>`,
     staff:`<span class="l-dmg">✨ ${pn}이 ${tn}에게 마법 미사일 발사. <strong>${dmg}</strong></span>`,
+    dualgun:`<span class="l-dmg">🔫 ${pn}이 ${tn}에게 마력탄 발사. <strong>${dmg}</strong></span>`,
     axe:`<span class="l-dmg">🪓 ${pn}이 ${tn}에게 도끼를 내리쳤다. <strong>${dmg}</strong></span>`,
     greataxe:`<span class="l-dmg">🪓 ${pn}의 대도끼가 ${tn}을 강타. <strong>${dmg}</strong></span>`,
     spear:`<span class="l-dmg">🔱 ${pn}이 ${tn}을 창으로 찔렀다. <strong>${dmg}</strong></span>`,
@@ -4236,6 +4478,10 @@ function trySkillProc(p,s,target,allM){
     const isMagic=skType==='magic';
     const procMult=skillBonusMult*(isSpecial?specialProcBonus:1.0)*(isMagic?staffMagicBonus:1.0);
     if(Math.random()<sk.proc*procMult){
+      // ★ 스킬 발동 효과음
+      if(skType==='magic')SFX.play('skill_magic');
+      else if(skType==='special')SFX.play('skill_special');
+      else SFX.play('skill_physical');
       const fx=sk.fx(s.atk,s); // ★ s(전체 스탯) 전달 — STR/INT/DEX 활용
       if(fx.dmg)fx.dmg=Math.min(Math.round(fx.dmg),99999);
       if(fx.counter){
@@ -4343,6 +4589,7 @@ function lootPhase(){
       const it=genItem(pool,forcedGrade,lv,false,tierIdx);
       it.tradeable=true;
       droppedItems.push(it);
+      SFX.play('item_drop');
       blogAdd(`<span class="l-item">🎁 드랍: ${it.name}</span>`);
     }
     // 인챈트 스크롤 드랍 (티어별 차등)
@@ -4421,6 +4668,7 @@ async function dungeonClear(){
   const mode=battle.mode;
   const tierIdx=battle.tierIdx;
   blogAdd(`<span class="l-exp">🏆 던전 클리어! 난이도: ${d.name}</span>`);
+  SFX.play('clear');
 
   // ★ 보스 클리어 보너스 드랍 (난이도+티어별 등급 엄격 제한)
   const bonusPool=[...WBASES,...ABASES,...ACCBASES];
@@ -5072,7 +5320,7 @@ window.adminUpdateItemSelect=function(){
   const sub=document.getElementById('giSub');
   if(!sub)return;
   const opts={
-    weapon:Object.keys(WN).map(k=>({v:k,n:{sword:'한손검',staff:'지팡이',bow:'활',dual:'쌍검',axe:'도끼',greataxe:'대도끼',dagger:'단검',greatsword:'대검',spear:'창',mace:'메이스'}[k]||k})),
+    weapon:Object.keys(WN).map(k=>({v:k,n:{sword:'한손검',staff:'지팡이',bow:'활',dual:'쌍검',axe:'도끼',greataxe:'대도끼',dagger:'단검',greatsword:'대검',spear:'창',mace:'메이스',dualgun:'듀얼건'}[k]||k})),
     armor:['head','chest','legs','boots','neck','offhand'].map(k=>({v:k,n:{head:'투구',chest:'흉갑',legs:'각반',boots:'장화',neck:'목걸이',offhand:'방패'}[k]||k})),
     accessory:['ring','amulet','earring','bracelet'].map(k=>({v:k,n:{ring:'반지',amulet:'부적',earring:'귀걸이',bracelet:'팔찌'}[k]||k})),
     set:Object.entries(SETS).flatMap(([sid,sd])=>Object.entries(sd.pcs).map(([pid,pd])=>({v:`${sid}::${pid}`,n:pd.n}))),
