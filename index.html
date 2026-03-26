@@ -508,6 +508,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <div class="srow"><span class="sn">💨 SPD</span><span class="sv" id="s-spd">-</span></div>
               <div class="srow"><span class="sn">💥 CRIT</span><span class="sv" id="s-crit">-</span></div>
               <div class="srow"><span class="sn">🌀 회피</span><span class="sv" id="s-dodge">-</span></div>
+              <div class="srow"><span class="sn">⚖️ 밸런스</span><span class="sv" id="s-balance">-</span></div>
               <div class="srow"><span class="sn">🔮 MATK</span><span class="sv" id="s-matk">-</span></div>
               <div class="srow"><span class="sn">💀 치명피해</span><span class="sv" id="s-cdmg">-</span></div>
               <div class="srow" style="border-top:1px solid var(--bd);margin-top:4px;padding-top:4px"><span class="sn" style="color:var(--gold)">⚙️ 전투력</span><span class="sv" id="s-score" style="color:var(--gold)">-</span></div>
@@ -834,57 +835,58 @@ function expForLevel(lv){
 }
 
 // Skills — 솔로 전용 (파티/적개심 관련 제거)
+// type: 'physical'=ATK+STR배율, 'magic'=MATK+INT배율, 'special'=DEX+SPD 발동률
 const SKILLS={
-  flame_burst:{name:'화염 폭발',icon:'🔥',desc:'150% 화염 피해',base:0.08,
-    fx:(a)=>({dmg:a*1.5,type:'fire',msg:'🔥 화염 폭발!'})},
-  ice_shard:{name:'빙결 파편',icon:'❄',desc:'110% 냉기+ATK 15% 감소',base:0.08,
-    fx:(a)=>({dmg:a*1.1,type:'ice',debuff:'spd',msg:'❄ 빙결 파편!'})},
-  lightning:{name:'번개 연쇄',icon:'⚡',desc:'2연타 70% 번개',base:0.09,
-    fx:(a)=>({dmg:a*0.7,hits:2,type:'lightning',msg:'⚡ 번개 연쇄!'})},
-  shadow_strike:{name:'그림자 타격',icon:'🌑',desc:'120% 어둠+방어무시',base:0.07,
-    fx:(a)=>({dmg:a*1.2,ignoreDef:true,type:'dark',msg:'🌑 그림자 타격!'})},
-  holy_judgment:{name:'신성 심판',icon:'✨',desc:'150% 신성',base:0.06,
-    fx:(a)=>({dmg:a*1.5,type:'holy',msg:'✨ 신성 심판!'})},
-  poison_stack:{name:'독 중첩',icon:'☠',desc:'50% + 2턴 독(30%)',base:0.09,
-    fx:(a)=>({dmg:a*0.5,dot:2,msg:'☠ 독 중첩!'})},
-  wind_slash:{name:'바람 베기',icon:'💨',desc:'100% 피해+회피+5',base:0.09,
-    fx:(a)=>({dmg:a*1.0,buffDodge:5,msg:'💨 바람 베기!'})},
-  vampiric:{name:'흡혈',icon:'🩸',desc:'80%+HP 2% 흡수',base:0.07,
-    fx:(a,s)=>({dmg:a*0.8,heal:0.02,type:'dark',msg:'🩸 흡혈!'})},
-  counter_strike:{name:'반격',icon:'🛡',desc:'방어 시 ATK 50% 반격',base:0.08,
-    fx:(a)=>({dmg:a*0.5,counter:true,msg:'🛡 반격!'})},
-  evasion:{name:'회피 강화',icon:'👤',desc:'50%+이번턴 추가 회피',base:0.07,
-    fx:(a)=>({dmg:a*0.5,buffDodge:20,msg:'👤 회피 강화!'})},
-  divine_shield:{name:'신성 방벽',icon:'🛡',desc:'피해 50% 감소 1턴',base:0.07,
-    fx:(a)=>({dmg:0,shield:true,msg:'🛡 신성 방벽!'})},
-  storm_strike:{name:'폭풍 일격',icon:'⛈',desc:'170% 번개',base:0.06,
-    fx:(a)=>({dmg:a*1.7,type:'lightning',msg:'⛈ 폭풍 일격!'})},
-  chaos_blast:{name:'혼돈 폭발',icon:'🌀',desc:'170% 랜덤 속성',base:0.05,
-    fx:(a)=>({dmg:a*1.7,type:'chaos',msg:'🌀 혼돈 폭발!'})},
-  frozen:{name:'동결',icon:'🧊',desc:'100%+1턴 마비',base:0.07,
-    fx:(a)=>({dmg:a*1.0,stun:true,type:'ice',msg:'🧊 동결!'})},
-  berserk:{name:'광폭화',icon:'🔴',desc:'ATK+15% 2턴',base:0.07,
-    fx:(a)=>({dmg:0,buffAtk:0.15,buffTurns:2,msg:'🔴 광폭화!'})},
-  mana_surge:{name:'마력 급등',icon:'🔮',desc:'스킬확률+10% 2턴',base:0.08,
-    fx:(a)=>({dmg:0,buffSkill:0.10,buffTurns:2,msg:'🔮 마력 급등!'})},
-  doom_strike:{name:'파멸 일격',icon:'💀',desc:'220% 어둠',base:0.04,
-    fx:(a)=>({dmg:a*2.2,type:'dark',msg:'💀 파멸의 일격!'})},
-  void_slash:{name:'공허 베기',icon:'🕳',desc:'150%+방어무시',base:0.05,
-    fx:(a)=>({dmg:a*1.5,ignoreDef:true,msg:'🕳 공허 베기!'})},
-  quick_strike:{name:'속격',icon:'⚡',desc:'3연타 50%',base:0.10,
-    fx:(a)=>({dmg:a*0.5,hits:3,msg:'⚡ 속격!'})},
-  arcane_burst:{name:'비전 폭발',icon:'🔮',desc:'INT 기반 120%',base:0.07,
-    fx:(a,s)=>({dmg:(s?.matk||a)*1.2,type:'arcane',msg:'🔮 비전 폭발!'})},
-  catastrophe:{name:'재앙',icon:'💥',desc:'260%+자신HP-25%',base:0.03,
-    fx:(a)=>({dmg:a*2.6,selfDmg:0.25,msg:'💥 재앙!'})},
-  regen:{name:'전투 재생',icon:'💚',desc:'공격시 HP 3% 회복',base:0.08,
-    fx:(a)=>({dmg:a*0.8,heal:0.03,type:'holy',msg:'💚 전투 재생!'})},
-  explosion:{name:'폭발',icon:'💣',desc:'180% 화염',base:0.06,
-    fx:(a)=>({dmg:a*1.8,type:'fire',msg:'💣 폭발!'})},
-  blizzard:{name:'눈보라',icon:'🌨',desc:'3연타 60%',base:0.06,
-    fx:(a)=>({dmg:a*0.6,hits:3,type:'ice',msg:'🌨 눈보라!'})},
-  lifesteal:{name:'생명 흡수',icon:'🌟',desc:'공격시 HP 4% 흡수',base:0.06,
-    fx:(a)=>({dmg:a*1.0,heal:0.04,type:'holy',msg:'🌟 생명 흡수!'})},
+  flame_burst:{name:'화염 폭발',icon:'🔥',desc:'150% 화염 피해',base:0.08,type:'physical',
+    fx:(a,s)=>({dmg:a*1.5*(1+(s?.str||5)*0.005),type:'fire',msg:'🔥 화염 폭발!'})},
+  ice_shard:{name:'빙결 파편',icon:'❄',desc:'110% 냉기+ATK 15% 감소',base:0.08,type:'special',
+    fx:(a,s)=>({dmg:a*1.1,type:'ice',debuff:'spd',msg:'❄ 빙결 파편!'})},
+  lightning:{name:'번개 연쇄',icon:'⚡',desc:'2연타 70% 번개',base:0.09,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*0.7,hits:2,type:'lightning',msg:'⚡ 번개 연쇄!'})},
+  shadow_strike:{name:'그림자 타격',icon:'🌑',desc:'120% 어둠+방어무시',base:0.07,type:'physical',
+    fx:(a,s)=>({dmg:a*1.2*(1+(s?.str||5)*0.005),ignoreDef:true,type:'dark',msg:'🌑 그림자 타격!'})},
+  holy_judgment:{name:'신성 심판',icon:'✨',desc:'150% 신성',base:0.06,type:'physical',
+    fx:(a,s)=>({dmg:a*1.5*(1+(s?.str||5)*0.005),type:'holy',msg:'✨ 신성 심판!'})},
+  poison_stack:{name:'독 중첩',icon:'☠',desc:'50% + 2턴 독(30%)',base:0.09,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*0.5,dot:2,msg:'☠ 독 중첩!'})},
+  wind_slash:{name:'바람 베기',icon:'💨',desc:'100% 피해+회피+5',base:0.09,type:'special',
+    fx:(a,s)=>({dmg:a*1.0,buffDodge:5,msg:'💨 바람 베기!'})},
+  vampiric:{name:'흡혈',icon:'🩸',desc:'80%+HP 2% 흡수',base:0.07,type:'physical',
+    fx:(a,s)=>({dmg:a*0.8*(1+(s?.str||5)*0.005),heal:0.02,type:'dark',msg:'🩸 흡혈!'})},
+  counter_strike:{name:'반격',icon:'🛡',desc:'방어 시 ATK 50% 반격',base:0.08,type:'physical',
+    fx:(a,s)=>({dmg:a*0.5*(1+(s?.str||5)*0.005),counter:true,msg:'🛡 반격!'})},
+  evasion:{name:'회피 강화',icon:'👤',desc:'50%+이번턴 추가 회피',base:0.07,type:'special',
+    fx:(a,s)=>({dmg:a*0.5,buffDodge:20,msg:'👤 회피 강화!'})},
+  divine_shield:{name:'신성 방벽',icon:'🛡',desc:'피해 50% 감소 1턴',base:0.07,type:'special',
+    fx:(a,s)=>({dmg:0,shield:true,msg:'🛡 신성 방벽!'})},
+  storm_strike:{name:'폭풍 일격',icon:'⛈',desc:'170% 번개',base:0.06,type:'physical',
+    fx:(a,s)=>({dmg:a*1.7*(1+(s?.str||5)*0.005),type:'lightning',msg:'⛈ 폭풍 일격!'})},
+  chaos_blast:{name:'혼돈 폭발',icon:'🌀',desc:'170% 랜덤 속성',base:0.05,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*1.7*(1+(s?.int||3)*0.008),type:'chaos',msg:'🌀 혼돈 폭발!'})},
+  frozen:{name:'동결',icon:'🧊',desc:'100%+1턴 마비',base:0.07,type:'special',
+    fx:(a,s)=>({dmg:a*1.0,stun:true,type:'ice',msg:'🧊 동결!'})},
+  berserk:{name:'광폭화',icon:'🔴',desc:'ATK+15% 2턴',base:0.07,type:'special',
+    fx:(a,s)=>({dmg:0,buffAtk:0.15,buffTurns:2,msg:'🔴 광폭화!'})},
+  mana_surge:{name:'마력 급등',icon:'🔮',desc:'스킬확률+10% 2턴',base:0.08,type:'magic',
+    fx:(a,s)=>({dmg:0,buffSkill:0.10,buffTurns:2,msg:'🔮 마력 급등!'})},
+  doom_strike:{name:'파멸 일격',icon:'💀',desc:'220% 어둠',base:0.04,type:'physical',
+    fx:(a,s)=>({dmg:a*2.2*(1+(s?.str||5)*0.005),type:'dark',msg:'💀 파멸의 일격!'})},
+  void_slash:{name:'공허 베기',icon:'🕳',desc:'150%+방어무시',base:0.05,type:'physical',
+    fx:(a,s)=>({dmg:a*1.5*(1+(s?.str||5)*0.005),ignoreDef:true,msg:'🕳 공허 베기!'})},
+  quick_strike:{name:'속격',icon:'⚡',desc:'3연타 50%',base:0.10,type:'special',
+    fx:(a,s)=>({dmg:a*0.5,hits:3,msg:'⚡ 속격!'})},
+  arcane_burst:{name:'비전 폭발',icon:'🔮',desc:'INT 기반 120%',base:0.07,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*1.2*(1+(s?.int||3)*0.008),type:'arcane',msg:'🔮 비전 폭발!'})},
+  catastrophe:{name:'재앙',icon:'💥',desc:'260%+자신HP-25%',base:0.03,type:'physical',
+    fx:(a,s)=>({dmg:a*2.6*(1+(s?.str||5)*0.005),selfDmg:0.25,msg:'💥 재앙!'})},
+  regen:{name:'전투 재생',icon:'💚',desc:'공격시 HP 3% 회복',base:0.08,type:'special',
+    fx:(a,s)=>({dmg:a*0.8,heal:0.03,type:'holy',msg:'💚 전투 재생!'})},
+  explosion:{name:'폭발',icon:'💣',desc:'180% 화염',base:0.06,type:'physical',
+    fx:(a,s)=>({dmg:a*1.8*(1+(s?.str||5)*0.005),type:'fire',msg:'💣 폭발!'})},
+  blizzard:{name:'눈보라',icon:'🌨',desc:'3연타 60%',base:0.06,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*0.6*(1+(s?.int||3)*0.008),hits:3,type:'ice',msg:'🌨 눈보라!'})},
+  lifesteal:{name:'생명 흡수',icon:'🌟',desc:'공격시 HP 4% 흡수',base:0.06,type:'special',
+    fx:(a,s)=>({dmg:a*1.0,heal:0.04,type:'holy',msg:'🌟 생명 흡수!'})},
 };
 
 // 50 Enchants (25 prefix + 25 suffix) — 솔로 전용
@@ -993,16 +995,16 @@ const ACCN={
   bracelet:['구리팔찌','은팔찌','금팔찌','루비팔찌','사파이어팔찌','에메랄드팔찌','다이아팔찌','마법사팔찌','심연팔찌','전설팔찌'],
 };
 const WBASES=[
-  {id:'sword',    hand:'1H',slot:'weapon',ar:1.0},
-  {id:'staff',    hand:'1H',slot:'weapon',ar:0.75,hr:0.5},
-  {id:'bow',      hand:'2H',slot:'weapon',ar:1.6},
-  {id:'dual',     hand:'2H',slot:'weapon',ar:1.75,sr:0.6},
-  {id:'axe',      hand:'1H',slot:'weapon',ar:1.15},
-  {id:'greataxe', hand:'2H',slot:'weapon',ar:2.0},
-  {id:'dagger',   hand:'1H',slot:'weapon',ar:0.85,sr:0.8},
-  {id:'greatsword',hand:'2H',slot:'weapon',ar:2.2},
-  {id:'spear',    hand:'2H',slot:'weapon',ar:1.7,dr:0.35},
-  {id:'mace',     hand:'1H',slot:'weapon',ar:1.15,dr:0.25},
+  {id:'sword',    hand:'1H',slot:'weapon',ar:1.0,   balMin:50,balMax:70}, // 한손검
+  {id:'staff',    hand:'1H',slot:'weapon',ar:0.75,hr:0.5,balMin:30,balMax:50}, // 지팡이
+  {id:'bow',      hand:'2H',slot:'weapon',ar:1.6,   balMin:60,balMax:80}, // 활
+  {id:'dual',     hand:'2H',slot:'weapon',ar:1.75,sr:0.6,balMin:35,balMax:55}, // 쌍검
+  {id:'axe',      hand:'1H',slot:'weapon',ar:1.15,  balMin:40,balMax:60}, // 도끼
+  {id:'greataxe', hand:'2H',slot:'weapon',ar:2.0,   balMin:25,balMax:45}, // 대도끼
+  {id:'dagger',   hand:'1H',slot:'weapon',ar:0.85,sr:0.8,balMin:55,balMax:75}, // 단검
+  {id:'greatsword',hand:'2H',slot:'weapon',ar:2.2,  balMin:35,balMax:55}, // 대검
+  {id:'spear',    hand:'2H',slot:'weapon',ar:1.7,dr:0.35,balMin:65,balMax:85}, // 창
+  {id:'mace',     hand:'1H',slot:'weapon',ar:1.15,dr:0.25,balMin:45,balMax:65}, // 메이스
 ];
 const ABASES=[
   {id:'head',   slot:'head',   dr:0.6},
@@ -1467,12 +1469,12 @@ function calcStats(c){
   let spd=c.baseSpd+(c.dex||5)*0.5,hp=(c.maxHp||100);
   let dodge=Math.min((c.dex||5)*0.2,25),crit=8+(c.dex||5)*0.15+(c.luk||2)*0.1;
   let critDmg=140+(c.str||5)*0.4+(c.luk||2)*0.25;
-  let goldBonus=(c.luk||2)*0.3,skillBonus=0;
+  let goldBonus=(c.luk||2)*0.3,skillBonus=0,balance=0;
   const eq=c.equipment||{};
   for(const it of Object.values(eq)){
     if(!it)continue;
     const s=it.stats||{};
-    atk+=s.atk||0;def+=s.def||0;spd+=s.spd||0;hp+=s.hp||0;matk+=s.matk||0;crit+=s.crit||0;
+    atk+=s.atk||0;def+=s.def||0;spd+=s.spd||0;hp+=s.hp||0;matk+=s.matk||0;crit+=s.crit||0;balance+=s.balance||0;
     const ab=b=>{if(!b)return;
       const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
       atk+=cap(b.atk)||0;def+=cap(b.def)||0;spd+=cap(b.spd)||0;hp+=cap(b.hp)||0;
@@ -1488,9 +1490,10 @@ function calcStats(c){
   atk+=sb.atk||0;def+=sb.def||0;spd+=sb.spd||0;hp+=sb.hp||0;crit+=sb.crit||0;
   dodge+=sb.dodge||0; // ★ 세트 보너스 회피 적용
   return{atk:Math.round(atk),matk:Math.round(matk),def:Math.round(def),spd:Math.round(spd),
-    maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),35), // ★ 상한 35%
+    maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),35),
     crit:Math.min(Math.round(crit),75),critDmg:Math.round(critDmg),
-    goldBonus:Math.round(goldBonus),skillBonus:Math.round(skillBonus)};
+    goldBonus:Math.round(goldBonus),skillBonus:Math.round(skillBonus),
+    balance:Math.round(balance)};
 }
 function calcSetB(eq){
   const sc={};for(const it of Object.values(eq)){if(!it||it.grade!=='set'||!it.setId)continue;sc[it.setId]=(sc[it.setId]||0)+1;}
@@ -1623,8 +1626,15 @@ async function selChar(id){
         if(!it)continue;
         if((it.enhance||0)>9){it.enhance=9;dirty=true;}
         if(it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;dirty=true;}
-        // ★ 신규 공식으로 스탯 마이그레이션
         if(!it._v||it._v<2){migrateItem(it);dirty=true;}
+        // ★ balance 마이그레이션 — 무기인데 balance 없으면 baseId 기준으로 부여
+        if(it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
+          const wb=WBASES.find(b=>b.id===it.baseId);
+          if(wb?.balMin!==undefined){
+            it.stats.balance=rand(wb.balMin,wb.balMax);
+            dirty=true;
+          }
+        }
       }
       if(dirty)saveChar();
       updateTop();renderChar();
@@ -1636,8 +1646,15 @@ async function selChar(id){
     for(const it of Object.values(inv)){
       if(it&&it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;needSave=true;}
       if(it&&(it.enhance||0)>9){it.enhance=9;needSave=true;}
-      // ★ 인벤 아이템도 마이그레이션
       if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
+      // ★ 인벤 무기 balance 마이그레이션
+      if(it&&it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
+        const wb=WBASES.find(b=>b.id===it.baseId);
+        if(wb?.balMin!==undefined){
+          it.stats.balance=rand(wb.balMin,wb.balMax);
+          needSave=true;
+        }
+      }
     }
     if(needSave)saveInv();
     renderInv();
@@ -1774,6 +1791,7 @@ function renderChar(){
   document.getElementById('s-spd').textContent=s.spd;
   document.getElementById('s-crit').textContent=s.crit+'%';
   document.getElementById('s-dodge').textContent=s.dodge+'%';
+  document.getElementById('s-balance').textContent=(s.balance||0)+'%';
   document.getElementById('s-matk').textContent=s.matk;
   document.getElementById('s-cdmg').textContent=s.critDmg+'%';
   document.getElementById('s-score').textContent=equipScore(char);
@@ -1807,7 +1825,7 @@ function renderEq(){
     const it=char.equipment[sl.k];const lk=sl.k==='offhand'&&is2H;
     let tooltip='';
     if(it){
-      const statLabels={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK'};
+      const statLabels={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',balance:'밸런스'};
       // ★ 인챈트 포함 총합 스탯 계산
       const ts=(()=>{
         const t={...it.stats};
@@ -1816,7 +1834,7 @@ function renderEq(){
           const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
           for(const[k,v]of Object.entries(enc.b)){
             const cv=cap(v);if(cv===0)continue;
-            if(['atk','def','hp','spd','crit','matk'].includes(k))t[k]=(t[k]||0)+cv;
+            if(['atk','def','hp','spd','crit','matk','balance'].includes(k))t[k]=(t[k]||0)+cv;
             if(k==='str')t.atk=(t.atk||0)+Math.round(cv*1.8);
             if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
             if(k==='int')t.matk=(t.matk||0)+Math.round(cv*2);
@@ -1826,7 +1844,7 @@ function renderEq(){
         }
         return t;
       })();
-      const statRows=Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk'].includes(k))
+      const statRows=Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk','balance'].includes(k))
         .map(([k,v])=>`<div class="sk-tooltip-stat-row"><span>${statLabels[k]||k.toUpperCase()}</span><span>+${v}</span></div>`).join('');
       const gM=GRADES[it.grade]?.skillM||0;
       const skillInfos=[];
@@ -1908,7 +1926,7 @@ window.openEqDetail=function(slotKey){
     const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
     for(const[k,v]of Object.entries(enc.b)){
       const cv=cap(v);if(cv===0)continue;
-      if(['atk','def','hp','spd','crit','matk'].includes(k))totalSt[k]=(totalSt[k]||0)+cv;
+      if(['atk','def','hp','spd','crit','matk','balance'].includes(k))totalSt[k]=(totalSt[k]||0)+cv;
       if(k==='str')totalSt.atk=(totalSt.atk||0)+Math.round(cv*1.8);
       if(k==='dex'){totalSt.spd=(totalSt.spd||0)+Math.round(cv*0.4);totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.08);}
       if(k==='int')totalSt.matk=(totalSt.matk||0)+Math.round(cv*2);
@@ -1916,7 +1934,7 @@ window.openEqDetail=function(slotKey){
       if(k==='luk')totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.08);
     }
   }
-  const statsHtml=Object.entries(totalSt).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk'].includes(k))
+  const statsHtml=Object.entries(totalSt).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk','balance'].includes(k))
     .map(([k,v])=>`<span style="background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--green)">${k.toUpperCase()} +${v}</span>`).join(' ');
 
   // 인챈트
@@ -2106,6 +2124,14 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   if(base.dr)stats.def=rollStat(rand(2,7)*base.dr*mult*lm);
   if(base.hr)stats.hp =rollStat(rand(8,22)*base.hr*mult*lm);
   if(base.sr)stats.spd=rollStat(rand(2,6)*base.sr*mult*lm);
+  // ★ 무기 밸런스 스탯 — 퍼센트(%), 등급이 높을수록 상한 가까이
+  if(base.balMin!==undefined){
+    const balRange=base.balMax-base.balMin;
+    const balBonus=Math.round(balRange*gradeIdx/4); // 레전더리면 범위 꽉 채움
+    const min=base.balMin+Math.round(balBonus*0.3);
+    const max=Math.min(99,base.balMax+Math.round(balBonus*0.15));
+    stats.balance=rand(min,max);
+  }
   const gi=Object.keys(GRADES).indexOf(grade);
   const gradeMult=GRADES[grade]?.mult||1;
   // 장비 등급에 따라 인챈트 tier 상한 제한
@@ -2330,7 +2356,7 @@ function renderInv(){
         const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
         for(const[k,v]of Object.entries(enc.b)){
           const cv=cap(v);if(cv===0)continue;
-          if(['atk','def','hp','spd','crit','matk'].includes(k))t[k]=(t[k]||0)+cv;
+          if(['atk','def','hp','spd','crit','matk','balance'].includes(k))t[k]=(t[k]||0)+cv;
           if(k==='str')t.atk=(t.atk||0)+Math.round(cv*1.8);
           if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
           if(k==='int')t.matk=(t.matk||0)+Math.round(cv*2);
@@ -2340,7 +2366,7 @@ function renderInv(){
       }
       return t;
     })();
-    const ss=Object.entries(ts).filter(([k,v])=>v>0&&v<=999999&&['atk','def','hp','spd','crit','matk'].includes(k)).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' ');
+    const ss=Object.entries(ts).filter(([k,v])=>v>0&&v<=999999&&['atk','def','hp','spd','crit','matk','balance'].includes(k)).map(([k,v])=>fmtStatKV(k,v)).join(' ');
     const lvLock=it.reqLv&&char.level<it.reqLv;
     return`<div class="icard gb-${it.grade} ${lvLock?'lv-locked':''}" data-id="${it.id}">
       ${it.grade==='set'?`<div style="font-size:8.5px;color:var(--st);font-weight:700;margin-bottom:2px">◆ 유일 · ${it.setName||''}</div>`:''}
@@ -2561,7 +2587,7 @@ function openIM(it){
       const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
       for(const[k,v]of Object.entries(enc.b)){
         const cv=cap(v);if(cv===0)continue;
-        if(['atk','def','hp','spd','crit','matk'].includes(k)) t[k]=(t[k]||0)+cv;
+        if(['atk','def','hp','spd','crit','matk','balance'].includes(k)) t[k]=(t[k]||0)+cv;
         if(k==='str') t.atk=(t.atk||0)+Math.round(cv*1.8);
         if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
         if(k==='int') t.matk=(t.matk||0)+Math.round(cv*2);
@@ -2578,6 +2604,9 @@ function openIM(it){
   const sr=allKeys.map(k=>statRowHtml(k.toUpperCase(),newStats[k],oldStats[k])).join('');
 
   // ★ 인챈트 스탯을 "str+3 (→ATK+5)" 형태로 표시하는 헬퍼
+// ★ 스탯 값 포맷 헬퍼 — balance는 % 표기
+function fmtStatVal(k,v){return k==='balance'?v+'%':(v>0?'+':'')+v;}
+function fmtStatKV(k,v){return k==='balance'?'밸런스 '+v+'%':(k.toUpperCase()+'+'+v);}
   function fmtEncStat(k,v){
     const hint={str:`→ATK+${Math.round(v*1.8)}`,dex:`→SPD+${Math.round(v*0.4)}/CRIT+${Math.round(v*0.08)}`,int:`→MATK+${Math.round(v*2)}`,vit:`→HP+${Math.round(v*10)}/DEF+${Math.round(v*0.6)}`,luk:`→CRIT+${Math.round(v*0.08)}`};
     const suf=hint[k]?` <span style="color:var(--tx3);font-size:9px">(${hint[k]})</span>`:'';
@@ -2598,7 +2627,7 @@ function openIM(it){
     <div style="margin-top:8px;padding:7px 9px;background:rgba(255,150,0,.05);border:1px solid rgba(255,150,0,.2);border-radius:6px;font-size:11px">
       <div style="font-size:9px;color:var(--tx3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">현재 장착 중</div>
       <div class="icname g-${equipped.grade}" style="font-size:11px;margin-bottom:3px">${equipped.name}</div>
-      <div style="font-size:10px;color:var(--tx3)">${Object.entries(totalStats(equipped)).filter(([,v])=>v>0).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' · ')}</div>
+      <div style="font-size:10px;color:var(--tx3)">${Object.entries(totalStats(equipped)).filter(([,v])=>v>0).map(([k,v])=>fmtStatKV(k,v)).join(' · ')}</div>
     </div>`:'<div style="font-size:10px;color:var(--tx3);margin-top:5px">현재 슬롯 비어있음</div>';
 
   document.getElementById('imtitle').innerHTML=`<span class="g-${it.grade}">${it.name}</span>`;
@@ -2611,7 +2640,7 @@ function openIM(it){
       <div style="font-size:9px;color:var(--tx3);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px">슬롯 선택 (현재 장착과 비교)</div>
       ${['accessory1','accessory2','accessory3'].map((sl,i)=>{
         const cur=char.equipment[sl];
-        const curStats=cur?Object.entries(totalStats(cur)).filter(([,v])=>v>0).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' '):'';
+        const curStats=cur?Object.entries(totalStats(cur)).filter(([,v])=>v>0).map(([k,v])=>fmtStatKV(k,v)).join(' '):'';
         return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;margin-bottom:5px">
           <div style="display:flex;justify-content:space-between;align-items:flex-start">
             <div style="flex:1;min-width:0">
@@ -2843,7 +2872,7 @@ window.sellByGrade=async grade=>{
 
 function renderShop(sb){
   sb.innerHTML=`<div class="shopgrid">${SHOP_ITEMS.map((si,i)=>{
-    const stats=Object.entries(si.stats||{}).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(', ');
+    const stats=Object.entries(si.stats||{}).map(([k,v])=>fmtStatKV(k,v)).join(', ');
     return`<div class="shopitem"><div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:2px">${si.n}</div><div style="font-size:10px;color:var(--tx2);margin-bottom:6px">${stats}</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;color:var(--gold)">💰${si.price}</span><button class="btn btn-gold btn-sm" onclick="buyShop(${i})">구매</button></div></div>`;
   }).join('')}</div>`;
 }
@@ -3178,7 +3207,7 @@ async function renderAuction(sb){
                     <div style="font-size:10px;font-weight:700;color:var(--purple);margin-bottom:3px">📜 ${it.enchantIsPrefix!==false?'[접두]':'[접미]'} ${it.enchantData?.n||''} <span style="font-size:9px;font-weight:400;color:var(--tx3)">성공률 ${Math.round((it.successRate||0.7)*100)}%</span></div>
                     ${(()=>{
                       const b=it.enchantData?.b||{};
-                      const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드보너스',skillBonus:'스킬발동'};
+                      const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',balance:'밸런스',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드보너스',skillBonus:'스킬발동'};
                       const parts=Object.entries(b).filter(([,v])=>v!==0&&isFinite(v)&&Math.abs(v)<=9999)
                         .map(([k,v])=>`<span style="color:${v>0?'var(--green)':'var(--red)'}">${labelMap[k]||k}${v>0?'+':''}${v}</span>`);
                       return parts.length?`<div style="font-size:10px;display:flex;flex-wrap:wrap;gap:5px">${parts.join('')}</div>`:'';
@@ -3254,7 +3283,7 @@ async function renderAuction(sb){
         </div>
         <div style="display:flex;flex-direction:column;gap:6px" id="auctionSellList">
           ${tradeable.map(it=>{
-            const statStr=Object.entries(it.stats||{}).filter(([,v])=>v>0).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' ');
+            const statStr=Object.entries(it.stats||{}).filter(([,v])=>v>0).map(([k,v])=>fmtStatKV(k,v)).join(' ');
             const suggestPrice=Math.round(getSellPrice(it)*3);
             return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px">
               <div style="display:flex;align-items:flex-start;gap:8px">
@@ -3530,13 +3559,21 @@ function nextFloor(){
 function spawnMonsters(b,isBoss){
   const t=b.tier;const d=b.diff;const sm=b.soloMult;
   const lv=t.recLv;const area=pick(t.areas);
+  const tierIdx=b.tierIdx||0;
+  const dk=b.diffKey||'normal';
+  // ★ 티어별 HP 배율 — vhard 고난이도 구간 조정 (T3~T5만 적용)
+  const tierHpMult=dk==='vhard'?[1,1,2.0,3.0,5.0][tierIdx]||1
+                  :dk==='hard'?[1,1,1,1.5,2.0][tierIdx]||1
+                  :1;
+  // ★ 티어별 몬스터 회피율 (밸런스로 상쇄 가능)
+  const tierDodge=[3,5,8,12,18][tierIdx]||0;
   if(isBoss){
-    // 보스: 완만한 레벨 성장, 플레이어 스탯과 균형 맞춤
     const bAtk=Math.round((25+lv*4.0)*d.monMult*sm*0.85);
-    const bHp=Math.round((280+lv*55)*d.monMult*sm);
+    const bHp=Math.round((280+lv*55)*d.monMult*sm*tierHpMult);
     const bDef=Math.round((8+lv*1.8)*d.monMult*sm);
     const bSkills=MON_SKILLS[area]||MON_SKILLS.cave;
     return[{id:'boss_0',name:BOSSN[t.tier-1],hp:bHp,maxHp:bHp,atk:bAtk,def:bDef,
+      dodge:Math.min(5+t.tier*1, 8), // ★ 보스 회피: 6~8%
       isBoss:true,hidden:false,aggro:0,expR:1.5,goldR:2.0,status:'alive',
       skills:bSkills,
       gimmick:{rage50:false,chargeWarn:false,chargeCount:0}}];
@@ -3566,13 +3603,14 @@ function spawnMonsters(b,isBoss){
     else if(roll<0.15){const sfx=pick(MSFX);mn+=' '+sfx.n;am*=sfx.am;hm*=sfx.hm;em*=sfx.em;gm*=sfx.gm||1;}
     else if(roll<0.40){const pfx=pick(MPFX);mn=pfx.n+' '+mn;am*=pfx.am;hm*=pfx.hm;em*=pfx.em;}
     // 개선된 몬스터 스탯 — 플레이어 성장곡선에 맞게 완만화
-    const hp=Math.round((60+lv*20)*hm*d.monMult*sm);
+    const hp=Math.round((60+lv*20)*hm*d.monMult*sm*tierHpMult);
     const atk=Math.round((10+lv*3.5)*am*d.dmgMult*sm);
     const def=Math.round((3+lv*1.2)*hm*d.monMult*sm);
     const skCount=t.tier<=1?rand(0,1):t.tier<=3?rand(1,2):rand(1,3);
     const shuffled=[...areaSkills].sort(()=>Math.random()-0.5);
     const monSkills=shuffled.slice(0,Math.min(skCount,shuffled.length));
-    mons.push({id:'mon_'+i,name:mn,hp,maxHp:hp,atk,def,hidden,isBoss:false,
+    const monDodge=Math.round(rand(1,3)+t.tier*0.5); // ★ 일반몹 회피: 티어1=1~4%, 티어5=3~6%
+    mons.push({id:'mon_'+i,name:mn,hp,maxHp:hp,atk,def,dodge:monDodge,hidden,isBoss:false,
       aggro:0,expR:em,goldR:gm,status:'alive',skills:monSkills});
   }
   return mons;
@@ -3819,15 +3857,16 @@ async function resolvePhase(){
       if(!aliveM.length)continue;
       const target=aliveM[0];
       let dmg=calcPlayerDmg(p,s);
-      // ★ ATK 버프 반영
       if(p._atkBuff&&p._atkBuffTurns>0){dmg=Math.round(dmg*(1+p._atkBuff));p._atkBuffTurns--;if(p._atkBuffTurns<=0)p._atkBuff=0;}
       let isCrit=Math.random()*100<s.crit;
       if(isCrit)dmg=Math.round(dmg*s.critDmg/100);
-      if(Math.random()*100<(target.dodge||0))dmg=0;
-      target.hp=Math.max(0,target.hp-dmg);
+      // ★ 밸런스(%)로 몬스터 회피 상쇄: 실효회피 = dodge × (1 - balance/100)
+      const effDodge=Math.max(0,(target.dodge||0)*(1-(s.balance||0)/100));
+      const isMiss=Math.random()*100<effDodge;
+      if(isMiss)dmg=0;
+      else target.hp=Math.max(0,target.hp-dmg);
       p.aggro=(p.aggro||0)+(isCrit?dmg*1.5:dmg);
-      if(isCrit)blogAdd(`<span class="l-crit">⚔ ${p.name} → ${target.name} 치명! <strong>${dmg}</strong></span>`);
-      else blogAdd(`<span class="l-dmg">⚔ ${p.name} → ${target.name} <strong>${dmg}</strong>`+(dmg===0?' (빗나감)':'')+'</span>');
+      blogAdd(getWeaponAttackMsg(p,target,dmg,isCrit&&!isMiss,isMiss));
       if(target.hp<=0){target.status='dead';blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
       trySkillProc(p,s,target,aliveM);
     }
@@ -3951,20 +3990,73 @@ async function resolvePhase(){
 }
 
 function calcPlayerDmg(p,s){
-  const base=Math.round(s.atk||10);
+  // ★ 무기 종류별 스탯 스케일링
+  const eq=p.charData?.equipment||char.equipment||{};
+  const weapon=eq.weapon;
+  const wid=weapon?.baseId||'';
+  let base;
+  if(wid==='staff'||weapon?.name?.includes('지팡이')||weapon?.slot==='weapon'&&weapon?.hand==='1H'&&(weapon?.baseId==='staff')){
+    base=Math.round(s.matk||10); // 지팡이: MATK
+  } else if(wid==='bow'){
+    base=Math.round((s.atk||10)*(1+(s.dex||5)*0.004)); // 활: ATK + DEX
+  } else if(wid==='dagger'){
+    base=Math.round((s.atk||10)*(1+((s.dex||5)+(s.str||5))*0.003)); // 쌍검: ATK + DEX+STR
+  } else {
+    base=Math.round((s.atk||10)*(1+(s.str||5)*0.003)); // 검/도끼/창: ATK + STR
+  }
   const variance=Math.round(base*0.1);
-  return Math.max(1,Math.min(base+rand(-variance,variance),99999)); // 최대 99999
+  return Math.max(1,Math.min(base+rand(-variance,variance),99999));
+}
+
+// ★ 무기별 공격 문구
+function getWeaponAttackMsg(p,target,dmg,isCrit,isMiss){
+  const eq=p.charData?.equipment||char.equipment||{};
+  const weapon=eq.weapon;
+  const wid=weapon?.baseId||weapon?.id||'';
+  const tn=target.name;
+  const pn=p.name;
+  if(isMiss){
+    const missMsg={bow:'🏹 화살이 빗나갔다!',staff:'✨ 마력이 흩어졌다!',dagger:'🗡 빈틈을 놓쳤다!'}[wid]||'💨 공격이 빗나갔다!';
+    return`<span class="l-dmg">${missMsg}</span>`;
+  }
+  if(isCrit){
+    const critMsg={
+      sword:`<span class="l-crit">⚔ ${pn}의 일격! ${tn}에게 치명타 <strong>${dmg}</strong>!</span>`,
+      greatsword:`<span class="l-crit">🗡 ${pn}의 대검이 ${tn}을 강타! <strong>${dmg}</strong>!</span>`,
+      dagger:`<span class="l-crit">🗡 ${pn}의 연속 찌르기! ${tn} 급소 <strong>${dmg}</strong>!</span>`,
+      bow:`<span class="l-crit">🏹 ${pn}의 화살이 ${tn}의 급소를 꿰뚫었다! <strong>${dmg}</strong>!</span>`,
+      staff:`<span class="l-crit">✨ ${pn}의 마력이 폭발! ${tn}에게 <strong>${dmg}</strong> 마법 피해!</span>`,
+      axe:`<span class="l-crit">🪓 ${pn}의 도끼가 ${tn}을 갈랐다! <strong>${dmg}</strong>!</span>`,
+      greataxe:`<span class="l-crit">🪓 ${pn}의 대도끼가 ${tn}을 박살냈다! <strong>${dmg}</strong>!</span>`,
+      spear:`<span class="l-crit">🔱 ${pn}의 창이 ${tn}을 꿰뚫었다! <strong>${dmg}</strong>!</span>`,
+    };
+    return critMsg[wid]||`<span class="l-crit">⚔ ${pn} → ${tn} 치명! <strong>${dmg}</strong></span>`;
+  }
+  const normalMsg={
+    sword:`<span class="l-dmg">⚔ ${pn}이 ${tn}을 베었다. <strong>${dmg}</strong></span>`,
+    greatsword:`<span class="l-dmg">🗡 ${pn}의 대검이 ${tn}을 내리쳤다. <strong>${dmg}</strong></span>`,
+    dagger:`<span class="l-dmg">🗡 ${pn}이 ${tn}을 빠르게 찔렀다. <strong>${dmg}</strong></span>`,
+    bow:`<span class="l-dmg">🏹 ${pn}의 화살이 ${tn}에게 적중! <strong>${dmg}</strong></span>`,
+    staff:`<span class="l-dmg">✨ ${pn}이 ${tn}에게 마법 미사일 발사. <strong>${dmg}</strong></span>`,
+    axe:`<span class="l-dmg">🪓 ${pn}이 ${tn}에게 도끼를 내리쳤다. <strong>${dmg}</strong></span>`,
+    greataxe:`<span class="l-dmg">🪓 ${pn}의 대도끼가 ${tn}을 강타. <strong>${dmg}</strong></span>`,
+    spear:`<span class="l-dmg">🔱 ${pn}이 ${tn}을 창으로 찔렀다. <strong>${dmg}</strong></span>`,
+  };
+  return normalMsg[wid]||`<span class="l-dmg">⚔ ${pn} → ${tn} <strong>${dmg}</strong></span>`;
 }
 
 // syncBattleState — 파티 제거됨, no-op
 function syncBattleState(opts={}){}
 function trySkillProc(p,s,target,allM){
   const skills=getSkills(p.charData||char);
-  // ★ skillBonus: 스킬 발동률 보너스 반영 (예: skillBonus=10 → +10%)
   const skillBonusMult=1+(s.skillBonus||0)/100;
+  // ★ 특수 스킬 발동률 보너스: DEX×0.003 + SPD×0.002
+  const specialProcBonus=1+((s.dex||5)*0.003+(s.spd||5)*0.002);
   for(const sk of skills){
-    if(Math.random()<sk.proc*skillBonusMult){
-      const fx=sk.fx(s.atk,s);
+    const isSpecial=SKILLS[sk.id]?.type==='special';
+    const procMult=skillBonusMult*(isSpecial?specialProcBonus:1);
+    if(Math.random()<sk.proc*procMult){
+      const fx=sk.fx(s.atk,s); // ★ s(전체 스탯) 전달 — STR/INT/DEX 활용
       if(fx.dmg)fx.dmg=Math.min(Math.round(fx.dmg),99999);
       if(fx.counter){
         // 반격: 피해 + 방어력 강화
@@ -5294,7 +5386,7 @@ async function renderWarehouse(sb){
       }
     }
     return Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit'].includes(k))
-      .map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' ');
+      .map(([k,v])=>fmtStatKV(k,v)).join(' ');
   }
 
   function whCard(it, btnHtml){
@@ -5320,7 +5412,7 @@ async function renderWarehouse(sb){
           ${!scrollTag&&it.slot?`<span>${it.slot}${it.hand?' · '+it.hand:''}</span>`:''}
           ${ss?`<span style="color:var(--green)">${ss}</span>`:''}
           ${it.isEnchantScroll&&it.enchantData?.b?(()=>{
-            const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드',skillBonus:'스킬발동'};
+            const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',balance:'밸런스',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드',skillBonus:'스킬발동'};
             const parts=Object.entries(it.enchantData.b).filter(([,v])=>v!==0&&isFinite(v)&&Math.abs(v)<=9999)
               .map(([k,v])=>`${labelMap[k]||k}${v>0?'+':''}${v}`).join(' ');
             return parts?`<span style="color:var(--purple)">${parts}</span>`:'';
