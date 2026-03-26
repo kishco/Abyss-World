@@ -1845,7 +1845,7 @@ function renderEq(){
         return t;
       })();
       const statRows=Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk','balance'].includes(k))
-        .map(([k,v])=>`<div class="sk-tooltip-stat-row"><span>${statLabels[k]||k.toUpperCase()}</span><span>+${v}</span></div>`).join('');
+        .map(([k,v])=>`<div class="sk-tooltip-stat-row"><span>${statLabels[k]||k.toUpperCase()}</span><span>${k==='balance'?v+'%':'+'+v}</span></div>`).join('');
       const gM=GRADES[it.grade]?.skillM||0;
       const skillInfos=[];
       for(const src of[it.prefix,it.suffix]){
@@ -2001,8 +2001,8 @@ const encHint={
 };
 function itSkStr(it){
   const sk=[];
-  if(it.prefix?.sk&&SKILLS[it.prefix.sk])sk.push('⚡'+SKILLS[it.prefix.sk].name);
-  if(it.suffix?.sk&&SKILLS[it.suffix.sk])sk.push('⚡'+SKILLS[it.suffix.sk].name);
+  if(it.prefix?.sk&&SKILLS[it.prefix.sk])sk.push('⚡'+SKILLS[it.prefix.sk].name+(typeof skillTypeBadge==='function'?skillTypeBadge(it.prefix.sk):''));
+  if(it.suffix?.sk&&SKILLS[it.suffix.sk])sk.push('⚡'+SKILLS[it.suffix.sk].name+(typeof skillTypeBadge==='function'?skillTypeBadge(it.suffix.sk):''));
   return sk.join(' ');
 }
 // ★ 강화 수치 포함 이름
@@ -3231,7 +3231,7 @@ async function renderAuction(sb){
                     for(const enc of[it.prefix,it.suffix]){
                       if(enc?.sk&&SKILLS[enc.sk]){
                         const sk=SKILLS[enc.sk];
-                        skList.push(`<span style="color:var(--gold)">⚡ ${sk.name}</span><span style="color:var(--tx3);font-size:9px"> — ${sk.desc}</span>`);
+                        skList.push(`<span style="color:var(--gold)">⚡ ${sk.name}${skillTypeBadge(enc.sk)}</span><span style="color:var(--tx3);font-size:9px"> — ${sk.desc}</span>`);
                       }
                     }
                     return skList.length?`<div style="font-size:9.5px;margin-bottom:2px;display:flex;flex-direction:column;gap:1px">${skList.join('')}</div>`:'';
@@ -4852,14 +4852,14 @@ window.adminOpenUser=async function(cid){
           <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">접두</div>
           <select id="giPre" style="width:100%;padding:6px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none">
             <option value="">없음</option>
-            ${PRE.map(p=>`<option value="${p.n}">${p.n} (${Object.entries(p.b).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}${p.sk&&SKILLS[p.sk]?' ⚡'+SKILLS[p.sk].name:''})</option>`).join('')}
+            ${PRE.map(p=>`<option value="${p.n}">${p.n} (${Object.entries(p.b).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}${p.sk&&SKILLS[p.sk]?' ⚡'+SKILLS[p.sk].name+' ['+({physical:'물리',magic:'마법',special:'특수'}[SKILLS[p.sk].type]||'물리')+']':''})</option>`).join('')}
           </select>
         </div>
         <div>
           <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">접미</div>
           <select id="giSuf" style="width:100%;padding:6px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none">
             <option value="">없음</option>
-            ${SUF.map(s=>`<option value="${s.n}">${s.n} (${Object.entries(s.b).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}${s.sk&&SKILLS[s.sk]?' ⚡'+SKILLS[s.sk].name:''})</option>`).join('')}
+            ${SUF.map(s=>`<option value="${s.n}">${s.n} (${Object.entries(s.b).filter(([,v])=>v>0).map(([k,v])=>`${k}+${v}`).join(' ')}${s.sk&&SKILLS[s.sk]?' ⚡'+SKILLS[s.sk].name+' ['+({physical:'물리',magic:'마법',special:'특수'}[SKILLS[s.sk].type]||'물리')+']':''})</option>`).join('')}
           </select>
         </div>
       </div>
@@ -5438,7 +5438,7 @@ async function renderWarehouse(sb){
               .map(([k,v])=>`${labelMap[k]||k}${v>0?'+':''}${v}`).join(' ');
             return parts?`<span style="color:var(--purple)">${parts}</span>`:'';
           })():''}
-          ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<span style="color:var(--gold)">⚡${SKILLS[it.enchantData.sk].name}</span>`:''}
+          ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<span style="color:var(--gold)">⚡${SKILLS[it.enchantData.sk].name}${skillTypeBadge(it.enchantData.sk)}</span>`:''}
         </div>
       </div>
       ${btnHtml}
