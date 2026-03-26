@@ -1851,6 +1851,7 @@ function renderEq(){
       for(const src of[it.prefix,it.suffix]){
         if(src?.sk&&SKILLS[src.sk]){
           const sk=SKILLS[src.sk];
+          const skId=src.sk;
           const proc=Math.round(sk.base*gM*(1+(char.int||3)*0.005)*100);
           if(proc>0)skillInfos.push(`<div class="sk-tooltip-title">${sk.icon} ${sk.name}${skillTypeBadge(skId)}</div><div class="sk-tooltip-desc">${sk.desc}</div><div class="sk-tooltip-proc">발동률: ${proc}%</div>`);
         }
