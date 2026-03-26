@@ -2404,6 +2404,23 @@ function openIM(it){
       toast(`✨ [${enchData?.n}] 인챈트 성공!`,3000);
     };
     renderEnchantTarget2();
+    // ★ 판매/버리기 버튼 추가
+    const existingBody=document.getElementById('imbody');
+    const btnDiv=document.createElement('div');
+    btnDiv.style.cssText='display:flex;gap:6px;margin-top:12px';
+    btnDiv.innerHTML=`
+      <button class="btn btn-gold btn-sm" style="flex:1" id="scrollSellBtn">💰 판매 (100G)</button>
+      <button class="btn btn-red btn-sm" id="scrollDiscBtn">버리기</button>`;
+    existingBody.appendChild(btnDiv);
+    document.getElementById('scrollSellBtn').onclick=async()=>{
+      if(!confirm(`${it.name}\n100G에 판매하시겠습니까?`))return;
+      delete inv[it.id];char.gold+=100;
+      await saveChar();await saveInv();closeIM();renderInv();updateTop();toast(`💰 ${it.name} 판매! +100G`);
+    };
+    document.getElementById('scrollDiscBtn').onclick=async()=>{
+      if(!confirm('버리시겠습니까?'))return;
+      delete inv[it.id];await saveInv();closeIM();renderInv();toast('버림');
+    };
     document.getElementById('imodal').classList.add('open');return;
   }
   // ★ 인챈트 추출 스크롤
@@ -2461,6 +2478,13 @@ function openIM(it){
       toast(`💎 [${enchObj.n}] 인챈트 추출 완료! 스크롤로 인벤에 추가됨`,4000);
     };
     renderExtractTargets();
+    // ★ 판매/버리기
+    const eb=document.getElementById('imbody');
+    const ebd=document.createElement('div');ebd.style.cssText='display:flex;gap:6px;margin-top:12px';
+    ebd.innerHTML=`<button class="btn btn-gold btn-sm" style="flex:1">💰 판매 (100G)</button><button class="btn btn-red btn-sm">버리기</button>`;
+    ebd.children[0].onclick=async()=>{if(!confirm(`${it.name}\n100G에 판매?`))return;delete inv[it.id];char.gold+=100;await saveChar();await saveInv();closeIM();renderInv();updateTop();toast(`💰 +100G`);};
+    ebd.children[1].onclick=async()=>{if(!confirm('버리시겠습니까?'))return;delete inv[it.id];await saveInv();closeIM();renderInv();toast('버림');};
+    eb.appendChild(ebd);
     document.getElementById('imodal').classList.add('open');return;
   }
   if(it.isScroll){
@@ -2468,7 +2492,11 @@ function openIM(it){
     document.getElementById('imbody').innerHTML=`
       <div style="font-size:12.5px;color:var(--tx2);line-height:1.8;margin-bottom:12px">모든 누적된 스탯 포인트를 랜덤으로 재배분합니다.<br>기본값(각 5) 이상의 포인트가 무작위 재분배됩니다.</div>
       <div style="font-size:11px;color:var(--tx3);margin-bottom:12px">현재 스탯: STR${char.str} DEX${char.dex} INT${char.int} VIT${char.vit} LUK${char.luk}</div>
-      <button class="btn btn-purple" id="useScrollBtn" style="width:100%">✨ 주문서 사용</button>`;
+      <button class="btn btn-purple" id="useScrollBtn" style="width:100%;margin-bottom:8px">✨ 주문서 사용</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-gold btn-sm" style="flex:1" onclick="(async()=>{if(!confirm('100G에 판매?'))return;delete inv['${it.id}'];char.gold+=100;await saveChar();await saveInv();closeIM();renderInv();updateTop();toast('💰 +100G');})()">💰 판매 (100G)</button>
+        <button class="btn btn-red btn-sm" onclick="(async()=>{if(!confirm('버리시겠습니까?'))return;delete inv['${it.id}'];await saveInv();closeIM();renderInv();toast('버림');})()">버리기</button>
+      </div>`;
     document.getElementById('useScrollBtn').onclick=()=>useRerollScroll(it.id);
     document.getElementById('imodal').classList.add('open');return;
   }
@@ -2596,6 +2624,14 @@ function openIM(it){
     if(!confirm('버리시겠습니까?'))return;
     delete inv[it.id];await saveInv();closeIM();renderInv();toast('버림');
   };
+  // ★ 파괴방지 스크롤 등 — 판매 버튼 추가
+  if(it.isProtectScroll){
+    const sellBtn=document.createElement('button');
+    sellBtn.className='btn btn-gold btn-sm';sellBtn.style.cssText='margin-top:8px;width:100%';
+    sellBtn.textContent='💰 판매 (100G)';
+    sellBtn.onclick=async()=>{if(!confirm('100G에 판매?'))return;delete inv[it.id];char.gold+=100;await saveChar();await saveInv();closeIM();renderInv();updateTop();toast('💰 +100G');};
+    document.getElementById('imbody').appendChild(sellBtn);
+  }
   document.getElementById('imodal').classList.add('open');
 }
 
@@ -2665,12 +2701,12 @@ window.townSec=function(id){
 
 // 판매가 계산: 등급 기본값 × 아이템레벨 배율
 function getSellPrice(it){
-  // ★ 판매가 인상 - 골드 순환 개선
+  // ★ 인챈트 스크롤은 등급 무관 100골드
+  if(it.isEnchantScroll||it.isProtectScroll||it.isExtractScroll||it.isScroll)return 100;
   const BASE={normal:20,uncommon:70,rare:200,epic:550,legendary:1400,set:2500};
   const base=BASE[it.grade]||20;
   const lv=it.itemLv||1;
   const lvMult=1+(lv-1)*0.05;
-  // ★ 강화 수치 반영 (강화할수록 판매가 증가)
   const enhBonus=1+((it.enhance||0)*0.15);
   return Math.round(base*lvMult*enhBonus);
 }
