@@ -1027,10 +1027,10 @@ const EQSLOTS=[
   {k:'accessory2',l:'장신구2',i:'💍'},{k:'accessory3',l:'장신구3',i:'💍'},
 ];
 const STATS_DEF=[
-  {k:'str',n:'STR',d:'ATK+0.8, 치명피해+0.4%'},
-  {k:'dex',n:'DEX',d:'회피+0.2%, CRIT+0.15%, SPD+0.5'},
-  {k:'int',n:'INT',d:'MATK+1.5, 스킬발동↑'},
-  {k:'vit',n:'VIT',d:'MaxHP+5(장비), DEF+0.3(장비)'},
+  {k:'str',n:'STR',d:'ATK+1.5, 치명피해+0.4%'},
+  {k:'dex',n:'DEX',d:'회피+0.2%, CRIT+0.25%, SPD+0.8'},
+  {k:'int',n:'INT',d:'MATK+1.5, 마법스킬↑'},
+  {k:'vit',n:'VIT',d:'HP+6, DEF+0.6'},
   {k:'luk',n:'LUK',d:'골드↑, CRIT+0.06%, 드랍↑'},
 ];
 const SETS={
@@ -1156,8 +1156,8 @@ const DTIERS=[
 ];
 const DIFF={
   normal:{name:'노말',color:'var(--green)',monMult:0.85,dmgMult:0.85,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
-  hard:{name:'어려움',color:'#ff9900',monMult:1.4,dmgMult:1.6,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:120,canWipe:false},
-  vhard:{name:'매우어려움',color:'var(--red)',monMult:2.8,dmgMult:3.2,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:250,canWipe:true},
+  hard:{name:'어려움',color:'#ff9900',monMult:1.4,dmgMult:1.6,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:300,canWipe:false},
+  vhard:{name:'매우어려움',color:'var(--red)',monMult:2.8,dmgMult:3.2,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:600,canWipe:true},
 };
 const MNAMES={
   cave:      ['고블린 전사','동굴 박쥐','바위 두더지','함정 거미','굴 뱀','광부 좀비','동굴 슬라임','야간 도둑','동굴 거북','독 유충'],
@@ -1465,9 +1465,9 @@ function mkChar(name){
 
 function calcStats(c){
   // 스탯 환산율 — 장비 의존도 높이고 스탯 올인 폭발 방지
-  let atk=c.baseAtk+(c.str||5)*0.8,matk=(c.int||3)*0.8,def=c.baseDef+(c.vit||5)*0.35;
-  let spd=c.baseSpd+(c.dex||5)*0.5,hp=(c.maxHp||100);
-  let dodge=Math.min((c.dex||5)*0.2,25),crit=8+(c.dex||5)*0.15+(c.luk||2)*0.1;
+  let atk=c.baseAtk+(c.str||5)*1.5,matk=(c.int||3)*1.5,def=c.baseDef+(c.vit||5)*0.6;
+  let spd=c.baseSpd+(c.dex||5)*0.8,hp=(c.maxHp||100);
+  let dodge=Math.min((c.dex||5)*0.2,25),crit=8+(c.dex||5)*0.25+(c.luk||2)*0.1;
   let critDmg=140+(c.str||5)*0.4+(c.luk||2)*0.25;
   let goldBonus=(c.luk||2)*0.3,skillBonus=0,balance=0;
   const eq=c.equipment||{};
@@ -1503,7 +1503,11 @@ function calcSetB(eq){
 // ★ 전투력: ATK/DEF/HP/SPD/CRIT 가중 합산 (강화·인챈트·세트 모두 반영)
 function equipScore(c){
   const s=calcStats(c);
-  return Math.round(s.atk*1.5 + s.matk*1.5 + s.def*0.8 + s.maxHp*0.05 + s.spd*0.3 + s.crit*0.2);
+  const eq=c.equipment||{};
+  const wt=getWeaponTraits(eq);
+  // ★ 지팡이 장착 시 MATK 기준, 그 외 ATK 기준
+  const dmgScore=wt.isStaff?s.matk*1.5:s.atk*1.5;
+  return Math.round(dmgScore + s.def*0.8 + s.maxHp*0.05 + s.spd*0.3 + s.crit*0.2);
 }
 function getSkills(c_arg){
   const c=c_arg||char;if(!c)return[];
@@ -3460,10 +3464,12 @@ window.selectMode=async function(tierIdx,mode){
       </div>
     </div>
     ${Object.entries(DIFF).map(([dk,dv])=>{
-      const meets=myScore>=dv.reqScore;
+      const TIER_REQ={hard:[0,200,400,700,1200,2000],vhard:[0,400,700,1200,2000,3500]};
+      const reqScore=TIER_REQ[dk]?.[tierIdx]||0;
+      const meets=myScore>=reqScore;
       const msg=dk==='normal'?'기본 난이도 — 포션 1~2개 소모 예상':
-            dk==='hard'?`전투력 ${dv.reqScore} 이상 필요 — 긴장감 있는 전투, 포션 2~4개`:
-            `전투력 ${dv.reqScore} 이상 필요 ⚠️ 장비 손실 가능 — 매우 위험`;
+            dk==='hard'?`전투력 ${reqScore} 이상 필요 — 긴장감 있는 전투, 포션 2~4개`:
+            `전투력 ${reqScore} 이상 필요 ⚠️ 장비 손실 가능 — 매우 위험`;
       const locked=dk!=='normal'&&!meets;
       return`<div style="background:var(--sf2);border:1px solid ${locked?'var(--bd)':dv.color+'44'};border-radius:8px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;${locked?'opacity:.55':''}">
         <div>
@@ -3481,8 +3487,14 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
   const s=calcStats(char);
   const score=equipScore(char);
   if(char.level<t.minLv){toast(`레벨 부족! 최소 Lv.${t.minLv} 필요`);return;}
-  if(diffKey!=='normal'&&score<d.reqScore){
-    toast(`⚠️ 장비 전투력 부족! 현재: ${score} / 필요: ${d.reqScore}`);return;
+  // ★ 티어 × 난이도 입구컷
+  const TIER_REQ={
+    hard: [0,200,400,700,1200,2000],
+    vhard:[0,400,700,1200,2000,3500],
+  };
+  const reqScore=TIER_REQ[diffKey]?.[tierIdx]||0;
+  if(diffKey!=='normal'&&score<reqScore){
+    toast(`⚠️ 전투력 부족! 현재: ${score} / 필요: ${reqScore}`);return;
   }
   if(Object.keys(inv).length>=100){toast('⚠️ 인벤토리가 가득 찼습니다! 먼저 정리해 주세요.');return;}
   startBattle(tierIdx,'solo',diffKey,[{id:charId,name:char.name,charData:char,stats:s,hp:s.maxHp,maxHp:s.maxHp,potions:5+(char.extraPotions||0)}]);
@@ -3579,10 +3591,10 @@ function spawnMonsters(b,isBoss){
   const lv=t.recLv;const area=pick(t.areas);
   const tierIdx=b.tierIdx||0;
   const dk=b.diffKey||'normal';
-  // ★ 티어별 HP 배율 — vhard 고난이도 구간 조정 (T3~T5만 적용)
-  const tierHpMult=dk==='vhard'?[1,1,2.0,3.0,5.0][tierIdx]||1
-                  :dk==='hard'?[1,1,1,1.5,2.0][tierIdx]||1
-                  :1;
+  // ★ 티어별 HP 배율 — T3~T5 노말/어려움만 적용 (vhard는 monMult로 충분)
+  const tierHpMult=dk==='vhard'?1
+                  :dk==='hard'?[1,1,1.3,1.6,2][tierIdx]||1
+                  :[1,1,1.2,1.5,2][tierIdx]||1;
   // ★ 티어별 몬스터 회피율 (밸런스로 상쇄 가능)
   const tierDodge=[3,5,8,12,18][tierIdx]||0;
   if(isBoss){
@@ -3870,22 +3882,41 @@ async function resolvePhase(){
         blogAdd(`<span class="l-heal">💊 ${p.name} 포션 사용! +${heal}HP (${p.hp}/${p.maxHp}) — 회복 자세 (피해 30%↓)</span>`);
       }
     }else if(p.actionChosen==='attack'){
-      // Update aggro from damage
       const aliveM=battle.monsters.filter(m=>m.status==='alive');
       if(!aliveM.length)continue;
       const target=aliveM[0];
+      const eq=p.charData?.equipment||char.equipment||{};
+      const wt=getWeaponTraits(eq);
       let dmg=calcPlayerDmg(p,s);
       if(p._atkBuff&&p._atkBuffTurns>0){dmg=Math.round(dmg*(1+p._atkBuff));p._atkBuffTurns--;if(p._atkBuffTurns<=0)p._atkBuff=0;}
-      let isCrit=Math.random()*100<s.crit;
-      if(isCrit)dmg=Math.round(dmg*s.critDmg/100);
-      // ★ 밸런스(%)로 몬스터 회피 상쇄: 실효회피 = dodge × (1 - balance/100)
+      // ★ 단검: CRIT +5%
+      const critBonus=wt.isDagger?5:0;
+      let isCrit=Math.random()*100<(s.crit+critBonus);
+      // ★ 대도끼: 치명타 데미지 +10%, 대검: +5%
+      const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
+      if(isCrit)dmg=Math.round(dmg*(s.critDmg/100)*critDmgBonus);
+      // ★ 창: 방어 무시 8%
+      if(wt.isSpear&&!isCrit)dmg=Math.round(dmg*1.08);
+      // ★ 밸런스로 몬스터 회피 상쇄
       const effDodge=Math.max(0,(target.dodge||0)*(1-(s.balance||0)/100));
       const isMiss=Math.random()*100<effDodge;
       if(isMiss)dmg=0;
       else target.hp=Math.max(0,target.hp-dmg);
+      // ★ 메이스: DEF 5% 감소 디버프
+      if(wt.isMace&&!isMiss&&target.status==='alive'){
+        target._maceDebuff=(target._maceDebuff||0)+1;
+        target.def=Math.round((target.def||0)*0.95);
+      }
       p.aggro=(p.aggro||0)+(isCrit?dmg*1.5:dmg);
       blogAdd(getWeaponAttackMsg(p,target,dmg,isCrit&&!isMiss,isMiss));
       if(target.hp<=0){target.status='dead';blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
+      // ★ 쌍검: 5% 추가타
+      if(wt.isDual&&!isMiss&&target.status==='alive'&&Math.random()<0.05){
+        const bonusDmg=Math.round(dmg*0.5);
+        target.hp=Math.max(0,target.hp-bonusDmg);
+        blogAdd(`<span class="l-skill">🗡 ${p.name} 추가 연격! <strong>${bonusDmg}</strong></span>`);
+        if(target.hp<=0)target.status='dead';
+      }
       trySkillProc(p,s,target,aliveM);
     }
   }
@@ -4007,21 +4038,40 @@ async function resolvePhase(){
   setTimeout(()=>startActionPhase(), battle.mode==='solo'?800:2000);
 }
 
-function calcPlayerDmg(p,s){
-  // ★ 무기 종류별 스탯 스케일링
-  const eq=p.charData?.equipment||char.equipment||{};
-  const weapon=eq.weapon;
+// ★ 무기 고유 특성 반환 헬퍼
+function getWeaponTraits(eq){
+  const weapon=eq?.weapon;
   const wid=weapon?.baseId||'';
+  return{
+    wid,
+    isStaff:   wid==='staff',
+    isBow:     wid==='bow',
+    isDagger:  wid==='dagger',
+    isDual:    wid==='dual',
+    isSpear:   wid==='spear',
+    isGreataxe:wid==='greataxe',
+    isMace:    wid==='mace',
+    isGreatsword:wid==='greatsword',
+    isSword:   wid==='sword',
+    isAxe:     wid==='axe',
+  };
+}
+
+function calcPlayerDmg(p,s){
+  const eq=p.charData?.equipment||char.equipment||{};
+  const t=getWeaponTraits(eq);
   let base;
-  if(wid==='staff'||weapon?.name?.includes('지팡이')||weapon?.slot==='weapon'&&weapon?.hand==='1H'&&(weapon?.baseId==='staff')){
-    base=Math.round(s.matk||10); // 지팡이: MATK
-  } else if(wid==='bow'){
-    base=Math.round((s.atk||10)*(1+(s.dex||5)*0.004)); // 활: ATK + DEX
-  } else if(wid==='dagger'){
-    base=Math.round((s.atk||10)*(1+((s.dex||5)+(s.str||5))*0.003)); // 쌍검: ATK + DEX+STR
-  } else {
-    base=Math.round((s.atk||10)*(1+(s.str||5)*0.003)); // 검/도끼/창: ATK + STR
+  if(t.isStaff){
+    base=Math.round((s.matk||10)*(1+(s.int||3)*0.004)); // 지팡이: MATK + INT
+  }else if(t.isBow){
+    base=Math.round((s.atk||10)*(1+(s.dex||5)*0.004));
+  }else if(t.isDagger||t.isDual){
+    base=Math.round((s.atk||10)*(1+((s.dex||5)+(s.str||5))*0.003));
+  }else{
+    base=Math.round((s.atk||10)*(1+(s.str||5)*0.003));
   }
+  // ★ 단검: CRIT +5% (calcStats에 없으므로 여기서 반영)
+  // ★ 대도끼: 치명타 데미지 +10% → 나중에 크리 시 적용
   const variance=Math.round(base*0.1);
   return Math.max(1,Math.min(base+rand(-variance,variance),99999));
 }
@@ -4068,11 +4118,16 @@ function syncBattleState(opts={}){}
 function trySkillProc(p,s,target,allM){
   const skills=getSkills(p.charData||char);
   const skillBonusMult=1+(s.skillBonus||0)/100;
-  // ★ 특수 스킬 발동률 보너스: DEX×0.003 + SPD×0.002
   const specialProcBonus=1+((s.dex||5)*0.003+(s.spd||5)*0.002);
+  // ★ 지팡이: 마법 스킬 발동률 +10%
+  const eq=p.charData?.equipment||char.equipment||{};
+  const wt=getWeaponTraits(eq);
+  const staffMagicBonus=wt.isStaff?1.10:1.0;
   for(const sk of skills){
-    const isSpecial=SKILLS[sk.id]?.type==='special';
-    const procMult=skillBonusMult*(isSpecial?specialProcBonus:1);
+    const skType=SKILLS[sk.id]?.type||'physical';
+    const isSpecial=skType==='special';
+    const isMagic=skType==='magic';
+    const procMult=skillBonusMult*(isSpecial?specialProcBonus:1.0)*(isMagic?staffMagicBonus:1.0);
     if(Math.random()<sk.proc*procMult){
       const fx=sk.fx(s.atk,s); // ★ s(전체 스탯) 전달 — STR/INT/DEX 활용
       if(fx.dmg)fx.dmg=Math.min(Math.round(fx.dmg),99999);
@@ -4752,7 +4807,7 @@ window.adminOpenUser=async function(cid){
     <!-- 스탯 탭 -->
     <div id="adt-stat">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
-        ${[['STR',c.str||5,'ATK+0.8, 치명피해+0.4%'],['DEX',c.dex||5,'회피+0.2%, CRIT+0.15%'],['INT',c.int||5,'MATK+1.5, 스킬발동↑'],['VIT',c.vit||5,'MaxHP+5, DEF+0.3'],['LUK',c.luk||5,'골드↑, CRIT+0.06%']].map(([k,v,d])=>`
+        ${[['STR',c.str||5,'ATK+1.5, 치명피해+0.4%'],['DEX',c.dex||5,'회피+0.2%, CRIT+0.25%'],['INT',c.int||5,'MATK+1.5, 마법스킬↑'],['VIT',c.vit||5,'HP+6, DEF+0.6'],['LUK',c.luk||5,'골드↑, CRIT+0.06%']].map(([k,v,d])=>`
           <div style="background:var(--sf3);border:1px solid var(--bd);border-radius:7px;padding:8px 12px">
             <div style="font-size:10px;color:var(--tx3);margin-bottom:2px">${k}</div>
             <div style="font-size:18px;font-weight:700;color:var(--tx);margin-bottom:2px">${v}</div>
@@ -5885,11 +5940,15 @@ window.enterSubjBattle=function(){
     ['atk','def','heal'].forEach(k=>{const el=document.getElementById('sbtn-'+k);if(el)el.disabled=true;});
     let defending=false;
     if(action==='attack'){
-      let dmg=Math.max(1,Math.round(s.atk-boss.def*0.3));
+      const wt=getWeaponTraits(char.equipment||{});
+      let baseDmg=wt.isStaff?s.matk*(1+(s.int||3)*0.004):wt.isBow?s.atk*(1+(s.dex||5)*0.004):wt.isDagger||wt.isDual?s.atk*(1+((s.dex||5)+(s.str||5))*0.003):s.atk*(1+(s.str||5)*0.003);
+      let dmg=Math.max(1,Math.round(baseDmg-boss.def*0.3));
       const variance=Math.round(dmg*0.15);dmg=Math.max(1,dmg+rand(-variance,variance));
-      const isCrit=Math.random()*100<s.crit;
-      if(isCrit)dmg=Math.round(dmg*s.critDmg/100);
-      // ★ 밸런스로 보스 회피 상쇄
+      const critBonus=wt.isDagger?5:0;
+      const isCrit=Math.random()*100<(s.crit+critBonus);
+      const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
+      if(isCrit)dmg=Math.round(dmg*(s.critDmg/100)*critDmgBonus);
+      if(wt.isSpear&&!isCrit)dmg=Math.round(dmg*1.08);
       const effDodge=Math.max(0,(boss.dodge||0)*(1-(s.balance||0)/100));
       const isMiss=Math.random()*100<effDodge;
       if(isMiss){
@@ -5899,6 +5958,7 @@ window.enterSubjBattle=function(){
         const fakeTarget={name:boss.name,dodge:0};
         const fakeP={charData:char};
         slog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
+        if(wt.isDual&&Math.random()<0.05){const b=Math.round(dmg*0.5);totalDmgDealt+=b;slog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
       }
       // Skill procs (회피 여부 관계없이)
       const subjSkillBonusMult=1+(s.skillBonus||0)/100;
@@ -6175,19 +6235,25 @@ window.enterChampBattle=async function(){
     phase=2;
     let defending=false;
     if(action==='attack'){
-      let dmg=Math.max(1,Math.round(s.atk-cs.def*0.4));
+      const wt=getWeaponTraits(char.equipment||{});
+      let baseDmg=wt.isStaff?s.matk*(1+(s.int||3)*0.004):wt.isBow?s.atk*(1+(s.dex||5)*0.004):wt.isDagger||wt.isDual?s.atk*(1+((s.dex||5)+(s.str||5))*0.003):s.atk*(1+(s.str||5)*0.003);
+      let dmg=Math.max(1,Math.round(baseDmg-cs.def*0.4));
       const v=Math.round(dmg*0.12);dmg=Math.max(1,dmg+rand(-v,v));
-      const isCrit=Math.random()*100<s.crit;
-      if(isCrit)dmg=Math.round(dmg*s.critDmg/100);
+      const critBonus=wt.isDagger?5:0;
+      const isCrit=Math.random()*100<(s.crit+critBonus);
+      const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
+      if(isCrit)dmg=Math.round(dmg*(s.critDmg/100)*critDmgBonus);
+      if(wt.isSpear&&!isCrit)dmg=Math.round(dmg*1.08);
       const effDodge=Math.max(0,(cs.dodge||0)*(1-(s.balance||0)/100));
       const isMiss=Math.random()*100<effDodge;
       if(isMiss){dmg=0;clog(`<span class="l-sys">💨 ${champ.name}이 회피했다!</span>`);}
       else{
         champHp=Math.max(0,champHp-dmg);
-        // ★ 무기별 공격 문구
         const fakeTarget={name:champ.name,dodge:0};
         const fakeP={charData:char};
         clog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
+        if(wt.isDual&&champHp>0&&Math.random()<0.05){const b=Math.round(dmg*0.5);champHp=Math.max(0,champHp-b);clog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
+        if(wt.isMace)cs.def=Math.round(cs.def*0.95);
       }
     }else if(action==='defend'){
       defending=true;
