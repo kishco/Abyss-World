@@ -720,6 +720,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <button class="btn btn-red" onclick="adminResetAllPotions()">💊 전체 물약 리셋</button>
         </div>
 
+        <!-- ②-b 인챈트 스탯 마이그레이션 -->
+        <div class="card2" style="margin-bottom:12px;border-color:rgba(176,96,255,.4);background:rgba(176,96,255,.04)">
+          <div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:4px">🔮 인챈트 스탯 마이그레이션</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.8">
+            스킬 타입(물리/마법/특수) 기준으로 인챈트 스탯을 재조정합니다.<br>
+            <span style="color:var(--purple)">인벤 · 착용장비 · 창고 · 경매장</span> 전체 대상 · 스탯 수치 자동 재계산
+          </div>
+          <button class="btn btn-purple" onclick="adminMigrateEnchantStats()">🔮 인챈트 스탯 일괄 재조정</button>
+        </div>
+
         <!-- ③ 랭킹 초기화 -->
         <div class="card2" style="margin-bottom:12px">
           <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">🏆 던전 랭킹 초기화</div>
@@ -891,80 +901,80 @@ const SKILLS={
 
 // 50 Enchants (25 prefix + 25 suffix) — 솔로 전용
 const PRE=[
-  // ─── 딜러 특화 ───
-  {n:'불타는',     attr:'fire',      b:{atk:4},              sk:'flame_burst',    w:14},
-  {n:'어둠의',     attr:'dark',      b:{atk:3,spd:2},        sk:'shadow_strike',  w:10},
-  {n:'피의',       attr:null,        b:{atk:4,crit:2},       sk:'vampiric',       w:9},
-  {n:'저주받은',   attr:null,        b:{atk:8,def:-3},       sk:null,             w:6},
-  {n:'폭풍의',     attr:'lightning', b:{atk:4,spd:4},        sk:'storm_strike',   w:7},
-  {n:'심판의',     attr:'holy',      b:{atk:6},              sk:'holy_judgment',  w:6},
-  {n:'심연의',     attr:'dark',      b:{atk:7,spd:3},        sk:'shadow_strike',  w:6},
-  {n:'광전사의',   attr:null,        b:{atk:10,hp:-20,crit:4},sk:'berserk',       w:4},
-  {n:'파멸의',     attr:'dark',      b:{atk:12,def:-5},      sk:'doom_strike',    w:3},
+  // ─── 딜러 특화 (physical: ATK/STR/CRIT 위주) ───
+  {n:'불타는',     attr:'fire',      b:{atk:4},              sk:'flame_burst',    w:14}, // physical ✓
+  {n:'어둠의',     attr:'dark',      b:{atk:3,str:2},        sk:'shadow_strike',  w:10}, // physical: spd→str
+  {n:'피의',       attr:null,        b:{atk:4,crit:2},       sk:'vampiric',       w:9},  // physical ✓
+  {n:'저주받은',   attr:null,        b:{atk:8,def:-3},       sk:null,             w:6},  // none ✓
+  {n:'폭풍의',     attr:'lightning', b:{atk:4,str:2,crit:2}, sk:'storm_strike',   w:7},  // physical: spd+4→str+2,crit+2
+  {n:'심판의',     attr:'holy',      b:{atk:4,str:2},        sk:'holy_judgment',  w:6},  // physical: atk만→atk+str
+  {n:'심연의',     attr:'dark',      b:{atk:7,str:3},        sk:'shadow_strike',  w:6},  // physical: spd→str
+  {n:'광전사의',   attr:null,        b:{dex:4,spd:3,crit:4,hp:-20},sk:'berserk',  w:4},  // special: atk→dex+spd
+  {n:'파멸의',     attr:'dark',      b:{atk:12,def:-5},      sk:'doom_strike',    w:3},  // physical ✓
   // ─── 탱커 특화 ───
-  {n:'강철의',     attr:null,        b:{def:6},              sk:null,             w:12},
-  {n:'강인한',     attr:null,        b:{vit:4,hp:25},        sk:null,             w:9},
-  {n:'불멸의',     attr:null,        b:{vit:5,hp:40},        sk:null,             w:5},
-  {n:'축복받은',   attr:'holy',      b:{hp:30,def:4},        sk:'divine_shield',  w:7},
-  {n:'얼어붙은',   attr:'ice',       b:{def:6,spd:-1},       sk:'frozen',         w:7},
-  {n:'철벽의',     attr:null,        b:{vit:6,def:8,hp:30},  sk:'counter_strike', w:4},
-  {n:'수호자의',   attr:'holy',      b:{def:10,hp:50,vit:3}, sk:'divine_shield',  w:3},
-  // ─── 생존/회복 특화 ───
-  {n:'신성한',     attr:'holy',      b:{hp:20},              sk:'holy_judgment',  w:10},
-  {n:'생명의',     attr:null,        b:{hp:35,vit:3},        sk:'regen',          w:6},
-  {n:'치유자의',   attr:'holy',      b:{hp:50,vit:4,int:2},  sk:'lifesteal',      w:4},
-  // ─── 마법 특화 ───
-  {n:'번개의',     attr:'lightning', b:{spd:3},              sk:'lightning',      w:12},
-  {n:'독의',       attr:'poison',    b:{atk:3},              sk:'poison_stack',   w:11},
-  {n:'바람의',     attr:null,        b:{spd:4,dex:2},        sk:'wind_slash',     w:10},
-  {n:'현자의',     attr:null,        b:{int:3},              sk:'arcane_burst',   w:9},
-  {n:'마법의',     attr:null,        b:{int:2,skillBonus:3}, sk:'mana_surge',     w:8},
-  {n:'혼돈의',     attr:null,        b:{str:1,dex:1,int:1},  sk:'chaos_blast',    w:5},
+  {n:'강철의',     attr:null,        b:{def:6},              sk:null,             w:12}, // none ✓
+  {n:'강인한',     attr:null,        b:{vit:4,hp:25},        sk:null,             w:9},  // none ✓
+  {n:'불멸의',     attr:null,        b:{vit:5,hp:40},        sk:null,             w:5},  // none ✓
+  {n:'축복받은',   attr:'holy',      b:{hp:30,def:4,dex:2},  sk:'divine_shield',  w:7},  // special: dex 추가
+  {n:'얼어붙은',   attr:'ice',       b:{def:6,dex:2},        sk:'frozen',         w:7},  // special: spd-1패널티→dex+2
+  {n:'철벽의',     attr:null,        b:{vit:6,def:8,hp:30},  sk:'counter_strike', w:4},  // physical ✓ (STR은 vit로 탱 성향)
+  {n:'수호자의',   attr:'holy',      b:{def:10,hp:50,vit:3,dex:2},sk:'divine_shield',w:3},// special: dex 추가
+  // ─── 생존/회복 특화 (special: DEX/SPD 위주) ───
+  {n:'신성한',     attr:'holy',      b:{hp:20,atk:3},        sk:'holy_judgment',  w:10}, // physical: atk 추가
+  {n:'생명의',     attr:null,        b:{hp:35,vit:3},        sk:'regen',          w:6},  // special ✓
+  {n:'치유자의',   attr:'holy',      b:{hp:50,vit:4,dex:2},  sk:'lifesteal',      w:4},  // special: int→dex
+  // ─── 마법 특화 (magic: MATK/INT/skillBonus 위주) ───
+  {n:'번개의',     attr:'lightning', b:{int:2,spd:2},        sk:'lightning',      w:12}, // magic: int 추가
+  {n:'독의',       attr:'poison',    b:{int:3},              sk:'poison_stack',   w:11}, // magic: atk→int
+  {n:'바람의',     attr:null,        b:{spd:4,dex:2},        sk:'wind_slash',     w:10}, // special ✓
+  {n:'현자의',     attr:null,        b:{int:3},              sk:'arcane_burst',   w:9},  // magic ✓
+  {n:'마법의',     attr:null,        b:{int:2,skillBonus:3}, sk:'mana_surge',     w:8},  // magic ✓
+  {n:'혼돈의',     attr:null,        b:{int:3,skillBonus:2}, sk:'chaos_blast',    w:5},  // magic: str/dex→int+skillBonus
   // ─── 범용 ───
-  {n:'황금의',     attr:null,        b:{goldBonus:8,luk:2},  sk:null,             w:9},
-  {n:'고대의',     attr:null,        b:{atk:5,def:3},        sk:null,             w:7},
-  {n:'용사의',     attr:null,        b:{str:3,vit:2},        sk:'counter_strike', w:9},
-  {n:'민첩한',     attr:null,        b:{dex:3,spd:2},        sk:'evasion',        w:10},
-  {n:'운명의',     attr:null,        b:{luk:4,crit:3},       sk:null,             w:4},
-  {n:'서리의',     attr:'ice',       b:{def:4},              sk:'ice_shard',      w:14},
+  {n:'황금의',     attr:null,        b:{goldBonus:8,luk:2},  sk:null,             w:9},  // none ✓
+  {n:'고대의',     attr:null,        b:{atk:5,def:3},        sk:null,             w:7},  // none ✓
+  {n:'용사의',     attr:null,        b:{str:3,vit:2},        sk:'counter_strike', w:9},  // physical ✓
+  {n:'민첩한',     attr:null,        b:{dex:3,spd:2},        sk:'evasion',        w:10}, // special ✓
+  {n:'운명의',     attr:null,        b:{luk:4,crit:3},       sk:null,             w:4},  // none ✓
+  {n:'서리의',     attr:'ice',       b:{def:4,dex:3},        sk:'ice_shard',      w:14}, // special: dex 추가
 ];
 const SUF=[
-  // ─── 딜러 특화 ───
-  {n:'힘',       b:{str:3,atk:5},              sk:null,             w:14},
-  {n:'광기',     b:{atk:4,crit:3},             sk:'berserk',        w:9},
-  {n:'파멸',     b:{atk:9,def:-3},             sk:'doom_strike',    w:6},
-  {n:'심연',     b:{atk:9,crit:4},             sk:'void_slash',     w:6},
-  {n:'분노',     b:{str:4,crit:4},             sk:'berserk',        w:7},
-  {n:'폭발',     b:{atk:7,crit:3},             sk:'explosion',      w:6},
-  {n:'재앙',     b:{atk:11,hp:-30},            sk:'catastrophe',    w:4},
-  {n:'절멸',     b:{atk:15,hp:-50,def:-5},     sk:'doom_strike',    w:2},
-  {n:'어둠',     b:{atk:6,spd:4},              sk:'shadow_strike',  w:7},
+  // ─── 딜러 특화 (physical: ATK/STR/CRIT 위주) ───
+  {n:'힘',       b:{str:3,atk:5},              sk:null,             w:14}, // none ✓
+  {n:'광기',     b:{dex:4,spd:3,crit:3},       sk:'berserk',        w:9},  // special: atk→dex+spd
+  {n:'파멸',     b:{atk:9,def:-3},             sk:'doom_strike',    w:6},  // physical ✓
+  {n:'심연',     b:{atk:9,crit:4},             sk:'void_slash',     w:6},  // physical ✓
+  {n:'분노',     b:{dex:3,spd:2,crit:4},       sk:'berserk',        w:7},  // special: str→dex+spd
+  {n:'폭발',     b:{atk:7,crit:3},             sk:'explosion',      w:6},  // physical ✓
+  {n:'재앙',     b:{atk:11,hp:-30},            sk:'catastrophe',    w:4},  // physical ✓
+  {n:'절멸',     b:{atk:15,hp:-50,def:-5},     sk:'doom_strike',    w:2},  // physical ✓
+  {n:'어둠',     b:{atk:6,str:4},              sk:'shadow_strike',  w:7},  // physical: spd→str
   // ─── 탱커 특화 ───
-  {n:'수호',     b:{def:4,hp:15},              sk:null,             w:14},
-  {n:'투지',     b:{hp:20,def:4},              sk:null,             w:11},
-  {n:'영원',     b:{hp:40,atk:4},              sk:null,             w:7},
-  {n:'평온',     b:{vit:3,def:5},              sk:null,             w:9},
-  {n:'냉기',     b:{def:8,spd:2},              sk:'blizzard',       w:6},
-  {n:'난공불락', b:{def:12,hp:60,vit:4},       sk:'divine_shield',  w:3},
-  {n:'용기',     b:{str:3,vit:2},              sk:'counter_strike', w:10},
-  // ─── 생존/회복 특화 ───
-  {n:'생명',     b:{hp:30,vit:3},              sk:null,             w:13},
-  {n:'축복',     b:{hp:25},                    sk:'regen',          w:8},
-  {n:'빛',       b:{def:6,hp:20},              sk:'lifesteal',      w:7},
-  {n:'성스러움', b:{hp:50,vit:5,int:3},        sk:'lifesteal',      w:4},
-  {n:'소생',     b:{hp:35,vit:4},              sk:'regen',          w:5},
-  // ─── 마법/스킬 특화 ───
-  {n:'질풍',     b:{spd:5,dex:2},              sk:null,             w:12},
-  {n:'지혜',     b:{int:4},                    sk:'arcane_burst',   w:9},
-  {n:'신비',     b:{int:5,skillBonus:5},       sk:'mana_surge',     w:6},
-  {n:'예지',     b:{int:3,luk:2},              sk:null,             w:9},
-  {n:'전설',     b:{str:2,dex:2,int:2},        sk:null,             w:5},
-  {n:'마력폭주', b:{int:8,skillBonus:12,hp:-20},sk:'chaos_blast',   w:3},
-  {n:'민첩',     b:{dex:4,spd:3},              sk:'quick_strike',   w:9},
+  {n:'수호',     b:{def:4,hp:15},              sk:null,             w:14}, // none ✓
+  {n:'투지',     b:{hp:20,def:4},              sk:null,             w:11}, // none ✓
+  {n:'영원',     b:{hp:40,atk:4},              sk:null,             w:7},  // none ✓
+  {n:'평온',     b:{vit:3,def:5},              sk:null,             w:9},  // none ✓
+  {n:'냉기',     b:{int:4,spd:2},              sk:'blizzard',       w:6},  // magic: def→int
+  {n:'난공불락', b:{def:12,hp:60,vit:4,dex:2}, sk:'divine_shield',  w:3},  // special: dex 추가
+  {n:'용기',     b:{str:3,vit:2},              sk:'counter_strike', w:10}, // physical ✓
+  // ─── 생존/회복 특화 (special: DEX/SPD 위주) ───
+  {n:'생명',     b:{hp:30,vit:3},              sk:null,             w:13}, // none ✓
+  {n:'축복',     b:{hp:25},                    sk:'regen',          w:8},  // special ✓
+  {n:'빛',       b:{dex:3,hp:20},              sk:'lifesteal',      w:7},  // special: def→dex
+  {n:'성스러움', b:{hp:50,vit:5,dex:3},        sk:'lifesteal',      w:4},  // special: int→dex
+  {n:'소생',     b:{hp:35,vit:4},              sk:'regen',          w:5},  // special ✓
+  // ─── 마법/스킬 특화 (magic: INT/MATK/skillBonus 위주) ───
+  {n:'질풍',     b:{spd:5,dex:2},              sk:null,             w:12}, // none ✓
+  {n:'지혜',     b:{int:4},                    sk:'arcane_burst',   w:9},  // magic ✓
+  {n:'신비',     b:{int:5,skillBonus:5},       sk:'mana_surge',     w:6},  // magic ✓
+  {n:'예지',     b:{int:3,luk:2},              sk:null,             w:9},  // none ✓
+  {n:'전설',     b:{str:2,dex:2,int:2},        sk:null,             w:5},  // none ✓
+  {n:'마력폭주', b:{int:8,skillBonus:12,hp:-20},sk:'chaos_blast',   w:3},  // magic ✓
+  {n:'민첩',     b:{dex:4,spd:3},              sk:'quick_strike',   w:9},  // special ✓
   // ─── 범용 ───
-  {n:'행운',     b:{goldBonus:8,luk:3},        sk:null,             w:12},
-  {n:'번영',     b:{goldBonus:10,luk:3},       sk:null,             w:8},
-  {n:'전설급',   b:{str:3,dex:3,int:3,vit:3},  sk:null,             w:3},
+  {n:'행운',     b:{goldBonus:8,luk:3},        sk:null,             w:12}, // none ✓
+  {n:'번영',     b:{goldBonus:10,luk:3},       sk:null,             w:8},  // none ✓
+  {n:'전설급',   b:{str:3,dex:3,int:3,vit:3},  sk:null,             w:3},  // none ✓
 ];
 
 // Weapon / Armor names (10 each)
@@ -1156,8 +1166,8 @@ const DTIERS=[
 ];
 const DIFF={
   normal:{name:'노말',color:'var(--green)',monMult:0.85,dmgMult:0.85,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
-  hard:{name:'어려움',color:'#ff9900',monMult:1.4,dmgMult:1.6,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:300,canWipe:false},
-  vhard:{name:'매우어려움',color:'var(--red)',monMult:2.8,dmgMult:3.2,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:600,canWipe:true},
+  hard:{name:'어려움',color:'#ff9900',monMult:1.4,dmgMult:1.6,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:180,canWipe:false},
+  vhard:{name:'매우어려움',color:'var(--red)',monMult:2.8,dmgMult:3.2,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:280,canWipe:true},
 };
 const MNAMES={
   cave:      ['고블린 전사','동굴 박쥐','바위 두더지','함정 거미','굴 뱀','광부 좀비','동굴 슬라임','야간 도둑','동굴 거북','독 유충'],
@@ -1596,9 +1606,14 @@ async function selChar(id){
   }
   // ★ 최초 로드 시 장비 마이그레이션
   let equipMigrated=false;
+  let equipStatsDirty=false; // _esv 플래그만 변경 (스탯 변화 없음)
   for(const sl of EQSLOTS){
     const it=char.equipment[sl.k];
     if(it&&(!it._v||it._v<2)){migrateItem(it);equipMigrated=true;}
+    if(it&&(!it._esv||it._esv<1)){
+      if(autoMigrateEnchantStats(it))equipMigrated=true; // 실제 스탯 변화 → 반드시 저장
+      else equipStatsDirty=true; // 스탯 변화 없지만 _esv:1 플래그는 DB에 써야 중복체크 방지
+    }
   }
   if(!char.str){char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;}
   if(char.extraPotions===undefined)char.extraPotions=0;
@@ -1606,11 +1621,27 @@ async function selChar(id){
   const ws=await get(ref(db,`warehouse/${id}`));warehouse=ws.val()||{};
   // ★ 인벤 마이그레이션
   let invMigrated=false;
+  let invStatsDirty=false;
   for(const it of Object.values(inv)){
     if(it&&(!it._v||it._v<2)){migrateItem(it);invMigrated=true;}
+    if(it&&(!it._esv||it._esv<1)){
+      if(autoMigrateEnchantStats(it))invMigrated=true;
+      else invStatsDirty=true;
+    }
   }
-  if(equipMigrated)await saveChar();
-  if(invMigrated)await saveInv();
+  // ★ 창고 마이그레이션
+  let whMigrated=false;
+  let whStatsDirty=false;
+  for(const it of Object.values(warehouse)){
+    if(it&&(!it._esv||it._esv<1)){
+      if(autoMigrateEnchantStats(it))whMigrated=true;
+      else whStatsDirty=true;
+    }
+  }
+  // ★ 스탯 변화 OR 플래그만 변화 모두 저장 (플래그 미저장 시 매 로그인 재체크 방지)
+  if(equipMigrated||equipStatsDirty)await saveChar();
+  if(invMigrated||invStatsDirty)await saveInv();
+  if(whMigrated||whStatsDirty)await set(ref(db,`warehouse/${id}`),warehouse);
   document.getElementById('charScr').classList.remove('open');
   document.getElementById('topbar').style.display='flex';
   document.getElementById('gameLayout').style.display='flex';
@@ -1636,6 +1667,7 @@ async function selChar(id){
         if((it.enhance||0)>9){it.enhance=9;dirty=true;}
         if(it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;dirty=true;}
         if(!it._v||it._v<2){migrateItem(it);dirty=true;}
+        if(!it._esv||it._esv<1){if(autoMigrateEnchantStats(it))dirty=true;else it._esv=1;}
         // ★ balance 마이그레이션 — 무기인데 balance 없으면 baseId 기준으로 부여
         if(it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
           const wb=WBASES.find(b=>b.id===it.baseId);
@@ -1656,6 +1688,7 @@ async function selChar(id){
       if(it&&it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;needSave=true;}
       if(it&&(it.enhance||0)>9){it.enhance=9;needSave=true;}
       if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
+      if(it&&(!it._esv||it._esv<1)){if(autoMigrateEnchantStats(it))needSave=true;else it._esv=1;}
       // ★ 인벤 무기 balance 마이그레이션
       if(it&&it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
         const wb=WBASES.find(b=>b.id===it.baseId);
@@ -2330,6 +2363,52 @@ function migrateItem(it){
   }
   it._v=2;
   return it;
+}
+
+// ═══ 인챈트 스탯 자동 마이그레이션 (접속 시 자동 실행, _esv:1 플래그로 중복 방지) ═══
+// 스킬 타입에 맞게 b 기반값을 수정하고 scaleEnchant로 재계산
+const ENCHANT_STAT_MAP={
+  // 접두
+  '어둠의':    {atk:3,str:2},
+  '폭풍의':    {atk:4,str:2,crit:2},
+  '심판의':    {atk:4,str:2},
+  '심연의':    {atk:7,str:3},
+  '광전사의':  {dex:4,spd:3,crit:4,hp:-20},
+  '축복받은':  {hp:30,def:4,dex:2},
+  '얼어붙은':  {def:6,dex:2},
+  '수호자의':  {def:10,hp:50,vit:3,dex:2},
+  '신성한':    {hp:20,atk:3},
+  '치유자의':  {hp:50,vit:4,dex:2},
+  '번개의':    {int:2,spd:2},
+  '독의':      {int:3},
+  '혼돈의':    {int:3,skillBonus:2},
+  '서리의':    {def:4,dex:3},
+  // 접미
+  '광기':      {dex:4,spd:3,crit:3},
+  '분노':      {dex:3,spd:2,crit:4},
+  '어둠':      {atk:6,str:4},
+  '냉기':      {int:4,spd:2},
+  '난공불락':  {def:12,hp:60,vit:4,dex:2},
+  '빛':        {dex:3,hp:20},
+  '성스러움':  {hp:50,vit:5,dex:3},
+};
+
+function autoMigrateEnchantStats(it){
+  // 이미 마이그레이션됐거나, 스크롤 류는 스킵
+  if(!it||it._esv>=1||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
+  const lv=it.itemLv||it.reqLv||1;
+  const g=it.grade==='set'?'legendary':it.grade;
+  const gm=GRADES[g]?.mult||1;
+  let changed=false;
+  for(const enc of[it.prefix,it.suffix]){
+    if(!enc||!enc.n)continue;
+    const newBase=ENCHANT_STAT_MAP[enc.n];
+    if(!newBase)continue;
+    enc.b=scaleEnchant(newBase,lv,gm);
+    changed=true;
+  }
+  it._esv=1; // 마이그레이션 완료 플래그 (변경 여부와 무관하게 항상 세팅)
+  return changed; // 실제 스탯이 바뀐 경우만 true
 }
 
 // ═══ INVENTORY ═══
@@ -3374,6 +3453,7 @@ async function renderAuction(sb){
     }
     // 구매한 아이템은 재판매 불가
     const bought={...v.item,tradeable:false};
+    autoMigrateEnchantStats(bought); // ★ 경매장 구매 시 즉시 인챈트 스탯 마이그레이션
     inv[bought.id]=bought;
     await saveInv();
     // 경매 상태 완료 처리
@@ -3414,19 +3494,32 @@ window.adminDeleteAuction=async function(lid){
 
 // ═══ DUNGEON ═══
 let dungState=null;
+// ★ 티어별 최대 드랍 등급 / 권장 장비
+const TIER_MAX_GRADE=['언커먼','레어','에픽','레전더리','레전더리·유일'];
+const TIER_MAX_COLOR=['#1eff00','#0070dd','#a335ee','#ff8c00','#00ffcc'];
+// ★ 난이도별 티어 전투력 입구컷 — 티어별 최대 드랍 등급 기준으로 현실적으로 설정
+// T1=언커먼max, T2=레어max, T3=에픽max, T4=레전더리max, T5=레전더리·유일
+const TIER_REQ_HARD =[180, 300, 500, 800,1400,2000]; // 노말 클리어 후 해당 티어 장비 갖추면 달성 가능
+const TIER_REQ_VHARD=[280, 430, 700,1100,1900,3000]; // 하드 클리어 후 강화/인챈트 된 장비로 달성 가능
+
 function renderDungeon(){
   const dg=document.getElementById('dgrid');
   dg.innerHTML=DTIERS.map((t,i)=>{
     const lk=char.level<t.minLv;
+    const maxGrade=TIER_MAX_GRADE[i]||'노말';
+    const maxColor=TIER_MAX_COLOR[i]||'#9d9d9d';
+    const hReq=TIER_REQ_HARD[i]||0;
+    const vReq=TIER_REQ_VHARD[i]||0;
     return`<div class="dcard ${lk?'locked':''}" onclick="${lk?'':` selectDungeon(${i})`}">
       <div class="dtier">Tier ${t.tier}</div>
       <div class="dname">${t.icon} ${t.n}</div>
       <div class="drange" style="font-size:10px">최소 Lv.${t.minLv} / 권장 Lv.${t.recLv} / ${t.floors}층</div>
-      ${t.lore?`<div style="font-size:9.5px;color:var(--tx3);margin-top:5px;line-height:1.6;font-style:italic">${t.lore}</div>`:''}
-      <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">
+      <div style="font-size:9px;margin-top:3px">최대 드랍: <span style="color:${maxColor};font-weight:700">${maxGrade}</span></div>
+      ${t.lore?`<div style="font-size:9.5px;color:var(--tx3);margin-top:4px;line-height:1.6;font-style:italic">${t.lore}</div>`:''}
+      <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;align-items:center">
         <span class="diff-btn diff-normal" style="font-size:9px;padding:2px 7px;cursor:default">노말</span>
-        <span class="diff-btn diff-hard" style="font-size:9px;padding:2px 7px;cursor:default">어려움</span>
-        <span class="diff-btn diff-vhard" style="font-size:9px;padding:2px 7px;cursor:default">매우어려움</span>
+        <span class="diff-btn diff-hard" style="font-size:9px;padding:2px 7px;cursor:default">어려움 <span style="opacity:.7">${hReq}+</span></span>
+        <span class="diff-btn diff-vhard" style="font-size:9px;padding:2px 7px;cursor:default">매우어려움 <span style="opacity:.7">${vReq}+</span></span>
       </div>
       <div class="dicon">${t.icon}</div>
     </div>`;
@@ -3450,31 +3543,41 @@ window.backToDungMain=()=>{
   document.getElementById('dungLobby').style.display='none';
   document.getElementById('dungBattle').style.display='none';
 };
+// ★ 티어별 권장 장비 힌트
+const TIER_GEAR_HINT=['언커먼 장비 권장','레어 장비 권장','에픽 장비 권장','레전더리 장비 권장','레전더리+ 권장'];
+
 window.selectMode=async function(tierIdx,mode){
   const old=document.getElementById('diffSel');
   if(old)old.remove();
   const t=DTIERS[tierIdx];
   const myScore=equipScore(char);
+  const gearHint=TIER_GEAR_HINT[tierIdx]||'';
   const div=document.createElement('div');div.id='diffSel';
   div.innerHTML=`
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
       <div style="font-size:11.5px;font-weight:700;color:var(--tx)">난이도 선택</div>
       <div style="font-size:10px;color:var(--tx3);background:var(--sf2);border:1px solid var(--bd);padding:2px 8px;border-radius:5px">
         내 전투력: <span style="color:var(--gold);font-weight:700;font-family:'IBM Plex Mono',monospace">${myScore}</span>
       </div>
+      <div style="font-size:10px;color:${TIER_MAX_COLOR[tierIdx]||'#9d9d9d'};background:var(--sf2);border:1px solid var(--bd);padding:2px 8px;border-radius:5px">
+        ${gearHint}
+      </div>
     </div>
     ${Object.entries(DIFF).map(([dk,dv])=>{
-      const TIER_REQ={hard:[200,250,400,700,1200,2000],vhard:[400,500,700,1200,2000,3500]};
-      const reqScore=TIER_REQ[dk]?.[tierIdx]||0;
+      const reqScore=dk==='hard'?TIER_REQ_HARD[tierIdx]:dk==='vhard'?TIER_REQ_VHARD[tierIdx]:0;
       const meets=myScore>=reqScore;
-      const msg=dk==='normal'?'기본 난이도 — 포션 1~2개 소모 예상':
-            dk==='hard'?`전투력 ${reqScore} 이상 필요 — 긴장감 있는 전투, 포션 2~4개`:
-            `전투력 ${reqScore} 이상 필요 ⚠️ 장비 손실 가능 — 매우 위험`;
+      // ★ 노말: 드랍등급 안내 추가
+      const dropHint=dk==='normal'
+        ?`<span style="color:${TIER_MAX_COLOR[tierIdx]||'#9d9d9d'};font-size:9px"> · 최대 드랍: ${TIER_MAX_GRADE[tierIdx]||'노말'}</span>`:'';
+      const msg=dk==='normal'?`기본 난이도 — 포션 1~2개 소모 예상${dropHint}`:
+            dk==='hard'?`전투력 <b>${reqScore}</b> 이상 · ${gearHint} 구비 후 도전 권장 · 포션 2~4개`:
+            `전투력 <b>${reqScore}</b> 이상 ⚠️ 장비 손실 가능 · 강화/인챈트 필수 · 매우 위험`;
       const locked=dk!=='normal'&&!meets;
-      return`<div style="background:var(--sf2);border:1px solid ${locked?'var(--bd)':dv.color+'44'};border-radius:8px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;${locked?'opacity:.55':''}">
-        <div>
-          <div style="font-weight:700;color:${dv.color};margin-bottom:2px">${dv.name} ${locked?`<span style="font-size:9px;color:var(--red)">[전투력 부족]</span>`:''}</div>
-          <div style="font-size:10px;color:var(--tx3)">${msg}</div>
+      const shortage=(!meets&&reqScore>0)?`<span style="font-size:9px;color:var(--red)"> (${reqScore-myScore} 부족)</span>`:'';
+      return`<div style="background:var(--sf2);border:1px solid ${locked?'var(--bd)':dv.color+'44'};border-radius:8px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:8px;${locked?'opacity:.55':''}">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;color:${dv.color};margin-bottom:3px">${dv.name}${shortage}</div>
+          <div style="font-size:10px;color:var(--tx3);line-height:1.6">${msg}</div>
         </div>
         <button class="diff-btn diff-${dk==='normal'?'normal':dk==='hard'?'hard':'vhard'}" onclick="startDungeon(${tierIdx},'solo','${dk}')">${dv.name}</button>
       </div>`;
@@ -3487,12 +3590,8 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
   const s=calcStats(char);
   const score=equipScore(char);
   if(char.level<t.minLv){toast(`레벨 부족! 최소 Lv.${t.minLv} 필요`);return;}
-  // ★ 티어 × 난이도 입구컷
-  const TIER_REQ={
-    hard: [200,250,400,700,1200,2000],
-    vhard:[400,500,700,1200,2000,3500],
-  };
-  const reqScore=TIER_REQ[diffKey]?.[tierIdx]||0;
+  // ★ 티어 × 난이도 입구컷 (TIER_REQ_HARD / TIER_REQ_VHARD 중앙화)
+  const reqScore=diffKey==='hard'?TIER_REQ_HARD[tierIdx]:diffKey==='vhard'?TIER_REQ_VHARD[tierIdx]:0;
   if(diffKey!=='normal'&&score<reqScore){
     toast(`⚠️ 전투력 부족! 현재: ${score} / 필요: ${reqScore}`);return;
   }
@@ -5125,6 +5224,133 @@ window.adminMigrateSkills=async()=>{
   toast(`✅ 마이그레이션 완료! ${charCount}명 착용 장비, 총 ${itemCount}개 아이템 업데이트`,5000);
   loadAdmin();
 };
+
+// ═══ 인챈트 스탯 마이그레이션 (스킬 타입 정합성 수정) ═══
+// 변경 맵: {인챈트이름: 새 b 객체}
+const ENCHANT_STAT_MIGRATION={
+  // ── 접두 ──
+  '어둠의':    {atk:3,str:2},
+  '폭풍의':    {atk:4,str:2,crit:2},
+  '심판의':    {atk:4,str:2},
+  '심연의':    {atk:7,str:3},
+  '광전사의':  {dex:4,spd:3,crit:4,hp:-20},
+  '축복받은':  {hp:30,def:4,dex:2},
+  '얼어붙은':  {def:6,dex:2},
+  '수호자의':  {def:10,hp:50,vit:3,dex:2},
+  '신성한':    {hp:20,atk:3},
+  '치유자의':  {hp:50,vit:4,dex:2},
+  '번개의':    {int:2,spd:2},
+  '독의':      {int:3},
+  '혼돈의':    {int:3,skillBonus:2},
+  '서리의':    {def:4,dex:3},
+  // ── 접미 ──
+  '광기':      {dex:4,spd:3,crit:3},
+  '분노':      {dex:3,spd:2,crit:4},
+  '어둠':      {atk:6,str:4},
+  '냉기':      {int:4,spd:2},
+  '난공불락':  {def:12,hp:60,vit:4,dex:2},
+  '빛':        {dex:3,hp:20},
+  '성스러움':  {hp:50,vit:5,dex:3},
+};
+
+window.adminMigrateEnchantStats=async function(){
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
+  const targetCount=Object.keys(ENCHANT_STAT_MIGRATION).length;
+  if(!confirm(
+    `인챈트 스탯 정합성 마이그레이션\n\n` +
+    `스킬 타입(물리/마법/특수)에 맞게 ${targetCount}종 인챈트의 b(스탯) 기반값을 수정합니다.\n` +
+    `• 인벤토리 / 착용 장비 / 창고 / 경매장 전체 대상\n` +
+    `• 기존 scaleEnchant로 실제 적용된 수치는 새 기반값 × 레벨/등급 배율로 재계산됩니다.\n\n` +
+    `⚠️ 되돌릴 수 없습니다. 계속하시겠습니까?`
+  ))return;
+
+  toast('🔄 인챈트 스탯 마이그레이션 진행 중...', 30000);
+
+  // ── 아이템 1개의 접두/접미 b를 재계산 ──
+  function migrateEnchant(enc, itemLv, gradeMult){
+    if(!enc||!enc.n)return false;
+    const newBase=ENCHANT_STAT_MIGRATION[enc.n];
+    if(!newBase)return false;
+    enc.b=scaleEnchant(newBase, itemLv||1, gradeMult||1);
+    return true;
+  }
+
+  function getGradeMult(it){
+    const g=it.grade==='set'?'legendary':it.grade;
+    return GRADES[g]?.mult||1;
+  }
+
+  function migrateItem(it){
+    if(!it||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
+    const lv=it.itemLv||it.reqLv||1;
+    const gm=getGradeMult(it);
+    let changed=false;
+    if(migrateEnchant(it.prefix, lv, gm))changed=true;
+    if(migrateEnchant(it.suffix, lv, gm))changed=true;
+    return changed;
+  }
+
+  let totalItems=0, totalChars=0, totalWarehouse=0, totalAuction=0;
+
+  // 1. 인벤토리
+  const invSn=await get(ref(db,'inv'));
+  const allInvs=invSn.val()||{};
+  for(const[cid,items]of Object.entries(allInvs)){
+    let changed=false;
+    const updated={...items};
+    for(const[iid,it]of Object.entries(items||{})){
+      if(migrateItem(it)){updated[iid]=it;changed=true;totalItems++;}
+    }
+    if(changed)await set(ref(db,`inv/${cid}`),updated);
+  }
+
+  // 2. 착용 장비
+  const charsSn=await get(ref(db,'chars'));
+  const allChars=charsSn.val()||{};
+  for(const[cid,c]of Object.entries(allChars)){
+    let changed=false;
+    const eq=c.equipment||{};
+    for(const sl of Object.keys(eq)){
+      if(migrateItem(eq[sl])){changed=true;totalItems++;}
+    }
+    if(changed){await update(ref(db,`chars/${cid}`),{equipment:eq});totalChars++;}
+  }
+
+  // 3. 창고
+  const whSn=await get(ref(db,'warehouse'));
+  const allWh=whSn.val()||{};
+  for(const[cid,items]of Object.entries(allWh)){
+    let changed=false;
+    const updated={...items};
+    for(const[iid,it]of Object.entries(items||{})){
+      if(migrateItem(it)){updated[iid]=it;changed=true;totalWarehouse++;}
+    }
+    if(changed)await set(ref(db,`warehouse/${cid}`),updated);
+  }
+
+  // 4. 경매장
+  const auctSn=await get(ref(db,'auction'));
+  const allAuct=auctSn.val()||{};
+  for(const[lid,listing]of Object.entries(allAuct)){
+    if(!listing||listing.status!=='active')continue;
+    const it=listing.item;
+    if(migrateItem(it)){
+      await update(ref(db,`auction/${lid}`),{item:it});
+      totalAuction++;
+    }
+  }
+
+  const total=totalItems+totalWarehouse+totalAuction;
+  toast(
+    `✅ 인챈트 스탯 마이그레이션 완료!\n` +
+    `• 인벤/착용: ${totalItems}개 (${totalChars}명)\n` +
+    `• 창고: ${totalWarehouse}개\n` +
+    `• 경매장: ${totalAuction}개\n` +
+    `• 총 ${total}개 아이템 업데이트`,
+    7000
+  );
+  loadAdmin();
+};
 window.adminResetSubjugation=async()=>{
   const bossIdx=getCurSubjBossIdx();
   const boss=SUBJ_BOSSES[bossIdx];
@@ -6559,6 +6785,7 @@ window.buyFromMerchant=async(idx)=>{
 // ★ 모든 관리자 함수에 isAdmin 가드 일괄 적용
 ['adminOpenUser','adminUpdateItemSelect','adminGiveItem','adminGiveGold',
  'adminResetAllPotions','adminResetRanking','adminMigrateSkills',
+ 'adminMigrateEnchantStats',
  'adminResetSubjugation','adminResetChamp','adminSendGift','adminHardReset',
  'adminSetLevel','banU','unban','delChat','clearChat',
  'adminSendNotice','loadMonitor','loadAdminAuction','adminSetLupangRate',
