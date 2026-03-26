@@ -2322,6 +2322,9 @@ function migrateItem(it){
 
 // ═══ INVENTORY ═══
 const GRADE_ORDER=['set','legendary','epic','rare','uncommon','normal'];
+// ★ 스탯 값 포맷 헬퍼 — balance는 % 표기
+function fmtStatVal(k,v){return k==='balance'?v+'%':(v>0?'+':'')+v;}
+function fmtStatKV(k,v){return k==='balance'?'밸런스 '+v+'%':(k.toUpperCase()+'+'+v);}
 function renderInv(){
   const items=Object.values(inv);
   const cnt=items.length;
@@ -2604,9 +2607,6 @@ function openIM(it){
   const sr=allKeys.map(k=>statRowHtml(k.toUpperCase(),newStats[k],oldStats[k])).join('');
 
   // ★ 인챈트 스탯을 "str+3 (→ATK+5)" 형태로 표시하는 헬퍼
-// ★ 스탯 값 포맷 헬퍼 — balance는 % 표기
-function fmtStatVal(k,v){return k==='balance'?v+'%':(v>0?'+':'')+v;}
-function fmtStatKV(k,v){return k==='balance'?'밸런스 '+v+'%':(k.toUpperCase()+'+'+v);}
   function fmtEncStat(k,v){
     const hint={str:`→ATK+${Math.round(v*1.8)}`,dex:`→SPD+${Math.round(v*0.4)}/CRIT+${Math.round(v*0.08)}`,int:`→MATK+${Math.round(v*2)}`,vit:`→HP+${Math.round(v*10)}/DEF+${Math.round(v*0.6)}`,luk:`→CRIT+${Math.round(v*0.08)}`};
     const suf=hint[k]?` <span style="color:var(--tx3);font-size:9px">(${hint[k]})</span>`:'';
@@ -4498,13 +4498,23 @@ function startChat(){
   document.addEventListener('keydown',e=>{
     const tag=document.activeElement?.tagName;
     if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
-    if(!battle||battle.done||battle.phase!==1)return;
-    const btn=e.key==='q'||e.key==='Q'||e.key==='1'?document.getElementById('actbtn-atk')
-             :e.key==='w'||e.key==='W'||e.key==='2'?document.getElementById('actbtn-def')
-             :e.key==='e'||e.key==='E'||e.key==='3'?document.getElementById('actbtn-heal')
-             :e.key==='r'||e.key==='R'||e.key==='4'?document.getElementById('actbtn-flee')
-             :null;
-    if(btn&&!btn.disabled){e.preventDefault();btn.click();}
+    if(!battle||battle.done)return;
+    if(battle.phase!==1)return;
+    const myP=battle.players?.find(p=>p.id===charId);
+    if(!myP||myP.status!=='alive'||myP.actionChosen)return;
+    let chosen=null;
+    if(e.key==='q'||e.key==='Q'||e.key==='1')chosen='attack';
+    else if(e.key==='w'||e.key==='W'||e.key==='2')chosen='defend';
+    else if(e.key==='e'||e.key==='E'||e.key==='3')chosen='heal';
+    else if(e.key==='r'||e.key==='R'||e.key==='4')chosen='flee';
+    if(chosen){
+      e.preventDefault();
+      // 버튼 클릭 시도, 실패 시 직접 chooseAction 호출
+      const btnMap={attack:'actbtn-atk',defend:'actbtn-def',heal:'actbtn-heal',flee:'actbtn-flee'};
+      const btn=document.getElementById(btnMap[chosen]);
+      if(btn&&!btn.disabled)btn.click();
+      else if(typeof chooseAction==='function')chooseAction(chosen);
+    }
   });
   document.getElementById('cwSend').onclick=cwSendMsg;
 }
