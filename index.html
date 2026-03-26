@@ -2347,7 +2347,7 @@ function renderInv(){
       ${it.isScroll?`<div style="font-size:8.5px;color:var(--lg);margin-bottom:2px">📜 주문서</div>`:''}
       ${it.isEnchantScroll?`<div style="font-size:8.5px;color:var(--purple);margin-bottom:2px">✨ 인챈트 스크롤</div>`:''}
       ${it.isSubjBox?`<div style="font-size:8.5px;color:var(--gold);margin-bottom:2px">📦 토벌전 보상 상자</div>`:''}
-      ${it.tradeable===true?`<div style="font-size:8px;color:var(--blue);background:rgba(74,143,255,.12);border:1px solid rgba(74,143,255,.25);border-radius:3px;padding:1px 4px;display:inline-block;margin-bottom:2px">🏛 거래가능</div>`:''}
+      ${it.tradeable===true&&(!it.isScroll||it.isEnchantScroll)?`<div style="font-size:8px;color:var(--blue);background:rgba(74,143,255,.12);border:1px solid rgba(74,143,255,.25);border-radius:3px;padding:1px 4px;display:inline-block;margin-bottom:2px">🏛 거래가능</div>`:''}
       <div class="icname g-${it.grade}">${itName(it)}</div>
       <div style="display:flex;align-items:center;gap:2px;margin-bottom:1px">
         <span class="ictype" style="font-size:9px">${it.isSubjBox?'토벌전 보상':`${it.slot}${it.hand?' · '+it.hand:''}`}</span>
@@ -2633,7 +2633,7 @@ function openIM(it){
       <span style="background:${it.gradeColor}22;border:1px solid ${it.gradeColor}44;color:${it.gradeColor};padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700">${it.gradeName}</span>
       <span style="font-size:11px;color:var(--tx2)">${it.slot}${it.hand?' · '+it.hand:''}</span>
       ${it.reqLv?`<span style="font-size:11px;font-weight:700;${lvLock?'color:var(--red)':'color:var(--tx3)'}">Lv.${it.reqLv} 필요${lvLock?' 🔒':''}</span>`:''}
-      ${it.tradeable===true?`<span style="font-size:10px;background:rgba(74,143,255,.15);color:var(--blue);padding:2px 6px;border-radius:6px">🏛 거래가능</span>`:''}
+      ${it.tradeable===true&&(!it.isScroll||it.isEnchantScroll)?`<span style="font-size:10px;background:rgba(74,143,255,.15);color:var(--blue);padding:2px 6px;border-radius:6px">🏛 거래가능</span>`:''}
     </div>
     ${sr?`<div class="sgrid" style="margin-bottom:7px">${sr}</div>`:''}
     ${ph}${sh}${seth}
@@ -2641,10 +2641,10 @@ function openIM(it){
     ${isAcc?accSelHtml:''}
     ${!isAcc?`<div style="display:flex;gap:6px;margin-top:10px">
       <button class="btn btn-gold" id="equipBtn" style="flex:1" ${lvLock?'disabled':''}>${lvLock?'⚔ 장착 (레벨 부족)':'⚔ 장착'}</button>
-      ${it.tradeable===true?`<button class="btn btn-blue btn-sm" id="auctionBtn">🏛 경매</button>`:''}
+      ${it.tradeable===true&&!it.isScroll?`<button class="btn btn-blue btn-sm" id="auctionBtn">🏛 경매</button>`:''}
       <button class="btn btn-red btn-sm" id="discBtn">버리기</button>
     </div>`:`<div style="margin-top:8px;display:flex;gap:6px">
-      ${it.tradeable===true?`<button class="btn btn-blue btn-sm" id="auctionBtn" style="flex:1">🏛 경매</button>`:''}
+      ${it.tradeable===true&&!it.isScroll?`<button class="btn btn-blue btn-sm" id="auctionBtn" style="flex:1">🏛 경매</button>`:''}
       <button class="btn btn-red btn-sm" id="discBtn" style="flex:1">버리기</button>
     </div>`}`;
 
