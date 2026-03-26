@@ -1735,7 +1735,7 @@ function renderChar(){
   document.getElementById('expfill').style.width=ep+'%';
   document.getElementById('exptxt').textContent=`${char.exp}/${char.expNext}`;
   const s=calcStats(char);
-  document.getElementById('s-hp').textContent=`${char.hp}/${s.maxHp}`;
+  document.getElementById('s-hp').textContent=s.maxHp;
   document.getElementById('s-atk').textContent=s.atk;
   document.getElementById('s-def').textContent=s.def;
   document.getElementById('s-spd').textContent=s.spd;
