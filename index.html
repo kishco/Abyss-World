@@ -1339,20 +1339,32 @@ window.toggleChat=function(forceHide){
   const main=document.querySelector('.main');
   const isHidden=w.classList.contains('cw-hidden');
   const doHide=forceHide!==undefined?forceHide:isHidden?false:true;
+  // ★ 모바일 딤 오버레이
+  let overlay=document.getElementById('chatOverlay');
+  if(!overlay){
+    overlay=document.createElement('div');
+    overlay.id='chatOverlay';
+    overlay.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;';
+    overlay.onclick=()=>toggleChat(true);
+    document.body.appendChild(overlay);
+  }
   if(doHide){
     w.classList.add('cw-hidden');
     btn.innerHTML='💬<div class="unread-dot" id="unreadDot"></div>';
     btn.title='채팅 열기';
     if(main)main.classList.add('chat-hidden');
+    overlay.style.display='none';
+    btn.style.display='flex'; // ★ 채팅 닫히면 버튼 다시 표시
     localStorage.setItem('chatHidden','1');
   }else{
     w.classList.remove('cw-hidden');
     btn.innerHTML='✕<div class="unread-dot" id="unreadDot"></div>';
     btn.title='채팅 숨기기';
     if(main)main.classList.remove('chat-hidden');
+    // ★ 모바일에서만 딤 오버레이 표시 + 버튼 숨김
+    if(window.innerWidth<=768){overlay.style.display='block';btn.style.display='none';}
     localStorage.setItem('chatHidden','0');
     document.getElementById('unreadDot').style.display='none';
-    // 열릴 때 스크롤 맨 아래
     const msgs=document.getElementById('cwMsgs');if(msgs)msgs.scrollTop=msgs.scrollHeight;
   }
 };
@@ -3440,6 +3452,7 @@ function startBattle(tierIdx,mode,diffKey,players){
     fleeVotes:new Set(),
     reviveQueue:new Set(),
     combatMs:0,
+    totalTurns:0, // ★ 총 턴수 카운트
     _phaseStart:null,
     _presence:{},
   };
@@ -3717,6 +3730,7 @@ async function resolvePhase(){
   // ★ 중복 실행 완벽 차단
   if(battle._resolving){return;}
   battle._resolving=true;
+  battle.totalTurns=(battle.totalTurns||0)+1; // ★ 턴수 증가
   if(battle._leaderFallbackTimer){clearTimeout(battle._leaderFallbackTimer);battle._leaderFallbackTimer=null;}
   battle.phase=2;
   if(battle._phaseStart){
@@ -4149,14 +4163,14 @@ async function dungeonClear(){
   }
   // ★ 매우어려움 클리어 랭킹 기록 (솔로 전용)
   if(dk==='vhard'){
-    const combatSec=Math.round((battle.combatMs||0)/1000);
+    const totalTurns=battle.totalTurns||0;
     const tierIdx=battle.tierIdx;
     const record={
       charName:char.name,
       mode:'solo',
       tierIdx,
       tierName:battle.tier.n,
-      combatSec,
+      totalTurns,
       members:char.name,
       memberCount:1,
       ts:Date.now(),
@@ -4164,11 +4178,11 @@ async function dungeonClear(){
     const rankKey=`solo_${char.name}_tier${tierIdx}`.replace(/[^a-zA-Z0-9가-힣_]/g,'_');
     const existing=await get(ref(db,`rankings/vhard/${rankKey}`));
     const prev=existing.val();
-    if(!prev||combatSec<prev.combatSec){
+    if(!prev||totalTurns<prev.totalTurns){
       await set(ref(db,`rankings/vhard/${rankKey}`),record);
-      blogAdd(`<span class="l-set">🏆 기록 ${prev?'갱신':'등록'}! 전투시간: ${combatSec}초${prev?' (이전: '+prev.combatSec+'초)':''}</span>`);
+      blogAdd(`<span class="l-set">🏆 기록 ${prev?'갱신':'등록'}! 총 ${totalTurns}턴${prev?' (이전: '+prev.totalTurns+'턴)':''}</span>`);
     }else{
-      blogAdd(`<span class="l-sys">📊 기존 기록(${prev.combatSec}초) 유지 — 현재: ${combatSec}초</span>`);
+      blogAdd(`<span class="l-sys">📊 기존 기록(${prev.totalTurns}턴) 유지 — 현재: ${totalTurns}턴</span>`);
     }
   }
   // ★ 클리어 보너스 EXP
@@ -6173,13 +6187,16 @@ async function loadRanking(){
   for(const r of allRecords){
     if(r.tierIdx===undefined||r.tierIdx===null)continue;
     const key=`solo_${r.charName}_${r.tierIdx}`;
-    if(!dedupMap[key]||r.combatSec<dedupMap[key].combatSec)dedupMap[key]=r;
+    // ★ totalTurns 우선, 구버전 combatSec 폴백
+    const score=r.totalTurns!==undefined?r.totalTurns:r.combatSec;
+    const prevScore=dedupMap[key]?(dedupMap[key].totalTurns!==undefined?dedupMap[key].totalTurns:dedupMap[key].combatSec):Infinity;
+    if(!dedupMap[key]||score<prevScore)dedupMap[key]=r;
   }
   const deduped=Object.values(dedupMap);
 
   const tierBtns=DTIERS.map((t,i)=>({idx:i,n:`${t.icon} T${t.tier}`}));
   const filterHtml=`
-    <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">* 매우어려움 기준 · 솔로</div>
+    <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">* 매우어려움 기준 · 솔로 · 낮은 턴수가 더 높은 순위</div>
     <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px">
       ${tierBtns.map(t=>`
         <button class="btn btn-sm ${selTier===t.idx?'btn-gold':'btn-ghost'}" onclick="setRankTier(${t.idx})" style="font-size:10px;min-width:58px">
@@ -6188,9 +6205,14 @@ async function loadRanking(){
     </div>`;
 
   let filtered=deduped.filter(r=>r.tierIdx===selTier&&r.mode==='solo');
-  filtered.sort((a,b)=>a.combatSec-b.combatSec);
+  filtered.sort((a,b)=>{
+    const sa=a.totalTurns!==undefined?a.totalTurns:a.combatSec;
+    const sb=b.totalTurns!==undefined?b.totalTurns:b.combatSec;
+    return sa-sb;
+  });
   const myRecord=filtered.find(r=>r.charName===char.name);
   const myRank=filtered.findIndex(r=>r.charName===char.name);
+  const scoreLabel=r=>r.totalTurns!==undefined?`${r.totalTurns}턴`:formatSec(r.combatSec);
 
   rb.innerHTML=filterHtml+(
     !filtered.length
@@ -6199,17 +6221,17 @@ async function loadRanking(){
        </div>`
     : `${myRecord?`<div style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="color:var(--gold)">나의 기록</span>
-        <span style="font-family:'IBM Plex Mono',monospace;color:var(--green);font-weight:700">${formatSec(myRecord.combatSec)}</span>
+        <span style="font-family:'IBM Plex Mono',monospace;color:var(--green);font-weight:700">${scoreLabel(myRecord)}</span>
         <span style="color:var(--tx3)">${myRank+1}위</span>
        </div>`:''}
       <div style="overflow-x:auto">
         <table class="utbl">
-          <thead><tr><th>순위</th><th>캐릭터</th><th>전투시간</th><th>날짜</th></tr></thead>
+          <thead><tr><th>순위</th><th>캐릭터</th><th>턴수</th><th>날짜</th></tr></thead>
           <tbody>${filtered.map((r,i)=>`
             <tr style="${r.charName===char.name?'background:rgba(240,192,64,.05)':''}">
               <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span></td>
               <td><div style="font-family:'Cinzel',serif;font-size:11px;color:${r.charName===char.name?'var(--gold)':'var(--tx)'}">${r.charName}${r.charName===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:3px">나</span>':''}</div></td>
-              <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--green);font-weight:700">${formatSec(r.combatSec)}</td>
+              <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--green);font-weight:700">${scoreLabel(r)}</td>
               <td style="font-size:9.5px;color:var(--tx3);white-space:nowrap">${r.ts?new Date(r.ts).toLocaleDateString('ko'):'-'}</td>
             </tr>`).join('')}
           </tbody>
