@@ -4244,10 +4244,10 @@ function renderBattle(){
     <div style="position:sticky;bottom:0;background:var(--sf);border-top:1px solid var(--bd);padding:8px 0 4px;margin-top:8px">
     ${myP&&myP.status==='alive'&&battle.phase===1&&!myP.actionChosen?`
       <div class="act-btns">
-        <button id="actbtn-atk" class="act-btn act-atk" onclick="chooseAction('attack')">⚔ 공격</button>
-        <button id="actbtn-def" class="act-btn act-def" onclick="chooseAction('defend')">🛡 방어<br><span style="font-size:9px">피해 50% 감소</span></button>
-        <button id="actbtn-heal" class="act-btn act-heal" onclick="chooseAction('heal')">💊 회복<br><span style="font-size:9px">HP 40% 회복${isSolo?' · 피해 30%↓':''} (포션 ${myP.potions}개)</span></button>
-        <button id="actbtn-flee" class="act-btn act-flee" onclick="chooseAction('flee')">💨 도망<br><span style="font-size:9px">${isSolo?'즉시 도망':'전원 선택 시'}</span></button>
+        <button id="actbtn-atk" class="act-btn act-atk" onclick="chooseAction('attack')">⚔ 공격<br><span style="font-size:9px;opacity:.6">[Q / 1]</span></button>
+        <button id="actbtn-def" class="act-btn act-def" onclick="chooseAction('defend')">🛡 방어<br><span style="font-size:9px">피해 50% 감소 <span style="opacity:.6">[W / 2]</span></span></button>
+        <button id="actbtn-heal" class="act-btn act-heal" onclick="chooseAction('heal')">💊 회복<br><span style="font-size:9px">HP 40% 회복${isSolo?' · 피해 30%↓':''} (포션 ${myP.potions}개) <span style="opacity:.6">[E / 3]</span></span></button>
+        <button id="actbtn-flee" class="act-btn act-flee" onclick="chooseAction('flee')">💨 도망<br><span style="font-size:9px">${isSolo?'즉시 도망':'전원 선택 시'} <span style="opacity:.6">[R / 4]</span></span></button>
       </div>`:
     myP&&myP.status==='alive'&&battle.phase===1&&myP.actionChosen?
       `<div style="padding:10px;text-align:center;background:rgba(68,212,136,.08);border:1px solid rgba(68,212,136,.2);border-radius:7px;font-size:12px;color:var(--green)">✅ 행동 선택됨 — 대기 중...</div>`:
@@ -4307,6 +4307,19 @@ function startChat(){
     renderChatMsgs(sn.val()||{},'world');
   });
   document.getElementById('cwInput').addEventListener('keydown',e=>{if(e.key==='Enter')cwSendMsg();});
+
+  // ★ 전투 단축키 (채팅/입력창 포커스 시 제외)
+  document.addEventListener('keydown',e=>{
+    const tag=document.activeElement?.tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+    if(!battle||battle.done||battle.phase!==1)return;
+    const btn=e.key==='q'||e.key==='Q'||e.key==='1'?document.getElementById('actbtn-atk')
+             :e.key==='w'||e.key==='W'||e.key==='2'?document.getElementById('actbtn-def')
+             :e.key==='e'||e.key==='E'||e.key==='3'?document.getElementById('actbtn-heal')
+             :e.key==='r'||e.key==='R'||e.key==='4'?document.getElementById('actbtn-flee')
+             :null;
+    if(btn&&!btn.disabled){e.preventDefault();btn.click();}
+  });
   document.getElementById('cwSend').onclick=cwSendMsg;
 }
 
