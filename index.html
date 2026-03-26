@@ -3464,7 +3464,7 @@ window.selectMode=async function(tierIdx,mode){
       </div>
     </div>
     ${Object.entries(DIFF).map(([dk,dv])=>{
-      const TIER_REQ={hard:[0,200,400,700,1200,2000],vhard:[0,400,700,1200,2000,3500]};
+      const TIER_REQ={hard:[200,250,400,700,1200,2000],vhard:[400,500,700,1200,2000,3500]};
       const reqScore=TIER_REQ[dk]?.[tierIdx]||0;
       const meets=myScore>=reqScore;
       const msg=dk==='normal'?'기본 난이도 — 포션 1~2개 소모 예상':
@@ -3489,8 +3489,8 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
   if(char.level<t.minLv){toast(`레벨 부족! 최소 Lv.${t.minLv} 필요`);return;}
   // ★ 티어 × 난이도 입구컷
   const TIER_REQ={
-    hard: [0,200,400,700,1200,2000],
-    vhard:[0,400,700,1200,2000,3500],
+    hard: [200,250,400,700,1200,2000],
+    vhard:[400,500,700,1200,2000,3500],
   };
   const reqScore=TIER_REQ[diffKey]?.[tierIdx]||0;
   if(diffKey!=='normal'&&score<reqScore){
