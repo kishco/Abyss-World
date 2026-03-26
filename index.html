@@ -5035,7 +5035,10 @@ window.whDeposit=async function(id){
   warehouse[id]=it;delete inv[id];
   await saveWarehouse();await saveInv();updateTop();
   toast(`🏦 ${it.name} → 창고에 보관`);
-  // ★ 탭 유지하며 새로고침
+  // ★ 탭 버튼 숫자 즉시 갱신
+  const d=document.getElementById('whtab-deposit');const w=document.getElementById('whtab-withdraw');
+  if(d)d.innerHTML=`🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.keys(inv).length}/100</span>`;
+  if(w)w.innerHTML=`🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${Object.keys(warehouse).length}/200</span>`;
   if(window.whTab)window.whTab('deposit');
   else{const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);}
   renderInv();
@@ -5047,7 +5050,10 @@ window.whWithdraw=async function(id){
   inv[id]=it;delete warehouse[id];
   await saveInv();await saveWarehouse();updateTop();
   toast(`🎒 ${it.name} → 인벤토리로 이동`);
-  // ★ 탭 유지하며 새로고침
+  // ★ 탭 버튼 숫자 즉시 갱신
+  const d=document.getElementById('whtab-deposit');const w=document.getElementById('whtab-withdraw');
+  if(d)d.innerHTML=`🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.keys(inv).length}/100</span>`;
+  if(w)w.innerHTML=`🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${Object.keys(warehouse).length}/200</span>`;
   if(window.whTab)window.whTab('withdraw');
   else{const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);}
   renderInv();
