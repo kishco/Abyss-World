@@ -996,7 +996,7 @@ const ACCN={
 };
 const WBASES=[
   {id:'sword',    hand:'1H',slot:'weapon',ar:1.0,   balMin:50,balMax:70}, // 한손검
-  {id:'staff',    hand:'1H',slot:'weapon',ar:0.75,hr:0.5,balMin:30,balMax:50}, // 지팡이
+  {id:'staff',    hand:'1H',slot:'weapon',mr:0.75,hr:0.5,balMin:30,balMax:50}, // 지팡이
   {id:'bow',      hand:'2H',slot:'weapon',ar:1.6,   balMin:60,balMax:80}, // 활
   {id:'dual',     hand:'2H',slot:'weapon',ar:1.75,sr:0.6,balMin:35,balMax:55}, // 쌍검
   {id:'axe',      hand:'1H',slot:'weapon',ar:1.15,  balMin:40,balMax:60}, // 도끼
@@ -1225,7 +1225,7 @@ const SHOP_ITEMS=[
   {n:'녹슨 단검',slot:'weapon',hand:'1H',stats:{atk:8},price:50},
   {n:'목검',slot:'weapon',hand:'1H',stats:{atk:12},price:80},
   {n:'사냥꾼의 활',slot:'weapon',hand:'2H',stats:{atk:16},price:100},
-  {n:'견습생 지팡이',slot:'weapon',hand:'1H',stats:{atk:8,hp:20},price:90},
+  {n:'견습생 지팡이',slot:'weapon',hand:'1H',baseId:'staff',stats:{matk:8,hp:20},price:90},
   {n:'전투 도끼',slot:'weapon',hand:'1H',stats:{atk:14},price:85},
   {n:'가죽 투구',slot:'head',stats:{def:6},price:40},
   {n:'가죽 갑옷',slot:'chest',stats:{def:12},price:70},
@@ -1465,7 +1465,7 @@ function mkChar(name){
 
 function calcStats(c){
   // 스탯 환산율 — 장비 의존도 높이고 스탯 올인 폭발 방지
-  let atk=c.baseAtk+(c.str||5)*0.8,matk=(c.int||3)*1.5,def=c.baseDef+(c.vit||5)*0.35;
+  let atk=c.baseAtk+(c.str||5)*0.8,matk=(c.int||3)*0.8,def=c.baseDef+(c.vit||5)*0.35;
   let spd=c.baseSpd+(c.dex||5)*0.5,hp=(c.maxHp||100);
   let dodge=Math.min((c.dex||5)*0.2,25),crit=8+(c.dex||5)*0.15+(c.luk||2)*0.1;
   let critDmg=140+(c.str||5)*0.4+(c.luk||2)*0.25;
@@ -2122,6 +2122,7 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   function rollStat(base){return Math.round(rand(Math.round(base*biasMin),Math.round(base*biasMax)));}
   const stats={};
   if(base.ar)stats.atk=rollStat(rand(4,10)*base.ar*mult*lm);
+  if(base.mr)stats.matk=rollStat(rand(4,10)*base.mr*mult*lm); // ★ 지팡이: MATK 생성
   if(base.dr)stats.def=rollStat(rand(2,7)*base.dr*mult*lm);
   if(base.hr)stats.hp =rollStat(rand(8,22)*base.hr*mult*lm);
   if(base.sr)stats.spd=rollStat(rand(2,6)*base.sr*mult*lm);
@@ -2290,6 +2291,7 @@ function migrateItem(it){
   // 신규 공식으로 기본 스탯 재계산 (중간값 사용 — 랜덤 없음)
   const newBase={};
   if(base.ar)newBase.atk=Math.round(8.5*base.ar*newMult*newLm);
+  if(base.mr)newBase.matk=Math.round(8.5*base.mr*newMult*newLm); // ★ 지팡이 마이그레이션
   if(base.dr)newBase.def=Math.round(5.5*base.dr*newMult*newLm);
   if(base.hr)newBase.hp =Math.round(22 *base.hr*newMult*newLm);
   if(base.sr)newBase.spd=Math.round(4.5*base.sr*newMult*newLm);
