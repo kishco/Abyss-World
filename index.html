@@ -1076,7 +1076,7 @@ const SETS={
     sg_boots:  {n:'수호자 장화',      slot:'boots', stats:{def:70, spd:28}},
   },bonuses:[
     {cnt:2,desc:'DEF+50 HP+150',b:{def:50,hp:150}},
-    {cnt:4,desc:'DEF+130 회피+8% SPD+20',b:{def:130,spd:20}},
+    {cnt:4,desc:'DEF+130 회피+8% SPD+20',b:{def:130,spd:20,dodge:8}},
   ]},
   // ★ HP/힐 — HP 최강, ATK/DEF 없음
   divine_light:{name:'신성한 빛',col:'#ffee80',pcs:{
@@ -1102,29 +1102,29 @@ const SETS={
     {cnt:3,desc:'스킬 발동+15% MATK+110',b:{matk:110,skillBonus:15}},
     {cnt:4,desc:'MATK+200 모든 스킬 피해+25%',b:{matk:200,skillBonus:25}},
   ]},
-  // ★ 올라운더 — 모두 중간, 세트 보너스로 강해짐
+  // ★ 올라운더 — 어느쪽도 최강 아님, 섞어쓰기 최적화
   dragon_sovereign:{name:'용군주',col:'#ff8c00',pcs:{
-    ds_helm:   {n:'용군주 왕관',      slot:'head',  stats:{atk:78, def:62, hp:180}},
-    ds_chest:  {n:'용군주 갑주',      slot:'chest', stats:{atk:95, def:95, hp:260}},
-    ds_weapon: {n:'용군주 창',        slot:'weapon',hand:'2H',stats:{atk:250,crit:16}},
-    ds_ring:   {n:'용군주 반지',      slot:'accessory',stats:{atk:68, def:48}},
-    ds_amulet: {n:'용군주 부적',      slot:'accessory',stats:{matk:80,hp:240}},
+    ds_helm:   {n:'용군주 왕관',      slot:'head',  stats:{atk:55, def:55, hp:160}},
+    ds_chest:  {n:'용군주 갑주',      slot:'chest', stats:{atk:70, def:80, hp:220}},
+    ds_weapon: {n:'용군주 창',        slot:'weapon',hand:'2H',stats:{atk:220,crit:12}},
+    ds_ring:   {n:'용군주 반지',      slot:'accessory',stats:{atk:50, def:40}},
+    ds_amulet: {n:'용군주 부적',      slot:'accessory',stats:{matk:65,hp:200}},
   },bonuses:[
-    {cnt:2,desc:'ATK+50 DEF+50',b:{atk:50,def:50}},
-    {cnt:3,desc:'CRIT+12% ATK+90',b:{atk:90,crit:12}},
-    {cnt:4,desc:'ATK+140 DEF+100 HP+500',b:{atk:140,def:100,hp:500}},
-    {cnt:5,desc:'전설 유일 조합 완성 — ATK+200 DEF+150 HP+800 SPD+30',b:{atk:200,def:150,hp:800,spd:30,crit:20}},
+    {cnt:2,desc:'ATK+30 DEF+30',b:{atk:30,def:30}},
+    {cnt:3,desc:'CRIT+8% ATK+50',b:{atk:50,crit:8}},
+    {cnt:4,desc:'ATK+80 DEF+60 HP+300',b:{atk:80,def:60,hp:300}},
+    {cnt:5,desc:'ATK+100 DEF+80 HP+400 SPD+15',b:{atk:100,def:80,hp:400,spd:15,crit:10}},
   ]},
-  // ★ 탱딜 하이브리드 — ATK+DEF 중간치, 어느쪽도 최강 아님
+  // ★ 회피 탱커 — SPD+회피 특화, DEF 중간
   frost:{name:'서리 군주',col:'#00ffcc',pcs:{
-    frost_helm: {n:'서리군주 투구',   slot:'head',  stats:{def:80, hp:240}},
-    frost_chest:{n:'서리군주 흉갑',   slot:'chest', stats:{def:118,hp:360}},
-    frost_sword:{n:'서리군주 검',     slot:'weapon',hand:'1H',stats:{atk:182,def:62}},
-    frost_boots:{n:'서리군주 장화',   slot:'boots', stats:{def:68, spd:36}},
+    frost_helm: {n:'서리군주 투구',   slot:'head',  stats:{spd:45, def:55, hp:180}},
+    frost_chest:{n:'서리군주 흉갑',   slot:'chest', stats:{spd:35, def:85, hp:280}},
+    frost_sword:{n:'서리군주 검',     slot:'weapon',hand:'1H',stats:{atk:182,spd:50}},
+    frost_boots:{n:'서리군주 장화',   slot:'boots', stats:{spd:60, def:50}},
   },bonuses:[
-    {cnt:2,desc:'DEF+60 HP+200',b:{def:60,hp:200}},
-    {cnt:3,desc:'SPD+25 DEF+100',b:{spd:25,def:100}},
-    {cnt:4,desc:'ATK+80 DEF+150 HP+400',b:{atk:80,def:150,hp:400}},
+    {cnt:2,desc:'회피+8% SPD+20',b:{spd:20,dodge:8}},
+    {cnt:3,desc:'회피+12% DEF+60 SPD+30',b:{spd:30,def:60,dodge:12}},
+    {cnt:4,desc:'회피+20% DEF+100 SPD+50',b:{spd:50,def:100,dodge:20}},
   ]},
   // ★ 광폭 딜러 — ATK 높고 HP 희생
   flame:{name:'불꽃의 분노',col:'#ff6030',pcs:{
@@ -1486,8 +1486,9 @@ function calcStats(c){
   }
   const sb=calcSetB(eq);
   atk+=sb.atk||0;def+=sb.def||0;spd+=sb.spd||0;hp+=sb.hp||0;crit+=sb.crit||0;
+  dodge+=sb.dodge||0; // ★ 세트 보너스 회피 적용
   return{atk:Math.round(atk),matk:Math.round(matk),def:Math.round(def),spd:Math.round(spd),
-    maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),25),
+    maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),35), // ★ 상한 35%
     crit:Math.min(Math.round(crit),75),critDmg:Math.round(critDmg),
     goldBonus:Math.round(goldBonus),skillBonus:Math.round(skillBonus)};
 }
@@ -2385,7 +2386,7 @@ function openIM(it){
     const successRate=it.successRate||0.7;
     const tier=it.enchantTier||2;
     const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
-    const eqItems2=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it&&x.it.grade!=='set');
+    const eqItems2=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it);
     const typeLabel=isPrefix?'접두':'접미';
     document.getElementById('imtitle').innerHTML=`<span style="color:${et.color}">📜 ${it.name}</span>`;
     function renderEnchantTarget2(){
@@ -2399,14 +2400,14 @@ function openIM(it){
             성공 확률: <b>${Math.round(successRate*100)}%</b> · 실패 시 스크롤 소모
           </div>
         </div>
-        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">부여할 장비를 선택하세요:<br><span style="font-size:10px">유일 장비 불가. 기존 ${typeLabel} 인챈트는 교체됩니다.</span></div>
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">부여할 장비를 선택하세요:<br><span style="font-size:10px">유일 장비는 성공률이 크게 낮아집니다. 기존 ${typeLabel} 인챈트는 교체됩니다.</span></div>
         ${!eqItems2.length?'<div style="color:var(--tx3);font-size:11px;padding:12px 0">장착된 장비 없음</div>':
         `<div style="display:flex;flex-direction:column;gap:6px">
           ${eqItems2.map(x=>`
             <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:9px 11px;cursor:pointer;transition:.15s"
               onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--bd)'"
               onclick="applyEnchantScroll('${it.id}','${x.sl}')">
-              <div class="icname g-${x.it.grade}" style="font-size:11.5px;margin-bottom:3px">${x.it.name}</div>
+              <div class="icname g-${x.it.grade}" style="font-size:11.5px;margin-bottom:3px">${x.it.name}${x.it.grade==='set'?`<span style="font-size:9px;color:var(--red);margin-left:5px">⚠️ 유일 — 확률 대폭 하락</span>`:''}</div>
               <div style="font-size:9.5px;color:var(--tx3)">
                 접두: <span style="color:${x.it.prefix?'var(--blue)':'var(--tx3)'}">${x.it.prefix?.n||'없음'}</span> /
                 접미: <span style="color:${x.it.suffix?'var(--purple)':'var(--tx3)'}">${x.it.suffix?.n||'없음'}</span>
@@ -2416,16 +2417,22 @@ function openIM(it){
     }
     window.applyEnchantScroll=async function(scrollId,slotKey){
       const sc=inv[scrollId];if(!sc)return;
-      const eq=char.equipment[slotKey];if(!eq||eq.grade==='set'){toast('유일 장비에는 인챈트 불가');return;}
+      const eq=char.equipment[slotKey];if(!eq)return;
+      // ★ 유일 장비: 성공률 하한치 적용 (티어별 최저)
+      const SET_RATES=[0.20,0.15,0.10,0.08,0.05]; // 하급~전설
+      const actualRate=eq.grade==='set'?SET_RATES[Math.min(tier-1,4)]:successRate;
       const existing=isPrefix?eq.prefix:eq.suffix;
       const overwriteWarn=existing?`\n⚠️ 기존 [${existing.n}] 인챈트가 사라집니다!`:'';
-      if(!confirm(`[${typeLabel}] ${enchData?.n} 인챈트를\n${eq.name}에 부여합니까?${overwriteWarn}\n성공 확률: ${Math.round(successRate*100)}%`))return;
+      const setWarn=eq.grade==='set'?`\n🔴 유일 장비 — 성공률 ${Math.round(actualRate*100)}% (일반의 하한치)`:'';
+      if(!confirm(`[${typeLabel}] ${enchData?.n} 인챈트를\n${eq.name}에 부여합니까?${overwriteWarn}${setWarn}\n성공 확률: ${Math.round(actualRate*100)}%`))return;
       delete inv[scrollId];
-      if(Math.random()>successRate){
+      if(Math.random()>actualRate){
         toast(`💨 인챈트 실패... 스크롤 소모`,3000);
         await saveInv();closeIM();return;
       }
-      const lv=eq.itemLv||1;const gm=GRADES[eq.grade]?.mult||1;
+      const lv=eq.itemLv||1;
+      // ★ 유일 장비는 레전더리 등급배율 적용 (gm=3.8)
+      const gm=eq.grade==='set'?GRADES['legendary']?.mult||3.8:(GRADES[eq.grade]?.mult||1);
       const scaledB=scaleEnchant(enchData.b,lv,gm);
       const enchObj={n:enchData.n,b:scaledB,sk:enchData.sk||null,attr:enchData.attr||null};
       if(isPrefix)eq.prefix=enchObj;else eq.suffix=enchObj;
@@ -2582,8 +2589,8 @@ function openIM(it){
     const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
     return`<span style="font-size:9px;background:${et.color}22;color:${et.color};border:1px solid ${et.color}44;padding:1px 5px;border-radius:4px;margin-left:5px">${et.name}</span>`;
   }
-  const ph=(!it.prefix||it.grade==='set')?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}<br>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
-  const sh=(!it.suffix||it.grade==='set')?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}<br>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
+  const ph=!it.prefix?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}<br>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
+  const sh=!it.suffix?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}<br>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
   const seth=it.grade==='set'?`<div style="margin-top:6px;padding:6px 9px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:11px;color:var(--st)">◆ ${it.setName}</div>`:'';
 
   // 장착 중 아이템 비교 표시
@@ -4813,14 +4820,16 @@ window.adminGiveItem=async function(cid){
     for(const[k,v]of Object.entries(pd.stats))scaledStats[k]=Math.round(v);
     it={id:gId(),name:pd.n,baseId:pid,slot:pd.slot,hand:pd.hand||null,grade:'set',
       gradeName:'유일',gradeColor:sd.col,setId:sid,setName:sd.name,
-      stats:scaledStats,prefix:null,suffix:null,attr:null,reqLv,itemLv:reqLv,enhance:0,tradeable:true};
+      stats:scaledStats,prefix:null,suffix:null,attr:null,reqLv,itemLv:reqLv,enhance:0,tradeable:false,_adminGift:true};
   }else{
     let base;
     if(type==='weapon') base=WBASES.find(b=>b.id===sub)||WBASES[0];
     else if(type==='accessory') base=ACCBASES.find(b=>b.id===sub)||ACCBASES[0];
     else base=ABASES.find(b=>b.slot===sub)||ABASES[0];
     it=genItem([base],grade,lv);
-    it.reqLv=lv; // ★ 필요Lv = 입력값으로 고정
+    it.reqLv=lv;
+    it.tradeable=false; // ★ 관리자 지급 아이템 거래 불가
+    it._adminGift=true;
   }
 
   // 강화 적용
