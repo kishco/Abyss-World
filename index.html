@@ -1071,15 +1071,15 @@ const PRE=[
   {n:'광전사의',   attr:null,        b:{dex:4,spd:3,crit:4,hp:-20},sk:'berserk',   w:4},
   {n:'파멸의',     attr:'dark',      b:{atk:12,def:-5},       sk:'doom_strike',    w:3},
   // ─── 마법 딜러 (magic: MATK/skillBonus) — 9개 ───
-  {n:'번개의',     attr:'lightning', b:{matk:4,spd:2},        sk:'lightning',      w:12},
-  {n:'독의',       attr:'poison',    b:{matk:5},              sk:'poison_stack',   w:11},
-  {n:'현자의',     attr:null,        b:{matk:5,int:1},        sk:'arcane_burst',   w:9},
+  {n:'번개의',     attr:'lightning', b:{matk:4,int:2,spd:2},  sk:'lightning',      w:12},
+  {n:'독의',       attr:'poison',    b:{matk:4,int:2},        sk:'poison_stack',   w:11},
+  {n:'현자의',     attr:null,        b:{matk:5,int:2},        sk:'arcane_burst',   w:9},
   {n:'마법의',     attr:null,        b:{matk:4,skillBonus:4}, sk:'mana_surge',     w:8},
-  {n:'혼돈의',     attr:null,        b:{matk:5,skillBonus:3}, sk:'chaos_blast',    w:5},
+  {n:'혼돈의',     attr:null,        b:{matk:7,int:3},        sk:'chaos_blast',    w:5},
   {n:'타오르는',   attr:'fire',      b:{matk:4},              sk:'flame_burst',    w:12},
-  {n:'신비로운',   attr:null,        b:{matk:6,int:1},        sk:'arcane_burst',   w:9},
+  {n:'신비로운',   attr:null,        b:{matk:6,int:2},        sk:'arcane_burst',   w:9},
   {n:'격류의',     attr:'ice',       b:{matk:5,skillBonus:2}, sk:'blizzard',       w:7},
-  {n:'파멸의주문', attr:'dark',      b:{matk:11,hp:-20},      sk:'chaos_blast',    w:3},
+  {n:'파멸의주문', attr:'dark',      b:{matk:11,int:3,hp:-20},sk:'chaos_blast',    w:3},
   // ─── 탱커 특화 ───
   {n:'강철의',     attr:null,        b:{def:6},               sk:null,             w:12},
   {n:'강인한',     attr:null,        b:{vit:4,hp:25},         sk:null,             w:9},
@@ -1114,13 +1114,13 @@ const SUF=[
   {n:'어둠',      b:{atk:6,str:4},               sk:'shadow_strike',  w:7},
   // ─── 마법 딜러 (magic: MATK/skillBonus) — 8개 ───
   {n:'마력',      b:{matk:6},                    sk:null,             w:13},
-  {n:'냉기',      b:{matk:6,spd:2},              sk:'blizzard',       w:6},
-  {n:'지혜',      b:{matk:7},                    sk:'arcane_burst',   w:9},
-  {n:'주문',      b:{matk:8,skillBonus:3},       sk:'arcane_burst',   w:8},
+  {n:'냉기',      b:{matk:6,int:2,spd:2},        sk:'blizzard',       w:6},
+  {n:'지혜',      b:{matk:6,int:3},              sk:'arcane_burst',   w:9},
+  {n:'주문',      b:{matk:7,int:2,skillBonus:3}, sk:'arcane_burst',   w:8},
   {n:'신비',      b:{matk:8,skillBonus:6},       sk:'mana_surge',     w:6},
   {n:'예지',      b:{matk:5,luk:2},              sk:null,             w:9},
   {n:'격노의주문',b:{matk:10,crit:3,hp:-20},     sk:'chaos_blast',    w:4},
-  {n:'마력폭주',  b:{matk:12,skillBonus:14,hp:-20},sk:'chaos_blast',  w:3},
+  {n:'마력폭주',  b:{matk:12,int:3,skillBonus:14,hp:-20},sk:'chaos_blast',w:3},
   // ─── 탱커 특화 ───
   {n:'수호',      b:{def:4,hp:15},               sk:null,             w:14},
   {n:'투지',      b:{hp:20,def:4},               sk:null,             w:11},
@@ -1643,7 +1643,7 @@ function mkChar(name){
 
 function calcStats(c){
   // 스탯 환산율 — 장비 의존도 높이고 스탯 올인 폭발 방지
-  let atk=c.baseAtk+(c.str||5)*1.5,matk=(c.int||3)*1.5,def=c.baseDef+(c.vit||5)*0.6;
+  let atk=c.baseAtk+(c.str||5)*1.5,matk=(c.baseMatk||0)+(c.int||3)*1.5,def=c.baseDef+(c.vit||5)*0.6;
   let spd=c.baseSpd+(c.dex||5)*0.8,hp=(c.maxHp||100);
   let dodge=Math.min((c.dex||5)*0.2,25),crit=8+(c.dex||5)*0.25+(c.luk||2)*0.1;
   let critDmg=140+(c.str||5)*0.4+(c.luk||2)*0.25;
@@ -1683,8 +1683,11 @@ function equipScore(c){
   const s=calcStats(c);
   const eq=c.equipment||{};
   const wt=getWeaponTraits(eq);
-  // ★ 지팡이/듀얼건 장착 시 MATK 기준, 그 외 ATK 기준
-  const dmgScore=(wt.isStaff||wt.isDualgun)?s.matk*1.5:s.atk*1.5;
+  // ★ 무기 타입별 딜 스탯 분리 — ATK계열은 ATK만, MATK계열은 MATK만 전투력에 반영
+  // (ATK 무기가 MATK 인챈트 달거나 반대로 달아도 전투력 뻥튀기 차단)
+  const dmgScore=(wt.isStaff||wt.isDualgun)
+    ? s.matk*1.5   // 마법 무기: MATK만
+    : s.atk*1.5;   // 물리 무기: ATK만
   return Math.round(dmgScore + s.def*0.8 + s.maxHp*0.05 + s.spd*0.3 + s.crit*0.2);
 }
 function getSkills(c_arg){
@@ -1904,7 +1907,7 @@ function gainExp(amt){
     char.exp-=char.expNext;char.level++;
     char.expNext=expForLevel(char.level);
     // 레벨당 기본 성장 — 장비 의존도 높이기 위해 낮춤
-    char.baseAtk+=0.15;char.baseDef+=0.08;char.baseSpd+=0.12;char.maxHp+=1;
+    char.baseAtk+=0.15;char.baseDef+=0.08;char.baseSpd+=0.12;char.baseMatk=(char.baseMatk||0)+0.15;char.maxHp+=1;
     const hpGain=1; char.hp=Math.min(char.hp+hpGain, char.maxHp);
     // 스탯 포인트: 레벨당 1~2pt (기존 1~3에서 하향)
     const totalPts=rand(1,2);
@@ -2011,6 +2014,13 @@ function renderChar(){
   document.getElementById('s-matk').textContent=s.matk;
   document.getElementById('s-cdmg').textContent=s.critDmg+'%';
   document.getElementById('s-score').textContent=equipScore(char);
+  // ★ 무기 타입에 따라 주력 딜 스탯 강조 / 비주력 희미하게
+  const _wt=getWeaponTraits(char.equipment||{});
+  const _isMagicWep=_wt.isStaff||_wt.isDualgun;
+  const _atkEl=document.getElementById('s-atk');
+  const _matkEl=document.getElementById('s-matk');
+  if(_atkEl){_atkEl.style.color=_isMagicWep?'var(--tx3)':'var(--tx)';_atkEl.title=_isMagicWep?'이 무기는 ATK를 사용하지 않습니다':'';}
+  if(_matkEl){_matkEl.style.color=_isMagicWep?'var(--tx)':'var(--tx3)';_matkEl.title=_isMagicWep?'':'이 무기는 MATK를 사용하지 않습니다';}
   // ★ 기본 스탯 + 장비 보너스 표시
   document.getElementById('baseStatGrid').innerHTML=STATS_DEF.map(st=>{
     const base=char[st.k]||0;
@@ -2548,7 +2558,7 @@ function migrateItem(it){
 // ═══ 인챈트 스탯 자동 마이그레이션 (접속 시 자동 실행, _esv:1 플래그로 중복 방지) ═══
 // 스킬 타입에 맞게 b 기반값을 수정하고 scaleEnchant로 재계산
 const ENCHANT_STAT_MAP={
-  // ── 접두 (물리→물리, 마법→마법 스탯 정합)
+  // ── 접두 (물리)
   '어둠의':    {atk:3,str:2},
   '폭풍의':    {atk:4,str:2,crit:2},
   '심판의':    {atk:4,str:2},
@@ -2559,36 +2569,37 @@ const ENCHANT_STAT_MAP={
   '수호자의':  {def:10,hp:50,vit:3,dex:2},
   '신성한':    {hp:20,atk:3},
   '치유자의':  {hp:50,vit:4,dex:2},
-  // 마법 (int→matk)
-  '번개의':    {matk:4,spd:2},
-  '독의':      {matk:5},
-  '현자의':    {matk:5,int:1},
-  '마법의':    {matk:4,skillBonus:4},
-  '혼돈의':    {matk:5,skillBonus:3},
-  '타오르는':  {matk:4},
-  '신비로운':  {matk:6,int:1},
-  '격류의':    {matk:5,skillBonus:2},
-  '파멸의주문':{matk:11,hp:-20},
   '서리의':    {def:4,dex:3},
-  // ── 접미 (물리→물리, 마법→matk)
+  // ── 접두 (마법 — int 형평성 반영)
+  '번개의':    {matk:4,int:2,spd:2},
+  '독의':      {matk:4,int:2},
+  '현자의':    {matk:5,int:2},
+  '마법의':    {matk:4,skillBonus:4},
+  '혼돈의':    {matk:7,int:3},
+  '타오르는':  {matk:4},
+  '신비로운':  {matk:6,int:2},
+  '격류의':    {matk:5,skillBonus:2},
+  '파멸의주문':{matk:11,int:3,hp:-20},
+  // ── 접미 (물리)
   '광기':      {dex:4,spd:3,crit:3},
   '분노':      {dex:3,spd:2,crit:4},
   '어둠':      {atk:6,str:4},
-  '마력':      {matk:6},
-  '냉기':      {matk:6,spd:2},
-  '지혜':      {matk:7},
-  '주문':      {matk:8,skillBonus:3},
-  '신비':      {matk:8,skillBonus:6},
-  '예지':      {matk:5,luk:2},
-  '격노의주문':{matk:10,crit:3,hp:-20},
-  '마력폭주':  {matk:12,skillBonus:14,hp:-20},
   '난공불락':  {def:12,hp:60,vit:4,dex:2},
   '빛':        {dex:3,hp:20},
   '성스러움':  {hp:50,vit:5,dex:3},
+  // ── 접미 (마법 — int 형평성 반영)
+  '마력':      {matk:6},
+  '냉기':      {matk:6,int:2,spd:2},
+  '지혜':      {matk:6,int:3},
+  '주문':      {matk:7,int:2,skillBonus:3},
+  '신비':      {matk:8,skillBonus:6},
+  '예지':      {matk:5,luk:2},
+  '격노의주문':{matk:10,crit:3,hp:-20},
+  '마력폭주':  {matk:12,int:3,skillBonus:14,hp:-20},
 };
 
 // ★ 이 숫자만 올리면 다음 접속 시 모든 유저 아이템 재마이그레이션
-const ENCHANT_STAT_VER=2;
+const ENCHANT_STAT_VER=3;
 
 function autoMigrateEnchantStats(it){
   // 이미 마이그레이션됐거나, 스크롤 류는 스킵
@@ -6993,6 +7004,7 @@ window.adminSetLevel=async function(cid){
   const baseAtk=8+newLv*0.15;
   const baseDef=3+newLv*0.08;
   const baseSpd=5+newLv*0.12;
+  const baseMatk=3+newLv*0.15;
   const maxHp=60+newLv;
 
   // ★ 스탯 포인트: 기본 5씩 + 레벨당 1~2pt 평균 1.5pt 누적
@@ -7010,7 +7022,7 @@ window.adminSetLevel=async function(cid){
   const newExpNext=expForLevel(newLv);
   await update(ref(db,`chars/${cid}`),{
     level:newLv,exp:0,expNext:newExpNext,
-    baseAtk,baseDef,baseSpd,maxHp,
+    baseAtk,baseDef,baseSpd,baseMatk,maxHp,
     str,dex,int:INT,vit,luk
   });
   toast(`✅ 레벨 → ${newLv} 변경 완료`);
