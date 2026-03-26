@@ -412,6 +412,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <button class="tlo" id="tlo">로그아웃</button>
 </header>
 
+<!-- 공지 배너 -->
+<div id="noticeBanner" style="display:none;background:linear-gradient(90deg,rgba(74,143,255,.15),rgba(74,143,255,.08));border-bottom:1px solid rgba(74,143,255,.3);padding:6px 14px;font-size:11px;color:var(--tx);display:flex;align-items:center;gap:8px;position:sticky;top:48px;z-index:900;backdrop-filter:blur(4px)">
+  <span style="color:var(--blue);font-weight:700;flex-shrink:0">📢 공지</span>
+  <span id="noticeBannerText" style="flex:1;line-height:1.5"></span>
+  <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
+</div>
+
 <!-- 업데이트 팝업 v2.0 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:480px;width:90%;max-height:85vh;overflow-y:auto">
@@ -624,7 +631,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="card2" style="margin-bottom:10px;border-color:rgba(240,192,64,.3)">
           <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:6px">📢 전체 공지 발송</div>
           <input id="adminNoticeInput" placeholder="공지 내용 입력..." style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px"/>
-          <button class="btn btn-gold btn-sm" onclick="adminSendNotice()">📢 공지 발송</button>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-gold btn-sm" style="flex:1" onclick="adminSendNotice()">📢 공지 발송</button>
+            <button class="btn btn-red btn-sm" onclick="adminClearNotice()">🗑 공지 삭제</button>
+          </div>
         </div>
         <div style="display:flex;gap:7px;margin-bottom:7px">
           <button class="btn btn-red btn-xs" onclick="clearChat()">채팅 전체 삭제</button>
@@ -1604,6 +1614,7 @@ async function selChar(id){
   checkUpdatePopup();
   startSubjugationWatcher();
   startChampWatcher();
+  initNoticeBanner();
   initBlackMarket();
   if(isAdmin)loadAdmin();
   set(ref(db,`presence/${curUser.uid}`),{charName:char.name,lastSeen:Date.now()});
@@ -5012,6 +5023,10 @@ window.adminSendNotice=async function(){
   const txt=document.getElementById('adminNoticeInput')?.value.trim();
   if(!txt){toast('공지 내용을 입력하세요');return;}
   if(!confirm(`전체 공지를 발송합니다:\n"${txt}"`))return;
+  const noticeId=gId();
+  // ★ DB에 공지 저장 (배너용) — 새 공지가 기존 공지 덮어씀
+  await set(ref(db,'admin/notice'),{text:txt,id:noticeId,ts:Date.now()});
+  // ★ 채팅에도 발송
   await push(ref(db,'chat/world'),{author:'📢 공지',text:txt,ts:Date.now(),isAdmin:true,isNotice:true});
   document.getElementById('adminNoticeInput').value='';
   toast('📢 공지 발송 완료!');
@@ -6156,7 +6171,35 @@ window.buyFromMerchant=async(idx)=>{
 });
 
 // ═══ 보안 강화 ═══
-// ★ 콘솔 경고 메시지
+// ★ 공지 배너 시스템
+window.closeNoticeBanner=async function(){
+  const banner=document.getElementById('noticeBanner');
+  if(banner)banner.style.display='none';
+  // ★ 본인이 닫은 기록 로컬에 저장 (새 공지 오면 다시 뜸)
+  const sn=await get(ref(db,'admin/notice'));
+  const n=sn.val();
+  if(n?.id)localStorage.setItem('dismissedNotice',n.id);
+};
+
+function initNoticeBanner(){
+  onValue(ref(db,'admin/notice'),sn=>{
+    const n=sn.val();
+    const banner=document.getElementById('noticeBanner');
+    const txt=document.getElementById('noticeBannerText');
+    if(!banner||!txt)return;
+    if(!n?.text){banner.style.display='none';return;}
+    const dismissed=localStorage.getItem('dismissedNotice');
+    if(dismissed===n.id){banner.style.display='none';return;}
+    txt.textContent=n.text;
+    banner.style.display='flex';
+  });
+}
+window.adminClearNotice=async function(){
+  if(!isAdmin)return;
+  if(!confirm('공지를 삭제하시겠습니까?'))return;
+  await set(ref(db,'admin/notice'),null);
+  toast('공지 삭제 완료');
+};
 console.log('%c⚠️ ABYSS WORLD 보안 경고', 'color:#ff4444;font-size:20px;font-weight:900');
 console.log('%c이 콘솔을 통한 임의 조작은 계정 정지 사유입니다.\n게임 데이터 위변조는 서버에서 감지됩니다.', 'color:#ff9900;font-size:13px');
 
