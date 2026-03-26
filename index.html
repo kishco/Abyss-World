@@ -597,7 +597,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="pane" id="pane-ranking">
       <div class="ptitle">🏆 랭킹</div>
       <div class="atabs" id="rankTabs">
-        <button class="atab on" onclick="rankTab('level')">레벨</button>
+        <button class="atab on" onclick="rankTab('level')">전투력</button>
         <button class="atab" onclick="rankTab('gold')">골드</button>
         <button class="atab" onclick="rankTab('clear')">던전 클리어</button>
         <button class="atab" onclick="rankTab('subjugation')">토벌전</button>
@@ -1503,7 +1503,7 @@ function calcSetB(eq){
 // ★ 전투력: ATK/DEF/HP/SPD/CRIT 가중 합산 (강화·인챈트·세트 모두 반영)
 function equipScore(c){
   const s=calcStats(c);
-  return Math.round(s.atk*1.5 + s.def*0.8 + s.maxHp*0.05 + s.spd*0.3 + s.crit*0.2);
+  return Math.round(s.atk*1.5 + s.matk*1.5 + s.def*0.8 + s.maxHp*0.05 + s.spd*0.3 + s.crit*0.2);
 }
 function getSkills(c_arg){
   const c=c_arg||char;if(!c)return[];
@@ -1561,11 +1561,16 @@ async function loadChars(){
   cl.querySelectorAll('.ccard').forEach(el=>el.addEventListener('click',e=>{if(e.target.dataset.del)return;selChar(el.dataset.id);}));
   cl.querySelectorAll('[data-del]').forEach(btn=>btn.addEventListener('click',async e=>{
     e.stopPropagation();
-    if(!confirm('삭제?'))return;
     const delId=btn.dataset.del;
+    const charData=mine.find(c=>c.id===delId);
+    const charName=charData?.name||'';
+    const input=prompt(`⚠️ 캐릭터를 삭제하려면 캐릭터 이름을 입력하세요.\n\n캐릭터명: "${charName}"\n\n삭제 시 모든 데이터가 사라지며 복구 불가능합니다.`);
+    if(input===null)return; // 취소
+    if(input!==charName){toast('❌ 캐릭터 이름이 일치하지 않습니다.');return;}
     await set(ref(db,`chars/${delId}`),null);
     await set(ref(db,`inv/${delId}`),null);
     await set(ref(db,`warehouse/${delId}`),null);
+    toast('캐릭터가 삭제되었습니다.');
     loadChars();
   }));
 }
@@ -6275,21 +6280,20 @@ async function loadRanking(){
   if(rankMode==='level'||rankMode==='gold'){
     const cs=await get(ref(db,'chars'));
     const chars=Object.values(cs.val()||{}).filter(c=>c.owner!==undefined);
-    // 어드민 계정은 랭킹에서 제외
     const adminUid=(curUser?.email===ADMIN_EMAIL)?curUser.uid:null;
     const nonAdmin=adminUid?chars.filter(c=>c.owner!==adminUid):chars;
     const sorted=rankMode==='level'
-      ?nonAdmin.sort((a,b)=>(b.level||1)-(a.level||1))
+      ?nonAdmin.sort((a,b)=>equipScore(b)-equipScore(a)) // ★ 레벨 → 전투력순
       :nonAdmin.sort((a,b)=>(b.gold||0)-(a.gold||0));
     rb.innerHTML=`
       <div style="overflow-x:auto">
         <table class="utbl">
-          <thead><tr><th style="width:36px">순위</th><th>캐릭터</th><th>${rankMode==='level'?'레벨':'골드'}</th></tr></thead>
+          <thead><tr><th style="width:36px">순위</th><th>캐릭터</th><th>${rankMode==='level'?'전투력':'골드'}</th></tr></thead>
           <tbody>${sorted.slice(0,50).map((c,i)=>`
             <tr style="${c.name===char.name?'background:rgba(240,192,64,.07)':''}">
               <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span></td>
               <td><span style="font-family:'Cinzel',serif;font-size:11px;color:${c.name===char.name?'var(--gold)':'var(--tx)'}">${c.name}${c.name===char.name?'<span style="font-size:9px;color:var(--blue);margin-left:4px">나</span>':''}</span></td>
-              <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green)">${rankMode==='level'?'Lv.'+c.level:'💰'+(c.gold||0).toLocaleString()}</td>
+              <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green)">${rankMode==='level'?equipScore(c).toLocaleString():'💰'+(c.gold||0).toLocaleString()}</td>
             </tr>`).join('')}
           </tbody>
         </table>
