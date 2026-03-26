@@ -1033,104 +1033,109 @@ const STATS_DEF=[
 ];
 const SETS={
   // ─── 딜러 빌드 ────────────────────────────────────────────────────
+  // ★ 딜러 — ATK/CRIT 특화, DEF 없음 (맞으면 아픔)
   crimson_blade:{name:'크림슨 블레이드',col:'#ff4444',pcs:{
-    cb_helm:   {n:'크림슨 투구',     slot:'head',  stats:{atk:18,crit:4}},
-    cb_chest:  {n:'크림슨 흉갑',     slot:'chest', stats:{atk:22,def:8}},
-    cb_sword:  {n:'크림슨 대검',     slot:'weapon',hand:'2H',stats:{atk:55,crit:6}},
-    cb_boots:  {n:'크림슨 장화',     slot:'boots', stats:{atk:12,spd:8}},
+    cb_helm:   {n:'크림슨 투구',     slot:'head',  stats:{atk:95, crit:14}},
+    cb_chest:  {n:'크림슨 흉갑',     slot:'chest', stats:{atk:110,crit:10}},
+    cb_sword:  {n:'크림슨 대검',     slot:'weapon',hand:'2H',stats:{atk:265,crit:16}},
+    cb_boots:  {n:'크림슨 장화',     slot:'boots', stats:{atk:85, spd:25}},
   },bonuses:[
     {cnt:2,desc:'CRIT+10% 크리티컬 피해+20%',b:{crit:10}},
-    {cnt:3,desc:'ATK+30',b:{atk:30}},
-    {cnt:4,desc:'ATK+60 CRIT+15%',b:{atk:60,crit:15}},
+    {cnt:3,desc:'ATK+100',b:{atk:100}},
+    {cnt:4,desc:'ATK+180 CRIT+18%',b:{atk:180,crit:18}},
   ]},
+  // ★ SPD/회피 딜러 — 빠르고 치명적, DEF 약간
   shadow_hunter:{name:'그림자 사냥꾼',col:'#9060ff',pcs:{
-    sh_hood:   {n:'암영 두건',        slot:'head',  stats:{spd:14,crit:5}},
-    sh_cloak:  {n:'암영 망토',        slot:'chest', stats:{spd:10,atk:18}},
-    sh_dagger: {n:'암영 이도류',      slot:'weapon',hand:'2H',stats:{atk:42,spd:18}},
-    sh_ring:   {n:'암영 반지',        slot:'accessory',stats:{spd:12,crit:6}},
+    sh_hood:   {n:'암영 두건',        slot:'head',  stats:{spd:55, crit:16}},
+    sh_cloak:  {n:'암영 망토',        slot:'chest', stats:{spd:45, atk:85}},
+    sh_dagger: {n:'암영 이도류',      slot:'weapon',hand:'2H',stats:{atk:245,spd:65}},
+    sh_ring:   {n:'암영 반지',        slot:'accessory',stats:{spd:55,crit:20}},
   },bonuses:[
-    {cnt:2,desc:'SPD+15 회피+8%',b:{spd:15}},
-    {cnt:3,desc:'ATK+25 CRIT+8%',b:{atk:25,crit:8}},
-    {cnt:4,desc:'스킬 발동률+15% ATK+40',b:{atk:40,skillBonus:15}},
+    {cnt:2,desc:'SPD+20 회피+10%',b:{spd:20}},
+    {cnt:3,desc:'ATK+70 CRIT+12%',b:{atk:70,crit:12}},
+    {cnt:4,desc:'스킬 발동률+18% ATK+130',b:{atk:130,skillBonus:18}},
   ]},
-  // ─── 탱커 빌드 ────────────────────────────────────────────────────
+  // ★ 순수 탱커 — DEF/HP 최강, ATK 없음
   iron_fortress:{name:'강철 요새',col:'#60a0ff',pcs:{
-    if_helm:   {n:'요새 투구',        slot:'head',  stats:{def:28,hp:60}},
-    if_chest:  {n:'요새 흉갑',        slot:'chest', stats:{def:48,hp:100}},
-    if_legs:   {n:'요새 각반',        slot:'legs',  stats:{def:36,hp:80}},
-    if_shield: {n:'요새 방패',        slot:'offhand',stats:{def:55,hp:80}},
-    if_neck:   {n:'요새 목걸이',      slot:'neck',  stats:{def:18,hp:60}},
+    if_helm:   {n:'요새 투구',        slot:'head',  stats:{def:90, hp:280}},
+    if_chest:  {n:'요새 흉갑',        slot:'chest', stats:{def:125,hp:430}},
+    if_legs:   {n:'요새 각반',        slot:'legs',  stats:{def:100,hp:330}},
+    if_shield: {n:'요새 방패',        slot:'offhand',stats:{def:135,hp:310}},
+    if_neck:   {n:'요새 목걸이',      slot:'neck',  stats:{def:62, hp:420}},
   },bonuses:[
-    {cnt:2,desc:'DEF+20 HP+80',b:{def:20,hp:80}},
-    {cnt:3,desc:'DEF+40 MaxHP+150',b:{def:40,hp:150}},
-    {cnt:4,desc:'피해 받을 때 5% 반사 DEF+60',b:{def:60,hp:200}},
-    {cnt:5,desc:'HP+400 DEF+80 무적 발동 확률↑',b:{def:80,hp:400}},
+    {cnt:2,desc:'DEF+50 HP+200',b:{def:50,hp:200}},
+    {cnt:3,desc:'DEF+100 HP+400',b:{def:100,hp:400}},
+    {cnt:4,desc:'DEF+160 HP+500',b:{def:160,hp:500}},
+    {cnt:5,desc:'HP+800 DEF+200 무적 발동 확률↑',b:{def:200,hp:800}},
   ]},
+  // ★ 밸런스 탱 — DEF+HP 중간, 딜 약함
   stone_guardian:{name:'석상 수호자',col:'#88aacc',pcs:{
-    sg_helm:   {n:'수호자 투구',      slot:'head',  stats:{def:22,hp:50}},
-    sg_bracelet:{n:'수호자 팔찌',     slot:'accessory',stats:{def:16,hp:40}},
-    sg_ring:   {n:'수호자 반지',      slot:'accessory',stats:{def:14,hp:35}},
-    sg_boots:  {n:'수호자 장화',      slot:'boots', stats:{def:18,spd:5}},
+    sg_helm:   {n:'수호자 투구',      slot:'head',  stats:{def:82, hp:260}},
+    sg_bracelet:{n:'수호자 팔찌',     slot:'accessory',stats:{def:60,hp:220}},
+    sg_ring:   {n:'수호자 반지',      slot:'accessory',stats:{def:55,hp:200}},
+    sg_boots:  {n:'수호자 장화',      slot:'boots', stats:{def:70, spd:28}},
   },bonuses:[
-    {cnt:2,desc:'DEF+15 HP+50',b:{def:15,hp:50}},
-    {cnt:4,desc:'DEF+40 회피+5% SPD+10',b:{def:40,spd:10}},
+    {cnt:2,desc:'DEF+50 HP+150',b:{def:50,hp:150}},
+    {cnt:4,desc:'DEF+130 회피+8% SPD+20',b:{def:130,spd:20}},
   ]},
-  // ─── 힐러/마법 빌드 ───────────────────────────────────────────────
+  // ★ HP/힐 — HP 최강, ATK/DEF 없음
   divine_light:{name:'신성한 빛',col:'#ffee80',pcs:{
-    dl_crown:  {n:'신성 왕관',        slot:'head',  stats:{hp:80,matk:18}},
-    dl_robe:   {n:'신성 로브',        slot:'chest', stats:{hp:120,matk:25}},
-    dl_staff:  {n:'신성 지팡이',      slot:'weapon',hand:'1H',stats:{matk:40,hp:60}},
-    dl_earring:{n:'신성 귀걸이',      slot:'accessory',stats:{matk:20,hp:50}},
-    dl_neck:   {n:'신성 목걸이',      slot:'neck',  stats:{hp:80,matk:15}},
+    dl_crown:  {n:'신성 왕관',        slot:'head',  stats:{hp:360, matk:88}},
+    dl_robe:   {n:'신성 로브',        slot:'chest', stats:{hp:430, matk:125}},
+    dl_staff:  {n:'신성 지팡이',      slot:'weapon',hand:'1H',stats:{matk:188,hp:260}},
+    dl_earring:{n:'신성 귀걸이',      slot:'accessory',stats:{matk:92,hp:260}},
+    dl_neck:   {n:'신성 목걸이',      slot:'neck',  stats:{hp:420, matk:78}},
   },bonuses:[
-    {cnt:2,desc:'HP+100 포션 회복량+20%',b:{hp:100}},
-    {cnt:3,desc:'MATK+30 스킬발동+10%',b:{matk:30,skillBonus:10}},
-    {cnt:4,desc:'포션 회복량+30% HP+200',b:{hp:200}},
-    {cnt:5,desc:'MATK+60 HP+300 스킬발동+20%',b:{matk:60,hp:300,skillBonus:20}},
+    {cnt:2,desc:'HP+250 포션 회복량+20%',b:{hp:250}},
+    {cnt:3,desc:'MATK+80 스킬발동+10%',b:{matk:80,skillBonus:10}},
+    {cnt:4,desc:'포션 회복량+30% HP+500',b:{hp:500}},
+    {cnt:5,desc:'MATK+160 HP+800 스킬발동+20%',b:{matk:160,hp:800,skillBonus:20}},
   ]},
+  // ★ 순수 MATK — 스킬 최강, 생존 취약
   arcane_scholar:{name:'비전 학자',col:'#cc88ff',pcs:{
-    as_hat:    {n:'학자 모자',         slot:'head',  stats:{matk:22,hp:40}},
-    as_robe:   {n:'학자 로브',         slot:'chest', stats:{matk:30,hp:60}},
-    as_staff:  {n:'학자 지팡이',       slot:'weapon',hand:'2H',stats:{matk:55,hp:40}},
-    as_amulet: {n:'학자 부적',         slot:'accessory',stats:{matk:18,hp:30}},
+    as_hat:    {n:'학자 모자',         slot:'head',  stats:{matk:92, hp:180}},
+    as_robe:   {n:'학자 로브',         slot:'chest', stats:{matk:122,hp:220}},
+    as_staff:  {n:'학자 지팡이',       slot:'weapon',hand:'2H',stats:{matk:265,hp:160}},
+    as_amulet: {n:'학자 부적',         slot:'accessory',stats:{matk:85,hp:160}},
   },bonuses:[
-    {cnt:2,desc:'MATK+25 INT 효율+20%',b:{matk:25}},
-    {cnt:3,desc:'스킬 발동+15% MATK+45',b:{matk:45,skillBonus:15}},
-    {cnt:4,desc:'MATK+80 모든 스킬 피해+25%',b:{matk:80,skillBonus:25}},
+    {cnt:2,desc:'MATK+60 INT 효율+20%',b:{matk:60}},
+    {cnt:3,desc:'스킬 발동+15% MATK+110',b:{matk:110,skillBonus:15}},
+    {cnt:4,desc:'MATK+200 모든 스킬 피해+25%',b:{matk:200,skillBonus:25}},
   ]},
-  // ─── 하이브리드 빌드 ──────────────────────────────────────────────
+  // ★ 올라운더 — 모두 중간, 세트 보너스로 강해짐
   dragon_sovereign:{name:'용군주',col:'#ff8c00',pcs:{
-    ds_helm:   {n:'용군주 왕관',      slot:'head',  stats:{atk:20,def:18,hp:60}},
-    ds_chest:  {n:'용군주 갑주',      slot:'chest', stats:{atk:28,def:28,hp:80}},
-    ds_weapon: {n:'용군주 창',        slot:'weapon',hand:'2H',stats:{atk:65,crit:8}},
-    ds_ring:   {n:'용군주 반지',      slot:'accessory',stats:{atk:18,def:12}},
-    ds_amulet: {n:'용군주 부적',      slot:'accessory',stats:{matk:20,hp:60}},
+    ds_helm:   {n:'용군주 왕관',      slot:'head',  stats:{atk:78, def:62, hp:180}},
+    ds_chest:  {n:'용군주 갑주',      slot:'chest', stats:{atk:95, def:95, hp:260}},
+    ds_weapon: {n:'용군주 창',        slot:'weapon',hand:'2H',stats:{atk:250,crit:16}},
+    ds_ring:   {n:'용군주 반지',      slot:'accessory',stats:{atk:68, def:48}},
+    ds_amulet: {n:'용군주 부적',      slot:'accessory',stats:{matk:80,hp:240}},
   },bonuses:[
-    {cnt:2,desc:'ATK+20 DEF+20',b:{atk:20,def:20}},
-    {cnt:3,desc:'CRIT+10% ATK+35',b:{atk:35,crit:10}},
-    {cnt:4,desc:'ATK+55 DEF+40 HP+200',b:{atk:55,def:40,hp:200}},
-    {cnt:5,desc:'전설 유일 조합 완성 — 모든 능력치+30% SPD+20',b:{atk:80,def:60,hp:300,spd:20,crit:15}},
+    {cnt:2,desc:'ATK+50 DEF+50',b:{atk:50,def:50}},
+    {cnt:3,desc:'CRIT+12% ATK+90',b:{atk:90,crit:12}},
+    {cnt:4,desc:'ATK+140 DEF+100 HP+500',b:{atk:140,def:100,hp:500}},
+    {cnt:5,desc:'전설 유일 조합 완성 — ATK+200 DEF+150 HP+800 SPD+30',b:{atk:200,def:150,hp:800,spd:30,crit:20}},
   ]},
-  // ─── 기존 호환 (이름만 유지, 수치 상향) ─────────────────────────
+  // ★ 탱딜 하이브리드 — ATK+DEF 중간치, 어느쪽도 최강 아님
   frost:{name:'서리 군주',col:'#00ffcc',pcs:{
-    frost_helm: {n:'서리군주 투구',   slot:'head',  stats:{def:24,hp:60}},
-    frost_chest:{n:'서리군주 흉갑',   slot:'chest', stats:{def:40,hp:100}},
-    frost_sword:{n:'서리군주 검',     slot:'weapon',hand:'1H',stats:{atk:35,def:15}},
-    frost_boots:{n:'서리군주 장화',   slot:'boots', stats:{def:20,spd:10}},
+    frost_helm: {n:'서리군주 투구',   slot:'head',  stats:{def:80, hp:240}},
+    frost_chest:{n:'서리군주 흉갑',   slot:'chest', stats:{def:118,hp:360}},
+    frost_sword:{n:'서리군주 검',     slot:'weapon',hand:'1H',stats:{atk:182,def:62}},
+    frost_boots:{n:'서리군주 장화',   slot:'boots', stats:{def:68, spd:36}},
   },bonuses:[
-    {cnt:2,desc:'DEF+20 HP+60',b:{def:20,hp:60}},
-    {cnt:3,desc:'SPD+15 DEF+30',b:{spd:15,def:30}},
-    {cnt:4,desc:'ATK+30 DEF+50 HP+150',b:{atk:30,def:50,hp:150}},
+    {cnt:2,desc:'DEF+60 HP+200',b:{def:60,hp:200}},
+    {cnt:3,desc:'SPD+25 DEF+100',b:{spd:25,def:100}},
+    {cnt:4,desc:'ATK+80 DEF+150 HP+400',b:{atk:80,def:150,hp:400}},
   ]},
+  // ★ 광폭 딜러 — ATK 높고 HP 희생
   flame:{name:'불꽃의 분노',col:'#ff6030',pcs:{
-    flame_chest:{n:'분노의 흉갑',     slot:'chest', stats:{def:28,atk:20}},
-    flame_sword:{n:'분노의 화염검',   slot:'weapon',hand:'2H',stats:{atk:60,crit:5}},
-    flame_helm: {n:'분노의 투구',     slot:'head',  stats:{def:20,atk:15}},
-    flame_ring: {n:'분노의 반지',     slot:'accessory',stats:{atk:18,crit:4}},
+    flame_chest:{n:'분노의 흉갑',     slot:'chest', stats:{atk:105,crit:10}},
+    flame_sword:{n:'분노의 화염검',   slot:'weapon',hand:'2H',stats:{atk:260,crit:18}},
+    flame_helm: {n:'분노의 투구',     slot:'head',  stats:{atk:92, crit:12}},
+    flame_ring: {n:'분노의 반지',     slot:'accessory',stats:{atk:75, crit:16}},
   },bonuses:[
-    {cnt:2,desc:'ATK+20 CRIT+5%',b:{atk:20,crit:5}},
-    {cnt:3,desc:'ATK+40 CRIT+10%',b:{atk:40,crit:10}},
-    {cnt:4,desc:'ATK+70 CRIT+18% 크리티컬 피해+30%',b:{atk:70,crit:18}},
+    {cnt:2,desc:'ATK+60 CRIT+8%',b:{atk:60,crit:8}},
+    {cnt:3,desc:'ATK+110 CRIT+14%',b:{atk:110,crit:14}},
+    {cnt:4,desc:'ATK+190 CRIT+22% 크리티컬 피해+30%',b:{atk:190,crit:22}},
   ]},
 };
 
@@ -4641,6 +4646,27 @@ window.adminOpenUser=async function(cid){
           <div style="font-size:11px;color:var(--green)">${5+(c.extraPotions||0)}</div>
         </div>
       </div>
+      <!-- ★ 아이템 적용 파생 스탯 -->
+      ${(()=>{
+        const s=calcStats(c);
+        const rows=[
+          ['⚔ ATK',Math.round(s.atk),'var(--red)'],
+          ['🛡 DEF',Math.round(s.def),'var(--blue)'],
+          ['❤️ HP',s.maxHp,'var(--green)'],
+          ['⚡ SPD',Math.round(s.spd),'var(--gold)'],
+          ['💥 CRIT',Math.round(s.crit)+'%','var(--purple)'],
+          ['🔮 MATK',Math.round(s.matk),'var(--ep)'],
+        ];
+        return`<div style="margin-top:10px;border-top:1px solid var(--bd);padding-top:10px">
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:6px">아이템 적용 파생 스탯</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">
+            ${rows.map(([k,v,col])=>`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;text-align:center">
+              <div style="font-size:9px;color:var(--tx3)">${k}</div>
+              <div style="font-size:13px;font-weight:700;color:${col}">${v}</div>
+            </div>`).join('')}
+          </div>
+        </div>`;
+      })()}
     </div>
 
     <!-- 장비 탭 -->
@@ -6260,36 +6286,37 @@ window.setRankTier=function(tierIdx){const rb=document.getElementById('rankBody'
 window.adminSetLevel=async function(cid){
   const newLv=parseInt(prompt('새 레벨 입력 (1~99):'));
   if(!newLv||newLv<1||newLv>99){toast('잘못된 레벨');return;}
-  // ★ 현재 캐릭 데이터 가져와서 레벨 차이만큼 스탯 성장/감소 적용
   const sn=await get(ref(db,`chars/${cid}`));
   const c=sn.val();if(!c)return;
   const curLv=c.level||1;
   const diff=newLv-curLv;
-  let {baseAtk=8,baseDef=3,baseSpd=5,maxHp=60,str=5,dex=5,int:INT=3,vit=5,luk=5}=c;
-  if(diff>0){
-    // 레벨업: 차이만큼 성장 적용
-    for(let i=0;i<diff;i++){
-      baseAtk+=0.15;baseDef+=0.08;baseSpd+=0.12;maxHp+=1;
-      const pts=Math.floor(Math.random()*2)+1; // 1~2pt
-      const stats=['str','dex','int','vit','luk'];
-      for(let p=0;p<pts;p++){
-        const k=stats[Math.floor(Math.random()*stats.length)];
-        if(k==='str')str++;else if(k==='dex')dex++;else if(k==='int')INT++;else if(k==='vit')vit++;else luk++;
-      }
-    }
-  }else if(diff<0){
-    // 레벨다운: 차이만큼 역성장
-    for(let i=0;i<Math.abs(diff);i++){
-      baseAtk=Math.max(1,baseAtk-0.15);baseDef=Math.max(0,baseDef-0.08);
-      baseSpd=Math.max(1,baseSpd-0.12);maxHp=Math.max(60,maxHp-1);
+
+  // ★ 레벨에 따른 기본 성장치 계산
+  // baseAtk/Def/Spd는 기본값 + 레벨당 누적
+  const baseAtk=8+newLv*0.15;
+  const baseDef=3+newLv*0.08;
+  const baseSpd=5+newLv*0.12;
+  const maxHp=60+newLv;
+
+  // ★ 스탯 포인트: 기본 5씩 + 레벨당 1~2pt 평균 1.5pt 누적
+  // 레벨다운이면 기본값(5)으로 리셋 후 새 레벨만큼만 성장
+  let str=5,dex=5,INT=3,vit=5,luk=5;
+  for(let i=0;i<newLv-1;i++){
+    const pts=Math.floor(Math.random()*2)+1;
+    const stats=['str','dex','int','vit','luk'];
+    for(let p=0;p<pts;p++){
+      const k=stats[Math.floor(Math.random()*stats.length)];
+      if(k==='str')str++;else if(k==='dex')dex++;else if(k==='int')INT++;else if(k==='vit')vit++;else luk++;
     }
   }
+
   const newExpNext=expForLevel(newLv);
   await update(ref(db,`chars/${cid}`),{
     level:newLv,exp:0,expNext:newExpNext,
-    baseAtk,baseDef,baseSpd,maxHp,str,dex,int:INT,vit,luk
+    baseAtk,baseDef,baseSpd,maxHp,
+    str,dex,int:INT,vit,luk
   });
-  toast(`✅ 레벨 → ${newLv} 변경 완료 (스탯 성장 반영)`);
+  toast(`✅ 레벨 → ${newLv} 변경 완료`);
   loadAdmin();
 };
 
