@@ -1688,7 +1688,23 @@ function renderChar(){
   document.getElementById('s-matk').textContent=s.matk;
   document.getElementById('s-cdmg').textContent=s.critDmg+'%';
   document.getElementById('s-score').textContent=equipScore(char);
-  document.getElementById('baseStatGrid').innerHTML=STATS_DEF.map(st=>`<div class="srow"><span class="sn">${st.n}</span><span class="sv">${char[st.k]||0}</span></div>`).join('');
+  // ★ 기본 스탯 + 장비 보너스 표시
+  document.getElementById('baseStatGrid').innerHTML=STATS_DEF.map(st=>{
+    const base=char[st.k]||0;
+    // 장비 인챈트에서 해당 스탯 보너스 합산
+    let bonus=0;
+    for(const it of Object.values(char.equipment||{})){
+      if(!it)continue;
+      for(const enc of[it.prefix,it.suffix]){
+        if(!enc?.b)continue;
+        const v=enc.b[st.k];
+        if(v&&isFinite(v)&&Math.abs(v)<=9999)bonus+=v;
+      }
+    }
+    const bonusStr=bonus>0?`<span style="color:var(--green);font-size:9px"> (+${bonus})</span>`:
+                   bonus<0?`<span style="color:var(--red);font-size:9px"> (${bonus})</span>`:'';
+    return`<div class="srow"><span class="sn">${st.n}</span><span class="sv">${base}${bonusStr}</span></div>`;
+  }).join('');
   const maxP=5+(char.extraPotions||0);
   document.getElementById('charPotions').textContent=maxP;
   document.getElementById('charMaxPotions').textContent=maxP;
