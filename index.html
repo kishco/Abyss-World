@@ -2001,8 +2001,8 @@ const encHint={
 };
 function itSkStr(it){
   const sk=[];
-  if(it.prefix?.sk&&SKILLS[it.prefix.sk])sk.push('⚡'+SKILLS[it.prefix.sk].name+(typeof skillTypeBadge==='function'?skillTypeBadge(it.prefix.sk):''));
-  if(it.suffix?.sk&&SKILLS[it.suffix.sk])sk.push('⚡'+SKILLS[it.suffix.sk].name+(typeof skillTypeBadge==='function'?skillTypeBadge(it.suffix.sk):''));
+  if(it.prefix?.sk&&SKILLS[it.prefix.sk])sk.push('⚡'+SKILLS[it.prefix.sk].name+skillTypeBadge(it.prefix.sk));
+  if(it.suffix?.sk&&SKILLS[it.suffix.sk])sk.push('⚡'+SKILLS[it.suffix.sk].name+skillTypeBadge(it.suffix.sk));
   return sk.join(' ');
 }
 // ★ 강화 수치 포함 이름
@@ -3210,7 +3210,7 @@ async function renderAuction(sb){
                     ${(it.enhance||0)>0?`<span style="color:var(--gold);font-size:10px">+${it.enhance}</span>`:''}
                     ${isMine?`<span style="font-size:9px;color:var(--gold)">[내 등록]</span>`:''}
                   </div>
-                  ${statStr?`<div style="font-size:10px;color:var(--green);margin-bottom:2px">${statStr}</div>`:''}
+                  ${statStr?`<div style="font-size:10px;color:var(--green);margin-bottom:2px">${statStr}${ts.balance?` <span style="color:var(--tx2)">밸런스 ${ts.balance}%</span>`:''}</div>`:''}
                   ${it.isEnchantScroll?`
                   <div style="background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.25);border-radius:5px;padding:5px 8px;margin-bottom:3px">
                     <div style="font-size:10px;font-weight:700;color:var(--purple);margin-bottom:3px">📜 ${it.enchantIsPrefix!==false?'[접두]':'[접미]'} ${it.enchantData?.n||''} <span style="font-size:9px;font-weight:400;color:var(--tx3)">성공률 ${Math.round((it.successRate||0.7)*100)}%</span></div>
@@ -3231,7 +3231,7 @@ async function renderAuction(sb){
                     for(const enc of[it.prefix,it.suffix]){
                       if(enc?.sk&&SKILLS[enc.sk]){
                         const sk=SKILLS[enc.sk];
-                        skList.push(`<span style="color:var(--gold)">⚡ ${sk.name}${skillTypeBadge(enc.sk)}</span><span style="color:var(--tx3);font-size:9px"> — ${sk.desc}</span>`);
+                        skList.push(`<span style="color:var(--gold)">⚡ ${sk.name}</span>${skillTypeBadge(enc.sk)}<span style="color:var(--tx3);font-size:9px"> — ${sk.desc}</span>`);
                       }
                     }
                     return skList.length?`<div style="font-size:9.5px;margin-bottom:2px;display:flex;flex-direction:column;gap:1px">${skList.join('')}</div>`:'';
@@ -5401,12 +5401,13 @@ async function renderWarehouse(sb){
       if(!enc?.b)continue;
       for(const[k,v]of Object.entries(enc.b)){
         if(!isFinite(v)||Math.abs(v)>9999)continue;
-        if(['atk','def','hp','spd','crit'].includes(k))ts[k]=(ts[k]||0)+v;
+        if(['atk','def','hp','spd','crit','matk','balance'].includes(k))ts[k]=(ts[k]||0)+v;
         if(k==='str')ts.atk=(ts.atk||0)+Math.round(v*1.8);
+        if(k==='int')ts.matk=(ts.matk||0)+Math.round(v*2);
         if(k==='vit'){ts.hp=(ts.hp||0)+Math.round(v*10);ts.def=(ts.def||0)+Math.round(v*0.6);}
       }
     }
-    return Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit'].includes(k))
+    return Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk','balance'].includes(k))
       .map(([k,v])=>fmtStatKV(k,v)).join(' ');
   }
 
@@ -5438,7 +5439,7 @@ async function renderWarehouse(sb){
               .map(([k,v])=>`${labelMap[k]||k}${v>0?'+':''}${v}`).join(' ');
             return parts?`<span style="color:var(--purple)">${parts}</span>`:'';
           })():''}
-          ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<span style="color:var(--gold)">⚡${SKILLS[it.enchantData.sk].name}${skillTypeBadge(it.enchantData.sk)}</span>`:''}
+          ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<span style="color:var(--gold)">⚡${SKILLS[it.enchantData.sk].name}${skillTypeBadge(it.enchantData.sk)}</span><span style="color:var(--tx3);font-size:9px"> — ${SKILLS[it.enchantData.sk].desc}</span>`:''}
         </div>
       </div>
       ${btnHtml}
