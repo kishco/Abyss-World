@@ -1117,11 +1117,16 @@ const SETS={
 
 // Dungeons
 const DTIERS=[
-  {tier:1,n:'버려진 동굴',icon:'⛏',minLv:1,floors:5,recLv:5,areas:['cave']},
-  {tier:2,n:'저주받은 숲',icon:'🌿',minLv:20,floors:7,recLv:25,areas:['darkforest']},
-  {tier:3,n:'오염된 사막',icon:'🏜️',minLv:40,floors:8,recLv:45,areas:['desert']},
-  {tier:4,n:'요새',icon:'🏰',minLv:60,floors:10,recLv:65,areas:['fortress']},
-  {tier:5,n:'용의 둥지',icon:'🐉',minLv:80,floors:12,recLv:85,areas:['dragon']},
+  {tier:1,n:'버려진 동굴',icon:'⛏',minLv:1,floors:5,recLv:5,areas:['cave'],
+   lore:'갈리아 인근 지하, 심연의 균열이 뚫린 이후 오염된 동굴. 균열의 수호자가 지상을 노려보고 있다.'},
+  {tier:2,n:'저주받은 숲',icon:'🌿',minLv:20,floors:7,recLv:25,areas:['darkforest'],
+   lore:'세미아가 지키던 서쪽 깊은 숲. 베니아 의회의 성지였으나 이제 80%가 심연에 잠식되었다.'},
+  {tier:3,n:'오염된 사막',icon:'🏜️',minLv:40,floors:8,recLv:45,areas:['desert'],
+   lore:'수천 년 전 루가 태초의 신의 일격을 막아낸 곳. 그 충격으로 대륙 중앙 전체가 사막이 되었고, 그 아래에 어비스의 중심이 잠들어 있다.'},
+  {tier:4,n:'요새',icon:'🏰',minLv:60,floors:10,recLv:65,areas:['fortress'],
+   lore:'중앙에서 동쪽으로 향하는 길목, 벨린 왕국의 요새. 왕 카르도스는 심연의 속삭임에 굴복해 백성을 제물로 바쳤고, 이제 그 자신이 심연이 되었다.'},
+  {tier:5,n:'용의 둥지',icon:'🐉',minLv:80,floors:12,recLv:85,areas:['dragon'],
+   lore:'수천 년 전 엘비아를 군림하던 고대 용들의 영역. 위대한 용들은 사라졌고, 남은 하급용들은 심연에 완전히 잠식되었다.'},
 ];
 const DIFF={
   normal:{name:'노말',color:'var(--green)',monMult:0.85,dmgMult:0.85,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
@@ -1189,7 +1194,7 @@ const HPFX=[
   {n:'[전설의]',am:2.5,hm:2.5,em:4.0,gm:5.0,db:0.8,hidden:true},
   {n:'[악몽의]',am:3.0,hm:3.0,em:5.0,gm:7.0,db:1.0,hidden:true},
 ];
-const BOSSN=['동굴의 폭군','저주받은 숲의 왕','사막의 고대 파라오','요새의 암흑 군주','태초의 용 아르카낙스'];
+const BOSSN=['균열의 수호자 그락','숲의 오염자 실바노스','사막의 유물 잔카르','벨린의 왕 카르도스','잠식된 용왕 아쉬라스'];
 const SHOP_ITEMS=[
   {n:'녹슨 단검',slot:'weapon',hand:'1H',stats:{atk:8},price:50},
   {n:'목검',slot:'weapon',hand:'1H',stats:{atk:12},price:80},
@@ -3281,6 +3286,7 @@ function renderDungeon(){
       <div class="dtier">Tier ${t.tier}</div>
       <div class="dname">${t.icon} ${t.n}</div>
       <div class="drange" style="font-size:10px">최소 Lv.${t.minLv} / 권장 Lv.${t.recLv} / ${t.floors}층</div>
+      ${t.lore?`<div style="font-size:9.5px;color:var(--tx3);margin-top:5px;line-height:1.6;font-style:italic">${t.lore}</div>`:''}
       <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">
         <span class="diff-btn diff-normal" style="font-size:9px;padding:2px 7px;cursor:default">노말</span>
         <span class="diff-btn diff-hard" style="font-size:9px;padding:2px 7px;cursor:default">어려움</span>
@@ -5242,15 +5248,15 @@ window.whWithdraw=async function(id){
 const SUBJ_BOSSES=[
   {id:'abydos',  name:'심연의 군주 아비도스', icon:'👁️', color:'var(--purple)',
    hp:50000000, atk:2800, def:800,
-   desc:'심연에서 깨어난 어둠의 지배자. 그 눈이 닿는 곳엔 절망만이 남는다.',
+   desc:'다른 차원에서 건너온 중간급 지배자. 수천 년간 심연에 봉인되어 있으나 그 힘은 여전히 엘비아를 위협한다.',
    skillDesc:'공허의 눈길 · 심연 파동 · 어둠 강화'},
   {id:'lavadon', name:'불의 정령 라바돈',      icon:'🔥', color:'var(--red)',
    hp:50000000, atk:3200, def:700,
-   desc:'태초의 불꽃에서 태어난 파괴의 정령. 대지가 녹아내릴 때까지 멈추지 않는다.',
+   desc:'아비도스와 같은 차원에서 건너온 파괴의 정령. 심연의 불꽃에 오염되어 대지를 태우며 봉인 속에서도 날뛰고 있다.',
    skillDesc:'화염 폭발 · 용암 파도 · 불길 강화'},
-  {id:'ru',      name:'영원의 기사 루',         icon:'⚔️', color:'var(--gold)',
+  {id:'ru',      name:'오염된 영원의 기사 루', icon:'⚔️', color:'var(--gold)',
    hp:50000000, atk:2600, def:1000,
-   desc:'불멸의 갑옷에 깃든 고대의 기사. 패배를 모르는 불굴의 전사.',
+   desc:'아비도스를 봉인하기 위해 스스로 심연에 남은 영원의 기사. 수천 년의 고독과 싸움 끝에 정신이 붕괴되었고, 이제 그는 적과 아군을 구분하지 못한다.',
    skillDesc:'성검 강타 · 불굴의 방어 · 영원 강화'},
 ];
 
