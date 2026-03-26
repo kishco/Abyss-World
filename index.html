@@ -422,7 +422,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 </header>
 
 <!-- 공지 배너 -->
-<div id="noticeBanner" style="display:none;background:linear-gradient(90deg,rgba(74,143,255,.15),rgba(74,143,255,.08));border-bottom:1px solid rgba(74,143,255,.3);padding:6px 14px;font-size:11px;color:var(--tx);display:flex;align-items:center;gap:8px;position:sticky;top:48px;z-index:900;backdrop-filter:blur(4px)">
+<div id="noticeBanner" style="display:none;background:linear-gradient(90deg,rgba(74,143,255,.15),rgba(74,143,255,.08));border-bottom:1px solid rgba(74,143,255,.3);padding:6px 14px;font-size:11px;color:var(--tx);align-items:center;gap:8px;position:sticky;top:48px;z-index:900;backdrop-filter:blur(4px)">
   <span style="color:var(--blue);font-weight:700;flex-shrink:0">📢 공지</span>
   <span id="noticeBannerText" style="flex:1;line-height:1.5"></span>
   <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
@@ -1852,7 +1852,7 @@ function renderEq(){
         if(src?.sk&&SKILLS[src.sk]){
           const sk=SKILLS[src.sk];
           const proc=Math.round(sk.base*gM*(1+(char.int||3)*0.005)*100);
-          if(proc>0)skillInfos.push(`<div class="sk-tooltip-title">${sk.icon} ${sk.name}</div><div class="sk-tooltip-desc">${sk.desc}</div><div class="sk-tooltip-proc">발동률: ${proc}%</div>`);
+          if(proc>0)skillInfos.push(`<div class="sk-tooltip-title">${sk.icon} ${sk.name}${skillTypeBadge(skId)}</div><div class="sk-tooltip-desc">${sk.desc}</div><div class="sk-tooltip-proc">발동률: ${proc}%</div>`);
         }
       }
       const enchStr=[it.prefix,it.suffix].filter(Boolean)
@@ -2325,6 +2325,14 @@ const GRADE_ORDER=['set','legendary','epic','rare','uncommon','normal'];
 // ★ 스탯 값 포맷 헬퍼 — balance는 % 표기
 function fmtStatVal(k,v){return k==='balance'?v+'%':(v>0?'+':'')+v;}
 function fmtStatKV(k,v){return k==='balance'?'밸런스 '+v+'%':(k.toUpperCase()+'+'+v);}
+// ★ 스킬 타입 뱃지
+function skillTypeBadge(skId){
+  const sk=SKILLS[skId];if(!sk)return'';
+  const t=sk.type||'physical';
+  const map={physical:['⚔️','물리','#ff6644'],magic:['🔮','마법','#aa66ff'],special:['💨','특수','#44ddcc']};
+  const [icon,label,col]=map[t]||map.physical;
+  return`<span style="font-size:8.5px;background:${col}22;border:1px solid ${col}66;color:${col};border-radius:3px;padding:1px 4px;margin-left:4px">${icon} ${label}</span>`;
+}
 function renderInv(){
   const items=Object.values(inv);
   const cnt=items.length;
@@ -2424,7 +2432,7 @@ function openIM(it){
         <div style="background:rgba(176,96,255,.07);border:1px solid rgba(176,96,255,.3);border-radius:8px;padding:10px 12px;margin-bottom:12px">
           <div style="font-size:11px;font-weight:700;color:${et.color};margin-bottom:5px">[${typeLabel}] ${enchData?.n||'???'} 인챈트</div>
           <div style="font-size:10px;color:var(--tx2);margin-bottom:3px">${bPreview}</div>
-          ${enchData?.sk&&SKILLS[enchData.sk]?`<div style="font-size:10px;color:var(--purple)">⚡ ${SKILLS[enchData.sk].name} — ${SKILLS[enchData.sk].desc}</div>`:''}
+          ${enchData?.sk&&SKILLS[enchData.sk]?`<div style="font-size:10px;color:var(--purple)">⚡ ${SKILLS[enchData.sk].name}${skillTypeBadge(enchData.sk)} — ${SKILLS[enchData.sk].desc}</div>`:''}
           <div style="margin-top:5px;font-size:10px;color:${tier>=4?'var(--red)':'var(--tx3)'}">
             성공 확률: <b>${Math.round(successRate*100)}%</b> · 실패 시 스크롤 소모
           </div>
@@ -2618,8 +2626,8 @@ function openIM(it){
     const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
     return`<span style="font-size:9px;background:${et.color}22;color:${et.color};border:1px solid ${et.color}44;padding:1px 5px;border-radius:4px;margin-left:5px">${et.name}</span>`;
   }
-  const ph=!it.prefix?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}<br>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
-  const sh=!it.suffix?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}<br>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
+  const ph=!it.prefix?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}<br>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name}${skillTypeBadge(it.prefix.sk)} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
+  const sh=!it.suffix?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}<br>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name}${skillTypeBadge(it.suffix.sk)} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
   const seth=it.grade==='set'?`<div style="margin-top:6px;padding:6px 9px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:11px;color:var(--st)">◆ ${it.setName}</div>`:'';
 
   // 장착 중 아이템 비교 표시
@@ -3212,7 +3220,7 @@ async function renderAuction(sb){
                         .map(([k,v])=>`<span style="color:${v>0?'var(--green)':'var(--red)'}">${labelMap[k]||k}${v>0?'+':''}${v}</span>`);
                       return parts.length?`<div style="font-size:10px;display:flex;flex-wrap:wrap;gap:5px">${parts.join('')}</div>`:'';
                     })()}
-                    ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<div style="font-size:9.5px;color:var(--gold);margin-top:2px">⚡ ${SKILLS[it.enchantData.sk].name} — ${SKILLS[it.enchantData.sk].desc}</div>`:''}
+                    ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<div style="font-size:9.5px;color:var(--gold);margin-top:2px">⚡ ${SKILLS[it.enchantData.sk].name}${skillTypeBadge(it.enchantData.sk)} — ${SKILLS[it.enchantData.sk].desc}</div>`:''}
                   </div>`:''}
                   ${!it.isEnchantScroll&&(it.prefix||it.suffix)?`<div style="font-size:9.5px;color:var(--tx3);margin-bottom:2px">${it.prefix?`[접두:${it.prefix.n}]`:''} ${it.suffix?`[접미:${it.suffix.n}]`:''}</div>`:''}
                   ${(()=>{
@@ -3527,13 +3535,15 @@ function nextFloor(){
     }
   }
   battle.reviveQueue.clear();
-  // ★ 층 클리어 후 HP 소량 회복 (하드코어: 15%, 전층 보스 직전엔 25%)
+  // ★ 층 클리어 후 HP 소량 회복 (1층 제외, 하드코어: 15%, 전층 보스 직전엔 25%)
   const nextIsBoss=(battle.floor===battle.floors);
   const healRate=nextIsBoss?0.25:0.15;
-  for(const p of battle.players.filter(p=>p.status==='alive')){
-    const healAmt=Math.round(p.maxHp*healRate);
-    p.hp=Math.min(p.hp+healAmt,p.maxHp);
-    blogAdd(`<span class="l-heal">🌿 ${p.name} 층 클리어 회복 +${healAmt}HP${nextIsBoss?' (보스 전 회복)':''}</span>`);
+  if(battle.floor>1){ // ★ 1층 진입 시엔 클리어 회복 없음
+    for(const p of battle.players.filter(p=>p.status==='alive')){
+      const healAmt=Math.round(p.maxHp*healRate);
+      p.hp=Math.min(p.hp+healAmt,p.maxHp);
+      blogAdd(`<span class="l-heal">🌿 ${p.name} 층 클리어 회복 +${healAmt}HP${nextIsBoss?' (보스 전 회복)':''}</span>`);
+    }
   }
   // 포션 +1 (2층 이상부터)
   if(battle.floor>1){
@@ -5536,15 +5546,15 @@ window.whWithdraw=async function(id){
 // 보스 정의 — LV99 풀강 유저 솔로 1주일도 못잡을 HP / LV50 유저 한두대 버틸 DEF
 const SUBJ_BOSSES=[
   {id:'abydos',  name:'심연의 군주 아비도스', icon:'👁️', color:'var(--purple)',
-   hp:50000000, atk:2800, def:800,
+   hp:50000000, atk:2800, def:800, dodge:8,
    desc:'다른 차원에서 건너온 중간급 지배자. 수천 년간 심연에 봉인되어 있으나 그 힘은 여전히 엘비아를 위협한다.',
    skillDesc:'공허의 눈길 · 심연 파동 · 어둠 강화'},
   {id:'lavadon', name:'불의 정령 라바돈',      icon:'🔥', color:'var(--red)',
-   hp:50000000, atk:3200, def:700,
+   hp:50000000, atk:3200, def:700, dodge:5,
    desc:'아비도스와 같은 차원에서 건너온 파괴의 정령. 심연의 불꽃에 오염되어 대지를 태우며 봉인 속에서도 날뛰고 있다.',
    skillDesc:'화염 폭발 · 용암 파도 · 불길 강화'},
   {id:'ru',      name:'오염된 영원의 기사 루', icon:'⚔️', color:'var(--gold)',
-   hp:50000000, atk:2600, def:1000,
+   hp:50000000, atk:2600, def:1000, dodge:12,
    desc:'아비도스를 봉인하기 위해 스스로 심연에 남은 영원의 기사. 수천 년의 고독과 싸움 끝에 정신이 붕괴되었고, 이제 그는 적과 아군을 구분하지 못한다.',
    skillDesc:'성검 강타 · 불굴의 방어 · 영원 강화'},
 ];
@@ -5869,10 +5879,18 @@ window.enterSubjBattle=function(){
       const variance=Math.round(dmg*0.15);dmg=Math.max(1,dmg+rand(-variance,variance));
       const isCrit=Math.random()*100<s.crit;
       if(isCrit)dmg=Math.round(dmg*s.critDmg/100);
-      totalDmgDealt+=dmg;
-      if(isCrit)slog(`<span class="l-crit">⚔ 치명타! → ${boss.name} <b>${dmg}</b></span>`);
-      else slog(`<span class="l-dmg">⚔ ${char.name} → ${boss.name} <b>${dmg}</b></span>`);
-      // Skill procs
+      // ★ 밸런스로 보스 회피 상쇄
+      const effDodge=Math.max(0,(boss.dodge||0)*(1-(s.balance||0)/100));
+      const isMiss=Math.random()*100<effDodge;
+      if(isMiss){
+        slog(`<span class="l-sys">💨 ${boss.name}이 회피했다!</span>`);
+      }else{
+        totalDmgDealt+=dmg;
+        const fakeTarget={name:boss.name,dodge:0};
+        const fakeP={charData:char};
+        slog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
+      }
+      // Skill procs (회피 여부 관계없이)
       const subjSkillBonusMult=1+(s.skillBonus||0)/100;
       for(const sl of Object.values(char.equipment||{})){
         if(!sl)continue;
@@ -5883,7 +5901,6 @@ window.enterSubjBattle=function(){
           if(Math.random()<proc&&sk.fx){
             const dummy={hp:1000000,maxHp:boss.hp,status:'alive',_dot:0};
             const res=sk.fx({atk:s.atk,name:char.name},dummy,[dummy]);
-            // ★ 스킬 데미지도 총 데미지에 합산
             const fx=sk.fx(s.atk,s);
             if(fx&&fx.dmg>0){
               const skDmg=Math.min(Math.round(fx.dmg),99999);
@@ -6012,7 +6029,7 @@ async function renderChamp(){
     ${!sorted.length?`<div style="color:var(--tx3);font-size:11px;padding:10px">아직 기록 없음</div>`:`
     <div style="overflow-x:auto">
       <table class="utbl">
-        <thead><tr><th>순위</th><th>캐릭터</th><th>최고 연승</th></tr></thead>
+        <thead><tr><th>순위</th><th>캐릭터</th><th>역대 최고 연승</th></tr></thead>
         <tbody>${sorted.slice(0,20).map(([name,wins],i)=>`
           <tr style="${name===char.name?'background:rgba(255,0,0,.05)':''}">
             <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:${i===0?'var(--red)':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i===0?'⚔':i+1}</span></td>
@@ -6152,9 +6169,16 @@ window.enterChampBattle=async function(){
       const v=Math.round(dmg*0.12);dmg=Math.max(1,dmg+rand(-v,v));
       const isCrit=Math.random()*100<s.crit;
       if(isCrit)dmg=Math.round(dmg*s.critDmg/100);
-      champHp=Math.max(0,champHp-dmg);
-      if(isCrit)clog(`<span class="l-crit">⚔ 치명타! → ${champ.name} -<b>${dmg}</b></span>`);
-      else clog(`<span class="l-dmg">⚔ ${char.name} → ${champ.name} -<b>${dmg}</b></span>`);
+      const effDodge=Math.max(0,(cs.dodge||0)*(1-(s.balance||0)/100));
+      const isMiss=Math.random()*100<effDodge;
+      if(isMiss){dmg=0;clog(`<span class="l-sys">💨 ${champ.name}이 회피했다!</span>`);}
+      else{
+        champHp=Math.max(0,champHp-dmg);
+        // ★ 무기별 공격 문구
+        const fakeTarget={name:champ.name,dodge:0};
+        const fakeP={charData:char};
+        clog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
+      }
     }else if(action==='defend'){
       defending=true;
       clog(`<span class="l-sys">🛡 ${char.name} 방어 자세</span>`);
