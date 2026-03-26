@@ -5071,7 +5071,18 @@ window.loadAdminAuction=async function(){
 
 // ★ 루팡 확률 — DB에서 로드해서 모든 클라이언트에 실시간 반영
 let _lupangRate=0.001;
-onValue(ref(db,'admin/lupangRate'),sn=>{if(sn.val()!==null)_lupangRate=sn.val();});
+onValue(ref(db,'admin/lupangRate'),sn=>{
+  if(sn.val()!==null){
+    _lupangRate=sn.val();
+    // ★ 드롭다운 UI도 현재 DB 값으로 동기화
+    const sel=document.getElementById('lupangRate');
+    if(sel){
+      const opts=[...sel.options];
+      const match=opts.find(o=>parseFloat(o.value)===_lupangRate);
+      if(match)sel.value=match.value;
+    }
+  }
+});
 window.adminSetLupangRate=async function(){
   if(!isAdmin)return;
   const rate=parseFloat(document.getElementById('lupangRate')?.value||'0.001');
