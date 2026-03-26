@@ -4116,17 +4116,22 @@ async function maybeLoseItem(){
   }
   const invItems=Object.values(inv).filter(i=>!i.isScroll&&!i.isEnchantScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox);
   const eqItems=Object.values(char.equipment||{}).filter(Boolean);
-  const allLosable=[...invItems,...eqItems];
-  if(!allLosable.length)return;
-  // vhard 전멸 시 인벤은 50%, 장착 장비는 20%로 각각 체크
+  if(!invItems.length&&!eqItems.length)return;
   let lostCount=0;
-  for(const it of invItems){
-    if(Math.random()<0.5){
+
+  // ★ 인벤: 최대 1~2개만 랜덤 손실 (기존 50% 전체 → 너무 가혹)
+  if(invItems.length>0){
+    const loseCnt=Math.min(invItems.length, rand(1,2));
+    const shuffled=[...invItems].sort(()=>Math.random()-0.5);
+    for(let i=0;i<loseCnt;i++){
+      const it=shuffled[i];
       delete inv[it.id];
       blogAdd(`<span class="l-dead">💥 인벤 아이템 소실: ${it.name}</span>`);
       lostCount++;
     }
   }
+
+  // ★ 장착 장비: 각 슬롯 20% 확률 (기존 유지)
   for(const[slot,it] of Object.entries(char.equipment||{})){
     if(!it)continue;
     if(Math.random()<0.20){
