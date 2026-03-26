@@ -1635,7 +1635,7 @@ function updateTop(){
 // ═══ LEVEL UP (random stats 1-5) ═══
 function gainExp(amt){
   char.exp+=amt;let lvUps=[];
-  while(char.exp>=char.expNext){
+  while(char.exp>=char.expNext&&char.level<99){
     char.exp-=char.expNext;char.level++;
     char.expNext=expForLevel(char.level);
     // 레벨당 기본 성장 — 장비 의존도 높이기 위해 낮춤
@@ -1654,6 +1654,7 @@ function gainExp(amt){
                  hp:char.maxHp};
     lvUps.push({level:char.level,pts:totalPts,rolled,before,after});
   }
+  if(char.level>=99){char.level=99;char.exp=0;}
   saveChar();updateTop();
   if(lvUps.length>0){
     if(battle&&!battle.done){
