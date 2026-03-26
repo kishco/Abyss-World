@@ -5440,6 +5440,7 @@ async function renderWarehouse(sb){
             return parts?`<span style="color:var(--purple)">${parts}</span>`:'';
           })():''}
           ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<span style="color:var(--gold)">⚡${SKILLS[it.enchantData.sk].name}${skillTypeBadge(it.enchantData.sk)}</span><span style="color:var(--tx3);font-size:9px"> — ${SKILLS[it.enchantData.sk].desc}</span>`:''}
+          ${!it.isEnchantScroll&&!it.isScroll?[it.prefix,it.suffix].filter(e=>e?.sk&&SKILLS[e.sk]).map(e=>`<span style="color:var(--gold)">⚡${SKILLS[e.sk].name}${skillTypeBadge(e.sk)}</span>`).join(' '):''}
         </div>
       </div>
       ${btnHtml}
