@@ -5222,13 +5222,50 @@ async function renderWarehouse(sb){
   }
 
   sb.innerHTML=`
-    <div style="display:flex;gap:6px;margin-bottom:12px">
+    <div style="display:flex;gap:6px;margin-bottom:8px">
       <button id="whtab-deposit" class="btn btn-blue btn-sm" style="flex:1" onclick="whTab('deposit')">🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.keys(inv).length}/100</span></button>
       <button id="whtab-withdraw" class="btn btn-ghost btn-sm" style="flex:1" onclick="whTab('withdraw')">🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${wCnt}/200</span></button>
     </div>
+    <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
+      <select id="whFilterType" onchange="whRefresh()" style="flex:1;min-width:80px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
+        <option value="">전체</option>
+        <option value="weapon">무기</option>
+        <option value="armor">방어구</option>
+        <option value="accessory">장신구</option>
+        <option value="scroll">주문서</option>
+        <option value="set">유일</option>
+      </select>
+      <select id="whFilterGrade" onchange="whRefresh()" style="flex:1;min-width:80px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
+        <option value="">전체 등급</option>
+        <option value="normal">노말</option>
+        <option value="uncommon">언커먼</option>
+        <option value="rare">레어</option>
+        <option value="epic">에픽</option>
+        <option value="legendary">레전더리</option>
+        <option value="set">유일</option>
+      </select>
+    </div>
     <div id="whContent"></div>`;
 
+  function whFilterItems(items){
+    const tf=document.getElementById('whFilterType')?.value||'';
+    const gf=document.getElementById('whFilterGrade')?.value||'';
+    return items.filter(i=>{
+      const typeOk=!tf
+        ||(tf==='weapon'&&i.slot==='weapon')
+        ||(tf==='armor'&&['head','chest','legs','boots','offhand'].includes(i.slot))
+        ||(tf==='accessory'&&(i.slot==='accessory'||i.slot==='neck'))
+        ||(tf==='scroll'&&(i.isScroll||i.isEnchantScroll||i.isProtectScroll||i.isExtractScroll))
+        ||(tf==='set'&&i.grade==='set');
+      const gradeOk=!gf||i.grade===gf;
+      return typeOk&&gradeOk;
+    });
+  }
+
+  window.whRefresh=function(){if(window._whCurrentTab)window.whTab(window._whCurrentTab);};
+
   window.whTab=function(tab){
+    window._whCurrentTab=tab;
     document.getElementById('whtab-deposit').className=`btn ${tab==='deposit'?'btn-blue':'btn-ghost'} btn-sm`;
     document.getElementById('whtab-deposit').style.flex='1';
     document.getElementById('whtab-withdraw').className=`btn ${tab==='withdraw'?'btn-green':'btn-ghost'} btn-sm`;
@@ -5236,16 +5273,16 @@ async function renderWarehouse(sb){
     const wc=document.getElementById('whContent');
     if(!wc)return;
     if(tab==='deposit'){
-      const items=Object.values(inv).filter(i=>!i.isSubjBox)
+      const items=whFilterItems(Object.values(inv).filter(i=>!i.isSubjBox))
         .sort((a,b)=>GRADE_ORDER_W.indexOf(a.grade)-GRADE_ORDER_W.indexOf(b.grade));
       wc.innerHTML=items.length===0
-        ?'<div style="color:var(--tx3);font-size:11px;padding:12px;text-align:center">인벤에 맡길 아이템 없음</div>'
+        ?'<div style="color:var(--tx3);font-size:11px;padding:12px;text-align:center">아이템 없음</div>'
         :`<div style="display:flex;flex-direction:column;gap:4px">${items.map(it=>whCard(it,`<button class="btn btn-blue btn-xs" style="white-space:nowrap" onclick="whDeposit('${it.id}')">창고↓</button>`)).join('')}</div>`;
     }else{
-      const items=Object.values(warehouse)
+      const items=whFilterItems(Object.values(warehouse))
         .sort((a,b)=>GRADE_ORDER_W.indexOf(a.grade)-GRADE_ORDER_W.indexOf(b.grade));
       wc.innerHTML=items.length===0
-        ?'<div style="color:var(--tx3);font-size:11px;padding:12px;text-align:center">창고가 비어 있습니다</div>'
+        ?'<div style="color:var(--tx3);font-size:11px;padding:12px;text-align:center">아이템 없음</div>'
         :`<div style="display:flex;flex-direction:column;gap:4px">${items.map(it=>whCard(it,`<button class="btn btn-green btn-xs" style="white-space:nowrap" onclick="whWithdraw('${it.id}')">인벤↑</button>`)).join('')}</div>`;
     }
   };
