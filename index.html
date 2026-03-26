@@ -2309,7 +2309,9 @@ function openIM(it){
     window.applyEnchantScroll=async function(scrollId,slotKey){
       const sc=inv[scrollId];if(!sc)return;
       const eq=char.equipment[slotKey];if(!eq||eq.grade==='set'){toast('유일 장비에는 인챈트 불가');return;}
-      if(!confirm(`[${typeLabel}] ${enchData?.n} 인챈트를\n${eq.name}에 부여합니까?\n성공 확률: ${Math.round(successRate*100)}%`))return;
+      const existing=isPrefix?eq.prefix:eq.suffix;
+      const overwriteWarn=existing?`\n⚠️ 기존 [${existing.n}] 인챈트가 사라집니다!`:'';
+      if(!confirm(`[${typeLabel}] ${enchData?.n} 인챈트를\n${eq.name}에 부여합니까?${overwriteWarn}\n성공 확률: ${Math.round(successRate*100)}%`))return;
       delete inv[scrollId];
       if(Math.random()>successRate){
         toast(`💨 인챈트 실패... 스크롤 소모`,3000);
