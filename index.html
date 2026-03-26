@@ -3217,14 +3217,6 @@ async function renderAuction(sb){
     renderAuctionTab('mine');
   };
 
-  window.adminDeleteAuction=async function(lid){
-    if(!isAdmin){toast('관리자 권한 필요');return;}
-    if(!confirm('⚠️ 관리자: 이 경매 항목을 강제 삭제하시겠습니까?\n(아이템은 판매자에게 반환되지 않습니다)'))return;
-    await set(ref(db,`auction/${lid}/status`),'admin_deleted');
-    toast('✅ 경매 항목 삭제 완료');
-    renderAuctionTab('browse');
-  };
-
   window.buyAuction=async function(lid){
     const sn=await get(ref(db,`auction/${lid}`));const v=sn.val();
     if(!v||v.status!=='active'){toast('이미 거래 완료된 항목');renderAuctionTab('browse');return;}
@@ -3267,6 +3259,16 @@ window.closeTownSec=()=>{
   document.getElementById('townmenu').style.display='grid';
   document.getElementById('townsec').style.display='none';
   if(_auctionUnsub){_auctionUnsub();_auctionUnsub=null;}
+};
+
+// ★ 관리자 경매 삭제 — renderAuction 바깥에 전역 정의
+window.adminDeleteAuction=async function(lid){
+  if(!isAdmin){toast('관리자 권한 필요');return;}
+  if(!confirm('⚠️ 관리자: 이 경매 항목을 강제 삭제하시겠습니까?\n(아이템은 판매자에게 반환되지 않습니다)'))return;
+  await set(ref(db,`auction/${lid}/status`),'admin_deleted');
+  toast('✅ 경매 항목 삭제 완료');
+  if(typeof renderAuctionTab==='function'&&document.getElementById('auctionContent'))renderAuctionTab('browse');
+  if(document.getElementById('adminAuctionList'))loadAdminAuction();
 };
 
 // ═══ DUNGEON ═══
@@ -5035,7 +5037,6 @@ window.loadAdminAuction=async function(){
 
 // ★ 루팡 확률 — DB에서 로드해서 모든 클라이언트에 실시간 반영
 let _lupangRate=0.001;
-get(ref(db,'admin/lupangRate')).then(sn=>{if(sn.val()!==null)_lupangRate=sn.val();});
 onValue(ref(db,'admin/lupangRate'),sn=>{if(sn.val()!==null)_lupangRate=sn.val();});
 window.adminSetLupangRate=async function(){
   if(!isAdmin)return;
@@ -6130,7 +6131,8 @@ window.buyFromMerchant=async(idx)=>{
  'adminResetAllPotions','adminResetRanking','adminMigrateSkills',
  'adminResetSubjugation','adminResetChamp','adminSendGift','adminHardReset',
  'adminSetLevel','banU','unban','delChat','clearChat',
- 'adminSendNotice','loadMonitor','loadAdminAuction','adminSetLupangRate'].forEach(fn=>{
+ 'adminSendNotice','loadMonitor','loadAdminAuction','adminSetLupangRate',
+ 'adminDeleteAuction'].forEach(fn=>{
   if(typeof window[fn]==='function')window[fn]=_adminGuard(window[fn]);
 });
 
