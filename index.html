@@ -2264,7 +2264,11 @@ function renderInv(){
   if(sortMode==='atk') fil.sort((a,b)=>((b.stats?.atk||0)+(b.prefix?.b?.atk||0))-((a.stats?.atk||0)+(a.prefix?.b?.atk||0)));
   else if(sortMode==='def') fil.sort((a,b)=>((b.stats?.def||0)+(b.prefix?.b?.def||0))-((a.stats?.def||0)+(a.prefix?.b?.def||0)));
   else if(sortMode==='grade') fil.sort((a,b)=>GRADE_ORDER.indexOf(a.grade)-GRADE_ORDER.indexOf(b.grade));
-  else fil.sort((a,b)=>(b.id||'').localeCompare(a.id||'')); // ★ newest: 최신이 위로
+  else{
+    // ★ newest: gId()의 앞 8자(타임스탬프 base36)만 비교해서 최신 먼저
+    const tsOf=id=>{try{return parseInt((id||'').slice(0,8),36);}catch{return 0;}};
+    fil.sort((a,b)=>tsOf(b.id)-tsOf(a.id));
+  }
   const gr=document.getElementById('invgrid');
   if(!fil.length){gr.innerHTML='<div class="iempty">🎒 아이템 없음</div>';return;}
   gr.innerHTML=fil.map(it=>{
