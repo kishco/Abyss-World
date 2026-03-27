@@ -1056,6 +1056,23 @@ const SKILLS={
     fx:(a,s)=>({dmg:(s?.matk||a)*0.6*(1+(s?.int||3)*0.008),hits:3,type:'ice',msg:'🌨 눈보라!'})},
   lifesteal:{name:'생명 흡수',icon:'🌟',desc:'공격시 HP 4% 흡수',base:0.06,type:'special',
     fx:(a,s)=>({dmg:a*1.0,heal:0.04,type:'holy',msg:'🌟 생명 흡수!'})},
+  // ─── 신규 스킬 ───
+  thunder_crash:{name:'낙뢰 강타',icon:'⚡',desc:'250% 번개 + 마비',base:0.04,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*2.5*(1+(s?.int||3)*0.008),stun:true,type:'lightning',msg:'⚡ 낙뢰 강타!'})},
+  soul_drain:{name:'영혼 흡수',icon:'💜',desc:'120% 어둠 + HP 3% 흡수',base:0.06,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*1.2*(1+(s?.int||3)*0.008),heal:0.03,type:'dark',msg:'💜 영혼 흡수!'})},
+  blood_rage:{name:'피의 광란',icon:'🩸',desc:'자신HP-15% 소모 후 200% 피해',base:0.05,type:'physical',
+    fx:(a,s)=>({dmg:a*2.0*(1+(s?.str||5)*0.005),selfDmg:0.15,type:'dark',msg:'🩸 피의 광란!'})},
+  armor_break:{name:'방어 붕괴',icon:'🔨',desc:'90% + 대상 DEF -30% 2턴',base:0.07,type:'physical',
+    fx:(a,s)=>({dmg:a*0.9*(1+(s?.str||5)*0.005),armorBreak:0.30,msg:'🔨 방어 붕괴!'})},
+  time_stop:{name:'시간 정지',icon:'⏱',desc:'피해 없음 + 2턴 마비',base:0.05,type:'special',
+    fx:(a,s)=>({dmg:0,stun:true,stunTurns:2,msg:'⏱ 시간 정지!'})},
+  void_nova:{name:'공허 폭발',icon:'🌌',desc:'MATK 기반 200% 범위',base:0.04,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*2.0*(1+(s?.int||3)*0.010),type:'arcane',aoe:true,msg:'🌌 공허 폭발!'})},
+  death_mark:{name:'죽음의 낙인',icon:'💀',desc:'50% + 3턴 독(매턴 10%)',base:0.06,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*0.5,dot:3,type:'poison',msg:'💀 죽음의 낙인!'})},
+  phantom_step:{name:'잔영 질주',icon:'👁',desc:'50% + 이번 턴 완전 회피',base:0.07,type:'special',
+    fx:(a,s)=>({dmg:a*0.5,buffDodge:100,msg:'👁 잔영 질주!'})},
 };
 
 // Enchants — 솔로 전용 (물리9/마법9 PRE, 물리9/마법8 SUF 밸런스)
@@ -1100,6 +1117,18 @@ const PRE=[
   {n:'민첩한',     attr:null,        b:{dex:3,spd:2},         sk:'evasion',        w:10},
   {n:'운명의',     attr:null,        b:{luk:4,crit:3},        sk:null,             w:4},
   {n:'서리의',     attr:'ice',       b:{def:4,dex:3},         sk:'ice_shard',      w:14},
+  // ─── 리스크형 고성능 (물리) ───
+  {n:'피에 굶주린',attr:'dark',      b:{atk:6,crit:4,hp:-40}, sk:'blood_rage',     w:5},  // 고딜+HP페널티
+  {n:'잔혹한',     attr:null,        b:{atk:9,def:-4,spd:-2}, sk:'armor_break',    w:4},  // 물리 고딜+방속페널티
+  {n:'광기어린',   attr:null,        b:{crit:8,atk:5,hp:-30}, sk:'berserk',        w:4},  // 크리특화+HP페널티
+  // ─── 리스크형 고성능 (마법) ───
+  {n:'영혼의',     attr:'dark',      b:{matk:7,int:2,hp:-30}, sk:'soul_drain',     w:6},  // 마법딜+HP페널티
+  {n:'낙뢰의',     attr:'lightning', b:{matk:6,int:2,def:-3}, sk:'thunder_crash',  w:5},  // 마법+방어페널티
+  {n:'죽음의',     attr:'poison',    b:{matk:8,int:3,spd:-3}, sk:'death_mark',     w:4},  // 독특화+속도페널티
+  // ─── 특수형 ───
+  {n:'시간의',     attr:null,        b:{dex:3,spd:5,def:-2},  sk:'time_stop',      w:5},  // 시간정지+방어페널티
+  {n:'잔영의',     attr:null,        b:{dex:5,spd:4,hp:-25},  sk:'phantom_step',   w:5},  // 완전회피+HP페널티
+  {n:'공허의',     attr:'dark',      b:{matk:9,int:4,hp:-50}, sk:'void_nova',      w:3},  // 범위마법+대형HP페널티
 ];
 const SUF=[
   // ─── 물리 딜러 (physical: ATK/STR/CRIT) — 9개 ───
@@ -1141,6 +1170,18 @@ const SUF=[
   {n:'행운',      b:{goldBonus:8,luk:3},         sk:null,             w:12},
   {n:'번영',      b:{goldBonus:10,luk:3},        sk:null,             w:8},
   {n:'전설급',    b:{str:3,dex:3,int:3,vit:3},   sk:null,             w:3},
+  // ─── 리스크형 고성능 (물리) ───
+  {n:'학살',      b:{atk:13,crit:5,hp:-60},      sk:'doom_strike',    w:3},  // 최고ATK+대형HP페널티
+  {n:'공격광',    b:{atk:9,str:3,def:-6},        sk:'berserk',        w:5},  // 공격특화+방어페널티
+  {n:'역습',      b:{atk:7,crit:5,spd:-4},       sk:'counter_strike', w:5},  // 반격특화+속도페널티
+  // ─── 리스크형 고성능 (마법) ───
+  {n:'낙뢰',      b:{matk:9,int:3,def:-4},       sk:'thunder_crash',  w:5},  // 마법+방어페널티
+  {n:'공허',      b:{matk:11,int:4,hp:-50},      sk:'void_nova',      w:3},  // 최고MATK+대형HP페널티
+  {n:'독아',      b:{matk:7,int:2,spd:-3},       sk:'death_mark',     w:5},  // 독특화+속도페널티
+  // ─── 특수형 ───
+  {n:'잔영',      b:{dex:5,spd:4,hp:-30},        sk:'phantom_step',   w:4},  // 완전회피+HP페널티
+  {n:'흡혼',      b:{matk:6,int:2,hp:-20},       sk:'soul_drain',     w:5},  // 영혼흡수+HP페널티
+  {n:'방어붕괴',  b:{atk:7,str:2,def:-5},        sk:'armor_break',    w:5},  // 방어붕괴+자신방패페널티
 ];
 // Weapon / Armor names (10 each)
 const WN={
@@ -2450,6 +2491,14 @@ const ENCHANT_TIER_MAP={
   '수호':1,'투지':1,'영원':2,'평온':2,'난공불락':5,'용기':2,
   '생명':1,'축복':2,'빛':2,'성스러움':4,'소생':2,
   '질풍':1,'민첩':2,'전설':3,'행운':1,'번영':2,'전설급':5,
+  // 접두 — 리스크형 고성능
+  '피에 굶주린':4,'잔혹한':4,'광기어린':4,
+  '영혼의':4,'낙뢰의':4,'죽음의':5,
+  '시간의':4,'잔영의':4,'공허의':5,
+  // 접미 — 리스크형 고성능
+  '학살':5,'공격광':4,'역습':3,
+  '낙뢰':4,'공허':5,'독아':3,
+  '잔영':4,'흡혼':3,'방어붕괴':3,
 };
 function getEnchantTier(enchantName){return ENCHANT_TIER_MAP[enchantName]||2;}
 
@@ -3508,13 +3557,70 @@ async function renderAuction(sb){
     const ac=document.getElementById('auctionContent');
     if(!ac)return;
     if(tab==='browse'){
-      ac.innerHTML=`<div style="font-size:11px;color:var(--tx3);text-align:center;padding:12px">불러오는 중...</div>`;
+      ac.innerHTML=`
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+          <select id="auc-cat" onchange="applyAuctionFilter()" style="flex:1;min-width:90px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
+            <option value="">전체 종류</option>
+            <option value="weapon">무기</option>
+            <option value="armor">방어구</option>
+            <option value="accessory">장신구</option>
+            <option value="set">유일</option>
+            <option value="scroll">인챈트 스크롤</option>
+          </select>
+          <select id="auc-grade" onchange="applyAuctionFilter()" style="flex:1;min-width:80px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
+            <option value="">전체 등급</option>
+            <option value="normal">노말</option>
+            <option value="uncommon">언커먼</option>
+            <option value="rare">레어</option>
+            <option value="epic">에픽</option>
+            <option value="legendary">레전더리</option>
+            <option value="set">유일</option>
+          </select>
+          <select id="auc-sort" onchange="applyAuctionFilter()" style="flex:1;min-width:80px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
+            <option value="newest">최신순</option>
+            <option value="price_asc">낮은가격</option>
+            <option value="price_desc">높은가격</option>
+            <option value="grade">등급순</option>
+          </select>
+        </div>
+        <div id="auc-list-wrap"><div style="font-size:11px;color:var(--tx3);text-align:center;padding:12px">불러오는 중...</div></div>`;
+      let _allListings=[];
+      window.applyAuctionFilter=function(){
+        const cat=document.getElementById('auc-cat')?.value||'';
+        const grade=document.getElementById('auc-grade')?.value||'';
+        const sort=document.getElementById('auc-sort')?.value||'newest';
+        const gradeOrder=['normal','uncommon','rare','epic','legendary','set'];
+        let filtered=_allListings.filter(([,v])=>{
+          const it=v.item||{};
+          const catOk=!cat
+            ||(cat==='weapon'&&it.slot==='weapon')
+            ||(cat==='armor'&&['head','chest','legs','boots','offhand','neck'].includes(it.slot))
+            ||(cat==='accessory'&&it.slot==='accessory')
+            ||(cat==='set'&&it.grade==='set')
+            ||(cat==='scroll'&&(it.isEnchantScroll||it.isScroll));
+          const gradeOk=!grade||it.grade===grade;
+          return catOk&&gradeOk;
+        });
+        if(sort==='price_asc')filtered.sort((a,b)=>(a[1].price||0)-(b[1].price||0));
+        else if(sort==='price_desc')filtered.sort((a,b)=>(b[1].price||0)-(a[1].price||0));
+        else if(sort==='grade')filtered.sort((a,b)=>gradeOrder.indexOf(b[1].item?.grade)-gradeOrder.indexOf(a[1].item?.grade));
+        renderAuctionList(filtered);
+      };
       try{
         const sn=await get(ref(db,'auction'));
         const all=sn.val()||{};
-        const listings=Object.entries(all).filter(([,v])=>v&&v.status==='active'&&v.item);
+        _allListings=Object.entries(all).filter(([,v])=>v&&v.status==='active'&&v.item);
+        window.applyAuctionFilter();
+      }catch(err){
+        console.error('auction browse error:',err);
+        const w=document.getElementById('auc-list-wrap');
+        if(w)w.innerHTML=`<div style="color:var(--red);font-size:11px;padding:12px">경매 목록을 불러오는데 실패했습니다. 새로고침해주세요.</div>`;
+      }
+      // renderAuctionList — 필터 적용 후 목록 그리기
+      function renderAuctionList(listings){
+        const w=document.getElementById('auc-list-wrap');if(!w)return;
         if(!listings.length){
-          ac.innerHTML=`<div style="font-size:11.5px;color:var(--tx3);text-align:center;padding:24px">등록된 경매 없음</div>`;
+          w.innerHTML=`<div style="font-size:11.5px;color:var(--tx3);text-align:center;padding:24px">조건에 맞는 경매 없음</div>`;
           return;
         }
         let html='<div style="display:flex;flex-direction:column;gap:6px">';
@@ -3525,16 +3631,19 @@ async function renderAuction(sb){
             const gradeColor=GRADES[it.grade]?.color||'#9d9d9d';
             const gradeName=GRADES[it.grade]?.name||it.grade||'기타';
             const price=v.price||0;
-            // 스탯 합산
             const ts={...(it.stats||{})};
             for(const enc of[it.prefix,it.suffix]){
               if(!enc||!enc.b)continue;
               for(const[k,val]of Object.entries(enc.b)){
                 if(!isFinite(val)||Math.abs(val)>9999)continue;
-                if(['atk','def','hp','spd','crit'].includes(k))ts[k]=(ts[k]||0)+val;
+                if(['atk','matk','def','hp','spd','crit','balance'].includes(k))ts[k]=(ts[k]||0)+val;
+                if(k==='str')ts.atk=(ts.atk||0)+Math.round(val*1.5);
+                if(k==='int')ts.matk=(ts.matk||0)+Math.round(val*1.5);
+                if(k==='dex'){ts.spd=(ts.spd||0)+Math.round(val*0.8);ts.crit=(ts.crit||0)+Math.round(val*0.25);}
+                if(k==='vit'){ts.hp=(ts.hp||0)+Math.round(val*6);ts.def=(ts.def||0)+Math.round(val*0.6);}
               }
             }
-            const statStr=Object.entries(ts).filter(([k,v2])=>v2>0&&['atk','def','hp','spd','crit'].includes(k)).map(([k,v2])=>`${k.toUpperCase()}+${v2}`).join(' ');
+            const statStr=Object.entries(ts).filter(([k,v2])=>v2>0&&['atk','matk','def','hp','spd','crit'].includes(k)).map(([k,v2])=>`${k.toUpperCase()}+${v2}`).join(' ');
             html+=`<div style="background:var(--sf2);border:1px solid ${isMine?'rgba(240,192,64,.3)':'var(--bd)'};border-radius:8px;padding:10px 12px">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
                 <div style="flex:1;min-width:0">
@@ -3559,7 +3668,6 @@ async function renderAuction(sb){
                   </div>`:''}
                   ${!it.isEnchantScroll&&(it.prefix||it.suffix)?`<div style="font-size:9.5px;color:var(--tx3);margin-bottom:2px">${it.prefix?`[접두:${it.prefix.n}]`:''} ${it.suffix?`[접미:${it.suffix.n}]`:''}</div>`:''}
                   ${(()=>{
-                    // ★ 일반 장비 스킬 표시
                     if(it.isEnchantScroll)return '';
                     const skList=[];
                     for(const enc of[it.prefix,it.suffix]){
@@ -3586,10 +3694,7 @@ async function renderAuction(sb){
           }catch(itemErr){console.warn('auction item render error:',itemErr);}
         }
         html+='</div>';
-        ac.innerHTML=html;
-      }catch(err){
-        console.error('auction browse error:',err);
-        ac.innerHTML=`<div style="color:var(--red);font-size:11px;padding:12px">경매 목록을 불러오는데 실패했습니다. 새로고침해주세요.</div>`;
+        w.innerHTML=html;
       }
     }else if(tab==='mine'){
       const sn=await get(ref(db,'auction'));const all=sn.val()||{};
@@ -4519,8 +4624,13 @@ function trySkillProc(p,s,target,allM){
           blogAdd(`<span class="l-skill">❄ ${target.name} 둔화! ATK -${target._spdDebuff*12}%</span>`);
         }
         if(fx.stun&&target.status==='alive'){
-          target._stunned=1;
-          blogAdd(`<span class="l-skill">🧊 ${target.name} 마비!</span>`);
+          target._stunned=fx.stunTurns||1;
+          blogAdd(`<span class="l-skill">🧊 ${target.name} ${target._stunned}턴 마비!</span>`);
+        }
+        if(fx.armorBreak&&target.status==='alive'){
+          target._armorBroken=(target._armorBroken||0)+1;
+          target.def=Math.max(0,Math.round((target.def||0)*(1-fx.armorBreak)));
+          blogAdd(`<span class="l-skill">🔨 ${target.name} DEF -${Math.round(fx.armorBreak*100)}%!</span>`);
         }
         if(fx.heal){const hm=Math.round(p.maxHp*fx.heal);p.hp=Math.min(p.hp+hm,p.maxHp);blogAdd(`<span class="l-heal"> 흡수 +${hm}HP</span>`);}
         if(fx.selfDmg){const sd=Math.round(p.maxHp*fx.selfDmg);p.hp=Math.max(1,p.hp-sd);blogAdd(`<span class="l-dmg"> 자신에게 -${sd}</span>`);}
@@ -6434,7 +6544,7 @@ window.enterSubjBattle=function(){
     let defending=false;
     if(action==='attack'){
       const wt=getWeaponTraits(char.equipment||{});
-      let baseDmg=wt.isStaff?s.matk*(1+(s.int||3)*0.004):wt.isBow?s.atk*(1+(s.dex||5)*0.004):wt.isDagger||wt.isDual?s.atk*(1+((s.dex||5)+(s.str||5))*0.003):s.atk*(1+(s.str||5)*0.003);
+      let baseDmg=wt.isStaff?s.matk*(1+(s.int||3)*0.004):wt.isDualgun?s.matk*(1+(s.int||3)*0.004+(s.spd||5)*0.002):wt.isBow?s.atk*(1+(s.dex||5)*0.004):wt.isDagger||wt.isDual?s.atk*(1+((s.dex||5)+(s.str||5))*0.003):s.atk*(1+(s.str||5)*0.003);
       let dmg=Math.max(1,Math.round(baseDmg-boss.def*0.3));
       const variance=Math.round(dmg*0.15);dmg=Math.max(1,dmg+rand(-variance,variance));
       const critBonus=wt.isDagger?5:0;
@@ -6576,10 +6686,53 @@ async function renderChamp(){
         <span style="color:var(--gold)">챔프</span>는 채팅에서 <span style="color:var(--red);font-weight:700">붉은 이름</span>으로 표시됩니다.
       </div>
       ${champ?`
-      <div style="background:rgba(0,0,0,.3);border:1px solid rgba(232,68,68,.3);border-radius:8px;padding:10px 14px;margin-bottom:12px">
+      <div style="background:rgba(0,0,0,.3);border:1px solid rgba(232,68,68,.3);border-radius:8px;padding:12px 14px;margin-bottom:12px">
         <div style="font-size:10px;color:var(--tx3);margin-bottom:4px">현재 챔프</div>
-        <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--red)">⚔ ${champ.name}</div>
-        <div style="font-size:10px;color:var(--tx2);margin-top:3px">연승: <b style="color:var(--gold)">${champ.streak||0}연승</b> · ATK ${champ.stats?.atk||'?'} · HP ${champ.stats?.maxHp||'?'}</div>
+        <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">⚔ ${champ.name} · <span style="font-size:11px;color:var(--gold)">${champ.streak||0}연승</span> · <span style="font-size:10px;color:var(--tx3)">Lv.${champ.level||'?'}</span></div>
+        <!-- 파생 스탯 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:8px">
+          ${(()=>{
+            const cs2=champ.stats||{};
+            const isMag=champ.isMagicWeapon||false;
+            const rows=[
+              ['❤️ HP', cs2.maxHp||'?'],
+              [isMag?'🔮 MATK':'⚔️ ATK', isMag?(cs2.matk||'?'):(cs2.atk||'?')],
+              ['🛡 DEF', cs2.def||'?'],
+              ['💨 SPD', cs2.spd||'?'],
+              ['💥 CRIT', (cs2.crit||'?')+'%'],
+              ['🌀 회피', (cs2.dodge||0)+'%'],
+            ];
+            return rows.map(([k,v])=>`
+              <div style="background:var(--sf3);border:1px solid var(--bd);border-radius:5px;padding:4px 7px">
+                <div style="font-size:9px;color:var(--tx3)">${k}</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--tx)">${v}</div>
+              </div>`).join('');
+          })()}
+        </div>
+        <!-- 장비 목록 -->
+        ${(()=>{
+          const eq=champ.equipment||{};
+          const slotLabel={head:'머리',neck:'목',chest:'상의',legs:'하의',boots:'신발',weapon:'무기',offhand:'보조',accessory1:'장신구1',accessory2:'장신구2',accessory3:'장신구3'};
+          const slots=Object.entries(eq).filter(([,it])=>it);
+          if(!slots.length)return'';
+          return`<div style="font-size:9px;color:var(--tx3);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase">장비</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            ${slots.map(([sl,it])=>{
+              const enh=(it.enhance||0)>0?`<span style="color:var(--gold);font-size:9px">+${it.enhance}</span> `:'';
+              const enc=[it.prefix?.n,it.suffix?.n].filter(Boolean).join(' / ');
+              const statStr=Object.entries(it.stats||{}).filter(([,v])=>v>0&&['atk','matk','def','hp','spd','crit'].includes(v===undefined?'':'')).slice(0,3)
+                .map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' ');
+              // properly filter stats
+              const stats2=Object.entries(it.stats||{}).filter(([k,v])=>v>0&&['atk','matk','def','hp','spd','crit'].includes(k)).map(([k,v])=>`${k.toUpperCase()}+${v}`).join(' ');
+              return`<div style="display:flex;align-items:center;gap:5px;font-size:10px;padding:3px 6px;background:var(--sf3);border-radius:4px">
+                <span style="color:var(--tx3);font-size:9px;min-width:28px">${slotLabel[sl]||sl}</span>
+                <span class="g-${it.grade}" style="font-size:10px">${enh}${it.name}</span>
+                ${stats2?`<span style="color:var(--tx3);font-size:9px;margin-left:auto">${stats2}</span>`:''}
+                ${enc?`<span style="color:var(--purple);font-size:8.5px">[${enc}]</span>`:''}
+              </div>`;
+            }).join('')}
+          </div>`;
+        })()}
       </div>`:`
       <div style="background:rgba(68,212,136,.05);border:1px solid rgba(68,212,136,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--green)">
         👑 현재 챔프가 없습니다! 지금 도전하면 바로 챔프가 됩니다!
@@ -6621,11 +6774,13 @@ window.enterChampBattle=async function(){
   // If no champ, just become champ
   if(!champ){
     const myStats=calcStats(char);
+    const myWt=getWeaponTraits(char.equipment||{});
     await set(ref(db,'champ/current'),{
       name:char.name,charId,streak:1,
       stats:myStats,equipment:char.equipment,
       str:char.str,dex:char.dex,int:char.int,vit:char.vit,luk:char.luk,
-      baseAtk:char.baseAtk||8,baseDef:char.baseDef||3,baseSpd:char.baseSpd||8,
+      baseAtk:char.baseAtk||8,baseDef:char.baseDef||3,baseSpd:char.baseSpd||8,baseMatk:char.baseMatk||0,
+      isMagicWeapon:(myWt.isStaff||myWt.isDualgun)||false,
       maxHp:myStats.maxHp,level:char.level,ts:Date.now()
     });
     // Record win streak
@@ -6729,7 +6884,7 @@ window.enterChampBattle=async function(){
     let defending=false;
     if(action==='attack'){
       const wt=getWeaponTraits(char.equipment||{});
-      let baseDmg=wt.isStaff?s.matk*(1+(s.int||3)*0.004):wt.isBow?s.atk*(1+(s.dex||5)*0.004):wt.isDagger||wt.isDual?s.atk*(1+((s.dex||5)+(s.str||5))*0.003):s.atk*(1+(s.str||5)*0.003);
+      let baseDmg=wt.isStaff?s.matk*(1+(s.int||3)*0.004):wt.isDualgun?s.matk*(1+(s.int||3)*0.004+(s.spd||5)*0.002):wt.isBow?s.atk*(1+(s.dex||5)*0.004):wt.isDagger||wt.isDual?s.atk*(1+((s.dex||5)+(s.str||5))*0.003):s.atk*(1+(s.str||5)*0.003);
       let dmg=Math.max(1,Math.round(baseDmg-cs.def*0.4));
       const v=Math.round(dmg*0.12);dmg=Math.max(1,dmg+rand(-v,v));
       const critBonus=wt.isDagger?5:0;
@@ -6767,11 +6922,13 @@ window.enterChampBattle=async function(){
       await set(oldWinsRef,Math.max(oldWSnap.val()||0, oldChampFinalStreak));
       // 새 챔프 등극 (streak:1로 시작)
       const myStats2=calcStats(char);
+      const myWt2=getWeaponTraits(char.equipment||{});
       await set(ref(db,'champ/current'),{
         name:char.name,charId,streak:1,
         stats:myStats2,equipment:char.equipment,
         str:char.str,dex:char.dex,int:char.int,vit:char.vit,luk:char.luk,
-        baseAtk:char.baseAtk||8,baseDef:char.baseDef||3,baseSpd:char.baseSpd||8,
+        baseAtk:char.baseAtk||8,baseDef:char.baseDef||3,baseSpd:char.baseSpd||8,baseMatk:char.baseMatk||0,
+        isMagicWeapon:(myWt2.isStaff||myWt2.isDualgun)||false,
         maxHp:myStats2.maxHp,level:char.level,ts:Date.now()
       });
       // 새 챔프 역대 최고 연승 기록 — 처음이면 1, 이전 기록보다 높으면 갱신
@@ -6782,8 +6939,16 @@ window.enterChampBattle=async function(){
       toast('🥊 챔프 등극!',4000);
       renderChampBattle();return;
     }
-    // Champ counter-attack
-    let cDmg=Math.max(1,Math.round(cs.atk*100/(100+s.def)));
+    // Champ counter-attack — 마법 무기 챔프면 MATK 기준
+    const champIsMagic=champ.isMagicWeapon||false;
+    let cDmg;
+    if(champIsMagic){
+      // 마법 챔프: MATK 기준 딜
+      const cMatk=cs.matk||cs.atk||10;
+      cDmg=Math.max(1,Math.round(cMatk*100/(100+s.def)));
+    }else{
+      cDmg=Math.max(1,Math.round(cs.atk*100/(100+s.def)));
+    }
     const cv=Math.round(cDmg*0.15);cDmg=Math.max(1,cDmg+rand(-cv,cv));
     if(defending)cDmg=Math.round(cDmg*0.5);
     const cCrit=Math.random()*100<cs.crit;
@@ -6817,7 +6982,8 @@ window.enterChampBattle=async function(){
   };
 
   clog(`<span class="l-sys">🥊 챔프전 시작! vs ${champ.name} (Lv.${champ.level||'?'})</span>`);
-  clog(`<span class="l-sys">챔프 스탯 — ATK:${cs.atk} DEF:${cs.def} HP:${cs.maxHp}</span>`);
+  const _champIsMag=champ.isMagicWeapon||false;
+  clog(`<span class="l-sys">챔프 스탯 — ${_champIsMag?'MATK':'ATK'}:${_champIsMag?(cs.matk||0):cs.atk} DEF:${cs.def} HP:${cs.maxHp}</span>`);
   clog(`<span class="l-sys">내 스탯 — ATK:${s.atk} DEF:${s.def} HP:${s.maxHp}</span>`);
   renderChampBattle();
 };
