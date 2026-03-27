@@ -391,11 +391,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <!-- CHAR SELECT -->
 <div id="charScr">
   <div class="ctitle">ABYSS WORLD</div>
-  <div class="csub">캐릭터를 선택하거나 생성하세요</div>
+  <div class="csub">모험가 이름을 입력하세요</div>
   <div class="clist" id="charList"></div>
   <div class="cnew">
     <div style="font-family:'Cinzel',serif;font-size:10.5px;color:var(--tx3);margin-bottom:7px;letter-spacing:1px">NEW ADVENTURER</div>
-    <input class="cinput" id="newCharName" placeholder="캐릭터 이름" maxlength="12"/>
+    <input class="cinput" id="newCharName" placeholder="캐릭터 이름 (2~12자)" maxlength="12"/>
     <button class="ccbtn" id="createCharBtn">⚔ 생성</button>
   </div>
   <div class="clogout" id="clogout">로그아웃</div>
@@ -436,24 +436,30 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <span style="font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:3px 10px;border-radius:5px;font-weight:700">v2.2 콘텐츠 패치</span>
     </div>
 
-    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:6px">⚡ 신규 스킬 8종 추가</div>
+    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:6px">⚡ 신규 스킬 11종 추가</div>
     <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      <span style="color:var(--purple)">낙뢰 강타</span> — 250% 마법 + 마비 <span style="color:var(--tx3);font-size:10px">/ 발동 4%</span><br>
-      <span style="color:var(--purple)">공허 폭발</span> — 200% MATK 범위 공격 (살아있는 전체 몹 여파) <span style="color:var(--tx3);font-size:10px">/ 발동 4%</span><br>
-      <span style="color:var(--purple)">영혼 흡수</span> — 120% 어둠 + HP 3% 흡수 <span style="color:var(--tx3);font-size:10px">/ 발동 6%</span><br>
-      <span style="color:var(--red)">피의 광란</span> — 자신 HP-15% 소모 후 200% 피해 <span style="color:var(--tx3);font-size:10px">/ 발동 5%</span><br>
-      <span style="color:var(--red)">방어 붕괴</span> — 90% + 대상 DEF -30% <span style="color:var(--tx3);font-size:10px">/ 발동 7%</span><br>
-      <span style="color:var(--green)">시간 정지</span> — 피해 없음 + 2턴 마비 <span style="color:var(--tx3);font-size:10px">/ 발동 4%</span><br>
-      <span style="color:var(--green)">잔영 질주</span> — 50% + 회피+60 <span style="color:var(--tx3);font-size:10px">/ 발동 6%</span><br>
-      <span style="color:var(--purple)">죽음의 낙인</span> — 50% + 3턴 강화독 <span style="color:var(--tx3);font-size:10px">/ 발동 6%</span>
+      <b style="color:var(--tx3)">물리 범위</b><br>
+      <span style="color:var(--gold)">회오리 베기</span> — 120% ATK 전체 공격 <span style="color:var(--tx3);font-size:10px">/ 발동 8%</span><br>
+      <span style="color:var(--gold)">강격 휘두르기</span> — 150% ATK 전체 + 방어무시 <span style="color:var(--tx3);font-size:10px">/ 발동 7%</span><br>
+      <span style="color:var(--gold)">대지 강타</span> — 180% + 1턴 마비 <span style="color:var(--tx3);font-size:10px">/ 발동 5%</span><br>
+      <b style="color:var(--tx3)">마법</b><br>
+      <span style="color:var(--purple)">낙뢰 강타</span> — 250% 번개 + 마비 <span style="color:var(--tx3);font-size:10px">/ 발동 4%</span> &nbsp;
+      <span style="color:var(--purple)">공허 폭발</span> — 200% 범위 <span style="color:var(--tx3);font-size:10px">/ 발동 4%</span><br>
+      <span style="color:var(--purple)">영혼 흡수</span> — 120% + HP 흡수 <span style="color:var(--tx3);font-size:10px">/ 발동 6%</span> &nbsp;
+      <span style="color:var(--purple)">죽음의 낙인</span> — 3턴 강화독 <span style="color:var(--tx3);font-size:10px">/ 발동 6%</span><br>
+      <b style="color:var(--tx3)">물리/특수</b><br>
+      <span style="color:var(--red)">피의 광란</span> — HP-15% 소모 후 200% <span style="color:var(--tx3);font-size:10px">/ 발동 5%</span> &nbsp;
+      <span style="color:var(--red)">방어 붕괴</span> — DEF -30% <span style="color:var(--tx3);font-size:10px">/ 발동 7%</span><br>
+      <span style="color:var(--green)">시간 정지</span> — 2턴 마비 <span style="color:var(--tx3);font-size:10px">/ 발동 4%</span> &nbsp;
+      <span style="color:var(--green)">잔영 질주</span> — 회피+60 <span style="color:var(--tx3);font-size:10px">/ 발동 6%</span>
     </div>
 
-    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">📜 신규 인챈트 18종 — 리스크형 고성능</div>
+    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">📜 인챈트 대폭 확충 — 초보자~전설급</div>
     <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      높은 공격력 대신 <b style="color:var(--red)">HP · 방어 · 속도 페널티</b>를 감수하는 고성능 인챈트가 추가되었습니다.<br>
-      <span style="color:var(--tx3)">접두:</span> <span style="color:var(--gold)">피에 굶주린 · 잔혹한 · 광기어린 · 영혼의 · 낙뢰의 · 죽음의 · 시간의 · 잔영의 · 공허의</span><br>
-      <span style="color:var(--tx3)">접미:</span> <span style="color:var(--gold)">학살 · 공격광 · 역습 · 낙뢰 · 공허 · 독아 · 잔영 · 흡혼 · 방어붕괴</span><br>
-      <span style="font-size:10px;color:var(--tx3)">고급(T4)~전설(T5) 등급 스크롤 또는 에픽 이상 장비 드랍으로 획득 가능</span>
+      <b style="color:var(--green)">T1 초보 인챈트</b> — 전사의 · 수련자의 · 수호병의 · 건강한 · 재빠른 · 마법사의 · 공격 · 방어 · 생기 · 강화 · 마력강화<br>
+      <b style="color:var(--blue)">T1~T3 범위기 인챈트</b> — 회오리 · 전장의 · 대지의 / 회전 · 참격 · 진동 (범위 스킬 전용)<br>
+      <b style="color:var(--red)">T3~T5 리스크 인챈트</b> — 피에 굶주린 · 잔혹한 · 학살 · 공허 등 고성능+패널티 18종<br>
+      <span style="font-size:10px;color:var(--tx3)">초보자는 T1 스크롤부터 시작 · 고티어 던전 클리어 후 고급 인챈트 도전 추천</span>
     </div>
 
     <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🏛️ 경매장 카테고리 필터 추가</div>
@@ -1072,6 +1078,15 @@ const SKILLS={
     fx:(a,s)=>({dmg:(s?.matk||a)*0.5,dot:3,type:'poison',msg:'💀 죽음의 낙인!'})},
   phantom_step:{name:'잔영 질주',icon:'👁',desc:'50% + 이번 턴 회피+60',base:0.06,type:'special',
     fx:(a,s)=>({dmg:a*0.5,buffDodge:60,msg:'👁 잔영 질주!'})},  // 완전회피 → 60으로 조정
+  // ─── 물리 범위 스킬 ───
+  whirlwind:{name:'회오리 베기',icon:'🌀',desc:'120% ATK 전체 공격',base:0.08,type:'physical',
+    fx:(a,s)=>({dmg:a*1.2*(1+(s?.str||5)*0.004),aoe:true,msg:'🌀 회오리 베기!'})},
+  cleave:{name:'강격 휘두르기',icon:'⚔',desc:'150% ATK + 방어 무시',base:0.07,type:'physical',
+    fx:(a,s)=>({dmg:a*1.5*(1+(s?.str||5)*0.005),ignoreDef:true,aoe:true,msg:'⚔ 강격 휘두르기!'})},
+  ground_slam:{name:'대지 강타',icon:'💢',desc:'180% + 1턴 마비',base:0.05,type:'physical',
+    fx:(a,s)=>({dmg:a*1.8*(1+(s?.str||5)*0.005),stun:true,aoe:true,msg:'💢 대지 강타!'})},
+  arcane_wave:{name:'마력 파동',icon:'🌊',desc:'100% MATK 전체 공격',base:0.09,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*1.0*(1+(s?.int||3)*0.006),aoe:true,msg:'🌊 마력 파동!'})},
 };
 
 // Enchants — 솔로 전용 (물리9/마법9 PRE, 물리9/마법8 SUF 밸런스)
@@ -1116,6 +1131,17 @@ const PRE=[
   {n:'민첩한',     attr:null,        b:{dex:3,spd:2},         sk:'evasion',        w:10},
   {n:'운명의',     attr:null,        b:{luk:4,crit:3},        sk:null,             w:4},
   {n:'서리의',     attr:'ice',       b:{def:4,dex:3},         sk:'ice_shard',      w:14},
+  // ─── 뉴비 T1 (단순·명확한 효과) ───
+  {n:'전사의',     attr:null,        b:{atk:3},               sk:null,             w:18},
+  {n:'수련자의',   attr:null,        b:{str:2},               sk:null,             w:18},
+  {n:'수호병의',   attr:null,        b:{def:4},               sk:null,             w:16},
+  {n:'건강한',     attr:null,        b:{hp:18,vit:2},         sk:null,             w:16},
+  {n:'재빠른',     attr:null,        b:{spd:3,dex:1},         sk:null,             w:15},
+  {n:'마법사의',   attr:null,        b:{matk:3},              sk:null,             w:16},
+  {n:'파동의',     attr:null,        b:{matk:3,int:1},        sk:'arcane_wave',    w:14}, // T1 마법 범위
+  // ─── T1~2 물리 범위 스킬 인챈트 ───  {n:'회오리',     attr:null,        b:{atk:3,str:1},         sk:'whirlwind',      w:13},
+  {n:'전장의',     attr:null,        b:{atk:4,str:2},         sk:'cleave',         w:10},
+  {n:'대지의',     attr:null,        b:{atk:5,vit:2},         sk:'ground_slam',    w:8},
   // ─── 리스크형 고성능 (물리) ───
   {n:'피에 굶주린',attr:'dark',      b:{atk:6,crit:4,hp:-40}, sk:'blood_rage',     w:5},  // 고딜+HP페널티
   {n:'잔혹한',     attr:null,        b:{atk:9,def:-4,spd:-2}, sk:'armor_break',    w:4},  // 물리 고딜+방속페널티
@@ -1169,6 +1195,17 @@ const SUF=[
   {n:'행운',      b:{goldBonus:8,luk:3},         sk:null,             w:12},
   {n:'번영',      b:{goldBonus:10,luk:3},        sk:null,             w:8},
   {n:'전설급',    b:{str:3,dex:3,int:3,vit:3},   sk:null,             w:3},
+  // ─── 뉴비 T1 (단순·명확한 효과) ───
+  {n:'공격',      b:{atk:4},                     sk:null,             w:18},
+  {n:'방어',      b:{def:4},                     sk:null,             w:18},
+  {n:'생기',      b:{hp:20},                     sk:null,             w:16},
+  {n:'강화',      b:{str:2,def:2},               sk:null,             w:15},
+  {n:'마력강화',  b:{matk:4},                    sk:null,             w:16},
+  {n:'파동',      b:{matk:3,int:1},              sk:'arcane_wave',    w:14}, // T1 마법 범위
+  // ─── T1~2 물리 범위 스킬 인챈트 ───
+  {n:'회전',      b:{atk:3,str:1},               sk:'whirlwind',      w:13},
+  {n:'참격',      b:{atk:5,str:2},               sk:'cleave',         w:10},
+  {n:'진동',      b:{atk:4,vit:2},               sk:'ground_slam',    w:8},
   // ─── 리스크형 고성능 (물리) ───
   {n:'학살',      b:{atk:13,crit:5,hp:-60},      sk:'doom_strike',    w:3},  // 최고ATK+대형HP페널티
   {n:'공격광',    b:{atk:9,str:3,def:-6},        sk:'berserk',        w:5},  // 공격특화+방어페널티
@@ -1780,28 +1817,29 @@ async function loadChars(){
   const snap=await get(ref(db,'chars'));
   const all=snap.val()||{};
   const mine=Object.entries(all).filter(([,c])=>c.owner===curUser.uid).map(([id,c])=>({...c,id}));
+  // ★ 계정당 캐릭터 1개 제한 — 이미 있으면 바로 입장
+  if(mine.length>0){
+    selChar(mine[0].id);
+    return;
+  }
+  // 캐릭터 없으면 생성 화면
   document.getElementById('charScr').classList.add('open');
-  const cl=document.getElementById('charList');
-  cl.innerHTML=mine.map(c=>`<div class="ccard" data-id="${c.id}"><div class="ccname">${c.name}${curUser?.email===ADMIN_EMAIL?` <span style="font-size:8px;color:var(--gold);background:rgba(240,192,64,.15);border:1px solid rgba(240,192,64,.3);padding:1px 4px;border-radius:3px">ADMIN</span>`:''}</div><div class="ccinfo">Lv.${c.level}<br>💰${c.gold}</div><button class="ccdel" data-del="${c.id}">삭제</button></div>`).join('');
-  cl.querySelectorAll('.ccard').forEach(el=>el.addEventListener('click',e=>{if(e.target.dataset.del)return;selChar(el.dataset.id);}));
-  cl.querySelectorAll('[data-del]').forEach(btn=>btn.addEventListener('click',async e=>{
-    e.stopPropagation();
-    const delId=btn.dataset.del;
-    const charData=mine.find(c=>c.id===delId);
-    const charName=charData?.name||'';
-    const input=prompt(`⚠️ 캐릭터를 삭제하려면 캐릭터 이름을 입력하세요.\n\n캐릭터명: "${charName}"\n\n삭제 시 모든 데이터가 사라지며 복구 불가능합니다.`);
-    if(input===null)return; // 취소
-    if(input!==charName){toast('❌ 캐릭터 이름이 일치하지 않습니다.');return;}
-    await set(ref(db,`chars/${delId}`),null);
-    await set(ref(db,`inv/${delId}`),null);
-    await set(ref(db,`warehouse/${delId}`),null);
-    toast('캐릭터가 삭제되었습니다.');
-    loadChars();
-  }));
+  document.getElementById('charList').innerHTML='';
+  // 생성 폼만 표시 (기존 캐릭터 선택 UI 숨김)
+  document.getElementById('newCharName').focus();
 }
 document.getElementById('createCharBtn').onclick=async()=>{
   const n=document.getElementById('newCharName').value.trim();
   if(!n){toast('이름 입력');return;}
+  if(n.length<2||n.length>12){toast('이름은 2~12자');return;}
+  // ★ 중복 생성 방지 — 이미 캐릭터가 있으면 차단
+  const snap=await get(ref(db,'chars'));
+  const all=snap.val()||{};
+  const mine=Object.entries(all).filter(([,c])=>c.owner===curUser.uid);
+  if(mine.length>0){toast('⚠️ 이미 캐릭터가 존재합니다.');selChar(mine[0][0]);return;}
+  // 이름 중복 체크
+  const nameUsed=Object.values(all).some(c=>c.name===n);
+  if(nameUsed){toast('⚠️ 이미 사용 중인 이름입니다.');return;}
   const c=mkChar(n);charId=c.id;await set(ref(db,`chars/${charId}`),c);
   const si=genShopItem(SHOP_ITEMS[0]);await set(ref(db,`inv/${charId}/${si.id}`),si);selChar(charId);
 };
@@ -2490,6 +2528,12 @@ const ENCHANT_TIER_MAP={
   '수호':1,'투지':1,'영원':2,'평온':2,'난공불락':5,'용기':2,
   '생명':1,'축복':2,'빛':2,'성스러움':4,'소생':2,
   '질풍':1,'민첩':2,'전설':3,'행운':1,'번영':2,'전설급':5,
+  // 뉴비 T1
+  '전사의':1,'수련자의':1,'수호병의':1,'건강한':1,'재빠른':1,'마법사의':1,'파동의':1,
+  '공격':1,'방어':1,'생기':1,'강화':1,'마력강화':1,'파동':1,
+  // T1~2 범위 스킬
+  '회오리':1,'전장의':2,'대지의':3,
+  '회전':1,'참격':2,'진동':3,
   // 접두 — 리스크형 고성능
   '피에 굶주린':4,'잔혹한':4,'광기어린':4,
   '영혼의':4,'낙뢰의':4,'죽음의':5,
