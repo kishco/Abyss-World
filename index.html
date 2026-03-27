@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ABYSS WORLD 2.1 - 다크 판타지 RPG</title>
+<title>ABYSS WORLD 2.2 - 다크 판타지 RPG</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
@@ -16,7 +16,7 @@
 
 <!-- Open Graph (카카오톡·디스코드·SNS 링크 공유 미리보기) -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="ABYSS WORLD 2.1 — 다크 판타지 RPG">
+<meta property="og:title" content="ABYSS WORLD 2.2 — 다크 판타지 RPG">
 <meta property="og:description" content="설치 없이 브라우저에서 바로! 5개 던전, 토벌전, 챔프전, 유일 아이템, 99레벨 육성. 무료 온라인 텍스트 RPG.">
 <meta property="og:url" content="https://kishco.github.io/Abyss-World/">
 <meta property="og:locale" content="ko_KR">
@@ -24,7 +24,7 @@
 
 <!-- Twitter 카드 -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ABYSS WORLD 2.1 — 다크 판타지 RPG">
+<meta name="twitter:title" content="ABYSS WORLD 2.2 — 다크 판타지 RPG">
 <meta name="twitter:description" content="설치 없이 브라우저에서 바로! 5개 던전, 토벌전, 챔프전. 무료 온라인 텍스트 RPG.">
 
 <!-- 구글 검색엔진에 크롤링 허용 -->
@@ -288,7 +288,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   .tlogo{font-size:11px;letter-spacing:1px;padding-right:7px;margin-right:6px;}
   .tname{font-size:11px;}
   .tlo{padding:2px 5px;font-size:9px;}
-  /* v2.1 배지 모바일에서 숨김 */
+  /* v2.2 배지 모바일에서 숨김 */
   .v2badge{display:none!important;}
   /* 골드 폰트 살짝 줄임 */
   .tg{font-size:9.5px;}
@@ -370,7 +370,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div id="loginScr">
   <div class="lwrap">
     <div class="llogo">⚔ ABYSS WORLD</div>
-    <div class="lsub">DARK FANTASY RPG v2.1</div>
+    <div class="lsub">DARK FANTASY RPG v2.2</div>
     <div class="ltabs">
       <button class="ltab on" id="tlogin" onclick="swTab('login')">로그인</button>
       <button class="ltab" id="treg" onclick="swTab('register')">회원가입</button>
@@ -428,50 +428,49 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
 </div>
 
-<!-- 업데이트 팝업 v2.1 -->
+<!-- 업데이트 팝업 v2.2 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:500px;width:90%;max-height:88vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
-      <span style="font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:3px 10px;border-radius:5px;font-weight:700">v2.1 밸런스 패치</span>
+      <span style="font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:3px 10px;border-radius:5px;font-weight:700">v2.2 콘텐츠 패치</span>
     </div>
 
-    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:7px">🔫 신규 무기 — 듀얼건 추가</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      마법 원거리 2H 무기 <b style="color:var(--purple)">듀얼건</b>이 추가되었습니다!<br>
-      🔫 낡은듀얼건 / 불꽃듀얼건 / 냉기듀얼건 / 번개듀얼건 / 심연듀얼건 / 전설의듀얼건 등<br>
-      ✨ 공격력: <b style="color:var(--gold)">MATK + INT + SPD</b> 동시 반영<br>
-      ⚡ 마법 스킬 발동률 <b style="color:var(--gold)">+15%</b> (지팡이보다 5%p 높음)<br>
-      🛡 2H 무기 — 방패 착용 불가 · 지팡이보다 높은 순수 딜 특화
+    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:6px">⚡ 신규 스킬 8종 추가</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
+      <span style="color:var(--purple)">낙뢰 강타</span> — 250% 마법 + 마비 <span style="color:var(--tx3);font-size:10px">/ 발동 4%</span><br>
+      <span style="color:var(--purple)">공허 폭발</span> — 200% MATK 범위 공격 (살아있는 전체 몹 여파) <span style="color:var(--tx3);font-size:10px">/ 발동 4%</span><br>
+      <span style="color:var(--purple)">영혼 흡수</span> — 120% 어둠 + HP 3% 흡수 <span style="color:var(--tx3);font-size:10px">/ 발동 6%</span><br>
+      <span style="color:var(--red)">피의 광란</span> — 자신 HP-15% 소모 후 200% 피해 <span style="color:var(--tx3);font-size:10px">/ 발동 5%</span><br>
+      <span style="color:var(--red)">방어 붕괴</span> — 90% + 대상 DEF -30% <span style="color:var(--tx3);font-size:10px">/ 발동 7%</span><br>
+      <span style="color:var(--green)">시간 정지</span> — 피해 없음 + 2턴 마비 <span style="color:var(--tx3);font-size:10px">/ 발동 4%</span><br>
+      <span style="color:var(--green)">잔영 질주</span> — 50% + 회피+60 <span style="color:var(--tx3);font-size:10px">/ 발동 6%</span><br>
+      <span style="color:var(--purple)">죽음의 낙인</span> — 50% + 3턴 강화독 <span style="color:var(--tx3);font-size:10px">/ 발동 6%</span>
     </div>
 
-    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:7px">✨ 지팡이 상향</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      지팡이 기본 MATK가 대폭 상향되었습니다.<br>
-      기존 지팡이 소지 시 <b style="color:var(--green)">접속 시 자동으로 스탯이 재계산</b>됩니다.
+    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">📜 신규 인챈트 18종 — 리스크형 고성능</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
+      높은 공격력 대신 <b style="color:var(--red)">HP · 방어 · 속도 페널티</b>를 감수하는 고성능 인챈트가 추가되었습니다.<br>
+      <span style="color:var(--tx3)">접두:</span> <span style="color:var(--gold)">피에 굶주린 · 잔혹한 · 광기어린 · 영혼의 · 낙뢰의 · 죽음의 · 시간의 · 잔영의 · 공허의</span><br>
+      <span style="color:var(--tx3)">접미:</span> <span style="color:var(--gold)">학살 · 공격광 · 역습 · 낙뢰 · 공허 · 독아 · 잔영 · 흡혼 · 방어붕괴</span><br>
+      <span style="font-size:10px;color:var(--tx3)">고급(T4)~전설(T5) 등급 스크롤 또는 에픽 이상 장비 드랍으로 획득 가능</span>
     </div>
 
-    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:7px">🔮 마법 인챈트 대폭 강화</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      기존 마법 인챈트(번개의/독의/현자의/냉기 등)가 <b style="color:var(--purple)">INT → MATK 직접 부여</b>로 변경<br>
-      신규 마법 인챈트 추가: <b style="color:var(--purple)">타오르는 · 신비로운 · 격류의 · 파멸의주문 (접두)</b><br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="color:var(--purple)">마력 · 주문 · 격노의주문 (접미)</b><br>
-      기존 보유 인챈트 장비는 <b style="color:var(--green)">접속 시 자동으로 재조정</b>됩니다.
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🏛️ 경매장 카테고리 필터 추가</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2.0;margin-bottom:14px;padding-left:4px">
+      경매 목록에서 <b>종류 / 등급 / 정렬</b> 3가지 기준으로 원하는 아이템을 빠르게 찾을 수 있습니다.
     </div>
 
-    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:7px">⚔️ 전투 밸런스 조정</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:14px">
-      몬스터 회피율 대폭 상향 — 밸런스 스탯 체감 강화<br>
-      &nbsp;&nbsp;일반 몹: T1 <b style="color:var(--tx)">8~12%</b> → T5 <b style="color:var(--tx)">33~42%</b><br>
-      &nbsp;&nbsp;보스: T1 <b style="color:var(--tx)">17%</b> → T5 <b style="color:var(--tx)">47%</b><br>
-      밸런스 낮은 장비 착용 시 고티어에서 공격이 자주 빗나갑니다.
+    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">🔮 마법 딜러 대폭 강화</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2.0;margin-bottom:14px;padding-left:4px">
+      기존 마법 인챈트에 <b>INT 스탯 추가</b> — ATK계열 인챈트의 STR과 동등한 형평성 확보<br>
+      지팡이 / 듀얼건 MATK 수치가 레벨업 시 자연스럽게 성장하도록 개선
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:7px">🛠 기타 개선</div>
-    <div style="font-size:11.5px;color:var(--tx2);line-height:2.1;margin-bottom:20px">
-      던전 입구컷 티어·난이도별 현실적으로 재조정 (T1 vhard 400→280 등)<br>
-      던전 카드에 최대 드랍 등급 + 요구 전투력 미리보기 표시<br>
-      인챈트 스크롤은 <b style="color:var(--tx)">붙이는 장비 레벨·등급 기준</b>으로 스탯 계산 (경매장 안전)
+    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:6px">🥊 챔프전 개선</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2.0;margin-bottom:18px;padding-left:4px">
+      마법 무기 챔프의 반격이 MATK 기준으로 정상 계산됩니다<br>
+      챔프 정보 패널에 <b>파생 스탯 + 장착 장비 목록</b>이 표시됩니다
     </div>
 
     <div style="display:flex;gap:8px">
@@ -1065,14 +1064,14 @@ const SKILLS={
     fx:(a,s)=>({dmg:a*2.0*(1+(s?.str||5)*0.005),selfDmg:0.15,type:'dark',msg:'🩸 피의 광란!'})},
   armor_break:{name:'방어 붕괴',icon:'🔨',desc:'90% + 대상 DEF -30% 2턴',base:0.07,type:'physical',
     fx:(a,s)=>({dmg:a*0.9*(1+(s?.str||5)*0.005),armorBreak:0.30,msg:'🔨 방어 붕괴!'})},
-  time_stop:{name:'시간 정지',icon:'⏱',desc:'피해 없음 + 2턴 마비',base:0.05,type:'special',
+  time_stop:{name:'시간 정지',icon:'⏱',desc:'피해 없음 + 2턴 마비',base:0.04,type:'special',
     fx:(a,s)=>({dmg:0,stun:true,stunTurns:2,msg:'⏱ 시간 정지!'})},
   void_nova:{name:'공허 폭발',icon:'🌌',desc:'MATK 기반 200% 범위',base:0.04,type:'magic',
     fx:(a,s)=>({dmg:(s?.matk||a)*2.0*(1+(s?.int||3)*0.010),type:'arcane',aoe:true,msg:'🌌 공허 폭발!'})},
   death_mark:{name:'죽음의 낙인',icon:'💀',desc:'50% + 3턴 독(매턴 10%)',base:0.06,type:'magic',
     fx:(a,s)=>({dmg:(s?.matk||a)*0.5,dot:3,type:'poison',msg:'💀 죽음의 낙인!'})},
-  phantom_step:{name:'잔영 질주',icon:'👁',desc:'50% + 이번 턴 완전 회피',base:0.07,type:'special',
-    fx:(a,s)=>({dmg:a*0.5,buffDodge:100,msg:'👁 잔영 질주!'})},
+  phantom_step:{name:'잔영 질주',icon:'👁',desc:'50% + 이번 턴 회피+60',base:0.06,type:'special',
+    fx:(a,s)=>({dmg:a*0.5,buffDodge:60,msg:'👁 잔영 질주!'})},  // 완전회피 → 60으로 조정
 };
 
 // Enchants — 솔로 전용 (물리9/마법9 PRE, 물리9/마법8 SUF 밸런스)
@@ -1543,7 +1542,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v2.1';
+  const key='abyssworld_update_v2.2';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1554,7 +1553,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v2.1',expire);
+    localStorage.setItem('abyssworld_update_v2.2',expire);
   }
 };
 
@@ -4631,6 +4630,16 @@ function trySkillProc(p,s,target,allM){
           target._armorBroken=(target._armorBroken||0)+1;
           target.def=Math.max(0,Math.round((target.def||0)*(1-fx.armorBreak)));
           blogAdd(`<span class="l-skill">🔨 ${target.name} DEF -${Math.round(fx.armorBreak*100)}%!</span>`);
+        }
+        if(fx.aoe){
+          // 범위 공격: 살아있는 모든 몬스터에 절반 피해 추가
+          const aoeMons=allM.filter(m=>m.status==='alive'&&m!==target);
+          for(const am of aoeMons){
+            const aoeD=Math.max(1,Math.round(dmg*0.5));
+            am.hp=Math.max(0,am.hp-aoeD);
+            blogAdd(`<span class="l-skill">💥 ${am.name}에게 여파 -${aoeD}</span>`);
+            if(am.hp<=0&&am.status==='alive')am.status='dead';
+          }
         }
         if(fx.heal){const hm=Math.round(p.maxHp*fx.heal);p.hp=Math.min(p.hp+hm,p.maxHp);blogAdd(`<span class="l-heal"> 흡수 +${hm}HP</span>`);}
         if(fx.selfDmg){const sd=Math.round(p.maxHp*fx.selfDmg);p.hp=Math.max(1,p.hp-sd);blogAdd(`<span class="l-dmg"> 자신에게 -${sd}</span>`);}
