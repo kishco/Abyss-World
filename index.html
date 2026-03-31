@@ -672,8 +672,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
 
     <!-- 이용약관 모달 -->
-    <div id="tosModal" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.9);z-index:9500;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
-      <div style="background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:24px 26px;max-width:520px;width:92%;max-height:88vh;overflow-y:auto">
+    <div id="tosModal" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.9);z-index:9500;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 12px;backdrop-filter:blur(4px)">
+      <div style="background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:24px 26px;max-width:520px;width:100%;margin:auto">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div style="font-family:'Cinzel',serif;font-size:16px;font-weight:900;color:var(--gold)">📜 ABYSS WORLD 이용약관</div>
           <button onclick="document.getElementById('tosModal').style.display='none'" style="background:none;border:none;color:var(--tx3);font-size:18px;cursor:pointer">✕</button>
@@ -6415,6 +6415,30 @@ window.settingToggleSfx=function(){
   toast(muted?'🔊 효과음 켜짐':'🔇 효과음 꺼짐');
 };
 
+// ★ 닉네임 변경 시 관련 DB 전체 전파
+async function propagateNickname(oldName,newName,targetCharId){
+  const ops=[];
+  const subjSn=await get(ref(db,`subjugation/weeklyRanking/${oldName}`));
+  if(subjSn.exists()){
+    ops.push(set(ref(db,`subjugation/weeklyRanking/${newName}`),subjSn.val()));
+    ops.push(remove(ref(db,`subjugation/weeklyRanking/${oldName}`)));
+  }
+  const champSn=await get(ref(db,'champ/current'));
+  const champ=champSn.val();
+  if(champ&&champ.charId===targetCharId){
+    ops.push(update(ref(db,'champ/current'),{name:newName}));
+  }
+  const aucSn=await get(ref(db,'auction'));
+  const auctions=aucSn.val()||{};
+  for(const[lid,v]of Object.entries(auctions)){
+    if(v&&v.sellerCharId===targetCharId&&v.sellerName===oldName){
+      ops.push(update(ref(db,`auction/${lid}`),{sellerName:newName}));
+    }
+  }
+  if(curUser)ops.push(set(ref(db,`presence/${curUser.uid}`),{charName:newName,lastSeen:Date.now()}));
+  await Promise.all(ops);
+}
+
 window.settingChangeNick=async function(){
   const coupons=char.nickCoupons||0;
   if(coupons<=0){toast('⚠️ 닉네임 변경 쿠폰이 없습니다');return;}
@@ -6426,9 +6450,11 @@ window.settingChangeNick=async function(){
   const dup=Object.values(all).some(c=>c.name===newName);
   if(dup){toast('⚠️ 이미 사용 중인 닉네임입니다');return;}
   if(!confirm(`닉네임을 "${char.name}" → "${newName}"으로 변경하시겠습니까?\n쿠폰 1개가 소모됩니다.`))return;
+  const oldName=char.name;
   char.name=newName;
   char.nickCoupons=Math.max(0,coupons-1);
   await saveChar();
+  await propagateNickname(oldName,newName,charId);
   document.getElementById('tname').innerHTML=newName+(isAdmin?` <span style="font-size:8px;background:rgba(240,192,64,.2);border:1px solid rgba(240,192,64,.4);color:var(--gold);padding:1px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace">ADMIN</span>`:'');
   document.getElementById('newNickInput').value='';
   renderSettings();
@@ -6486,9 +6512,25 @@ window.adminChangeNick=async function(cid,oldName){
   const snap=await get(ref(db,'chars'));
   const dup=Object.values(snap.val()||{}).some(c=>c.name===newName);
   if(dup){toast('⚠️ 이미 사용 중인 닉네임');return;}
-  if(!confirm(`"${oldName}" → "${newName}" 닉네임 변경?`))return;
+  if(!confirm(`"${oldName}" → "${newName}" 닉네임 변경?\n채팅·랭킹·경매장 전체 반영됩니다.`))return;
   await update(ref(db,`chars/${cid}`),{name:newName});
-  toast(`✅ ${oldName} → ${newName} 변경 완료`);
+  // ★ 관련 DB 전파 (어드민은 curUser가 본인이므로 presence는 스킵, cid로 처리)
+  const ops=[];
+  const subjSn=await get(ref(db,`subjugation/weeklyRanking/${oldName}`));
+  if(subjSn.exists()){
+    ops.push(set(ref(db,`subjugation/weeklyRanking/${newName}`),subjSn.val()));
+    ops.push(remove(ref(db,`subjugation/weeklyRanking/${oldName}`)));
+  }
+  const champSn=await get(ref(db,'champ/current'));
+  const champ=champSn.val();
+  if(champ&&champ.charId===cid)ops.push(update(ref(db,'champ/current'),{name:newName}));
+  const aucSn=await get(ref(db,'auction'));
+  for(const[lid,v]of Object.entries(aucSn.val()||{})){
+    if(v&&v.sellerCharId===cid&&v.sellerName===oldName)
+      ops.push(update(ref(db,`auction/${lid}`),{sellerName:newName}));
+  }
+  await Promise.all(ops);
+  toast(`✅ ${oldName} → ${newName} 변경 완료 (전체 반영)`);
   adminOpenUser(cid);
 };
 
