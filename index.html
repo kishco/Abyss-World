@@ -6871,12 +6871,14 @@ window.settingToggleSfx=function(){
 
 // ★ 닉네임 변경 시 관련 DB 전체 전파
 async function propagateNickname(oldName,newName,targetCharId){
-  const ops=[];
+  // ★ 토벌전 주간 랭킹 — set 완료 후 remove 순차 처리 (동시 처리 시 중복 노출 버그 방지)
   const subjSn=await get(ref(db,`subjugation/weeklyRanking/${oldName}`));
   if(subjSn.exists()){
-    ops.push(set(ref(db,`subjugation/weeklyRanking/${newName}`),subjSn.val()));
-    ops.push(remove(ref(db,`subjugation/weeklyRanking/${oldName}`)));
+    await set(ref(db,`subjugation/weeklyRanking/${newName}`),subjSn.val());
+    await remove(ref(db,`subjugation/weeklyRanking/${oldName}`));
   }
+  // 나머지는 독립적이므로 병렬 처리 유지
+  const ops=[];
   const champSn=await get(ref(db,'champ/current'));
   const champ=champSn.val();
   if(champ&&champ.charId===targetCharId){
@@ -6890,7 +6892,7 @@ async function propagateNickname(oldName,newName,targetCharId){
     }
   }
   if(curUser)ops.push(set(ref(db,`presence/${curUser.uid}`),{charName:newName,lastSeen:Date.now()}));
-  await Promise.all(ops);
+  if(ops.length)await Promise.all(ops);
 }
 
 window.settingChangeNick=async function(){
@@ -6968,13 +6970,13 @@ window.adminChangeNick=async function(cid,oldName){
   if(dup){toast('⚠️ 이미 사용 중인 닉네임');return;}
   if(!confirm(`"${oldName}" → "${newName}" 닉네임 변경?\n채팅·랭킹·경매장 전체 반영됩니다.`))return;
   await update(ref(db,`chars/${cid}`),{name:newName});
-  // ★ 관련 DB 전파 (어드민은 curUser가 본인이므로 presence는 스킵, cid로 처리)
-  const ops=[];
+  // ★ 토벌전 랭킹 순차 처리 (동시 처리 시 중복 노출 방지)
   const subjSn=await get(ref(db,`subjugation/weeklyRanking/${oldName}`));
   if(subjSn.exists()){
-    ops.push(set(ref(db,`subjugation/weeklyRanking/${newName}`),subjSn.val()));
-    ops.push(remove(ref(db,`subjugation/weeklyRanking/${oldName}`)));
+    await set(ref(db,`subjugation/weeklyRanking/${newName}`),subjSn.val());
+    await remove(ref(db,`subjugation/weeklyRanking/${oldName}`));
   }
+  const ops=[];
   const champSn=await get(ref(db,'champ/current'));
   const champ=champSn.val();
   if(champ&&champ.charId===cid)ops.push(update(ref(db,'champ/current'),{name:newName}));
@@ -6983,7 +6985,7 @@ window.adminChangeNick=async function(cid,oldName){
     if(v&&v.sellerCharId===cid&&v.sellerName===oldName)
       ops.push(update(ref(db,`auction/${lid}`),{sellerName:newName}));
   }
-  await Promise.all(ops);
+  if(ops.length)await Promise.all(ops);
   toast(`✅ ${oldName} → ${newName} 변경 완료 (전체 반영)`);
   adminOpenUser(cid);
 };
