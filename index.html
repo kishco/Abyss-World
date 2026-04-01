@@ -3434,11 +3434,24 @@ function openIM(it){
       if(!eq)return;
       const SET_RATES=[0.20,0.15,0.10,0.08,0.05];
       const actualRate=eq.grade==='set'?SET_RATES[Math.min(tier-1,4)]:successRate;
+      const oldEnch=isPrefix?eq.prefix:eq.suffix; // 결과 화면용으로 미리 저장
       delete inv[scrollId];
+
+      // ── 실패 ──
       if(Math.random()>actualRate){
-        toast(`💨 인챈트 실패... 스크롤 소모`,3000);
-        await saveInv();closeIM();return;
+        await saveInv();updateTop();renderChar();
+        document.getElementById('imbody').innerHTML=`
+          <div style="text-align:center;padding:20px 0 12px">
+            <div style="font-size:40px;margin-bottom:10px">💨</div>
+            <div style="font-size:15px;font-weight:700;color:var(--red);margin-bottom:6px">인챈트 실패</div>
+            <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">${enchData?.n} 스크롤이 소모되었습니다</div>
+            <div style="font-size:10px;color:var(--tx3)">${eq.name} — 변화 없음</div>
+          </div>
+          <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="closeIM()">닫기</button>`;
+        return;
       }
+
+      // ── 성공 ──
       const lv=eq.itemLv||1;
       const gm=ENCHANT_GRADE_MULT[eq.grade]||ENCHANT_GRADE_MULT['normal']||1;
       const scaledB=scaleEnchant(enchData.b,lv,gm);
@@ -3447,9 +3460,58 @@ function openIM(it){
       const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
       const basePart=eq.baseName||eq.name.replace(/^.*(전설의|정예|강화된|좋은)\s/,'');
       eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+gAdj+basePart;
-      await saveEqFn();await saveInv();closeIM();updateTop();renderChar();
-      toast(`✨ [${enchData?.n}] 인챈트 성공!`,3000);
+      await saveEqFn();await saveInv();updateTop();renderChar();
       trackBounty('enchant',1);
+
+      // 결과 스탯 행 생성 (실제 확정값)
+      const oldB=oldEnch?.b||{};
+      const allResKeys=[...new Set([...Object.keys(scaledB),...Object.keys(oldB)])];
+      const resultRows=allResKeys.map(k=>{
+        const label=STAT_LABEL_EN[k]||k.toUpperCase();
+        const suffix=k==='balance'?'%':'';
+        const nv=scaledB[k]??null;
+        const ov=oldB[k]??null;
+        const color=nv!==null?(nv>0?'var(--green)':'var(--red)'):'var(--tx3)';
+        let changeHtml='';
+        if(nv!==null&&ov!==null){
+          const diff=nv-ov;
+          if(diff>0) changeHtml=`<span style="font-size:9px;color:var(--green);margin-left:5px">(+${diff}${suffix})</span>`;
+          else if(diff<0) changeHtml=`<span style="font-size:9px;color:var(--red);margin-left:5px">(${diff}${suffix})</span>`;
+        } else if(nv!==null&&ov===null){
+          changeHtml=`<span style="font-size:9px;color:var(--green);margin-left:5px">(신규)</span>`;
+        } else if(nv===null&&ov!==null){
+          changeHtml=`<span style="font-size:9px;color:var(--tx3);margin-left:5px">(제거)</span>`;
+        }
+        const valHtml=nv!==null
+          ?`<b style="color:${color};font-family:'IBM Plex Mono',monospace">${nv>0?'+':''}${nv}${suffix}</b>${changeHtml}`
+          :`<span style="color:var(--tx3);font-size:10px">—${changeHtml}</span>`;
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-size:11px;color:var(--tx2)">${label}</span>
+          <span>${valHtml}</span>
+        </div>`;
+      }).join('');
+
+      const resSkillHtml=(enchObj.sk&&SKILLS[enchObj.sk])?`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-size:11px;color:var(--tx2)">스킬</span>
+          <span style="font-size:11px;color:var(--purple)">⚡ ${SKILLS[enchObj.sk].name}${skillTypeBadge(enchObj.sk)}</span>
+        </div>`:''  ;
+
+      document.getElementById('imbody').innerHTML=`
+        <div style="text-align:center;padding:14px 0 10px">
+          <div style="font-size:34px;margin-bottom:6px">✨</div>
+          <div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:4px">인챈트 성공!</div>
+          <div style="font-size:11px;color:var(--tx2)">${eq.name}</div>
+        </div>
+        <div style="background:var(--sf2);border:1px solid rgba(176,96,255,.4);border-radius:9px;padding:11px 14px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08)">
+            ${oldEnch?`<span style="font-size:11px;color:var(--tx3)">${oldEnch.n}</span><span style="font-size:10px;color:var(--tx3)">→</span>`:''}
+            <span style="font-size:13px;font-weight:700;color:${et.color}">${enchData?.n}</span>
+          </div>
+          ${resultRows||'<div style="font-size:10px;color:var(--tx3)">스탯 없음</div>'}
+          ${resSkillHtml}
+        </div>
+        <button class="btn btn-gold" style="width:100%" onclick="closeIM()">확인</button>`;
     };
     window._enchantTarget();
     document.getElementById('imodal').classList.add('open');return;
