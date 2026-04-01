@@ -3326,24 +3326,66 @@ function openIM(it){
       const gm=ENCHANT_GRADE_MULT[eq.grade]||1;
       const SET_RATES=[0.20,0.15,0.10,0.08,0.05];
       const actualRate=eq.grade==='set'?SET_RATES[Math.min(tier-1,4)]:successRate;
-      const ranges=enchData?.b?getEnchantRange(enchData.b,lv,gm):{};
+      const newRanges=enchData?.b?getEnchantRange(enchData.b,lv,gm):{};
       const existing=isPrefix?eq.prefix:eq.suffix;
+      const oldB=existing?.b||{};
 
-      const rangeRows=Object.entries(ranges).map(([k,{lo,hi,neg}])=>{
+      // ── 모든 스탯 키 합집합 ──
+      const allKeys=[...new Set([...Object.keys(newRanges),...Object.keys(oldB)])];
+
+      // ── 비교 행 생성 ──
+      const compRows=allKeys.map(k=>{
         const label=STAT_LABEL_EN[k]||k.toUpperCase();
         const suffix=k==='balance'?'%':'';
-        const color=neg?'var(--red)':'var(--green)';
-        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-          <span style="font-size:11px;color:var(--tx2)">${label}</span>
-          <span style="font-size:12px;font-weight:700;color:${color};font-family:'IBM Plex Mono',monospace">${lo>0?'+':''}${lo}${suffix} ~ ${hi>0?'+':''}${hi}${suffix}</span>
+        const oldVal=oldB[k]??null;
+        const nr=newRanges[k]??null;
+
+        // 기존 값
+        const oldHtml=oldVal!==null
+          ?`<span style="font-size:11px;color:var(--tx3);font-family:'IBM Plex Mono',monospace">${oldVal>0?'+':''}${oldVal}${suffix}</span>`
+          :`<span style="font-size:10px;color:var(--tx3)">—</span>`;
+
+        // 신규 범위 + 방향 뱃지
+        let dirHtml='';
+        if(nr!==null&&oldVal!==null){
+          const midNew=(nr.lo+nr.hi)/2;
+          if(midNew>oldVal) dirHtml=`<span style="font-size:9px;color:var(--green);margin-left:3px">▲</span>`;
+          else if(midNew<oldVal) dirHtml=`<span style="font-size:9px;color:var(--red);margin-left:3px">▼</span>`;
+          else dirHtml=`<span style="font-size:9px;color:var(--tx3);margin-left:3px">—</span>`;
+        }
+        const newColor=nr?.neg?'var(--red)':'var(--green)';
+        const newHtml=nr!==null
+          ?`<span style="font-size:11px;font-weight:700;color:${newColor};font-family:'IBM Plex Mono',monospace">${nr.lo>0?'+':''}${nr.lo}${suffix}~${nr.hi>0?'+':''}${nr.hi}${suffix}</span>${dirHtml}`
+          :`<span style="font-size:10px;color:var(--tx3)">—</span>`;
+
+        return`<div style="display:grid;grid-template-columns:60px 1fr 8px 1fr;align-items:center;gap:4px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-size:10.5px;color:var(--tx2)">${label}</span>
+          <span style="text-align:right">${oldHtml}</span>
+          <span style="text-align:center;font-size:10px;color:var(--tx3)">→</span>
+          <span style="display:flex;align-items:center">${newHtml}</span>
         </div>`;
       }).join('');
 
-      const skillRow=enchData?.sk&&SKILLS[enchData.sk]?`
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-          <span style="font-size:11px;color:var(--tx2)">스킬</span>
-          <span style="font-size:11px;color:var(--purple)">⚡ ${SKILLS[enchData.sk].name}${skillTypeBadge(enchData.sk)}</span>
+      // 스킬 비교
+      const oldSkill=existing?.sk;
+      const newSkill=enchData?.sk;
+      const skillChanged=oldSkill!==newSkill;
+      const skillCompHtml=(oldSkill||newSkill)?`
+        <div style="display:grid;grid-template-columns:60px 1fr 8px 1fr;align-items:center;gap:4px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-size:10.5px;color:var(--tx2)">스킬</span>
+          <span style="text-align:right;font-size:10px;color:${oldSkill?'var(--purple)':'var(--tx3)'}">${oldSkill&&SKILLS[oldSkill]?`⚡${SKILLS[oldSkill].name}`:'—'}</span>
+          <span style="text-align:center;font-size:10px;color:var(--tx3)">→</span>
+          <span style="font-size:10px;color:${newSkill?'var(--purple)':'var(--tx3)'}">${newSkill&&SKILLS[newSkill]?`⚡${SKILLS[newSkill].name}`:'—'}</span>
         </div>`:'';
+
+      // 인챈트명 헤더 — 기존명 | 변경명
+      const nameHeader=existing
+        ?`<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:7px;border:1px solid rgba(255,255,255,.08)">
+            <span style="font-size:11px;font-weight:700;color:${isPrefix?'var(--blue)':'var(--purple)'}">${existing.n}</span>
+            <span style="font-size:10px;color:var(--tx3)">→</span>
+            <span style="font-size:11px;font-weight:700;color:${et.color}">${enchData?.n}</span>
+          </div>`
+        :`<div style="text-align:center;font-size:11px;color:var(--tx2);margin-bottom:10px;padding:6px;background:rgba(176,96,255,.06);border-radius:7px">신규 부여 — <b style="color:${et.color}">${enchData?.n}</b></div>`;
 
       document.getElementById('imbody').innerHTML=`
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
@@ -3351,21 +3393,27 @@ function openIM(it){
           <span style="font-size:11px;color:var(--tx3)">장비 선택으로 돌아가기</span>
         </div>
         <div style="background:rgba(176,96,255,.07);border:1px solid rgba(176,96,255,.35);border-radius:9px;padding:11px 14px;margin-bottom:10px">
-          <div style="font-size:10px;color:${et.color};font-weight:700;margin-bottom:2px">[${typeLabel}] ${enchData?.n} 인챈트</div>
-          <div style="font-size:10px;color:var(--tx3)">성공 확률: <b style="color:${actualRate<0.5?'var(--red)':'var(--green)'}">${Math.round(actualRate*100)}%</b> · 실패 시 스크롤 소모</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+            <div style="font-size:10px;color:${et.color};font-weight:700">[${typeLabel}] ${enchData?.n}</div>
+            <div style="font-size:10px;color:var(--tx3)">성공 <b style="color:${actualRate<0.5?'var(--red)':'var(--green)'}">${Math.round(actualRate*100)}%</b></div>
+          </div>
+          <div style="font-size:9.5px;color:var(--tx3)">실패 시 스크롤 소모 · Lv.${lv} · ${eq.gradeName||eq.grade} 기준</div>
         </div>
         <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:11px 14px;margin-bottom:10px">
-          <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:10px">
             <span class="icname g-${eq.grade}" style="font-size:12px">${eq.name}</span>
-            <span style="font-size:9px;color:var(--tx3)">Lv.${lv} · ${eq.gradeName||eq.grade}</span>
           </div>
-          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">이 장비 기준 · 범위 내 랜덤 결정</div>
-          ${rangeRows||'<div style="font-size:10px;color:var(--tx3)">스탯 없음</div>'}
-          ${skillRow}
+          ${nameHeader}
+          <div style="display:grid;grid-template-columns:60px 1fr 8px 1fr;gap:4px;margin-bottom:4px">
+            <span></span>
+            <span style="text-align:right;font-size:9px;color:var(--tx3)">기존</span>
+            <span></span>
+            <span style="font-size:9px;color:var(--tx3)">신규 범위</span>
+          </div>
+          ${compRows||'<div style="font-size:10px;color:var(--tx3)">스탯 없음</div>'}
+          ${skillCompHtml}
+          ${allKeys.length||oldSkill||newSkill?`<div style="margin-top:5px;font-size:9px;color:var(--tx3)">▲▼ 신규 범위 중간값 기준 비교 · 실제 수치는 범위 내 랜덤</div>`:''}
         </div>
-        ${existing?`<div style="background:rgba(232,68,68,.07);border:1px solid rgba(232,68,68,.25);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:10.5px;color:var(--tx2)">
-          ⚠️ 기존 [${typeLabel}] <b style="color:${isPrefix?'var(--blue)':'var(--purple)'}">${existing.n}</b> 인챈트가 교체됩니다
-        </div>`:''}
         ${eq.grade==='set'?`<div style="background:rgba(232,68,68,.07);border:1px solid rgba(232,68,68,.25);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:10.5px;color:var(--red)">
           🔴 유일 장비 — 성공률 ${Math.round(actualRate*100)}%로 크게 낮아집니다
         </div>`:''}
