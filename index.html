@@ -370,7 +370,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div id="loginScr">
   <div class="lwrap">
     <div class="llogo">⚔ ABYSS WORLD</div>
-    <div class="lsub">DARK FANTASY RPG v2.3</div>
+    <div class="lsub">DARK FANTASY RPG v2.3.1</div>
     <div style="text-align:center;margin-bottom:18px;margin-top:2px">
       <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener"
         style="display:inline-flex;align-items:center;gap:6px;background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.4);color:#7289da;padding:5px 14px;border-radius:20px;font-size:11px;text-decoration:none;font-family:'IBM Plex Mono',monospace;transition:.2s"
@@ -441,7 +441,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="bossKillBanner" style="display:none;font-size:9px;color:var(--gold);font-family:'IBM Plex Mono',monospace;animation:pulse 1s infinite"></span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:4px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v2.3</span>
+  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:4px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v2.3.1</span>
   <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener" class="v2badge"
     style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.35);color:#7289da;padding:2px 7px;border-radius:5px;font-size:9px;text-decoration:none;margin-right:6px;white-space:nowrap;font-family:'IBM Plex Mono',monospace"
     title="디스코드 커뮤니티">
@@ -458,44 +458,41 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
 </div>
 
-<!-- 업데이트 팝업 v2.3 -->
+<!-- 업데이트 팝업 v2.3.1 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:500px;width:90%;max-height:88vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
-      <span style="font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:3px 10px;border-radius:5px;font-weight:700">v2.3 밸런스 패치</span>
+      <span style="font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:3px 10px;border-radius:5px;font-weight:700">v2.3.1 개선 패치</span>
     </div>
 
-    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:6px">⚖️ 인챈트 수치 밸런스 조정</div>
+    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">🔨 강화 / 인챈트 개선</div>
     <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      레전더리 이상 장비에서 인챈트 수치가 지나치게 크게 붙던 문제를 수정했습니다.<br>
-      <b style="color:var(--tx3)">성장 곡선</b> — 레벨에 따른 인챈트 배율이 완만한 곡선으로 변경 (고레벨 과잉 성장 억제)<br>
-      <b style="color:var(--tx3)">등급 배율 조정</b> — 인챈트 전용 등급 배율 분리, 기존보다 낮게 적용<br>
-      <b style="color:var(--tx3)">일부 극단 인챈트 기반값 하향</b> — 마력폭주 · 파멸의주문 · 절멸 · 학살 등<br>
-      <span style="font-size:10px;color:var(--tx3)">※ 기존 장착 인챈트는 새 배율로 재계산되지 않으며 자연스럽게 교체 유도됩니다.</span>
+      <b style="color:var(--tx3)">인벤토리 아이템 지원</b> — 강화·인챈트 시 장착 장비 외 인벤토리 아이템도 선택 가능<br>
+      <b style="color:var(--tx3)">장착/인벤 구분 표시</b> — 파란색 뱃지(장착) · 회색 뱃지(인벤)로 시각적 구분
     </div>
 
-    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">🐉 토벌전 전면 개선</div>
+    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">📜 인챈트 스크롤 등급별 판매</div>
     <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--gold)">보스 전용 스킬 추가</b> — 각 보스마다 고유 스킬 2~3종 보유<br>
-      &nbsp;· 아비도스: 공허의 눈길(마비) · 심연 파동(전체) · 어둠 강화(격노)<br>
-      &nbsp;· 라바돈: 화염 폭발(강타) · 용암 파도(전체 화상) · 불길 강화(격노)<br>
-      &nbsp;· 루: 성검 강타(고데미지) · 불굴의 방어(피해감소) · 영원 강화(격노)<br>
-      <b style="color:var(--green)">플레이어 스킬 발동 수정</b> — 토벌전에서 인챈트 스킬이 정상 발동되도록 수정<br>
-      <b style="color:var(--blue)">스탯 표시 개선</b> — 전투 시작 시 MATK 포함한 스탯 정보 표시
+      판매 탭에서 하급/중급/상급/고급/전설 등급별로 개별 일괄판매 가능<br>
+      <span style="font-size:10px;color:var(--tx3)">전체 일괄판매도 기존과 동일하게 지원합니다.</span>
     </div>
 
-    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">🧊 몬스터 기절 효과 수정</div>
-    <div style="font-size:11px;color:var(--tx2);line-height:2.0;margin-bottom:14px;padding-left:4px">
-      몬스터의 기절 스킬(방패 강타 · 꼬리 일격 등)이 플레이어에게 실제로 적용되지 않던 버그를 수정했습니다.<br>
-      이제 기절 시 해당 턴 행동 불가 메시지가 표시됩니다.
+    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:6px">📊 파생 스탯 설명 추가</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
+      캐릭터 탭 파생 스탯 우측 <b>❓ 스탯 설명</b> 버튼으로 각 스탯 상세 설명 확인 가능<br>
+      밸런스·회피·치명 등 파생 스탯의 작동 방식 안내
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🐛 기타 버그 수정</div>
+    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:6px">⚖️ 밸런스 스탯 상한 수정</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
+      밸런스 스탯이 100% 이상으로 오르던 비정상 현상 수정 — 상한 <b style="color:var(--gold)">99%</b> 적용<br>
+      기존 유저 장비에 자동 적용 (초과분 클램프)
+    </div>
+
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🐛 버그 수정</div>
     <div style="font-size:11px;color:var(--tx2);line-height:2.0;margin-bottom:18px;padding-left:4px">
-      토벌전 스킬 프로시저 이중 호출 버그 수정<br>
-      토벌전 스탯 출력에 MATK 추가<br>
-      기타 전투 연산 안정성 개선
+      설정 화면 효과음 끄기 버튼이 실제로 적용되지 않던 버그 수정
     </div>
 
     <div style="display:flex;gap:8px">
@@ -588,7 +585,22 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <div style="font-size:10px;color:var(--tx3);margin-top:2px;font-family:'IBM Plex Mono',monospace" id="exptxt">0/100</div>
           </div>
           <div class="card" style="margin-bottom:10px">
-            <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">파생 스탯</div>
+            <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
+              파생 스탯
+              <button onclick="toggleStatDesc()" style="background:rgba(74,143,255,.12);border:1px solid rgba(74,143,255,.3);color:var(--blue);font-size:9px;padding:2px 7px;border-radius:4px;cursor:pointer">❓ 스탯 설명</button>
+            </div>
+            <div id="statDescPanel" style="display:none;margin-bottom:8px;background:rgba(74,143,255,.06);border:1px solid rgba(74,143,255,.2);border-radius:7px;padding:9px 11px;font-size:10px;color:var(--tx2);line-height:2.0">
+              <div><span style="color:var(--tx)">❤️ HP</span> — 최대 체력. VIT 스탯과 장비 HP합산.</div>
+              <div><span style="color:var(--tx)">⚔️ ATK</span> — 물리 공격력. STR 스탯 + 무기 ATK.</div>
+              <div><span style="color:var(--tx)">🛡 DEF</span> — 방어력. 받는 피해를 감소.</div>
+              <div><span style="color:var(--tx)">💨 SPD</span> — 행동 속도. 높을수록 먼저 행동.</div>
+              <div><span style="color:var(--tx)">💥 CRIT</span> — 치명타 확률(%). DEX·LUK 영향. 상한 75%.</div>
+              <div><span style="color:var(--tx)">🌀 회피</span> — 적 공격 회피율(%). 상한 35%. DEX 영향.</div>
+              <div><span style="color:var(--tx)">⚖️ 밸런스</span> — 무기 명중률에 관여. 높을수록 적 회피를 무시. 100%시 적 회피 완전 상쇄. 상한 99%.</div>
+              <div><span style="color:var(--tx)">🔮 MATK</span> — 마법 공격력. INT 스탯 + 지팡이/듀얼건 MATK.</div>
+              <div><span style="color:var(--tx)">💀 치명피해</span> — 치명타 시 배율(%). 기본 140%+. STR·LUK 영향.</div>
+              <div><span style="color:var(--gold)">⚙️ 전투력</span> — 장비 강화·인챈트·세트 등 종합 전투 수치.</div>
+            </div>
             <div class="sgrid">
               <div class="srow"><span class="sn">❤️ HP</span><span class="sv" id="s-hp">-</span></div>
               <div class="srow"><span class="sn">⚔️ ATK</span><span class="sv" id="s-atk">-</span></div>
@@ -1829,7 +1841,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v2.3';
+  const key='abyssworld_update_v2.3.1';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1840,7 +1852,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v2.3',expire);
+    localStorage.setItem('abyssworld_update_v2.3.1',expire);
   }
 };
 
@@ -2003,6 +2015,8 @@ function mkChar(name){
     createdAt:Date.now()};
 }
 
+window.toggleStatDesc=function(){const p=document.getElementById('statDescPanel');if(!p)return;p.style.display=p.style.display==='none'?'block':'none';};
+
 function calcStats(c){
   // 스탯 환산율 — 장비 의존도 높이고 스탯 올인 폭발 방지
   let atk=c.baseAtk+(c.str||5)*1.5,matk=(c.baseMatk||0)+(c.int||3)*1.5,def=c.baseDef+(c.vit||5)*0.6;
@@ -2033,7 +2047,7 @@ function calcStats(c){
     maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),35),
     crit:Math.min(Math.round(crit),75),critDmg:Math.round(critDmg),
     goldBonus:Math.round(goldBonus),skillBonus:Math.round(skillBonus),
-    balance:Math.round(balance)};
+    balance:Math.min(99,Math.round(balance))};
 }
 function calcSetB(eq){
   const sc={};for(const it of Object.values(eq)){if(!it||it.grade!=='set'||!it.setId)continue;sc[it.setId]=(sc[it.setId]||0)+1;}
@@ -2216,6 +2230,10 @@ async function selChar(id){
             dirty=true;
           }
         }
+        // ★ balance 99% 상한 마이그레이션
+        if(it.stats&&it.stats.balance!==undefined&&it.stats.balance>99&&!it._balv){
+          it.stats.balance=99;it._balv=1;dirty=true;
+        }
       }
       if(dirty)saveChar();
       updateTop();renderChar();
@@ -2237,6 +2255,10 @@ async function selChar(id){
           it.stats.balance=rand(wb.balMin,wb.balMax);
           needSave=true;
         }
+      }
+      // ★ balance 99% 상한 마이그레이션 (인벤)
+      if(it&&it.stats&&it.stats.balance!==undefined&&it.stats.balance>99&&!it._balv){
+        it.stats.balance=99;it._balv=1;needSave=true;
       }
     }
     if(needSave)saveInv();
@@ -2759,7 +2781,7 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
     const balBonus=Math.round(balRange*gradeIdx/4); // 레전더리면 범위 꽉 채움
     const min=base.balMin+Math.round(balBonus*0.3);
     const max=Math.min(99,base.balMax+Math.round(balBonus*0.15));
-    stats.balance=rand(min,max);
+    stats.balance=Math.min(99,rand(min,max));
   }
   const gi=Object.keys(GRADES).indexOf(grade);
   const gradeMult=GRADES[grade]?.mult||1;
@@ -3197,52 +3219,179 @@ function openIM(it){
     const successRate=it.successRate||0.7;
     const tier=it.enchantTier||2;
     const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
-    const eqItems2=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it);
+    const eqItems2=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k],src:'eq'})).filter(x=>x.it);
+    // 인벤토리에서 장비 아이템 (무기/방어구/악세서리) 추가
+    const invItems2=Object.values(inv).filter(i=>i&&i.slot&&['weapon','head','chest','legs','boots','gloves','ring','necklace'].includes(i.slot)&&!i.isEnchantScroll&&!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox).map(i=>({sl:null,it:i,src:'inv'}));
     const typeLabel=isPrefix?'접두':'접미';
     document.getElementById('imtitle').innerHTML=`<span style="color:${et.color}">📜 ${it.name}</span>`;
-    function renderEnchantTarget2(){
-      const bPreview=enchData?.b?Object.entries(scaleEnchant(enchData.b,1,1)).filter(([,v])=>v!==0).map(([k,v])=>`${k}${v>0?'+':''}${v}`).join(' '):'';
-      document.getElementById('imbody').innerHTML=`
-        <div style="background:rgba(176,96,255,.07);border:1px solid rgba(176,96,255,.3);border-radius:8px;padding:10px 12px;margin-bottom:12px">
-          <div style="font-size:11px;font-weight:700;color:${et.color};margin-bottom:5px">[${typeLabel}] ${enchData?.n||'???'} 인챈트</div>
-          <div style="font-size:10px;color:var(--tx2);margin-bottom:3px">${bPreview}</div>
-          ${enchData?.sk&&SKILLS[enchData.sk]?`<div style="font-size:10px;color:var(--purple)">⚡ ${SKILLS[enchData.sk].name}${skillTypeBadge(enchData.sk)} — ${SKILLS[enchData.sk].desc}</div>`:''}
-          <div style="margin-top:5px;font-size:10px;color:${tier>=4?'var(--red)':'var(--tx3)'}">
-            성공 확률: <b>${Math.round(successRate*100)}%</b> · 실패 시 스크롤 소모
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">부여할 장비를 선택하세요:<br><span style="font-size:10px">유일 장비는 성공률이 크게 낮아집니다. 기존 ${typeLabel} 인챈트는 교체됩니다.</span></div>
-        ${!eqItems2.length?'<div style="color:var(--tx3);font-size:11px;padding:12px 0">장착된 장비 없음</div>':
-        `<div style="display:flex;flex-direction:column;gap:6px">
-          ${eqItems2.map(x=>`
-            <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:9px 11px;cursor:pointer;transition:.15s"
-              onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--bd)'"
-              onclick="applyEnchantScroll('${it.id}','${x.sl}')">
-              <div class="icname g-${x.it.grade}" style="font-size:11.5px;margin-bottom:3px">${x.it.name}${x.it.grade==='set'?`<span style="font-size:9px;color:var(--red);margin-left:5px">⚠️ 유일 — 확률 대폭 하락</span>`:''}</div>
-              <div style="font-size:9.5px;color:var(--tx3)">
-                접두: <span style="color:${x.it.prefix?'var(--blue)':'var(--tx3)'}">${x.it.prefix?.n||'없음'}</span> /
-                접미: <span style="color:${x.it.suffix?'var(--purple)':'var(--tx3)'}">${x.it.suffix?.n||'없음'}</span>
-              </div>
-            </div>`).join('')}
-        </div>`}`;
+    // ── 인챈트 유동 스탯 범위 계산 (랜덤 없이 min~max만 반환) ──
+    function getEnchantRange(b, lv, gradeMult){
+      const lm=1+Math.sqrt(Math.max(0,lv-1))*0.163;
+      const gm=Math.min(gradeMult,2.7);
+      const ranges={};
+      for(const[k,v]of Object.entries(b)){
+        if(v===0)continue;
+        const base=Math.abs(v)*lm*gm;
+        const lo=Math.max(1,Math.round(base*0.75));
+        const hi=Math.round(base*1.25);
+        ranges[k]={lo:v>0?lo:-hi, hi:v>0?hi:-lo, neg:v<0};
+      }
+      return ranges;
     }
-    window.applyEnchantScroll=async function(scrollId,slotKey){
+    const STAT_LABEL_EN={atk:'ATK',matk:'MATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',balance:'밸런스',
+      goldBonus:'골드보너스',skillBonus:'스킬발동',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK'};
+
+    // 잠금/판매/버리기 핸들러를 전역으로 노출 (innerHTML 교체 후에도 유지되도록)
+    const scrollItemId=it.id;
+    window._enchScrollLock=async function(){
+      const sc=inv[scrollItemId];if(!sc)return;
+      sc._locked=!sc._locked;
+      await saveInv();
+      toast(sc._locked?`🔒 ${sc.name} 잠금`:`🔓 ${sc.name} 잠금 해제`);
+      closeIM();renderInv();
+    };
+    window._enchScrollSell=async function(){
+      const sc=inv[scrollItemId];if(!sc)return;
+      if(sc._locked){toast('🔒 잠금된 스크롤은 판매할 수 없습니다');return;}
+      if(!confirm(`${sc.name}\n100G에 판매하시겠습니까?`))return;
+      delete inv[scrollItemId];char.gold+=100;
+      await saveChar();await saveInv();closeIM();renderInv();updateTop();toast(`💰 ${sc.name} 판매! +100G`);
+    };
+    window._enchScrollDisc=async function(){
+      const sc=inv[scrollItemId];if(!sc)return;
+      if(sc._locked){toast('🔒 잠금된 스크롤은 버릴 수 없습니다');return;}
+      if(!confirm('버리시겠습니까?'))return;
+      delete inv[scrollItemId];await saveInv();closeIM();renderInv();toast('버림');
+    };
+
+    // ★ 전역으로 노출 — onclick 인라인에서 호출 가능하도록
+    window._enchantTarget=function renderEnchantTarget2(){
+      const allTargets=[...eqItems2,...invItems2];
+      const renderItem=(x)=>{
+        const key=x.src==='eq'?`eq:${x.sl}`:`inv:${x.it.id}`;
+        const lv=x.it.itemLv||1;
+        const gm=ENCHANT_GRADE_MULT[x.it.grade]||1;
+        const ranges=enchData?.b?getEnchantRange(enchData.b,lv,gm):{};
+        const rangeHtml=Object.entries(ranges).map(([k,{lo,hi,neg}])=>{
+          const label=STAT_LABEL_EN[k]||k.toUpperCase();
+          const color=neg?'var(--red)':'var(--green)';
+          const suffix=k==='balance'?'%':'';
+          return`<span style="color:${color};font-size:9.5px;background:${neg?'rgba(232,68,68,.08)':'rgba(30,220,100,.08)'};padding:1px 5px;border-radius:3px;border:1px solid ${neg?'rgba(232,68,68,.2)':'rgba(30,220,100,.2)'}">${label} ${lo>0?'+':''}${lo}${suffix}~${hi>0?'+':''}${hi}${suffix}</span>`;
+        }).join(' ');
+        return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;cursor:pointer;transition:.15s"
+            onmouseover="this.style.borderColor='var(--purple)';this.style.background='rgba(176,96,255,.07)'"
+            onmouseout="this.style.borderColor='var(--bd)';this.style.background='var(--sf2)'"
+            onclick="showEnchantPreview('${it.id}','${key}')">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">
+              <span class="icname g-${x.it.grade}" style="font-size:11.5px">${x.it.name}</span>
+              ${x.src==='inv'?`<span style="font-size:9px;color:var(--tx3);background:rgba(255,255,255,.07);padding:1px 5px;border-radius:3px">인벤</span>`:`<span style="font-size:9px;color:var(--blue);background:rgba(74,143,255,.1);padding:1px 5px;border-radius:3px">장착</span>`}
+              ${x.it.grade==='set'?`<span style="font-size:9px;color:var(--red)">⚠️ 유일</span>`:''}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">
+              ${rangeHtml||`<span style="font-size:9px;color:var(--tx3)">스탯 없음</span>`}
+              ${enchData?.sk&&SKILLS[enchData.sk]?`<span style="font-size:9.5px;color:var(--purple);background:rgba(176,96,255,.1);padding:1px 5px;border-radius:3px;border:1px solid rgba(176,96,255,.25)">⚡${SKILLS[enchData.sk].name}</span>`:''}
+            </div>
+            <div style="font-size:9px;color:var(--tx3)">
+              현재 접두: <span style="color:${x.it.prefix?'var(--blue)':'var(--tx3)'}">${x.it.prefix?.n||'없음'}</span> · 
+              접미: <span style="color:${x.it.suffix?'var(--purple)':'var(--tx3)'}">${x.it.suffix?.n||'없음'}</span>
+              · Lv.${lv} / ${x.it.gradeName||x.it.grade}
+            </div>
+          </div>`;
+      };
+      const sc=inv[scrollItemId];
+      const isLk=!!(sc&&sc._locked);
+      document.getElementById('imbody').innerHTML=`
+        <div style="background:rgba(176,96,255,.07);border:1px solid rgba(176,96,255,.3);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:${et.color};margin-bottom:3px">[${typeLabel}] ${enchData?.n||'???'} 인챈트</div>
+          ${enchData?.sk&&SKILLS[enchData.sk]?`<div style="font-size:10px;color:var(--purple);margin-bottom:3px">⚡ ${SKILLS[enchData.sk].name}${skillTypeBadge(enchData.sk)} — ${SKILLS[enchData.sk].desc}</div>`:''}
+          <div style="font-size:10px;color:${tier>=4?'var(--red)':'var(--tx3)'}">성공 확률: <b>${Math.round(successRate*100)}%</b> · 실패 시 스크롤 소모</div>
+        </div>
+        <div style="font-size:10.5px;color:var(--tx2);margin-bottom:6px">장비를 선택하면 <b style="color:var(--green)">해당 장비 기준 예상 스탯 범위</b>를 확인 후 인챈트할 수 있습니다.</div>
+        ${!allTargets.length?'<div style="color:var(--tx3);font-size:11px;padding:12px 0">장착/인벤 장비 없음</div>':
+        `<div style="display:flex;flex-direction:column;gap:6px">${allTargets.map(renderItem).join('')}</div>`}
+        <div style="display:flex;gap:6px;margin-top:12px">
+          <button class="btn btn-xs" onclick="_enchScrollLock()" style="background:${isLk?'rgba(240,192,64,.18)':'rgba(255,255,255,.06)'};border:1px solid ${isLk?'var(--gold)':'var(--bd2)'};color:${isLk?'var(--gold)':'var(--tx3)'};">${isLk?'🔒':'🔓'}</button>
+          <button class="btn btn-gold btn-sm" style="flex:1" onclick="_enchScrollSell()">💰 판매 (100G)</button>
+          <button class="btn btn-red btn-sm" onclick="_enchScrollDisc()">버리기</button>
+        </div>`;
+    };
+
+    // ── 2단계: 선택된 장비 미리보기 패널 ──
+    window.showEnchantPreview=function(scrollId, keyStr){
       const sc=inv[scrollId];if(!sc)return;
-      const eq=char.equipment[slotKey];if(!eq)return;
-      // ★ 유일 장비: 성공률 하한치 적용 (티어별 최저)
-      const SET_RATES=[0.20,0.15,0.10,0.08,0.05]; // 하급~전설
+      const[src,ref2]=keyStr.split(':');
+      const eq=src==='eq'?char.equipment[ref2]:inv[ref2];
+      if(!eq)return;
+      const lv=eq.itemLv||1;
+      const gm=ENCHANT_GRADE_MULT[eq.grade]||1;
+      const SET_RATES=[0.20,0.15,0.10,0.08,0.05];
       const actualRate=eq.grade==='set'?SET_RATES[Math.min(tier-1,4)]:successRate;
+      const ranges=enchData?.b?getEnchantRange(enchData.b,lv,gm):{};
       const existing=isPrefix?eq.prefix:eq.suffix;
-      const overwriteWarn=existing?`\n⚠️ 기존 [${existing.n}] 인챈트가 사라집니다!`:'';
-      const setWarn=eq.grade==='set'?`\n🔴 유일 장비 — 성공률 ${Math.round(actualRate*100)}% (일반의 하한치)`:'';
-      if(!confirm(`[${typeLabel}] ${enchData?.n} 인챈트를\n${eq.name}에 부여합니까?${overwriteWarn}${setWarn}\n성공 확률: ${Math.round(actualRate*100)}%`))return;
+
+      const rangeRows=Object.entries(ranges).map(([k,{lo,hi,neg}])=>{
+        const label=STAT_LABEL_EN[k]||k.toUpperCase();
+        const suffix=k==='balance'?'%':'';
+        const color=neg?'var(--red)':'var(--green)';
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-size:11px;color:var(--tx2)">${label}</span>
+          <span style="font-size:12px;font-weight:700;color:${color};font-family:'IBM Plex Mono',monospace">${lo>0?'+':''}${lo}${suffix} ~ ${hi>0?'+':''}${hi}${suffix}</span>
+        </div>`;
+      }).join('');
+
+      const skillRow=enchData?.sk&&SKILLS[enchData.sk]?`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-size:11px;color:var(--tx2)">스킬</span>
+          <span style="font-size:11px;color:var(--purple)">⚡ ${SKILLS[enchData.sk].name}${skillTypeBadge(enchData.sk)}</span>
+        </div>`:'';
+
+      document.getElementById('imbody').innerHTML=`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <button onclick="_enchantTarget()" style="background:rgba(255,255,255,.07);border:1px solid var(--bd2);color:var(--tx2);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer">← 뒤로</button>
+          <span style="font-size:11px;color:var(--tx3)">장비 선택으로 돌아가기</span>
+        </div>
+        <div style="background:rgba(176,96,255,.07);border:1px solid rgba(176,96,255,.35);border-radius:9px;padding:11px 14px;margin-bottom:10px">
+          <div style="font-size:10px;color:${et.color};font-weight:700;margin-bottom:2px">[${typeLabel}] ${enchData?.n} 인챈트</div>
+          <div style="font-size:10px;color:var(--tx3)">성공 확률: <b style="color:${actualRate<0.5?'var(--red)':'var(--green)'}">${Math.round(actualRate*100)}%</b> · 실패 시 스크롤 소모</div>
+        </div>
+        <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:11px 14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+            <span class="icname g-${eq.grade}" style="font-size:12px">${eq.name}</span>
+            <span style="font-size:9px;color:var(--tx3)">Lv.${lv} · ${eq.gradeName||eq.grade}</span>
+          </div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">이 장비 기준 · 범위 내 랜덤 결정</div>
+          ${rangeRows||'<div style="font-size:10px;color:var(--tx3)">스탯 없음</div>'}
+          ${skillRow}
+        </div>
+        ${existing?`<div style="background:rgba(232,68,68,.07);border:1px solid rgba(232,68,68,.25);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:10.5px;color:var(--tx2)">
+          ⚠️ 기존 [${typeLabel}] <b style="color:${isPrefix?'var(--blue)':'var(--purple)'}">${existing.n}</b> 인챈트가 교체됩니다
+        </div>`:''}
+        ${eq.grade==='set'?`<div style="background:rgba(232,68,68,.07);border:1px solid rgba(232,68,68,.25);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:10.5px;color:var(--red)">
+          🔴 유일 장비 — 성공률 ${Math.round(actualRate*100)}%로 크게 낮아집니다
+        </div>`:''}
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn btn-purple" style="flex:1;padding:11px;font-size:13px;font-weight:700"
+            onclick="applyEnchantScroll('${scrollId}','${keyStr}')">✨ 인챈트</button>
+          <button class="btn btn-ghost" style="padding:11px 18px;font-size:13px"
+            onclick="_enchantTarget()">취소</button>
+        </div>`;
+    };
+
+    window.applyEnchantScroll=async function(scrollId,keyStr){
+      const sc=inv[scrollId];if(!sc)return;
+      const[src,ref2]=keyStr.split(':');
+      let eq,saveEqFn;
+      if(src==='eq'){eq=char.equipment[ref2];saveEqFn=async()=>{await saveChar();};}
+      else{eq=inv[ref2];saveEqFn=async()=>{await saveInv();};}
+      if(!eq)return;
+      const SET_RATES=[0.20,0.15,0.10,0.08,0.05];
+      const actualRate=eq.grade==='set'?SET_RATES[Math.min(tier-1,4)]:successRate;
       delete inv[scrollId];
       if(Math.random()>actualRate){
         toast(`💨 인챈트 실패... 스크롤 소모`,3000);
         await saveInv();closeIM();return;
       }
       const lv=eq.itemLv||1;
-      // ★ 인챈트 전용 등급배율 사용 (과잉 성장 억제)
       const gm=ENCHANT_GRADE_MULT[eq.grade]||ENCHANT_GRADE_MULT['normal']||1;
       const scaledB=scaleEnchant(enchData.b,lv,gm);
       const enchObj={n:enchData.n,b:scaledB,sk:enchData.sk||null,attr:enchData.attr||null};
@@ -3250,39 +3399,11 @@ function openIM(it){
       const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
       const basePart=eq.baseName||eq.name.replace(/^.*(전설의|정예|강화된|좋은)\s/,'');
       eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+gAdj+basePart;
-      await saveChar();await saveInv();closeIM();updateTop();renderChar();
+      await saveEqFn();await saveInv();closeIM();updateTop();renderChar();
       toast(`✨ [${enchData?.n}] 인챈트 성공!`,3000);
       trackBounty('enchant',1);
     };
-    renderEnchantTarget2();
-    // ★ 잠금 + 판매/버리기 버튼 추가
-    const existingBody=document.getElementById('imbody');
-    const btnDiv=document.createElement('div');
-    btnDiv.style.cssText='display:flex;gap:6px;margin-top:12px';
-    const isLocked=!!it._locked;
-    btnDiv.innerHTML=`
-      <button class="btn btn-xs" id="scrollLockBtn" style="background:${isLocked?'rgba(240,192,64,.18)':'rgba(255,255,255,.06)'};border:1px solid ${isLocked?'var(--gold)':'var(--bd2)'};color:${isLocked?'var(--gold)':'var(--tx3)'};" title="${isLocked?'잠금 해제':'잠금'}">${isLocked?'🔒':'🔓'}</button>
-      <button class="btn btn-gold btn-sm" style="flex:1" id="scrollSellBtn">💰 판매 (100G)</button>
-      <button class="btn btn-red btn-sm" id="scrollDiscBtn">버리기</button>`;
-    existingBody.appendChild(btnDiv);
-    document.getElementById('scrollLockBtn').onclick=async()=>{
-      it._locked=!it._locked;
-      inv[it.id]=it;
-      await saveInv();
-      toast(it._locked?`🔒 ${it.name} 잠금`:`🔓 ${it.name} 잠금 해제`);
-      closeIM();renderInv();
-    };
-    document.getElementById('scrollSellBtn').onclick=async()=>{
-      if(it._locked){toast('🔒 잠금된 스크롤은 판매할 수 없습니다');return;}
-      if(!confirm(`${it.name}\n100G에 판매하시겠습니까?`))return;
-      delete inv[it.id];char.gold+=100;
-      await saveChar();await saveInv();closeIM();renderInv();updateTop();toast(`💰 ${it.name} 판매! +100G`);
-    };
-    document.getElementById('scrollDiscBtn').onclick=async()=>{
-      if(it._locked){toast('🔒 잠금된 스크롤은 버릴 수 없습니다');return;}
-      if(!confirm('버리시겠습니까?'))return;
-      delete inv[it.id];await saveInv();closeIM();renderInv();toast('버림');
-    };
+    window._enchantTarget();
     document.getElementById('imodal').classList.add('open');return;
   }
   // ★ 인챈트 추출 스크롤
@@ -3599,16 +3720,37 @@ function renderSell(sb){
   const gNames={normal:'노말',uncommon:'언커먼',rare:'레어',epic:'에픽',legendary:'레전더리',set:'유일'};
   const gradeOrder=['set','legendary','epic','rare','uncommon','normal'];
 
-  // ─ 인챈트 스크롤 일괄판매 ─
   const unlockEnch=enchants.filter(i=>!i._locked);
-  const enchBulkHtml=`<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.3);border-radius:7px;padding:9px 12px;margin-bottom:5px">
-    <div>
+  // ─ 인챈트 스크롤 일괄판매 (등급별) ─
+  const enchByTier={1:[],2:[],3:[],4:[],5:[]};
+  for(const e of enchants){if(!e._locked){const t=e.enchantTier||2;(enchByTier[t]=enchByTier[t]||[]).push(e);}}
+  const tierBulkHtml=`<div style="background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.3);border-radius:8px;padding:10px 12px;margin-bottom:5px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <span style="color:var(--purple);font-weight:700;font-size:11px">📜 인챈트 스크롤</span>
-      <span style="font-size:10px;color:var(--tx3);margin-left:6px">총 ${enchants.length}개 (잠금 제외 ${unlockEnch.length}개)</span>
+      <span style="font-size:10px;color:var(--tx3)">총 ${enchants.length}개 (잠금 제외 ${unlockEnch.length}개)</span>
     </div>
-    <div style="display:flex;align-items:center;gap:7px">
-      <span style="font-size:11px;color:var(--gold)">💰${(unlockEnch.length*100).toLocaleString()}</span>
-      <button class="btn btn-gold btn-xs" onclick="sellAllEnchants()">일괄판매</button>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      ${[5,4,3,2,1].map(t=>{
+        const arr=enchByTier[t]||[];if(!arr.length)return'';
+        const et=ENCHANT_TIERS[t];const total=arr.length*100;
+        return`<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:5px 9px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:10px;font-weight:700;color:${et.color}">${et.name}</span>
+            <span style="font-size:10px;color:var(--tx3)">${arr.length}개</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:10px;color:var(--gold)">💰${total.toLocaleString()}G</span>
+            <button class="btn btn-gold btn-xs" onclick="sellEnchantsByTier(${t})">판매</button>
+          </div>
+        </div>`;
+      }).join('')}
+      ${unlockEnch.length?`<div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(176,96,255,.2);padding-top:6px;margin-top:2px">
+        <span style="font-size:10px;color:var(--tx3)">전체 ${unlockEnch.length}개</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:10px;color:var(--gold)">💰${(unlockEnch.length*100).toLocaleString()}G</span>
+          <button class="btn btn-gold btn-xs" onclick="sellAllEnchants()">전체 판매</button>
+        </div>
+      </div>`:''}
     </div>
   </div>`;
 
@@ -3668,7 +3810,7 @@ function renderSell(sb){
 
   sb.innerHTML=`
     <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">인챈트 스크롤 일괄판매</div>
-    ${enchants.length?enchBulkHtml:`<div style="font-size:11px;color:var(--tx3);padding:4px 0 8px">인챈트 스크롤 없음</div>`}
+    ${enchants.length?tierBulkHtml:`<div style="font-size:11px;color:var(--tx3);padding:4px 0 8px">인챈트 스크롤 없음</div>`}
     <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">장비 등급별 일괄판매</div>
     ${bulkHtml||'<div style="font-size:11px;color:var(--tx3);padding:4px 0 8px">판매 가능한 장비 없음</div>'}
     <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin:10px 0 7px">개별 판매</div>
@@ -3714,6 +3856,19 @@ window.sellAllEnchants=async function(){
   char.gold+=total;
   await saveChar();await saveInv();updateTop();
   toast(`💰 인챈트 스크롤 ${toSell.length}개 판매! +${total.toLocaleString()}G`);
+  const sb=document.getElementById('secbody');if(sb)renderSell(sb);
+};
+// ★ 인챈트 스크롤 등급별 판매
+window.sellEnchantsByTier=async function(tier){
+  const et=ENCHANT_TIERS[tier];
+  const toSell=Object.values(inv).filter(it=>it.isEnchantScroll&&!it._locked&&(it.enchantTier||2)===tier);
+  if(!toSell.length){toast(`판매할 ${et?.name||'해당 등급'} 스크롤 없음`);return;}
+  const total=toSell.length*100;
+  if(!confirm(`[${et?.name||tier}등급] 인챈트 스크롤 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금 스크롤 제외)`))return;
+  for(const it of toSell)delete inv[it.id];
+  char.gold+=total;
+  await saveChar();await saveInv();updateTop();
+  toast(`💰 [${et?.name}] 스크롤 ${toSell.length}개 판매! +${total.toLocaleString()}G`);
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
 };
 
@@ -4208,7 +4363,10 @@ function renderForge(sb){
     const table=FORGE_TABLE[enh]||FORGE_TABLE[8];
     const canAfford=char.gold>=cost;
     return`<div class="shopitem" style="border-color:${maxed?'var(--gold)':'var(--bd)'}">
-      <div class="icname g-${it.grade}" style="margin-bottom:3px">${enh>0?`<span style="color:var(--gold)">+${enh}</span> `:''}${it.name}</div>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <div class="icname g-${it.grade}" style="margin-bottom:0">${enh>0?`<span style="color:var(--gold)">+${enh}</span> `:''}${it.name}</div>
+        <span style="font-size:8px;color:var(--blue);background:rgba(74,143,255,.1);padding:1px 4px;border-radius:3px">장착</span>
+      </div>
       <div style="font-size:9.5px;color:var(--tx3);margin-bottom:4px">${maxed?'<span style="color:var(--gold)">★ 최대 강화</span>':`다음: +${enh+1}`}</div>
       ${!maxed?`<div style="font-size:9px;color:var(--tx3);margin-bottom:5px">
         성공 <span style="color:var(--green)">${table.succ}%</span> · 
@@ -4221,10 +4379,39 @@ function renderForge(sb){
       >${maxed?'최대':`강화 (${cost.toLocaleString()}G)`}</button>
     </div>`;
   }).join('');
+
+  // ★ 인벤토리 강화 가능 아이템
+  const invGear=Object.values(inv).filter(i=>i&&i.slot&&['weapon','head','chest','legs','boots','gloves','ring','necklace'].includes(i.slot)&&!i.isEnchantScroll&&!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox);
+  const invRows=invGear.map(it=>{
+    const enh=it.enhance||0;
+    const maxed=enh>=9;
+    const cost=maxed?0:getForgeCost(it);
+    const table=FORGE_TABLE[Math.min(enh,8)];
+    const canAfford=char.gold>=cost;
+    return`<div class="shopitem" style="border-color:${maxed?'var(--gold)':'var(--bd)'}">
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <div class="icname g-${it.grade}" style="margin-bottom:0">${enh>0?`<span style="color:var(--gold)">+${enh}</span> `:''}${it.name}</div>
+        <span style="font-size:8px;color:var(--tx3);background:rgba(255,255,255,.07);padding:1px 4px;border-radius:3px">인벤</span>
+      </div>
+      <div style="font-size:9.5px;color:var(--tx3);margin-bottom:4px">${maxed?'<span style="color:var(--gold)">★ 최대 강화</span>':`다음: +${enh+1}`}</div>
+      ${!maxed?`<div style="font-size:9px;color:var(--tx3);margin-bottom:5px">
+        성공 <span style="color:var(--green)">${table.succ}%</span> · 
+        실패 <span style="color:var(--tx2)">${table.fail}%</span> · 
+        파괴 <span style="color:var(--red)">${table.destroy}%</span>
+      </div>`:''}
+      <div style="font-size:10px;color:var(--gold);margin-bottom:5px">${!maxed?`💰${cost.toLocaleString()}G`:''}</div>
+      <button class="btn ${maxed?'btn-ghost':canAfford?'btn-gold':'btn-red'} btn-sm" style="width:100%" 
+        onclick="doForgeInv('${it.id}')" ${maxed?'disabled':''}
+      >${maxed?'최대':`강화 (${cost.toLocaleString()}G)`}</button>
+    </div>`;
+  }).join('');
+
   sb.innerHTML=`
     <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">강화 단계가 높을수록 <span style="color:var(--red)">파괴 확률</span>이 증가합니다.</div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:12px">비용은 장비 레벨 · 등급 · 인챈트 가치에 따라 달라집니다.</div>
-    <div class="shopgrid">${rows}</div>`;
+    ${rows?`<div style="font-size:9px;color:var(--blue);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">장착 장비</div><div class="shopgrid">${rows}</div>`:'<div style="font-size:11px;color:var(--tx3);margin-bottom:10px">장착된 장비 없음</div>'}
+    ${invRows?`<div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin:12px 0 7px">인벤토리 장비</div><div class="shopgrid">${invRows}</div>`:''}`
+;
 }
 
 window.doForge=async sl=>{
@@ -4278,6 +4465,50 @@ window.doForge=async sl=>{
   await saveChar();updateTop();renderChar();
   const sb=document.getElementById('secbody');if(sb)renderForge(sb);
 };
+
+// ★ 인벤 아이템 강화
+window.doForgeInv=async function(itemId){
+  const it=inv[itemId];if(!it){toast('아이템 없음');return;}
+  const enh=it.enhance||0;
+  if(enh>=9){toast('최대 강화 +9');return;}
+  const cost=getForgeCost(it);
+  if(char.gold<cost){toast(`골드 부족! 필요: ${cost.toLocaleString()}G`);return;}
+  char.gold-=cost;
+  const table=FORGE_TABLE[Math.min(enh,8)];
+  const roll=Math.random()*100;
+  if(roll<table.succ){
+    it.enhance=enh+1;
+    if(!it._baseStats)it._baseStats={...it.stats};
+    for(const k of Object.keys(it._baseStats)){
+      if((it._baseStats[k]||0)>0)
+        it.stats[k]=Math.round(it._baseStats[k]*(1+Math.pow(it.enhance,1.3)*0.06));
+    }
+    toast(`🔨 강화 성공! +${it.enhance}`,3000);
+    blogAdd&&blogAdd(`<span class="l-exp">🔨 ${it.name} +${it.enhance} 강화 성공!</span>`);
+    trackBounty('enhance',1);
+    if(it.enhance>=3)trackBounty('enhance3',1);
+  }else if(roll<table.succ+table.destroy){
+    const protectScroll=Object.values(inv).find(i=>i.isProtectScroll);
+    if(protectScroll){
+      delete inv[protectScroll.id];
+      await saveChar();await saveInv();updateTop();renderChar();
+      toast(`🛡 파괴 방지 스크롤 발동! ${it.name} 보호됨! (+${enh} 유지)`,4000);
+      const sb2=document.getElementById('secbody');if(sb2)renderForge(sb2);
+      return;
+    }
+    delete inv[itemId];
+    await saveChar();await saveInv();updateTop();renderChar();
+    toast(`💥 강화 실패 — ${it.name} 파괴됨!`,4000);
+    blogAdd&&blogAdd(`<span class="l-dead">💥 ${it.name} 강화 실패로 파괴!</span>`);
+    const sb=document.getElementById('secbody');if(sb)renderForge(sb);
+    return;
+  }else{
+    toast(`강화 실패... (+${enh} 유지)`);
+  }
+  await saveChar();await saveInv();updateTop();renderChar();
+  const sb=document.getElementById('secbody');if(sb)renderForge(sb);
+};
+
 function renderRerollSec(sb){
   const scrolls=Object.values(inv).filter(i=>i.isScroll);
   sb.innerHTML=`
@@ -6928,10 +7159,9 @@ window.showToS=function(){
 };
 
 window.settingToggleSfx=function(){
-  const muted=localStorage.getItem('sfx_muted')==='1';
-  localStorage.setItem('sfx_muted',muted?'0':'1');
+  SFX.toggle(); // 내부 muted 상태 + localStorage 동시 업데이트
   renderSettings();
-  toast(muted?'🔊 효과음 켜짐':'🔇 효과음 꺼짐');
+  toast(SFX.isMuted()?'🔇 효과음 꺼짐':'🔊 효과음 켜짐');
 };
 
 // ★ 닉네임 변경 시 관련 DB 전체 전파
