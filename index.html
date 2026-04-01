@@ -379,6 +379,22 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         디스코드 커뮤니티
       </a>
     </div>
+    <!-- ★ 추천 이벤트 배너 (로그인 화면) -->
+    <div style="margin-bottom:14px;background:linear-gradient(135deg,rgba(176,96,255,.15),rgba(74,143,255,.1));border:1px solid rgba(176,96,255,.45);border-radius:10px;padding:10px 14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:16px">🎁</span>
+        <span style="font-size:11px;font-weight:700;color:#B060FF;font-family:'IBM Plex Mono',monospace">친구 추천 이벤트 진행 중!</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="font-size:9.5px;color:var(--tx2)">
+          <span style="color:var(--gold);font-weight:700">신규 유저</span> — 파괴방지 스크롤 3개 · 인챈트 스크롤 · 추출 스크롤 · 1,500G
+        </div>
+        <div style="font-size:9.5px;color:var(--tx2)">
+          <span style="color:#44D488;font-weight:700">추천한 유저</span> — 3,000G · 인챈트 스크롤 2개 · 재조정 주문서
+        </div>
+      </div>
+      <div style="font-size:9px;color:var(--tx3);margin-top:5px">가입 후 설정 탭에서 추천인 닉네임을 입력하세요</div>
+    </div>
     <div class="ltabs">
       <button class="ltab on" id="tlogin" onclick="swTab('login')">로그인</button>
       <button class="ltab" id="treg" onclick="swTab('register')">회원가입</button>
@@ -533,6 +549,20 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <button class="nbtn" data-tab="admin" id="adminNav" style="display:none"><div class="ni">🛡</div><div class="nl">관리자</div></button>
   </nav>
   <main class="main">
+    <!-- ★ 추천 이벤트 상단 배너 -->
+    <div id="referralBanner" style="margin:10px 10px 0;background:linear-gradient(135deg,rgba(176,96,255,.15),rgba(74,143,255,.12));border:1px solid rgba(176,96,255,.4);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;position:relative"
+      onclick="document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-settings'));document.querySelectorAll('.nbtn').forEach(b=>b.classList.toggle('on',b.dataset.tab==='settings'))">
+      <span style="font-size:22px;flex-shrink:0">🎁</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:700;color:#B060FF;margin-bottom:2px">친구 추천 이벤트 진행 중!</div>
+        <div style="font-size:10px;color:var(--tx2)">친구를 추천하면 <b style="color:var(--gold)">3,000G + 인챈트 스크롤 2개 + 재조정 주문서</b> 지급!</div>
+        <div style="font-size:9px;color:var(--tx3);margin-top:2px">신규 유저도 파괴방지 스크롤 3개 + 인챈트 스크롤 + 추출 스크롤 + 1,500G 수령</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        <span style="font-size:9px;background:rgba(176,96,255,.2);color:#B060FF;padding:2px 8px;border-radius:10px;border:1px solid rgba(176,96,255,.4);white-space:nowrap">설정 → 추천인 코드</span>
+        <button onclick="event.stopPropagation();document.getElementById('referralBanner').style.display='none'" style="background:none;border:none;color:var(--tx3);font-size:11px;cursor:pointer;padding:0">✕ 닫기</button>
+      </div>
+    </div>
 
     <!-- CHARACTER -->
     <div class="pane on" id="pane-character">
@@ -623,6 +653,14 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="tcard" onclick="townSec('reroll')"><div class="tcicon">🔮</div><div class="tcname">능력치 재조정</div><div class="tcdesc">재조정 주문서 사용</div></div>
         <div class="tcard" onclick="townSec('auction')"><div class="tcicon">🏛️</div><div class="tcname">경매장</div><div class="tcdesc">유저 간 장비 거래</div></div>
         <div class="tcard" onclick="townSec('warehouse')"><div class="tcicon">🏦</div><div class="tcname">창고</div><div class="tcdesc">최대 200개 보관</div></div>
+        <!-- ★ 추천 이벤트 카드 -->
+        <div class="tcard" id="townReferralCard"
+          style="border-color:rgba(176,96,255,.5);background:linear-gradient(135deg,rgba(176,96,255,.1),rgba(74,143,255,.07))"
+          onclick="document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-settings'));document.querySelectorAll('.nbtn').forEach(b=>b.classList.toggle('on',b.dataset.tab==='settings'))">
+          <div class="tcicon">🎁</div>
+          <div class="tcname" style="color:#B060FF">친구 추천 이벤트</div>
+          <div class="tcdesc">추천 시 +3,000G & 스크롤!</div>
+        </div>
       </div>
       <div id="townsec" style="display:none"></div>
     </div>
@@ -697,14 +735,23 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <button class="btn btn-ghost btn-sm" onclick="settingUnlockAll()">전체 잠금 해제</button>
         </div>
 
-        <!-- 비밀번호 변경 -->
-        <div class="card2">
+        <!-- 비밀번호 변경 — Google 로그인 유저 자동 숨김 -->
+        <div class="card2" id="pwChangeCard">
           <div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:4px">🔑 비밀번호 변경</div>
           <input id="curPwInput" type="password" placeholder="현재 비밀번호"
             style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:12px;outline:none;margin-bottom:6px"/>
           <input id="newPwInput" type="password" placeholder="새 비밀번호 (6자 이상)"
             style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:12px;outline:none;margin-bottom:8px"/>
           <button class="btn btn-blue btn-sm" style="width:100%" onclick="settingChangePw()">비밀번호 변경</button>
+        </div>
+
+        <!-- 추천인 코드 입력 (1회만) -->
+        <div class="card2" id="referralCard">
+          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:4px">🎁 추천인 코드 입력</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.6">다른 플레이어의 <b style="color:var(--tx)">닉네임</b>을 입력하면<br>파괴방지 스크롤 2개 + 500G를 드립니다!<br><span style="color:var(--tx3)">※ 1회만 가능 · 본인 닉네임 불가</span></div>
+          <input id="referralInput" placeholder="추천인 닉네임 입력"
+            style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid rgba(240,192,64,.3);border-radius:6px;color:var(--tx);font-size:12px;outline:none;margin-bottom:8px"/>
+          <button class="btn btn-gold btn-sm" style="width:100%" onclick="submitReferral()">추천인 등록</button>
         </div>
 
         <!-- 캐릭터 삭제 -->
@@ -2202,6 +2249,13 @@ async function selChar(id){
   // ★ 일일/주간 미션 초기화 (날짜가 바뀌면 자동 갱신)
   getOrInitDailyQuests();
   getOrInitWeeklyQuest();
+  // ★ 추천 이벤트 배너 — 이미 추천인 등록한 유저는 숨김
+  if(char.referredBy){
+    const banner=document.getElementById('referralBanner');
+    if(banner)banner.style.display='none';
+    const townCard=document.getElementById('townReferralCard');
+    if(townCard)townCard.style.display='none';
+  }
   updateBountyCardDesc(); // ★ 현상금 카드 설명 실시간 반영
   startSubjugationWatcher();
   startChampWatcher();
@@ -4406,7 +4460,7 @@ async function renderAuction(sb){
                     }
                     return skList.length?`<div style="font-size:9.5px;margin-bottom:2px;display:flex;flex-direction:column;gap:1px">${skList.join('')}</div>`:'';
                   })()}
-                  <div style="font-size:9.5px;color:var(--tx3);margin-top:2px">판매자: ${v.sellerName||'?'}</div>
+                  <div style="font-size:9.5px;color:var(--tx3);margin-top:2px">판매자: ${v.sellerName||'?'}${it.reqLv?` · <span style="color:${char.level>=it.reqLv?'var(--green)':'var(--red)'}">장착 Lv.${it.reqLv}${char.level<it.reqLv?' ⚠️':''}</span>`:''}</div>
                 </div>
                 <div style="text-align:right;flex-shrink:0">
                   <div style="font-size:13px;font-weight:700;color:var(--gold);font-family:'IBM Plex Mono',monospace;margin-bottom:6px">💰${price.toLocaleString()}</div>
@@ -4434,7 +4488,7 @@ async function renderAuction(sb){
           <div style="display:flex;align-items:center;justify-content:space-between">
             <div>
               <div class="icname g-${it.grade}" style="font-size:11px;margin-bottom:2px">${it.name}${it.enhance>0?` <span style="color:var(--gold)">+${it.enhance}</span>`:''}</div>
-              <div style="font-size:9.5px;color:var(--tx3)">등록가: <span style="color:var(--gold);font-family:'IBM Plex Mono',monospace">${v.price.toLocaleString()}G</span></div>
+              <div style="font-size:9.5px;color:var(--tx3)">등록가: <span style="color:var(--gold);font-family:'IBM Plex Mono',monospace">${v.price.toLocaleString()}G</span>${it.reqLv?` · 장착 Lv.${it.reqLv}`:''}</div>
             </div>
             <button class="btn btn-red btn-xs" onclick="cancelAuction('${lid}')">취소</button>
           </div>
@@ -6734,7 +6788,7 @@ window.loadAdminAuction=async function(){
       return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:8px">
         <div style="flex:1;min-width:0">
           <div style="font-size:11px;font-weight:700;color:var(--tx)">${escapeHtml(it.name||'?')}</div>
-          <div style="font-size:9.5px;color:var(--tx3)">판매자: ${escapeHtml(v.sellerName||'?')} · 💰${(v.price||0).toLocaleString()}G</div>
+          <div style="font-size:9.5px;color:var(--tx3)">판매자: ${escapeHtml(v.sellerName||'?')} · 💰${(v.price||0).toLocaleString()}G${v.item?.reqLv?` · 장착 Lv.${v.item.reqLv}`:''}</div>
         </div>
         <button class="btn btn-red btn-xs" onclick="adminDeleteAuction('${lid}')">🗑삭제</button>
       </div>`;
@@ -6841,13 +6895,10 @@ window.navTo=function(tab){
 function renderSettings(){
   const nameEl=document.getElementById('settingCurName');
   if(nameEl)nameEl.textContent=char.name;
-  // 닉네임 변경 쿠폰 수
   const couponEl=document.getElementById('nickCouponCount');
   if(couponEl)couponEl.textContent=char.nickCoupons||0;
-  // 잠금 아이템 수
   const lockCntEl=document.getElementById('lockedCount');
   if(lockCntEl)lockCntEl.textContent=Object.values(inv).filter(i=>i._locked).length;
-  // SFX 버튼 상태
   const sfxBtn=document.getElementById('sfxToggleBtn');
   if(sfxBtn){
     const muted=localStorage.getItem('sfx_muted')==='1';
@@ -6855,6 +6906,20 @@ function renderSettings(){
     sfxBtn.style.background=muted?'rgba(232,68,68,.15)':'rgba(68,212,136,.15)';
     sfxBtn.style.borderColor=muted?'var(--red)':'var(--green)';
     sfxBtn.style.color=muted?'var(--red)':'var(--green)';
+  }
+  // ★ Google 로그인 유저는 비밀번호 변경 숨김
+  const pwCard=document.getElementById('pwChangeCard');
+  if(pwCard){
+    const isGoogle=curUser?.providerData?.some(p=>p.providerId==='google.com');
+    pwCard.style.display=isGoogle?'none':'block';
+  }
+  // ★ 추천인 카드 — 이미 완료한 경우 표시 변경
+  const refCard=document.getElementById('referralCard');
+  if(refCard){
+    if(char.referredBy){
+      refCard.innerHTML=`<div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px">✅ 추천인 등록 완료</div>
+      <div style="font-size:10px;color:var(--tx3)">추천인: <b style="color:var(--tx)">${char.referredBy}</b><br>파괴방지 스크롤 3개 + 인챈트 스크롤 + 추출 스크롤 + 1,500G를 받았습니다!</div>`;
+    }
   }
 }
 
@@ -6915,6 +6980,62 @@ window.settingChangeNick=async function(){
   document.getElementById('newNickInput').value='';
   renderSettings();
   toast(`✅ 닉네임이 "${newName}"으로 변경되었습니다! (남은 쿠폰: ${char.nickCoupons})`);
+};
+
+// ★ 추천인 코드 제출
+window.submitReferral=async function(){
+  if(char.referredBy){toast('⚠️ 이미 추천인을 등록했습니다');return;}
+  const input=(document.getElementById('referralInput')?.value||'').trim();
+  if(!input){toast('추천인 닉네임을 입력해주세요');return;}
+  if(input===char.name){toast('⚠️ 본인 닉네임은 입력할 수 없습니다');return;}
+  // 추천인 닉네임으로 캐릭터 검색
+  const snap=await get(ref(db,'chars'));
+  const all=snap.val()||{};
+  const referrerEntry=Object.entries(all).find(([,c])=>c.name===input);
+  if(!referrerEntry){toast('⚠️ 존재하지 않는 닉네임입니다');return;}
+  const [refCharId,refChar]=referrerEntry;
+  if(!confirm(`"${input}"님을 추천인으로 등록하시겠습니까?\n\n▶ 내가 받는 보상\n  • 파괴방지 스크롤 3개\n  • 인챈트 스크롤 1개\n  • 인챈트 추출 스크롤 1개\n  • 골드 1,500G\n\n▶ 추천인이 받는 보상\n  • 골드 3,000G\n  • 인챈트 스크롤 2개\n  • 능력치 재조정 주문서 1개`))return;
+
+  // ★ 추천받은 사람(나) 보상 지급
+  char.referredBy=input;
+  char.gold=(char.gold||0)+1500;
+  // 파괴방지 스크롤 3개
+  for(let i=0;i<3;i++){
+    const sc={id:gId(),name:'파괴방지 스크롤',isProtectScroll:true,grade:'uncommon',
+      gradeName:'언커먼',gradeColor:'#1EFF00',slot:'scroll',tradeable:false};
+    await addItem(sc);
+  }
+  // 인챈트 스크롤 1개
+  const myScroll=genEnchantScroll(Math.max(1,char.level||1),false);
+  myScroll.tradeable=false;
+  await addItem(myScroll);
+  // 인챈트 추출 스크롤 1개
+  const myExtract={id:gId(),name:'인챈트 추출 스크롤',icon:'💎',isExtractScroll:true,
+    grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',slot:'scroll',stats:{},_v:2,tradeable:false};
+  await addItem(myExtract);
+  await saveChar();
+  updateTop();
+  toast('🎁 추천인 등록 완료! 파괴방지 스크롤 3개 + 인챈트 스크롤 + 추출 스크롤 + 1,500G 지급!',5000);
+
+  // ★ 추천한 사람(추천인) 보상 지급 — Firebase 직접 업데이트
+  await update(ref(db,`chars/${refCharId}`),{gold:(refChar.gold||0)+3000});
+  // 인챈트 스크롤 2개
+  for(let i=0;i<2;i++){
+    const refScroll=genEnchantScroll(Math.max(1,refChar.level||1),i===1);
+    refScroll.tradeable=true;
+    await set(ref(db,`inv/${refCharId}/${refScroll.id}`),refScroll);
+  }
+  // 능력치 재조정 주문서 1개
+  const refReroll=genScrollItem();
+  refReroll.tradeable=false;
+  await set(ref(db,`inv/${refCharId}/${refReroll.id}`),refReroll);
+  // 추천인에게 알림 채팅
+  await push(ref(db,'chat/world'),{
+    author:'SYSTEM',
+    text:`🎁 ${char.name}님이 ${input}님의 추천으로 합류했습니다! ${input}님에게 +3,000G + 인챈트 스크롤 2개 + 재조정 주문서 지급!`,
+    ts:Date.now(),isAdmin:true
+  });
+  renderSettings();
 };
 
 window.settingChangePw=async function(){
