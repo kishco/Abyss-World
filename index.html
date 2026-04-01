@@ -3219,9 +3219,6 @@ function openIM(it){
     const successRate=it.successRate||0.7;
     const tier=it.enchantTier||2;
     const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
-    const eqItems2=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k],src:'eq'})).filter(x=>x.it);
-    // 인벤토리에서 장비 아이템 (무기/방어구/악세서리) 추가
-    const invItems2=Object.values(inv).filter(i=>i&&i.slot&&['weapon','head','chest','legs','boots','gloves','ring','necklace'].includes(i.slot)&&!i.isEnchantScroll&&!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox).map(i=>({sl:null,it:i,src:'inv'}));
     const typeLabel=isPrefix?'접두':'접미';
     document.getElementById('imtitle').innerHTML=`<span style="color:${et.color}">📜 ${it.name}</span>`;
     // ── 인챈트 유동 스탯 범위 계산 (랜덤 없이 min~max만 반환) ──
@@ -3266,6 +3263,9 @@ function openIM(it){
 
     // ★ 전역으로 노출 — onclick 인라인에서 호출 가능하도록
     window._enchantTarget=function renderEnchantTarget2(){
+      // 매번 최신 장비/인벤 상태로 갱신
+      const eqItems2=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k],src:'eq'})).filter(x=>x.it);
+      const invItems2=Object.values(inv).filter(i=>i&&i.slot&&['weapon','head','chest','legs','boots','gloves','ring','necklace'].includes(i.slot)&&!i.isEnchantScroll&&!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox).map(i=>({sl:null,it:i,src:'inv'}));
       const allTargets=[...eqItems2,...invItems2];
       const renderItem=(x)=>{
         const key=x.src==='eq'?`eq:${x.sl}`:`inv:${x.it.id}`;
@@ -5113,7 +5113,7 @@ function startBattle(tierIdx,mode,diffKey,players){
 }
 
 function nextFloor(){
-  if(!battle)return;
+  if(!battle||battle.done)return; // ★ done이면 진행 차단
   battle.floor++;
   if(battle.floor>battle.floors){dungeonClear();return;}
   // 부활 큐 처리 (파티)
@@ -5930,6 +5930,8 @@ async function maybeLoseItem(){
 }
 
 async function dungeonClear(){
+  if(!battle||battle._cleared)return; // ★ 중복 클리어 완전 차단
+  battle._cleared=true;
   const d=battle.diff;const dk=battle.diffKey;
   const mode=battle.mode;
   const tierIdx=battle.tierIdx;
