@@ -1060,10 +1060,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
   <div class="cw-tabs">
     <button class="cw-tab on" id="cwt-world" onclick="cwTab('world')">월드</button>
+    <button class="cw-tab" id="cwt-system" onclick="cwTab('system')">시스템<span id="cwSysBadge" style="display:none;margin-left:4px;background:var(--red);color:#fff;font-size:8px;padding:1px 4px;border-radius:6px;vertical-align:middle">N</span></button>
     <button class="cw-tab" id="cwt-whisper" onclick="cwTab('whisper')">귓속말</button>
   </div>
   <div class="cw-msgs" id="cwMsgs"></div>
-  <div class="cw-inp-area">
+  <div class="cw-inp-area" id="cwInpArea">
     <div class="cw-whisper-row" id="cwWhisperRow" style="display:none">
       <input class="cw-winput" id="cwTarget" placeholder="대상 이름"/>
     </div>
@@ -3748,10 +3749,46 @@ function openIM(it){
     if(!confirm('버리시겠습니까?'))return;
     delete inv[it.id];await saveInv();closeIM();renderInv();toast('버림');
   };
-  // ★ 파괴방지 스크롤 등 — 판매 버튼 추가
+  // ★ 파괴방지 스크롤 — 사용 버튼 + 스택 시스템
   if(it.isProtectScroll){
+    // 현재 보유 개수 확인
+    const protectCount=Object.values(inv).filter(i=>i.isProtectScroll).length;
+    const curStack=char._deathWard||0;
+    const useBtn=document.createElement('button');
+    useBtn.className='btn btn-gold btn-sm';useBtn.style.cssText='margin-top:8px;width:100%';
+    if(curStack>0){
+      // 이미 적용 중이면 스택 추가 여부 표시
+      useBtn.textContent=`🛡 사용 (현재 ${curStack}회 적용 중 → ${curStack+1}회로 증가)`;
+    }else{
+      useBtn.textContent='🛡 사용 (강화 파괴 1회 방지)';
+    }
+    useBtn.onclick=async()=>{
+      const msg=curStack>0
+        ?`파괴방지 스크롤을 사용합니다.\n현재: ${curStack}회 → ${curStack+1}회 적용`
+        :'파괴방지 스크롤을 사용합니다.\n강화 파괴 시 1회 자동으로 막아줍니다.';
+      if(!confirm(msg))return;
+      char._deathWard=(char._deathWard||0)+1;
+      delete inv[it.id];
+      await saveChar();await saveInv();closeIM();renderInv();updateTop();
+      toast(`🛡 파괴방지 적용 완료! (${char._deathWard}회 보호)`,3000);
+    };
+    document.getElementById('imbody').appendChild(useBtn);
+    // 스택 현황 표시
+    if(curStack>0){
+      const info=document.createElement('div');
+      info.style.cssText='margin-top:6px;font-size:10px;color:var(--green);text-align:center';
+      info.textContent=`현재 ${curStack}회 보호 적용 중 (누적 스택 가능)`;
+      document.getElementById('imbody').appendChild(info);
+    }
+    // 보유 개수 표시
+    if(protectCount>1){
+      const cnt=document.createElement('div');
+      cnt.style.cssText='margin-top:4px;font-size:10px;color:var(--tx3);text-align:center';
+      cnt.textContent=`보유 수량: ${protectCount}개`;
+      document.getElementById('imbody').appendChild(cnt);
+    }
     const sellBtn=document.createElement('button');
-    sellBtn.className='btn btn-gold btn-sm';sellBtn.style.cssText='margin-top:8px;width:100%';
+    sellBtn.className='btn btn-ghost btn-sm';sellBtn.style.cssText='margin-top:6px;width:100%';
     sellBtn.textContent='💰 판매 (100G)';
     sellBtn.onclick=async()=>{if(!confirm('100G에 판매?'))return;delete inv[it.id];char.gold+=100;await saveChar();await saveInv();closeIM();renderInv();updateTop();toast('💰 +100G');};
     document.getElementById('imbody').appendChild(sellBtn);
@@ -4536,7 +4573,24 @@ function renderForge(sb){
     </div>`;
   }).join('');
 
+  const protectInvCnt=Object.values(inv).filter(i=>i.isProtectScroll).length;
+  const deathWardStack=char._deathWard||0;
+  const protectInfo=deathWardStack>0||protectInvCnt>0
+    ?`<div style="background:rgba(68,212,136,.07);border:1px solid rgba(68,212,136,.25);border-radius:7px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">🛡</span>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--green)">파괴방지 보호 중</div>
+          <div style="font-size:10px;color:var(--tx3)">
+            ${deathWardStack>0?`사용된 스크롤: ${deathWardStack}회 남음`:''}
+            ${deathWardStack>0&&protectInvCnt>0?' · ':''}
+            ${protectInvCnt>0?`인벤 스크롤: ${protectInvCnt}개`:''}
+          </div>
+        </div>
+      </div>`
+    :`<div style="font-size:10px;color:var(--tx3);margin-bottom:8px">💡 파괴방지 스크롤 사용 시 강화 파괴를 막을 수 있습니다</div>`;
+
   sb.innerHTML=`
+    ${protectInfo}
     <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">강화 단계가 높을수록 <span style="color:var(--red)">파괴 확률</span>이 증가합니다.</div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:12px">비용은 장비 레벨 · 등급 · 인챈트 가치에 따라 달라집니다.</div>
     ${rows?`<div style="font-size:9px;color:var(--blue);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">장착 장비</div><div class="shopgrid">${rows}</div>`:'<div style="font-size:11px;color:var(--tx3);margin-bottom:10px">장착된 장비 없음</div>'}
@@ -4570,12 +4624,20 @@ window.doForge=async sl=>{
     trackBounty('enhance',1);
     if(it.enhance>=3)trackBounty('enhance3',1);
   }else if(roll<table.succ+table.destroy){
-    // ★ 파괴 방지 스크롤 체크
+    // ★ 파괴 방지 — 사용된 스크롤(_deathWard) 먼저 소모, 없으면 인벤 스크롤 자동 발동
+    if((char._deathWard||0)>0){
+      char._deathWard--;
+      await saveChar();updateTop();renderChar();
+      toast(`🛡 파괴방지 발동! ${it.name} 보호됨! (+${enh} 유지) [남은 보호: ${char._deathWard}회]`,4000);
+      blogAdd&&blogAdd(`<span class="l-heal">🛡 파괴방지가 ${it.name}을(를) 지켰습니다! (+${enh} 유지, 남은 보호: ${char._deathWard}회)</span>`);
+      const sb2=document.getElementById('secbody');if(sb2)renderForge(sb2);
+      return;
+    }
     const protectScroll=Object.values(inv).find(i=>i.isProtectScroll);
     if(protectScroll){
       delete inv[protectScroll.id];
       await saveChar();await saveInv();updateTop();renderChar();
-      toast(`🛡 파괴 방지 스크롤 발동! ${it.name} 보호됨! (+${enh} 유지)`,4000);
+      toast(`🛡 파괴 방지 스크롤 자동 발동! ${it.name} 보호됨! (+${enh} 유지)`,4000);
       blogAdd&&blogAdd(`<span class="l-heal">🛡 파괴 방지 스크롤이 ${it.name}을(를) 지켰습니다! (+${enh} 유지)</span>`);
       const sb2=document.getElementById('secbody');if(sb2)renderForge(sb2);
       return;
@@ -6216,8 +6278,9 @@ async function cleanExpiredAuctions(){
 
 // ═══ CHAT ═══
 let cwMode='world',cwActive=false;
+let _cwSysMsgCount=0; // ★ 시스템 탭 미읽음 카운트
 // ★ 채팅 리스너 중복 방지: 각 채널별 unsubscribe 함수 보관
-const cwUnsub={world:null,party:null,whisper:null};
+const cwUnsub={world:null,party:null,whisper:null,system:null};
 
 function startChat(){
   if(cwActive)return; // ★ 이미 초기화된 경우 중복 등록 방지
@@ -6227,6 +6290,25 @@ function startChat(){
   cwUnsub.world=onValue(ref(db,'chat/world'),sn=>{
     if(cwMode!=='world')return;
     renderChatMsgs(sn.val()||{},'world');
+  });
+  // ★ 시스템 채널 리스너 — 항상 감시, 탭 안 봐도 뱃지 갱신
+  if(cwUnsub.system)cwUnsub.system();
+  cwUnsub.system=onValue(ref(db,'chat/system'),sn=>{
+    const msgs=sn.val()||{};
+    if(cwMode==='system'){
+      renderChatMsgs(msgs,'system');
+      _cwSysMsgCount=0;
+      const badge=document.getElementById('cwSysBadge');
+      if(badge)badge.style.display='none';
+    }else{
+      // 탭 안 보고 있으면 뱃지 표시
+      const cnt=Object.keys(msgs).length;
+      if(cnt>_cwSysMsgCount){
+        _cwSysMsgCount=cnt;
+        const badge=document.getElementById('cwSysBadge');
+        if(badge){badge.style.display='inline';badge.textContent='N';}
+      }
+    }
   });
   // ★ keydown 이벤트 — AbortController로 단일 등록 보장
   const cwInputEl=document.getElementById('cwInput');
@@ -6267,8 +6349,17 @@ window.cwTab=function(m){
   document.querySelectorAll('.cw-tab').forEach(t=>t.classList.remove('on'));
   const tabEl=document.getElementById('cwt-'+m);if(tabEl)tabEl.classList.add('on');
   document.getElementById('cwWhisperRow').style.display=m==='whisper'?'flex':'none';
+  // ★ 시스템 탭은 읽기 전용 — 입력창 숨김
+  const inpArea=document.getElementById('cwInpArea');
+  if(inpArea)inpArea.style.display=m==='system'?'none':'block';
   if(m==='world'){
     get(ref(db,'chat/world')).then(sn=>renderChatMsgs(sn.val()||{},'world'));
+  }else if(m==='system'){
+    // 시스템 탭 진입 시 뱃지 초기화
+    const badge=document.getElementById('cwSysBadge');
+    if(badge)badge.style.display='none';
+    _cwSysMsgCount=0;
+    get(ref(db,'chat/system')).then(sn=>renderChatMsgs(sn.val()||{},'system'));
   }else if(m==='whisper'){
     if(cwUnsub.whisper)cwUnsub.whisper();
     cwUnsub.whisper=onValue(ref(db,`chat/whisper/${charId}`),sn=>{
@@ -6280,6 +6371,20 @@ window.cwTab=function(m){
 function renderChatMsgs(msgs,type){
   const el=document.getElementById('cwMsgs');
   const arr=Object.values(msgs).sort((a,b)=>(a.ts||0)-(b.ts||0)).slice(-80);
+  // ★ 시스템 탭은 전용 렌더링
+  if(type==='system'){
+    el.innerHTML=arr.length===0
+      ?`<div style="padding:20px;text-align:center;color:var(--tx3);font-size:11px">시스템 메시지 없음</div>`
+      :arr.map(m=>`<div class="cw-msg" style="border-left:2px solid rgba(74,143,255,.4);padding-left:8px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+          <span style="font-size:9px;color:var(--blue);font-weight:700">⚙ SYSTEM</span>
+          <span class="cw-time">${new Date(m.ts||Date.now()).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+        <div class="cw-text" style="color:var(--tx)">${escapeHtml(m.text)}</div>
+      </div>`).join('');
+    el.scrollTop=el.scrollHeight;
+    return;
+  }
   el.innerHTML=arr.map(m=>{
     const isAdmin=m.isAdmin;
     const isChamp1=m.champRank===1;
@@ -7421,7 +7526,7 @@ window.submitReferral=async function(){
   refReroll.tradeable=false;
   await set(ref(db,`inv/${refCharId}/${refReroll.id}`),refReroll);
   // 추천인에게 알림 채팅
-  await push(ref(db,'chat/world'),{
+  await push(ref(db,'chat/system'),{
     author:'SYSTEM',
     text:`🎁 ${char.name}님이 ${input}님의 추천으로 합류했습니다! ${input}님에게 +3,000G + 인챈트 스크롤 2개 + 재조정 주문서 지급!`,
     ts:Date.now(),isAdmin:true
@@ -8259,7 +8364,7 @@ window.enterSubjBattle=function(){
       if(!ok)await set(ref(db,`inv/${charId}/${extraBox.id}`),extraBox);
       await saveInv();
       // Broadcast banner
-      await push(ref(db,'chat/world'),{author:'SYSTEM',text:`🎉 ${boss.name}가 처치되었습니다!! 처치자: ${char.name}`,ts:Date.now(),isAdmin:true});
+      await push(ref(db,'chat/system'),{author:'SYSTEM',text:`🎉 ${boss.name}가 처치되었습니다!! 처치자: ${char.name}`,ts:Date.now(),isAdmin:true});
     }
     toast(`✅ 토벌전 데미지 ${dmg.toLocaleString()} 기록!`,3000);
   }
@@ -8542,7 +8647,7 @@ window.enterChampBattle=async function(){
       const newWinsRef=ref(db,`champ/wins/${char.name}`);
       const newWSnap=await get(newWinsRef);
       await set(newWinsRef,Math.max(newWSnap.val()||0, 1));
-      await push(ref(db,'chat/world'),{author:'SYSTEM',text:`🥊 ${char.name}이(가) ${champ.name}을(를) 꺾고 새 챔프가 되었습니다!`,ts:Date.now(),isAdmin:true});
+      await push(ref(db,'chat/system'),{author:'SYSTEM',text:`🥊 ${char.name}이(가) ${champ.name}을(를) 꺾고 새 챔프가 되었습니다!`,ts:Date.now(),isAdmin:true});
       toast('🥊 챔프 등극!',4000);
       renderChampBattle();return;
     }
@@ -8576,6 +8681,10 @@ window.enterChampBattle=async function(){
       const winsRef=ref(db,`champ/wins/${champ.name}`);
       const wSn=await get(winsRef);const prev=wSn.val()||0;
       await set(winsRef,Math.max(prev,newStreak));
+      // ★ 방어 성공 시스템 메시지 (연승 추적용)
+      await push(ref(db,'chat/system'),{author:'SYSTEM',
+        text:`🛡 ${champ.name}이(가) ${char.name}의 도전을 물리쳤습니다! (${newStreak}연승)`,
+        ts:Date.now(),isAdmin:true});
       renderChampBattle();return;
     }
     phase=1;
