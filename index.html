@@ -2003,6 +2003,8 @@ async function checkChatReset(){
 
 // ═══ CHARACTER ═══
 let char=null,charId=null,inv={},warehouse={},isAdmin=false;
+// ★ 실시간 리스너 unsub 전역 관리
+let _charUnsub=null, _invUnsub=null;
 
 function mkChar(name){
   return{id:gId(),owner:curUser.uid,name:name.trim(),level:1,exp:0,expNext:expForLevel(1),
@@ -2077,6 +2079,25 @@ function getSkills(c_arg){
     }
   }return sk;
 }
+// ════════════════════════════════════════════
+// ★ 세션 캐시 — Firebase 읽기 최적화 (60초 TTL)
+// ════════════════════════════════════════════
+const _SESSION_CACHE_TTL=60000;
+const _sessionCache={};
+async function cachedGet(path){
+  const now=Date.now();
+  if(_sessionCache[path]&&now-_sessionCache[path].ts<_SESSION_CACHE_TTL){
+    return _sessionCache[path].val;
+  }
+  const sn=await get(ref(db,path));
+  _sessionCache[path]={val:sn.val(),ts:now};
+  return sn.val();
+}
+function invalidateCache(path){
+  // 저장 후 해당 경로 캐시 즉시 무효화
+  delete _sessionCache[path];
+}
+
 async function saveChar(){
   if(!db||!charId)return;
   // ★ 저장 전 수치 검증
@@ -2090,6 +2111,7 @@ async function saveChar(){
     }
   }
   await set(ref(db,`chars/${charId}`),char);
+  invalidateCache(`chars/${charId}`); // ★ 캐시 무효화
 }
 async function saveInv(){
   if(!db||!charId)return;
@@ -2101,6 +2123,7 @@ async function saveInv(){
     }
   }
   await set(ref(db,`inv/${charId}`),inv);
+  invalidateCache(`inv/${charId}`); // ★ 캐시 무효화
 }
 async function addItem(item){
   const maxSlots=char?.invSlots||100;
@@ -2210,7 +2233,10 @@ async function selChar(id){
   }
   isAdmin=curUser.email===ADMIN_EMAIL;
   document.getElementById('adminNav').style.display=isAdmin?'flex':'none';
-  onValue(ref(db,`chars/${id}`),sn=>{
+  // ★ 기존 리스너 해제 후 재등록 (selChar 재호출 시 누수 방지)
+  if(_charUnsub){_charUnsub();_charUnsub=null;}
+  if(_invUnsub){_invUnsub();_invUnsub=null;}
+  _charUnsub=onValue(ref(db,`chars/${id}`),sn=>{
     if(sn.val()){
       char=sn.val();char.equipment=char.equipment||{};if(!char.str)char.str=5;
       let dirty=false;
@@ -2239,7 +2265,7 @@ async function selChar(id){
       updateTop();renderChar();
     }
   });
-  onValue(ref(db,`inv/${id}`),sn=>{
+  _invUnsub=onValue(ref(db,`inv/${id}`),sn=>{
     inv=sn.val()||{};
     let needSave=false;
     for(const it of Object.values(inv)){
@@ -6194,6 +6220,7 @@ let cwMode='world',cwActive=false;
 const cwUnsub={world:null,party:null,whisper:null};
 
 function startChat(){
+  if(cwActive)return; // ★ 이미 초기화된 경우 중복 등록 방지
   cwActive=true;
   // 월드 채팅 리스너 1회만 등록
   if(cwUnsub.world)cwUnsub.world();
@@ -6201,30 +6228,37 @@ function startChat(){
     if(cwMode!=='world')return;
     renderChatMsgs(sn.val()||{},'world');
   });
-  document.getElementById('cwInput').addEventListener('keydown',e=>{if(e.key==='Enter')cwSendMsg();});
+  // ★ keydown 이벤트 — AbortController로 단일 등록 보장
+  const cwInputEl=document.getElementById('cwInput');
+  if(cwInputEl&&!cwInputEl._keyBound){
+    cwInputEl.addEventListener('keydown',e=>{if(e.key==='Enter')cwSendMsg();});
+    cwInputEl._keyBound=true;
+  }
 
-  // ★ 전투 단축키 (채팅/입력창 포커스 시 제외)
-  document.addEventListener('keydown',e=>{
-    const tag=document.activeElement?.tagName;
-    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
-    if(!battle||battle.done)return;
-    if(battle.phase!==1)return;
-    const myP=battle.players?.find(p=>p.id===charId);
-    if(!myP||myP.status!=='alive'||myP.actionChosen)return;
-    let chosen=null;
-    if(e.key==='q'||e.key==='Q'||e.key==='1')chosen='attack';
-    else if(e.key==='w'||e.key==='W'||e.key==='2')chosen='defend';
-    else if(e.key==='e'||e.key==='E'||e.key==='3')chosen='heal';
-    else if(e.key==='r'||e.key==='R'||e.key==='4')chosen='flee';
-    if(chosen){
-      e.preventDefault();
-      // 버튼 클릭 시도, 실패 시 직접 chooseAction 호출
-      const btnMap={attack:'actbtn-atk',defend:'actbtn-def',heal:'actbtn-heal',flee:'actbtn-flee'};
-      const btn=document.getElementById(btnMap[chosen]);
-      if(btn&&!btn.disabled)btn.click();
-      else if(typeof chooseAction==='function')chooseAction(chosen);
-    }
-  });
+  // ★ 전투 단축키 — 1회만 등록
+  if(!window._battleKeyBound){
+    window._battleKeyBound=true;
+    document.addEventListener('keydown',e=>{
+      const tag=document.activeElement?.tagName;
+      if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+      if(!battle||battle.done)return;
+      if(battle.phase!==1)return;
+      const myP=battle.players?.find(p=>p.id===charId);
+      if(!myP||myP.status!=='alive'||myP.actionChosen)return;
+      let chosen=null;
+      if(e.key==='q'||e.key==='Q'||e.key==='1')chosen='attack';
+      else if(e.key==='w'||e.key==='W'||e.key==='2')chosen='defend';
+      else if(e.key==='e'||e.key==='E'||e.key==='3')chosen='heal';
+      else if(e.key==='r'||e.key==='R'||e.key==='4')chosen='flee';
+      if(chosen){
+        e.preventDefault();
+        const btnMap={attack:'actbtn-atk',defend:'actbtn-def',heal:'actbtn-heal',flee:'actbtn-flee'};
+        const btn=document.getElementById(btnMap[chosen]);
+        if(btn&&!btn.disabled)btn.click();
+        else if(typeof chooseAction==='function')chooseAction(chosen);
+      }
+    });
+  }
   document.getElementById('cwSend').onclick=cwSendMsg;
 }
 
@@ -6281,13 +6315,22 @@ function renderChatMsgs(msgs,type){
 function escapeHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 let _lastChatTs=0;
+// ★ 귓속말 대상 캐시 — 매 전송마다 전체 chars 읽기 방지 (2분 TTL)
+let _whisperCharCache={data:null,ts:0};
+async function _getCharsForWhisper(){
+  const now=Date.now();
+  if(_whisperCharCache.data&&now-_whisperCharCache.ts<120000)return _whisperCharCache.data;
+  const sn=await get(ref(db,'chars'));
+  _whisperCharCache={data:sn.val()||{},ts:now};
+  return _whisperCharCache.data;
+}
 async function cwSendMsg(){
   const inp=document.getElementById('cwInput');const txt=inp.value.trim();if(!txt)return;
   // ★ 길이 제한: 200자
   if(txt.length>200){toast('⚠️ 메시지는 200자 이내로 입력해주세요.');return;}
   // ★ 도배 방지: 1.5초 쿨다운
   const now=Date.now();
-  if(now-_lastChatTs<500){toast('⚠️ 너무 빠릅니다. 잠시 후 다시 입력해주세요.');return;}
+  if(now-_lastChatTs<1500){toast('⚠️ 너무 빠릅니다. 잠시 후 다시 입력해주세요.');return;}
   _lastChatTs=now;
   const ts=now;const author=char.name;
   const isAdminMsg=curUser?.email===ADMIN_EMAIL;
@@ -6302,7 +6345,7 @@ async function cwSendMsg(){
   }else if(cwMode==='whisper'){
     const targetName=document.getElementById('cwTarget').value.trim();
     if(!targetName){toast('대상 이름 입력');return;}
-    const allChars=await get(ref(db,'chars'));const ac=allChars.val()||{};
+    const ac=await _getCharsForWhisper();
     const tEntry=Object.entries(ac).find(([,c])=>c.name===targetName);
     if(!tEntry){toast('캐릭터 없음');return;}
     const [tid]=tEntry;
@@ -6397,6 +6440,7 @@ function _adminGuard(fn){
   };
 }
 window.adminOpenUser=async function(cid){
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const el=document.getElementById('adminUserDetail');
   el.style.display='block';
   el.innerHTML=`<div style="color:var(--tx3);font-size:11px">로딩 중...</div>`;
@@ -6611,6 +6655,7 @@ window.adminOpenUser=async function(cid){
 };
 
 window.adminUpdateItemSelect=function(){
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const type=document.getElementById('giType')?.value;
   const sub=document.getElementById('giSub');
   if(!sub)return;
@@ -6631,6 +6676,7 @@ window.adminUpdateItemSelect=function(){
 };
 
 window.adminGiveItem=async function(cid){
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const type=document.getElementById('giType').value;
   const sub=document.getElementById('giSub').value;
   const grade=document.getElementById('giGrade').value;
@@ -6695,6 +6741,7 @@ window.adminGiveItem=async function(cid){
 };
 
 window.adminGiveGold=async function(cid){
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const amt=parseInt(document.getElementById('giGold').value)||0;
   if(amt<=0)return;
   const cSn=await get(ref(db,`chars/${cid}`));const c=cSn.val();if(!c)return;
@@ -6705,6 +6752,7 @@ window.adminGiveGold=async function(cid){
 
 
 window.adminResetAllPotions=async()=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   if(!confirm('모든 유저의 물약을 기본 5개로 리셋하시겠습니까?\nextraPotions=0, firstClears={} 초기화'))return;
   const cs=await get(ref(db,'chars'));
   const chars=cs.val()||{};
@@ -6719,6 +6767,7 @@ window.adminResetAllPotions=async()=>{
 };
 
 window.adminResetRanking=async()=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   if(!confirm('vhard 랭킹을 전체 삭제하시겠습니까?'))return;
   await set(ref(db,'rankings/vhard'),null);
   toast('✅ 던전 랭킹 초기화 완료');
@@ -6732,6 +6781,7 @@ const SKILL_MAP={
   'heal_on_hit':'regen',
 };
 window.adminMigrateSkills=async()=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   if(!confirm('전체 유저의 인벤토리 + 착용 장비 인챈트 스킬을 솔로용으로 변환합니다.\n(taunt→반격, shadow_step→회피강화, holy_light→생명흡수, heal_on_hit→전투재생)\n\n계속하시겠습니까?'))return;
   toast('🔮 마이그레이션 진행 중...', 10000);
   const [csSn, invSn]=await Promise.all([get(ref(db,'chars')),get(ref(db,'inv'))]);
@@ -6903,6 +6953,7 @@ window.adminMigrateEnchantStats=async function(){
   loadAdmin();
 };
 window.adminResetSubjugation=async()=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const bossIdx=getCurSubjBossIdx();
   const boss=SUBJ_BOSSES[bossIdx];
   if(!confirm(`토벌전 기록을 리셋하고 ${boss.name}의 HP를 완전 회복하시겠습니까?\n\n• 이번 주 누적 데미지 랭킹 초기화\n• 보스 HP ${boss.hp.toLocaleString()} 완전 회복\n• 보스 처치 기록 초기화\n\n⚠️ 보상은 지급되지 않습니다.`))return;
@@ -6918,6 +6969,7 @@ window.adminResetSubjugation=async()=>{
 
 // 챔프전 리셋
 window.adminResetChamp=async(fullReset)=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const champSn=await get(ref(db,'champ/current'));
   const champ=champSn.val();
   const msg=fullReset
@@ -6994,6 +7046,7 @@ async function giveGiftToChar(cid, charLevel, tierData){
 }
 
 window.adminSendGift=async()=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const tier=parseInt(document.getElementById('giftTier')?.value||1);
   const target=document.getElementById('giftTarget')?.value||'all';
   const tierData=GIFT_TIERS[tier];
@@ -7036,6 +7089,7 @@ async function doHardResetChar(cid, cname){
 }
 
 window.adminHardReset=async()=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const target=document.getElementById('hardResetTarget')?.value||'all';
 
   if(target==='one'){
@@ -7074,6 +7128,7 @@ window.clearChat=async()=>{if(!confirm('전체 삭제?'))return;await set(ref(db
 
 // ★ 유저 검색 필터
 window.adminFilterUsers=function(q){
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   document.querySelectorAll('#utblbody tr').forEach(r=>{
     const name=r.querySelector('td')?.textContent||'';
     r.style.display=(!q||name.toLowerCase().includes(q.toLowerCase()))?'':'none';
@@ -7802,11 +7857,7 @@ function startSubjugationWatcher(){
       }
     }
   });
-  // Watch champ for red name
-  onValue(ref(db,'champ/current'),sn=>{
-    const d=sn.val();
-    window._champRank1Name=d?.name||null;
-  });
+  // Watch champ for red name — startChampWatcher()에서 통합 관리
   // Weekly reset check
   checkSubjWeeklyReset();
 }
@@ -8226,8 +8277,11 @@ window.enterSubjBattle=function(){
 };
 
 // ═══ 챔프전 시스템 ═══
+let _champWatcherUnsub=null;
 function startChampWatcher(){
-  onValue(ref(db,'champ/current'),sn=>{
+  // ★ 이미 등록된 경우 재등록 방지 (토벌전 watcher와 중복 방지)
+  if(_champWatcherUnsub){_champWatcherUnsub();_champWatcherUnsub=null;}
+  _champWatcherUnsub=onValue(ref(db,'champ/current'),sn=>{
     window._champData=sn.val();
     window._champRank1Name=window._champData?.name||null;
   });
@@ -8711,6 +8765,7 @@ window.setRankTier=function(tierIdx){const rb=document.getElementById('rankBody'
 
 // ═══ 관리자 레벨 조정 패널 추가 ═══
 window.adminSetLevel=async function(cid){
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const newLv=parseInt(prompt('새 레벨 입력 (1~99):'));
   if(!newLv||newLv<1||newLv>99){toast('잘못된 레벨');return;}
   const sn=await get(ref(db,`chars/${cid}`));
