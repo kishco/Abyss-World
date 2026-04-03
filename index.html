@@ -5584,16 +5584,28 @@ async function resolvePhase(){
       if(!isMiss){isCrit?SFX.play('crit'):SFX.play('attack');}
       blogAdd(getWeaponAttackMsg(p,target,dmg,isCrit&&!isMiss,isMiss));
       if(target.hp<=0){target.status='dead';SFX.play('kill');blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
-      // ★ 쌍검: 5% 추가타
-      if(wt.isDual&&!isMiss&&target.status==='alive'&&Math.random()<0.12){
+      // ★ 쌍검 연격: 기본 12% + SPD/800 추가 확률
+      const dualRate=wt.isDual?(0.12+(s.spd||0)/800):0;
+      if(wt.isDual&&!isMiss&&target.status==='alive'&&Math.random()<dualRate){
         const bonusDmg=Math.round(dmg*0.6);
         target.hp=Math.max(0,target.hp-bonusDmg);
         blogAdd(`<span class="l-skill">🗡 ${p.name} 추가 연격! <strong>${bonusDmg}</strong></span>`);
         if(target.hp<=0)target.status='dead';
       }
+      // ★ SPD 연격: 쌍검 외 모든 무기 SPD/800 확률
+      if(!wt.isDual&&!isMiss&&target.status==='alive'&&Math.random()<(s.spd||0)/800){
+        const spdBonusDmg=Math.round(dmg*0.5);
+        target.hp=Math.max(0,target.hp-spdBonusDmg);
+        blogAdd(`<span class="l-skill">💨 ${p.name} 신속 연격! <strong>${spdBonusDmg}</strong></span>`);
+        if(target.hp<=0)target.status='dead';
+      }
       trySkillProc(p,s,target,aliveM);
     }
   }
+  // ★ SPD/활 선공 처리: 선공 조건 만족한 플레이어가 공격한 몬스터가 이미 죽었으면 반격 스킵
+  // (플레이어가 먼저 공격해서 몬스터를 처치 → 해당 몬스터는 반격 안 함 — 이미 dead이므로 아래 aliveM 필터에서 자동 제외)
+  // ★ 활 선공: 활 사용자는 이번 턴 몬스터 반격 중 본인 대상 공격 확률 50% 감소
+  const bowUser=battle.players.find(p=>p.status==='alive'&&getWeaponTraits(p.charData?.equipment||char.equipment||{}).isBow);
   // Monsters attack
   const aliveM=battle.monsters.filter(m=>m.status==='alive');
   for(const m of aliveM){
@@ -5604,7 +5616,17 @@ async function resolvePhase(){
     aliveP.sort((a,b)=>(b.aggro||0)-(a.aggro||0));
     const tgt=aliveP[0];
 
-    // ★ 보스 기믹
+    // ★ SPD 선공: 이미 플레이어 공격으로 처치된 몬스터는 위 filter에서 제외됨 (자동 선공 효과)
+    // ★ 활 선공: 활 사용자가 타겟이면 50% 확률로 반격 회피 (원거리라 몬스터가 못 따라잡음)
+    if(bowUser&&tgt.id===bowUser.id&&Math.random()<0.5){
+      blogAdd(`<span class="l-skill">🏹 ${bowUser.name} 원거리 선공! ${m.name}의 반격을 회피했습니다.</span>`);
+      continue;
+    }
+    // ★ SPD 선공 회피: 플레이어 SPD가 높을수록 몬스터 반격 회피 확률 추가 (SPD/500)
+    if(tgt&&Math.random()<((tgt.stats||calcStats(char)).spd||0)/800){
+      blogAdd(`<span class="l-skill">💨 ${tgt.name} 신속 회피! ${m.name}의 공격을 피했습니다.</span>`);
+      continue;
+    }
     if(m.isBoss&&m.gimmick){
       const hpPct=m.hp/m.maxHp;
       // 격노 (체력 50% 이하)
@@ -8283,7 +8305,13 @@ window.enterSubjBattle=function(){
         const fakeTarget={name:boss.name,dodge:0};
         const fakeP={charData:char,name:char.name};
         slog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
-        if(wt.isDual&&Math.random()<0.12){const b=Math.round(dmg*0.6);totalDmgDealt+=b;slog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
+        // ★ 쌍검 연격: 기본 12% + SPD/800 추가
+        const dualProb=wt.isDual?(0.12+(s.spd||0)/800):0;
+        if(wt.isDual&&Math.random()<dualProb){const b=Math.round(dmg*0.6);totalDmgDealt+=b;slog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
+        // ★ SPD 연격: 모든 무기 SPD/800 확률
+        if(!wt.isDual&&Math.random()<(s.spd||0)/800){const b=Math.round(dmg*0.5);totalDmgDealt+=b;slog(`<span class="l-skill">💨 신속 연격! <strong>${b}</strong></span>`);}
+        // ★ 활 선공: 보스 반격 회피 50%
+        if(wt.isBow)slog(`<span class="l-skill">🏹 원거리 선공 — 반격 회피 가능</span>`);
       }
       // ★ 스킬 발동 — 턴당 최대 1회만, 발동하면 즉시 중단
       const subjSkillBonusMult=1+(s.skillBonus||0)/100;
@@ -8613,7 +8641,13 @@ window.enterChampBattle=async function(){
         const fakeTarget={name:champ.name,dodge:0};
         const fakeP={charData:char};
         clog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
-        if(wt.isDual&&champHp>0&&Math.random()<0.12){const b=Math.round(dmg*0.6);champHp=Math.max(0,champHp-b);clog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
+        // ★ 쌍검 연격: 기본 12% + SPD/800 추가
+        const champDualProb=wt.isDual?(0.12+(s.spd||0)/800):0;
+        if(wt.isDual&&champHp>0&&Math.random()<champDualProb){const b=Math.round(dmg*0.6);champHp=Math.max(0,champHp-b);clog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
+        // ★ SPD 연격: 모든 무기 SPD/800 확률
+        if(!wt.isDual&&champHp>0&&Math.random()<(s.spd||0)/800){const b=Math.round(dmg*0.5);champHp=Math.max(0,champHp-b);clog(`<span class="l-skill">💨 신속 연격! <strong>${b}</strong></span>`);}
+        // ★ 활 선공: 챔프 반격 회피 50%
+        if(wt.isBow&&Math.random()<0.5){clog(`<span class="l-skill">🏹 원거리 선공!</span>`);/* 아래 챔프 반격 전 bowFirstStrike 플래그 설정 */window._bowChampFirstStrike=true;}
         if(wt.isMace)cs.def=Math.round(cs.def*0.95);
       }
     }else if(action==='defend'){
@@ -8653,6 +8687,10 @@ window.enterChampBattle=async function(){
       renderChampBattle();return;
     }
     // Champ counter-attack — 마법 무기 챔프면 MATK 기준
+    // ★ 활 선공: 이번 턴 반격 회피
+    if(window._bowChampFirstStrike){window._bowChampFirstStrike=false;clog(`<span class="l-skill">🏹 원거리 선공으로 ${champ.name}의 반격을 피했습니다!</span>`);phase=1;renderChampBattle();return;}
+    // ★ SPD 선공 회피: SPD/800 확률로 반격 회피
+    if(Math.random()<(s.spd||0)/800){clog(`<span class="l-skill">💨 ${char.name} 신속 회피! ${champ.name}의 반격을 피했습니다.</span>`);phase=1;renderChampBattle();return;}
     const champIsMagic=champ.isMagicWeapon||false;
     let cDmg;
     if(champIsMagic){
