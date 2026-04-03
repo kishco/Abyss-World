@@ -443,7 +443,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="bossKillBanner" style="display:none;font-size:9px;color:var(--gold);font-family:'IBM Plex Mono',monospace;animation:pulse 1s infinite"></span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:4px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v2.3.1</span>
+  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:4px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v2.4</span>
   <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener" class="v2badge"
     style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.35);color:#7289da;padding:2px 7px;border-radius:5px;font-size:9px;text-decoration:none;margin-right:6px;white-space:nowrap;font-family:'IBM Plex Mono',monospace"
     title="디스코드 커뮤니티">
@@ -5433,14 +5433,14 @@ function evFullHeal(){
   myP.hp=myP.maxHp;
   blogAdd(`<span class="l-heal">✨ 성스러운 힘으로 HP가 완전히 회복되었습니다! (${myP.maxHp}/${myP.maxHp})</span>`);
   renderBattle();
-  setTimeout(()=>startActionPhase(),1200);
+  setTimeout(()=>startActionPhase(),700);
 }
 function evGoldRoom(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
   const gold=Math.round((50+battle.tier.recLv*20)*battle.diff.goldMult*(1+char.luk*0.005));
   char.gold+=gold;saveChar();updateTop();
   blogAdd(`<span class="l-exp">💰 금화가 가득! +${gold.toLocaleString()}G 획득!</span>`);
-  setTimeout(()=>startActionPhase(),1200);
+  setTimeout(()=>startActionPhase(),700);
 }
 function evTreasure(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
@@ -5459,7 +5459,7 @@ function evTreasure(){
     es.tradeable=true;addItem(es);
     blogAdd(`<span class="l-set">📜 ${es.name}도 발견!</span>`);
   }
-  setTimeout(()=>startActionPhase(),1200);
+  setTimeout(()=>startActionPhase(),700);
 }
 function evAmbush(){
   // 추가 몬스터 2~4마리 스폰
@@ -5478,7 +5478,7 @@ function evAmbush(){
   }
   blogAdd(`<span class="l-dead">💀 ${extraCount}마리의 몬스터가 쏟아져 나왔다!</span>`);
   renderBattle();
-  setTimeout(()=>startActionPhase(),1200);
+  setTimeout(()=>startActionPhase(),700);
 }
 function evTrap(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
@@ -5487,7 +5487,7 @@ function evTrap(){
   blogAdd(`<span class="l-dmg">⚠️ 함정! -${dmg}HP 피해를 입었습니다!</span>`);
   if(myP.hp<myP.maxHp*0.2)blogAdd(`<span class="l-warn">⚠️ HP가 위험합니다!</span>`);
   renderBattle();
-  setTimeout(()=>startActionPhase(),1200);
+  setTimeout(()=>startActionPhase(),700);
 }
 function evDebuff(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
@@ -5501,12 +5501,12 @@ function evDebuff(){
   battle._dungDebuff=db2.n;
   blogAdd(`<span class="l-warn">💀 저주의 방! [${db2.n}] 디버프가 던전 종료까지 지속됩니다!</span>`);
   renderBattle();
-  setTimeout(()=>startActionPhase(),1200);
+  setTimeout(()=>startActionPhase(),700);
 }
 function evNothing(){
   const msgs=['벽에 이상한 낙서가 있다...','예전에 누가 살았던 것 같다.','오래된 뼈가 흩어져 있다.','바람이 불어온다.'];
   blogAdd(`<span class="l-sys">😶 ${pick(msgs)}</span>`);
-  setTimeout(()=>startActionPhase(),1200);
+  setTimeout(()=>startActionPhase(),700);
 }
 // (히든 상인 제거됨 — 던전 이벤트 시스템으로 대체)
 window.closeMerchant=()=>{
@@ -5654,7 +5654,7 @@ async function resolvePhase(){
     blogAdd('<span class="l-warn">💨 도망쳤습니다!</span>');
     battle.done=true;
     battle._resolving=false;
-    setTimeout(()=>endBattle(false,true),1200);return;
+    setTimeout(()=>endBattle(false,true),700);return;
   }
   // ★ 선제 몬스터 스킬 처리 (행동 취소형: m_flee_debuff 등) — 플레이어 행동 이전에 발동
   const aliveMpre=battle.monsters.filter(m=>m.status==='alive');
@@ -5866,7 +5866,7 @@ async function resolvePhase(){
     if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');await maybeLoseItem();}
     syncBattleState({success:false,fled:false});
     battle._resolving=false;
-    setTimeout(()=>endBattle(false,false),1500);return;
+    setTimeout(()=>endBattle(false,false),900);return;
   }
   // Check monsters dead
   const allMDead=battle.monsters.every(m=>m.status==='dead');
@@ -5874,7 +5874,7 @@ async function resolvePhase(){
     lootPhase();
     syncBattleState();
     battle._resolving=false;
-    setTimeout(()=>{battle.phase=0;nextFloor();},battle.mode==='solo'?1500:2500);return;
+    setTimeout(()=>{battle.phase=0;nextFloor();},battle.mode==='solo'?900:1800);return;
   }
   syncBattleState();
   battle._resolving=false;
@@ -6247,19 +6247,27 @@ async function dungeonClear(){
     const sd=document.getElementById('itSealsDisplay');
     if(sd)sd.textContent=`🔱 징수: ${char._immortalSeals}개`;
 
+    // ★ done 처리 — navLock 해제 + action 버튼 제거
+    battle.done=true;
+    if(battle.timer){clearInterval(battle.timer);battle.timer=null;}
+    updateNavLock();
+
     // 클리어 후 버튼
     const isFreeMode2=(Math.max(prevFloor,floor))>=IT_TOTAL_FLOORS;
     const nextF=floor+1;
     setTimeout(()=>{
-      if(!document.getElementById('dungBattle'))return;
+      const db2=document.getElementById('dungBattle');
+      if(!db2)return;
+      const actArea=db2.querySelector('[style*="sticky"]');
+      if(actArea)actArea.remove();
       const btn=document.createElement('div');
       btn.style.cssText='padding:12px;display:flex;gap:8px;flex-direction:column';
       btn.innerHTML= nextF<=IT_TOTAL_FLOORS && !isFreeMode2
         ?`<button class="btn btn-red" onclick="startITBattle(${nextF})">⚔ ${nextF}층 도전</button>
            <button class="btn btn-ghost btn-sm" onclick="navTo('immortaltower')">← 탑으로</button>`
         :`<button class="btn btn-ghost" onclick="navTo('immortaltower')">📋 구간 선택으로</button>`;
-      document.getElementById('dungBattle').appendChild(btn);
-    },2000);
+      db2.appendChild(btn);
+    },1200);
     return;
   }
   SFX.play('clear');
@@ -6341,7 +6349,7 @@ async function dungeonClear(){
   gainExp(bonusExp);
   blogAdd(`<span class="l-exp">🎉 클리어 보너스 EXP +${bonusExp}</span>`);
 
-  setTimeout(()=>endBattle(true,false),2000);
+  setTimeout(()=>endBattle(true,false),1200);
 }
 
 function endBattle(success,fled){
@@ -9323,12 +9331,13 @@ window.enterChampBattle=async function(){
         // ★ 활 선공: 15%+SPD/800 상한 30%
         if(wt.isBow){const bowRate=Math.min(0.15+(s.spd||0)/800,0.30);if(Math.random()<bowRate){clog(`<span class="l-skill">🏹 원거리 선공!</span>`);window._bowChampFirstStrike=true;}}
         if(wt.isMace)cs.def=Math.round(cs.def*0.95);
-        // ★ 챔프전 스킬 발동 (상한 35%)
+        // ★ 챔프전 스킬 발동 (상한 35%, 1회만)
         if(champHp>0){
           const CHAMP_MAX_PROC=0.35;
           const champSBMult=1+Math.min((s.skillBonus||0)/100,0.5);
+          let skProced=false;
           for(const sl of Object.values(char.equipment||{})){
-            if(!sl)continue;
+            if(!sl||skProced)continue;
             for(const enc of[sl.prefix,sl.suffix]){
               if(!enc?.sk)continue;
               const sk=SKILLS[enc.sk];if(!sk||!sk.fx)continue;
@@ -9336,7 +9345,7 @@ window.enterChampBattle=async function(){
               const proc=Math.min(sk.base*skillM*(1+(s.int||3)*0.005)*champSBMult,CHAMP_MAX_PROC);
               if(Math.random()<proc){
                 try{const fx=sk.fx(s.atk,s);if(fx?.dmg>0){const sd=Math.min(Math.round(fx.dmg),99999);champHp=Math.max(0,champHp-sd);clog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name} <strong>${sd}</strong></span>`);}}catch(e){}
-                break;
+                skProced=true;break;
               }
             }
           }
