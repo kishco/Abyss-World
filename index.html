@@ -3712,10 +3712,10 @@ function openIM(it){
     </div>
     ${sr?`<div class="sgrid" style="margin-bottom:7px">${sr}</div>`:''}
     ${ph}${sh}${seth}
-    ${!isAcc?compareHtml:''}
+    ${!isAcc&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isScroll?compareHtml:''}
     ${isAcc?accSelHtml:''}
     ${!isAcc?`<div style="display:flex;gap:6px;margin-top:10px">
-      <button class="btn btn-gold" id="equipBtn" style="flex:1" ${lvLock?'disabled':''}>${lvLock?'⚔ 장착 (레벨 부족)':'⚔ 장착'}</button>
+      ${!it.isProtectScroll&&!it.isExtractScroll&&!it.isScroll?`<button class="btn btn-gold" id="equipBtn" style="flex:1" ${lvLock?'disabled':''}>${lvLock?'⚔ 장착 (레벨 부족)':'⚔ 장착'}</button>`:''}
       ${it.tradeable===true&&!it.isScroll?`<button class="btn btn-blue btn-sm" id="auctionBtn">🏛 경매</button>`:''}
       <button class="btn btn-sm" id="lockBtn" style="background:${it._locked?'rgba(240,192,64,.2)':'rgba(255,255,255,.06)'};border:1px solid ${it._locked?'var(--gold)':'var(--bd2)'};color:${it._locked?'var(--gold)':'var(--tx3)'};" title="${it._locked?'잠금 해제':'잠금'}">${it._locked?'🔒':'🔓'}</button>
       <button class="btn btn-red btn-sm" id="discBtn">버리기</button>
