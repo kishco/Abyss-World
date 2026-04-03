@@ -130,16 +130,18 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .btn-sm{padding:4px 9px;font-size:11px;border-radius:5px;}
 .btn-xs{padding:3px 7px;font-size:10px;border-radius:4px;}
 .btn-purple{background:linear-gradient(135deg,#1a0a30,#2a1050);border:1px solid var(--purple);color:var(--purple);}
-.g-normal{color:#9d9d9d!important;}.g-uncommon{color:#1eff00!important;}.g-rare{color:#0070dd!important;}.g-epic{color:#a335ee!important;}.g-legendary{color:#ff8c00!important;}.g-set{color:#00ffcc!important;}
-.gb-normal{border-color:#9d9d9d!important;}.gb-uncommon{border-color:#1eff00!important;}.gb-rare{border-color:#0070dd!important;}.gb-epic{border-color:#a335ee!important;}.gb-legendary{border-color:#ff8c00!important;box-shadow:0 0 8px rgba(255,140,0,.1)!important;}.gb-set{border-color:#00ffcc!important;box-shadow:0 0 8px rgba(0,255,204,.1)!important;}
+.g-normal{color:#9d9d9d!important;}.g-uncommon{color:#1eff00!important;}.g-rare{color:#0070dd!important;}.g-epic{color:#a335ee!important;}.g-legendary{color:#ff8c00!important;}.g-set{color:#00ffcc!important;}.g-immortal{color:#FF2244!important;}
+.gb-normal{border-color:#9d9d9d!important;}.gb-uncommon{border-color:#1eff00!important;}.gb-rare{border-color:#0070dd!important;}.gb-epic{border-color:#a335ee!important;}.gb-legendary{border-color:#ff8c00!important;box-shadow:0 0 8px rgba(255,140,0,.1)!important;}.gb-set{border-color:#00ffcc!important;box-shadow:0 0 8px rgba(0,255,204,.1)!important;}.gb-immortal{border-color:#FF2244!important;box-shadow:0 0 12px rgba(255,34,68,.25)!important;}
 
 /* Grade text shimmer effects */
 .g-rare{text-shadow:0 0 6px rgba(0,112,221,.4);}
 .g-epic{text-shadow:0 0 8px rgba(163,53,238,.5);}
 .g-legendary{color:#ff8c00!important;text-shadow:0 0 10px rgba(255,140,0,.6);animation:legendaryShimmer 2s infinite;}
 .g-set{color:#00ffcc!important;text-shadow:0 0 10px rgba(0,255,204,.5);animation:setShimmer 3s infinite;}
+.g-immortal{color:#FF2244!important;text-shadow:0 0 12px rgba(255,34,68,.8);animation:immortalFlame 1.5s infinite;}
 @keyframes legendaryShimmer{0%,100%{text-shadow:0 0 8px rgba(255,140,0,.5);}50%{text-shadow:0 0 16px rgba(255,140,0,.9),0 0 24px rgba(255,180,0,.4);}}
 @keyframes setShimmer{0%,100%{text-shadow:0 0 8px rgba(0,255,204,.4);}50%{text-shadow:0 0 16px rgba(0,255,204,.8),0 0 24px rgba(0,200,160,.4);}}
+@keyframes immortalFlame{0%{color:#FF2244;text-shadow:0 0 10px rgba(255,34,68,.8),0 0 20px rgba(255,80,0,.4);}33%{color:#FF4400;text-shadow:0 0 18px rgba(255,80,0,.9),0 0 32px rgba(255,34,68,.6),0 0 48px rgba(255,0,0,.3);}66%{color:#CC0033;text-shadow:0 0 14px rgba(200,0,50,.9),0 0 28px rgba(255,34,68,.5);}100%{color:#FF2244;text-shadow:0 0 10px rgba(255,34,68,.8),0 0 20px rgba(255,80,0,.4);}}
 .lv-locked{opacity:.55;filter:grayscale(.4);}
 .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px;}
 .srow{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:var(--sf2);border-radius:5px;border:1px solid var(--bd);}
@@ -539,6 +541,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <button class="nbtn" data-tab="inventory"><div class="ni">🎒</div><div class="nl">인벤</div></button>
     <button class="nbtn" data-tab="town"><div class="ni">🏘️</div><div class="nl">마을</div></button>
     <button class="nbtn" data-tab="dungeon"><div class="ni">🏰</div><div class="nl">던전</div></button>
+    <button class="nbtn" data-tab="immortaltower"><div class="ni">🗼</div><div class="nl">불멸의탑</div></button>
     <button class="nbtn" data-tab="subjugation"><div class="ni">🐉</div><div class="nl">토벌전</div></button>
     <button class="nbtn" data-tab="champ"><div class="ni">🥊</div><div class="nl">챔프전</div></button>
     <button class="nbtn" data-tab="ranking"><div class="ni">🏆</div><div class="nl">랭킹</div></button>
@@ -686,6 +689,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div id="dungMode" style="display:none"></div>
       <div id="dungLobby" style="display:none"></div>
       <div id="dungBattle" style="display:none"></div>
+    </div>
+
+    <!-- 불멸의 탑 -->
+    <div class="pane" id="pane-immortaltower">
+      <div class="ptitle" style="display:flex;align-items:center;gap:8px">
+        <span class="g-immortal" style="font-family:'Cinzel',serif">🗼 불멸의 탑</span>
+        <span id="itSealsDisplay" style="font-size:11px;color:var(--gold);margin-left:auto">🔱 징수: 0개</span>
+      </div>
+      <div id="itMain"></div>
+      <div id="itBattle" style="display:none"></div>
     </div>
 
     <!-- SUBJUGATION (토벌전) -->
@@ -1260,6 +1273,7 @@ const GRADES={
   epic:     {name:'에픽',    color:'#a335ee',w:4,   mult:2.6, skillM:0.9},
   legendary:{name:'레전더리',color:'#ff8c00',w:0.8, mult:3.8, skillM:1.3},
   set:      {name:'유일',    color:'#00ffcc',w:0.0, mult:3.0, skillM:1.5}, // ★ 유일 장비 (드랍으로만)
+  immortal: {name:'불멸',    color:'#FF2244',w:0.0, mult:5.0, skillM:1.8}, // ★ 불멸 장비 (제련으로만)
 };
 const ATTR_N={fire:'🔥화염',ice:'❄냉기',lightning:'⚡번개',dark:'🌑어둠',holy:'✨신성',poison:'☠독'};
 const ATTR_C={fire:'#ff6030',ice:'#60c8ff',lightning:'#ffe040',dark:'#a060ff',holy:'#fff080',poison:'#80ff40'};
@@ -4590,7 +4604,29 @@ function renderForge(sb){
       </div>`
     :`<div style="font-size:10px;color:var(--tx3);margin-bottom:8px">💡 파괴방지 스크롤 사용 시 강화 파괴를 막을 수 있습니다</div>`;
 
+  // ★ 불멸 제련 섹션 (Lv.99만 노출)
+  const immortalSection=char.level>=99?`
+    <div style="background:linear-gradient(135deg,rgba(255,34,68,.08),rgba(180,0,30,.05));border:1px solid rgba(255,34,68,.35);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:700" class="g-immortal">🔱 불멸 제련</div>
+        <div style="font-size:11px;color:var(--gold)">징수: ${char._immortalSeals||0} / ${IT_SEALS_REQUIRED}개</div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);margin-bottom:8px;line-height:1.7">
+        Lv.99 레전더리 무기에 성공률 <b>1%</b>로 불멸 등급을 부여합니다.<br>
+        실패 시 징수 ${IT_SEALS_REQUIRED}개 소멸. 불멸의 탑에서 징수 획득.
+      </div>
+      ${(()=>{
+        const legWep=char.equipment?.weapon;
+        if(!legWep||legWep.grade!=='legendary'||legWep.slot!=='weapon')
+          return `<div style="font-size:10px;color:var(--tx3)">⚠️ Lv.99 레전더리 무기 장착 필요</div>`;
+        return `<button class="btn btn-red btn-sm" style="width:100%;border-color:#FF2244" onclick="doImmortalForge('weapon')" ${(char._immortalSeals||0)<IT_SEALS_REQUIRED?'disabled':''}>
+          🔱 ${legWep.name} 불멸 제련 시도
+        </button>`;
+      })()}
+    </div>`:'';
+
   sb.innerHTML=`
+    ${immortalSection}
     ${protectInfo}
     <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">강화 단계가 높을수록 <span style="color:var(--red)">파괴 확률</span>이 증가합니다.</div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:12px">비용은 장비 레벨 · 등급 · 인챈트 가치에 따라 달라집니다.</div>
@@ -6488,6 +6524,482 @@ async function cwSendMsg(){
   inp.value='';
 }
 
+// ════════════════════════════════════════════
+// ★ 불멸의 탑 시스템
+// ════════════════════════════════════════════
+const IT_TOTAL_FLOORS = 100;
+const IT_SEALS_REQUIRED = 100;
+const IT_FORGE_RATE = 0.01; // 1%
+
+// ★ 불멸의 탑 — 주간 특성 풀
+const IT_PLAYER_BUFFS=[
+  {id:'warrior_grace',   name:'전사의 가호',   icon:'⚔️', color:'var(--gold)',
+   desc:'공격력 +15%',    apply:(s)=>({...s,atk:Math.round(s.atk*1.15),matk:Math.round(s.matk*1.15)})},
+  {id:'abyss_reverse',   name:'심연의 역흐름', icon:'🌀', color:'var(--purple)',
+   desc:'스킬 발동률 +10%', apply:(s)=>({...s,skillBonus:(s.skillBonus||0)+10})},
+  {id:'iron_will',       name:'불굴의 의지',   icon:'🛡', color:'var(--blue)',
+   desc:'HP +20%, 받는 피해 -10%', apply:(s)=>({...s,maxHp:Math.round(s.maxHp*1.2),_dmgReduce:0.10})},
+  {id:'lightning_reflex',name:'번개 반응',     icon:'⚡', color:'var(--yellow)',
+   desc:'연격 확률 +15%p', apply:(s)=>({...s,_extraDual:0.15})},
+  {id:'potion_boost',    name:'포션 강화',     icon:'💊', color:'var(--green)',
+   desc:'포션 회복량 +40%', apply:(s)=>({...s,_potionMult:1.40})},
+  {id:'abyss_resist',    name:'심연 저항',     icon:'🔮', color:'var(--teal)',
+   desc:'받는 피해 -20%', apply:(s)=>({...s,_dmgReduce:0.20})},
+  {id:'lucky_wind',      name:'행운의 바람',   icon:'🍀', color:'var(--green)',
+   desc:'치명타 확률 +12%', apply:(s)=>({...s,crit:Math.min(s.crit+12,75)})},
+];
+
+const IT_MONSTER_DEBUFFS=[
+  {id:'berserk',     name:'광폭화',     icon:'🔴', color:'var(--red)',
+   desc:'몬스터 ATK +20%',        apply:(m)=>({...m,atk:Math.round(m.atk*1.20)})},
+  {id:'iron_hide',   name:'철벽',       icon:'🗿', color:'#aaa',
+   desc:'몬스터 DEF +30%',        apply:(m)=>({...m,def:Math.round(m.def*1.30)})},
+  {id:'regeneration',name:'심연 재생', icon:'💉', color:'var(--green)',
+   desc:'몬스터 매 턴 HP 5% 회복', apply:(m)=>({...m,_regen:0.05})},
+  {id:'agile',       name:'기민함',     icon:'💨', color:'var(--blue)',
+   desc:'몬스터 회피 +12%',       apply:(m)=>({...m,dodge:Math.min(m.dodge+12,55)})},
+  {id:'abyss_rage',  name:'심연의 분노',icon:'💀', color:'#FF2244',
+   desc:'몬스터 ATK +40%, HP -15%',apply:(m)=>({...m,atk:Math.round(m.atk*1.40),hp:Math.round(m.hp*0.85),maxHp:Math.round(m.maxHp*0.85)})},
+  {id:'tough_skin',  name:'강화 외피',  icon:'🦴', color:'var(--gold)',
+   desc:'몬스터 DEF +20%, HP +25%', apply:(m)=>({...m,def:Math.round(m.def*1.20),hp:Math.round(m.hp*1.25),maxHp:Math.round(m.maxHp*1.25)})},
+  {id:'poison_mist', name:'독 안개',    icon:'☠️', color:'#80ff40',
+   desc:'매 턴 플레이어 HP 3% 감소',apply:(m)=>({...m,_poisonFog:0.03})},
+  {id:'curse',       name:'저주',       icon:'💜', color:'var(--purple)',
+   desc:'플레이어 치명타 확률 -20%',apply:(m)=>({...m,_cursed:true})},
+  {id:'mass_rage',   name:'집단 격노',  icon:'🌋', color:'var(--orange)',
+   desc:'몬스터 ATK +15%, 회피 +8%',apply:(m)=>({...m,atk:Math.round(m.atk*1.15),dodge:Math.min(m.dodge+8,50)})},
+  {id:'hunter',      name:'사냥의 본능',icon:'🎯', color:'var(--red)',
+   desc:'몬스터 공격 미스 없음 (회피 무효)', apply:(m)=>({...m,_noDodge:true})},
+];
+
+// 주간 로테이션 결정 (시드 기반)
+function getITWeekRotation(){
+  const d=new Date();
+  const mon=new Date(d);mon.setHours(0,0,0,0);
+  mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+  const seed=Math.floor(mon.getTime()/(7*24*60*60*1000));
+  // 시드로 인덱스 결정 (항상 같은 주에 같은 특성)
+  const pIdx=seed%IT_PLAYER_BUFFS.length;
+  const mIdx1=seed%IT_MONSTER_DEBUFFS.length;
+  const mIdx2=(seed+3)%IT_MONSTER_DEBUFFS.length===mIdx1?(seed+4)%IT_MONSTER_DEBUFFS.length:(seed+3)%IT_MONSTER_DEBUFFS.length;
+  return{
+    player:IT_PLAYER_BUFFS[pIdx],
+    monsters:[IT_MONSTER_DEBUFFS[mIdx1],IT_MONSTER_DEBUFFS[mIdx2]]
+  };
+}
+  if(floor<=20)  return {atk:1.8,  hp:1.5,  def:1.5,  dodge:15};
+  if(floor<=50)  return {atk:2.8,  hp:2.5,  def:2.2,  dodge:22};
+  if(floor<=80)  return {atk:4.5,  hp:4.0,  def:3.5,  dodge:30};
+               return {atk:7.0,  hp:6.5,  def:5.5,  dodge:38};
+}
+
+function getITWeekKey(){
+  const d=new Date();
+  const mon=new Date(d);mon.setHours(0,0,0,0);
+  mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+  return`it_w${mon.getFullYear()}${mon.getMonth()+1}${mon.getDate()}`;
+}
+
+async function renderImmortalTower(){
+  const main=document.getElementById('itMain');
+  if(!main)return;
+  if(char.level<99){
+    main.innerHTML=`<div style="text-align:center;padding:40px 20px">
+      <div style="font-size:40px;margin-bottom:12px">🔒</div>
+      <div style="font-size:14px;font-weight:700;color:var(--tx2);margin-bottom:6px">Lv.99 전용 콘텐츠</div>
+      <div style="font-size:11px;color:var(--tx3)">불멸의 탑은 최고 레벨에 도달한 모험가만 입장할 수 있습니다.</div>
+    </div>`;
+    return;
+  }
+  const wk=getITWeekKey();
+  const sn=await get(ref(db,`immortalTower/${wk}/${charId}`));
+  const progress=sn.val()||{floor:0};
+  const currentFloor=progress.floor||0;
+  const seals=char._immortalSeals||0;
+  const rotation=getITWeekRotation();
+  // 징수 표시 갱신
+  const sd=document.getElementById('itSealsDisplay');
+  if(sd)sd.textContent=`🔱 징수: ${seals}개`;
+  const nextFloor=currentFloor+1;
+  const isCleared=currentFloor>=IT_TOTAL_FLOORS;
+
+  main.innerHTML=`
+    <!-- 세계관 설명 -->
+    <div style="background:linear-gradient(135deg,rgba(255,34,68,.05),rgba(100,0,20,.08));border:1px solid rgba(255,34,68,.2);border-radius:12px;padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:#FF2244;margin-bottom:6px;letter-spacing:.5px">— 불멸의 탑에 대하여 —</div>
+      <div style="font-size:10.5px;color:var(--tx2);line-height:1.8">
+        심연의 존재에게 오염된 중부 대륙. 그 중앙에 갑작스럽게 솟아오른 거대한 탑.<br>
+        탑의 기원을 아는 자는 없다. 다만 탑 내부에는 심연에 잠식된 존재들이 층마다 가득하며,<br>
+        꼭대기에 무엇이 있는지는 아직 아무도 밝혀내지 못했다.
+      </div>
+    </div>
+
+    <!-- 주간 특성 -->
+    <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:12px;padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">이번 주 탑의 특성</div>
+      <!-- 유저 버프 -->
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(68,212,136,.07);border:1px solid rgba(68,212,136,.25);border-radius:8px;margin-bottom:8px">
+        <span style="font-size:20px;flex-shrink:0">${rotation.player.icon}</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+            <span style="font-size:11px;font-weight:700;color:${rotation.player.color}">${rotation.player.name}</span>
+            <span style="font-size:9px;background:rgba(68,212,136,.15);color:var(--green);padding:1px 6px;border-radius:8px">도전자 버프</span>
+          </div>
+          <div style="font-size:10px;color:var(--tx2)">${rotation.player.desc}</div>
+        </div>
+      </div>
+      <!-- 몬스터 디버프 2종 -->
+      ${rotation.monsters.map(m=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,34,68,.06);border:1px solid rgba(255,34,68,.2);border-radius:8px;margin-bottom:6px">
+        <span style="font-size:20px;flex-shrink:0">${m.icon}</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+            <span style="font-size:11px;font-weight:700;color:${m.color}">${m.name}</span>
+            <span style="font-size:9px;background:rgba(255,34,68,.12);color:#FF2244;padding:1px 6px;border-radius:8px">몬스터 강화</span>
+          </div>
+          <div style="font-size:10px;color:var(--tx2)">${m.desc}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+
+    <!-- 진행 현황 -->
+    <div style="background:linear-gradient(135deg,rgba(255,34,68,.08),rgba(180,0,30,.05));border:1px solid rgba(255,34,68,.3);border-radius:12px;padding:14px 16px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px">이번 주 진행 현황</div>
+          <div style="font-size:10px;color:var(--tx3)">매주 월요일 자정 초기화 · 징수는 누적 유지</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:22px;font-weight:700;color:#FF2244;font-family:'Cinzel',serif">${currentFloor}<span style="font-size:13px;color:var(--tx3)"> / ${IT_TOTAL_FLOORS}층</span></div>
+          <div style="font-size:10px;color:var(--gold)">🔱 불멸의 징수: ${seals}개</div>
+        </div>
+      </div>
+      <div style="background:rgba(0,0,0,.3);border-radius:6px;height:8px;overflow:hidden;margin-bottom:10px">
+        <div style="height:100%;width:${Math.min(currentFloor/IT_TOTAL_FLOORS*100,100)}%;background:linear-gradient(90deg,#FF2244,#FF6600);border-radius:6px;transition:width .5s"></div>
+      </div>
+      ${isCleared
+        ?`<div style="text-align:center;color:#FF2244;font-weight:700;font-size:12px">🏆 이번 주 100층 완전 정복!</div>`
+        :`<button class="btn btn-red" style="width:100%;font-size:13px;padding:10px;background:linear-gradient(135deg,#8B0000,#CC0022);border:1px solid #FF2244" onclick="startITBattle(${nextFloor})">
+          ⚔ ${nextFloor}층 도전 — ${getITMonsterName(nextFloor)}
+        </button>`}
+    </div>
+
+    <!-- 난이도 안내 -->
+    <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px">📋 층 구간별 난이도</div>
+      ${[
+        {range:'1~20층',  label:'입문',   color:'var(--green)',  desc:'Lv.99 초입 — 레전더리 미강화'},
+        {range:'21~50층', label:'중급',   color:'var(--gold)',   desc:'레전더리 강화 장비 필요'},
+        {range:'51~80층', label:'고급',   color:'var(--orange)', desc:'레전더리 풀강 + 인챈트 필요'},
+        {range:'81~100층',label:'최정상', color:'#FF2244',       desc:'풀강 풀인챈트 + 스킬 운용'},
+      ].map(r=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:10px;color:var(--tx3);width:55px">${r.range}</span>
+        <span style="font-size:10px;font-weight:700;color:${r.color}">${r.label}</span>
+        <span style="font-size:10px;color:var(--tx3)">${r.desc}</span>
+      </div>`).join('')}
+    </div>
+    <div style="background:var(--sf2);border:1px solid rgba(255,34,68,.2);border-radius:10px;padding:12px 14px">
+      <div style="font-size:11px;font-weight:700;color:#FF2244;margin-bottom:6px">🔱 불멸의 징수 안내</div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.8">
+        • 층을 클리어할 때마다 징수 1개 획득<br>
+        • 징수 ${IT_SEALS_REQUIRED}개 모으면 대장간에서 <span class="g-immortal">불멸</span> 장비 제련 가능<br>
+        • 제련 성공률 1% — 실패 시 징수 ${IT_SEALS_REQUIRED}개 소멸<br>
+        • Lv.99 레전더리 무기만 제련 가능 (유일 장비 불가)<br>
+        • 징수는 초기화되지 않고 영구 누적
+      </div>
+    </div>`;
+}
+}
+
+function getITMonsterName(floor){
+  const names={
+    1:'어둠의 파수꾼',10:'심연의 기사',20:'공허의 지배자',
+    30:'불멸의 망령',50:'심연의 수호자',70:'붕괴의 군주',
+    80:'영원의 감시자',90:'심연 최후의 방패',100:'불멸의 탑 수호신'
+  };
+  const key=Object.keys(names).filter(k=>floor>=parseInt(k)).pop();
+  return names[key]||'심연의 전사';
+}
+
+window.startITBattle=async function(floor){
+  if(char.level<99){toast('⚠️ Lv.99 전용 콘텐츠입니다');return;}
+  const main=document.getElementById('itMain');
+  const battle=document.getElementById('itBattle');
+  if(!main||!battle)return;
+  main.style.display='none';
+  battle.style.display='block';
+
+  const rotation=getITWeekRotation();
+  const mult=getITMonsterMult(floor);
+  const lv=99;
+  // 기본 몬스터 스탯
+  let monBase={
+    hp:   Math.round((60+lv*20)*mult.hp),
+    atk:  Math.round((10+lv*3.5)*mult.atk*3.2),
+    def:  Math.round((3+lv*1.2)*mult.def),
+    dodge:mult.dodge,
+    _regen:0, _poisonFog:0, _noDodge:false, _cursed:false
+  };
+  // ★ 주간 몬스터 특성 2종 적용
+  for(const md of rotation.monsters) monBase=md.apply(monBase);
+  const hpfx=floor<=20?HPFX[0]:floor<=50?HPFX[1]:HPFX[2];
+  const monName=`${hpfx.n} ${getITMonsterName(floor)}`;
+  let monHp=Math.round(monBase.hp*hpfx.hm);
+  const monMaxHp=monHp;
+  const monAtk=Math.round(monBase.atk*hpfx.am);
+  const monDef=Math.round(monBase.def);
+  const monDodge=Math.min(monBase.dodge,55);
+  const monRegen=monBase._regen||0;
+  const monPoisonFog=monBase._poisonFog||0;
+  const monNoDodge=monBase._noDodge||false;
+  const monCursed=monBase._cursed||false;
+
+  // ★ 주간 플레이어 버프 적용
+  let s=rotation.player.apply({...calcStats(char)});
+  const wt=getWeaponTraits(char.equipment||{});
+
+  let myHp=s.maxHp;
+  let monCurHp=monHp;
+  let potions=Math.min((char.potions||0)+(char.extraPotions||0),10);
+  let done=false;
+  let phase=1;
+
+  function itlog(msg){
+    const log=document.getElementById('itLog');
+    if(!log)return;
+    log.innerHTML+=`<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px">${msg}</div>`;
+    log.scrollTop=log.scrollHeight;
+  }
+
+  function renderIT(){
+    const hpPct=Math.max(0,Math.round(myHp/s.maxHp*100));
+    const mhpPct=Math.max(0,Math.round(monCurHp/monMaxHp*100));
+    battle.innerHTML=`
+      <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="exitITBattle()">← 탑으로</button>
+        <div class="g-immortal" style="font-size:12px;font-weight:700">🗼 ${floor}층</div>
+      </div>
+      <!-- 주간 특성 미니 배지 -->
+      <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
+        <span style="font-size:9px;background:rgba(68,212,136,.12);color:var(--green);padding:2px 7px;border-radius:8px;border:1px solid rgba(68,212,136,.3)">${rotation.player.icon} ${rotation.player.name}</span>
+        ${rotation.monsters.map(m=>`<span style="font-size:9px;background:rgba(255,34,68,.1);color:#FF2244;padding:2px 7px;border-radius:8px;border:1px solid rgba(255,34,68,.25)">${m.icon} ${m.name}</span>`).join('')}
+      </div>
+      <div style="background:rgba(255,34,68,.07);border:1px solid rgba(255,34,68,.3);border-radius:10px;padding:12px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-size:12px;font-weight:700;color:#FF2244">${monName}</div>
+          <div style="font-size:11px;color:var(--tx3)">${monCurHp.toLocaleString()} / ${monMaxHp.toLocaleString()}</div>
+        </div>
+        <div style="background:rgba(0,0,0,.4);border-radius:4px;height:8px;overflow:hidden">
+          <div style="height:100%;width:${mhpPct}%;background:linear-gradient(90deg,#FF2244,#FF4400);border-radius:4px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:9px;color:var(--tx3);margin-top:4px">ATK ${monAtk} · DEF ${monDef} · 회피 ${monDodge}%${monRegen>0?' · 재생':''}${monPoisonFog>0?' · 독안개':''}</div>
+      </div>
+      <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-size:12px;font-weight:700;color:var(--tx)">${char.name}</div>
+          <div style="font-size:11px;color:var(--tx3)">${myHp.toLocaleString()} / ${s.maxHp.toLocaleString()}</div>
+        </div>
+        <div style="background:rgba(0,0,0,.4);border-radius:4px;height:8px;overflow:hidden">
+          <div style="height:100%;width:${hpPct}%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:4px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:9px;color:var(--tx3);margin-top:4px">ATK ${s.atk} · DEF ${s.def} · HP ${s.maxHp} · 포션 ${potions}개</div>
+      </div>
+      <div id="itLog" style="height:160px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:8px;padding:8px;margin-bottom:10px;font-family:'IBM Plex Mono',monospace"></div>
+      ${!done?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-red" style="padding:10px" id="itAtk" onclick="itAction('attack')">⚔ 공격</button>
+        <button class="btn btn-ghost" style="padding:10px" id="itDef" onclick="itAction('defend')">🛡 방어</button>
+        <button class="btn btn-blue" style="padding:10px" id="itHeal" onclick="itAction('heal')" ${potions<=0?'disabled':''}>💊 포션 (${potions})</button>
+        <button class="btn btn-ghost btn-sm" style="padding:10px" onclick="exitITBattle()">💨 도망</button>
+      </div>`:''}`;
+  }
+
+  window.exitITBattle=function(){
+    battle.style.display='none';
+    main.style.display='block';
+    renderImmortalTower();
+  };
+
+  window.itAction=async function(action){
+    if(done||phase!==1)return;
+    phase=2;
+    ['itAtk','itDef','itHeal'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});
+    let defending=false;
+
+    // ── 플레이어 행동 ──
+    if(action==='attack'){
+      // ★ 저주: 치명타 확률 감소
+      const cursePenalty=monCursed?-20:0;
+      let dmg=calcPlayerDmg({charData:char,name:char.name},s);
+      if(dmg===undefined||isNaN(dmg))dmg=s.atk;
+      const critBonus=(wt.isDagger?5:0)+cursePenalty;
+      const isCrit=Math.random()*100<Math.max(0,s.crit+critBonus);
+      const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
+      if(isCrit)dmg=Math.round(dmg*(s.critDmg/100)*critDmgBonus);
+      if(wt.isSpear&&!isCrit)dmg=Math.round(dmg*1.08);
+      // ★ 몬스터 회피 (noDodge 특성이면 회피 불가)
+      const effDodge=monNoDodge?0:Math.max(0,monDodge*(1-(s.balance||0)/100));
+      const isMiss=Math.random()*100<effDodge;
+      if(isMiss){itlog(`<span style="color:var(--tx3)">💨 ${monName} 회피!</span>`);}
+      else{
+        monCurHp=Math.max(0,monCurHp-dmg);
+        if(isCrit)itlog(`<span style="color:var(--yellow)">💥 치명타! ${char.name} → ${monName} <b>-${dmg}</b></span>`);
+        else itlog(`<span style="color:var(--tx)">⚔ ${char.name} → ${monName} -${dmg}</span>`);
+        // 연격
+        const dualRate=wt.isDual?Math.min(0.12+(s._extraDual||0)+(s.spd||0)/800,0.40+(s._extraDual||0)):Math.min((s.spd||0)/800+(s._extraDual||0),0.25);
+        if(wt.isDual&&monCurHp>0&&Math.random()<Math.min(dualRate,0.50)){const b=Math.round(dmg*0.6);monCurHp=Math.max(0,monCurHp-b);itlog(`<span style="color:var(--purple)">🗡 연격! -${b}</span>`);}
+        else if(!wt.isDual&&monCurHp>0&&Math.random()<Math.min(dualRate,0.35)){const b=Math.round(dmg*0.5);monCurHp=Math.max(0,monCurHp-b);itlog(`<span style="color:var(--blue)">💨 신속 연격! -${b}</span>`);}
+        // 스킬 발동
+        if(monCurHp>0){
+          const ITMP=0.35;const sbm=1+Math.min((s.skillBonus||0)/100,0.5);
+          for(const sl of Object.values(char.equipment||{})){
+            if(!sl)continue;
+            for(const enc of[sl.prefix,sl.suffix]){
+              if(!enc?.sk)continue;
+              const sk=SKILLS[enc.sk];if(!sk||!sk.fx)continue;
+              const skM=GRADES[sl.grade]?.skillM||0;if(!skM)continue;
+              const proc=Math.min(sk.base*skM*(1+(s.int||3)*0.005)*sbm,ITMP);
+              if(Math.random()<proc){
+                try{const fx=sk.fx(s.atk,s);if(fx?.dmg>0){const sd=Math.min(Math.round(fx.dmg),99999);monCurHp=Math.max(0,monCurHp-sd);itlog(`<span style="color:var(--purple)">${sk.icon||'⚡'} ${sk.name} <b>-${sd}</b></span>`);}}catch(e){}
+                break;
+              }
+            }
+          }
+        }
+      }
+    }else if(action==='defend'){
+      defending=true;
+      itlog(`<span style="color:var(--blue)">🛡 ${char.name} 방어 자세</span>`);
+    }else if(action==='heal'){
+      if(potions<=0){toast('포션 없음!');phase=1;renderIT();return;}
+      potions--;
+      const potMult=s._potionMult||1.0;
+      const heal=Math.round(s.maxHp*0.4*potMult);
+      myHp=Math.min(myHp+heal,s.maxHp);
+      itlog(`<span style="color:var(--green)">💊 포션! +${heal}HP (${myHp}/${s.maxHp})${potMult>1?' [포션 강화 중]':''}</span>`);
+    }
+
+    // ── 승리 체크 ──
+    if(monCurHp<=0){
+      done=true;
+      itlog(`<span style="color:#FF2244;font-weight:700">💀 ${monName} 처치! ${floor}층 클리어!</span>`);
+      // 징수 지급
+      char._immortalSeals=(char._immortalSeals||0)+1;
+      const wk=getITWeekKey();
+      const newFloor=Math.max((await get(ref(db,`immortalTower/${wk}/${charId}`))).val()?.floor||0, floor);
+      await set(ref(db,`immortalTower/${wk}/${charId}`),{floor:newFloor,ts:Date.now()});
+      // 드랍 아이템 (Lv.99 고정)
+      const dropGrade=genGrade(4); // T5 vhard 동일 드랍 풀
+      const drop=genItem(['weapon','head','chest','legs','boots','accessory'],dropGrade,99,false,4);
+      if(drop){
+        if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length<(char.invSlots||100)){
+          await addItem(drop);await saveInv();
+          itlog(`<span style="color:var(--gold)">🎁 드랍: <span class="g-${drop.grade}">${drop.name}</span></span>`);
+        }
+      }
+      await saveChar();updateTop();
+      const sd2=document.getElementById('itSealsDisplay');
+      if(sd2)sd2.textContent=`🔱 징수: ${char._immortalSeals}개`;
+      renderIT();
+      return;
+    }
+
+    // ── 몬스터 반격 ──
+    // ★ 재생: 몬스터 HP 회복
+    if(monRegen>0&&monCurHp>0){const rg=Math.round(monMaxHp*monRegen);monCurHp=Math.min(monCurHp+rg,monMaxHp);itlog(`<span style="color:#80ff40">💉 ${monName} 재생! +${rg}HP</span>`);}
+    // ★ 독안개: 플레이어 HP 감소
+    if(monPoisonFog>0){const pg=Math.round(s.maxHp*monPoisonFog);myHp=Math.max(0,myHp-pg);itlog(`<span style="color:#80ff40">☠️ 독안개! ${char.name} -${pg}HP</span>`);if(myHp<=0){done=true;itlog(`<span style="color:var(--tx3)">💀 ${char.name} 독안개로 쓰러짐...</span>`);renderIT();return;}}
+    if(wt.isBow){const br=Math.min(0.15+(s.spd||0)/800,0.30);if(Math.random()<br){itlog(`<span style="color:var(--green)">🏹 원거리 선공! 반격 회피</span>`);phase=1;renderIT();return;}}
+    if(Math.random()<Math.min((s.spd||0)/800,0.20)){itlog(`<span style="color:var(--blue)">💨 신속 회피!</span>`);phase=1;renderIT();return;}
+    let mDmg=Math.max(1,Math.round(monAtk*100/(100+s.def)));
+    const mv=Math.round(mDmg*0.15);mDmg=Math.max(1,mDmg+rand(-mv,mv));
+    if(defending)mDmg=Math.round(mDmg*0.5);
+    // ★ 받는 피해 감소 버프 적용
+    if(s._dmgReduce)mDmg=Math.max(1,Math.round(mDmg*(1-s._dmgReduce)));
+    if(Math.random()*100<(s.dodge||0)){itlog(`<span style="color:var(--tx3)">✨ 회피!</span>`);}
+    else{
+      myHp=Math.max(0,myHp-mDmg);
+      itlog(`<span style="color:var(--red)">⚔ ${monName} → ${char.name} -<b>${mDmg}</b> (${myHp}/${s.maxHp})</span>`);
+    }
+
+    // ── 패배 체크 ──
+    if(myHp<=0){
+      done=true;
+      itlog(`<span style="color:var(--tx3)">💀 ${char.name} 쓰러짐... 도전 실패</span>`);
+      renderIT();
+      return;
+    }
+    phase=1;
+    renderIT();
+  };
+
+  renderIT();
+};
+
+// 불멸의 탑 주간 초기화 체크
+async function checkITWeeklyReset(){
+  // 데이터는 Firebase에 weekKey별로 저장되므로 자동 초기화됨
+}
+
+// ════════════════════════════════════════════
+// ★ 불멸 제련 (대장간)
+// ════════════════════════════════════════════
+window.doImmortalForge=async function(slotKey){
+  const it=slotKey==='inv'?null:char.equipment[slotKey];
+  if(!it){toast('장비를 선택하세요');return;}
+  if(it.grade!=='legendary'){toast('⚠️ Lv.99 레전더리 무기만 제련 가능합니다');return;}
+  if(it.slot!=='weapon'){toast('⚠️ 무기 슬롯만 불멸 제련 가능합니다');return;}
+  if((it.reqLv||0)<99&&(it.itemLv||0)<90){toast('⚠️ Lv.99 레전더리 무기만 제련 가능합니다');return;}
+  const seals=char._immortalSeals||0;
+  if(seals<IT_SEALS_REQUIRED){toast(`⚠️ 불멸의 징수가 부족합니다 (${seals}/${IT_SEALS_REQUIRED}개)`);return;}
+  if(!confirm(`🔱 불멸 제련 시도\n\n대상: ${it.name}\n징수 소모: ${IT_SEALS_REQUIRED}개\n성공률: 1%\n\n⚠️ 실패 시 징수 ${IT_SEALS_REQUIRED}개가 소멸합니다.\n계속하시겠습니까?`))return;
+
+  // 징수 소모
+  char._immortalSeals=seals-IT_SEALS_REQUIRED;
+  const success=Math.random()<IT_FORGE_RATE;
+
+  if(success){
+    it.grade='immortal';
+    it.gradeName='불멸';
+    it.gradeColor='#FF2244';
+    it._immortal=true;
+    // 스탯 추가 강화 (불멸 등급 배율 적용)
+    if(it.stats){
+      for(const k of Object.keys(it.stats)){
+        if(['atk','matk','def','hp','spd'].includes(k))
+          it.stats[k]=Math.round((it.stats[k]||0)*1.3);
+      }
+    }
+    await saveChar();await saveInv();
+    // 시스템 채팅 알림
+    await push(ref(db,'chat/system'),{
+      author:'SYSTEM',
+      text:`🔱 ${char.name}이(가) 불멸의 무기 [${it.name}]를 제련하였습니다!`,
+      ts:Date.now(),isAdmin:true
+    });
+    await push(ref(db,'chat/world'),{
+      author:'SYSTEM',
+      text:`🔱✨ ${char.name}이(가) 불멸의 무기를 제련하였습니다! 심연을 정복한 전사가 등장했습니다.`,
+      ts:Date.now(),isAdmin:true
+    });
+    updateTop();renderChar();renderForge(document.getElementById('secbody'));
+    // 성공 팝업
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:3000;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML=`<div style="background:linear-gradient(135deg,#1a0005,#2a000a);border:2px solid #FF2244;border-radius:16px;padding:32px 28px;text-align:center;max-width:320px;box-shadow:0 0 40px rgba(255,34,68,.4)">
+      <div style="font-size:48px;margin-bottom:12px">🔱</div>
+      <div style="font-size:20px;font-weight:700;margin-bottom:6px;animation:immortalFlame 1.5s infinite">불멸 제련 성공!</div>
+      <div class="g-immortal" style="font-size:15px;font-weight:700;margin-bottom:16px">${it.name}</div>
+      <div style="font-size:11px;color:var(--tx2);margin-bottom:20px">심연의 힘이 당신의 무기에 깃들었습니다.</div>
+      <button class="btn btn-red" style="width:100%" onclick="this.parentElement.parentElement.remove()">확인</button>
+    </div>`;
+    document.body.appendChild(overlay);
+  }else{
+    await saveChar();updateTop();
+    toast(`💔 불멸 제련 실패... 징수 ${IT_SEALS_REQUIRED}개 소멸 (남은 징수: ${char._immortalSeals}개)`,5000);
+    renderForge(document.getElementById('secbody'));
+  }
+};
+
 // ═══ ADMIN ═══
 function atab(id,btn){
   document.querySelectorAll('#pane-admin .atab').forEach(t=>t.classList.remove('on'));
@@ -7384,6 +7896,7 @@ document.querySelectorAll('.nbtn').forEach(b=>{
     }
     if(tab==='subjugation'){renderSubjugation();}
     if(tab==='champ'){renderChamp();}
+    if(tab==='immortaltower'){renderImmortalTower();}
   });
 });
 window.navTo=function(tab){
