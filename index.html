@@ -2964,6 +2964,7 @@ function migrateEnchantName(it){
       const isCorrupted=tmp===it.baseName||tmp===''||[...WBASES,...ABASES,...ACCBASES].some(b=>b.id===it.baseId&&tmp.length<5);
       if(isCorrupted)basePart=pool[Math.floor(Math.random()*pool.length)];
       else basePart=tmp;
+      if(!it._itUniqueName)it._itUniqueName=basePart; // ★ 고유 이름 영구 저장
     }
   }
   if(!basePart&&!it._itUnique)basePart=it.baseName||'';
@@ -3632,19 +3633,25 @@ function openIM(it){
       const enchObj={n:enchData.n,b:scaledB,sk:enchData.sk||null,attr:enchData.attr||null};
       if(isPrefix)eq.prefix=enchObj;else eq.suffix=enchObj;
       const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
-      // ★ baseName 우선, 없으면 기존 인챈트명 제거하고 베이스만 추출
-      let basePart=eq.baseName||'';
-      if(!basePart){
-        // 현재 prefix/suffix 이름을 앞에서 제거
-        let tmp=eq.name;
-        const oldPre=eq.prefix?.n||'';const oldSuf=eq.suffix?.n||'';
-        if(oldPre)tmp=tmp.replace(oldPre,'').trim();
-        if(oldSuf)tmp=tmp.replace(oldSuf,'').trim();
-        tmp=tmp.replace(/^(전설의|정예|강화된|좋은)\s/,'').trim();
-        basePart=tmp;
+      let basePart='';
+      if(eq._itUniqueName){
+        // ★ IT 고유 이름 아이템: 저장된 고유 이름 사용
+        basePart=eq._itUniqueName;
+      }else if(eq.grade==='set'){
+        // 유일: SETS에서 직접 가져오기
+        basePart=SETS[eq.setId]?.pcs[eq.baseId]?.n||eq.baseName||'';
+      }else{
+        basePart=eq.baseName||'';
+        if(!basePart){
+          let tmp=eq.name;
+          const oldPre=eq.prefix?.n||'';const oldSuf=eq.suffix?.n||'';
+          if(oldPre)tmp=tmp.replace(oldPre,'').trim();
+          if(oldSuf)tmp=tmp.replace(oldSuf,'').trim();
+          tmp=tmp.replace(/^(전설의|정예|강화된|좋은)\s/,'').trim();
+          basePart=tmp;
+        }
       }
-      // 유일 장비는 gAdj 없이 baseName만
-      const finalGAdj=eq.grade==='set'?'':gAdj;
+      const finalGAdj=(eq.grade==='set'||eq._itUniqueName)?'':gAdj;
       eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+finalGAdj+basePart;
       await saveEqFn();await saveInv();
       trackBounty('enchant',1);
@@ -6390,6 +6397,7 @@ async function dungeonClear(){
         const encPart=[drop.prefix?.n,drop.suffix?.n].filter(Boolean).join(' ');
         drop.name=(encPart?encPart+' ':'')+uniqueName;
         drop._itUnique=true;
+        drop._itUniqueName=uniqueName; // ★ 고유 이름 보존
       }
     }
     // ★ 에픽 이상은 인챈트 강제 적용
