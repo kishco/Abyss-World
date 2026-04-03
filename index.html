@@ -1371,6 +1371,24 @@ const SKILLS={
     fx:(a,s)=>({dmg:a*1.8*(1+(s?.str||5)*0.005),stun:true,aoe:true,msg:'💢 대지 강타!'})},
   arcane_wave:{name:'마력 파동',icon:'🌊',desc:'100% MATK 전체 공격',base:0.09,type:'magic',
     fx:(a,s)=>({dmg:(s?.matk||a)*1.0*(1+(s?.int||3)*0.006),aoe:true,msg:'🌊 마력 파동!'})},
+  // ─── 불멸 전용 스킬 (ATK계) ───
+  immortal_abyss_slash:{name:'심연 참격',icon:'🔱',desc:'320% ATK + 방어 완전 무시',base:0.05,type:'physical',
+    fx:(a,s)=>({dmg:a*3.2*(1+(s?.str||5)*0.006),ignoreDef:true,msg:'🔱 심연 참격!'})},
+  immortal_storm_chain:{name:'폭풍 연격',icon:'⚡',desc:'4연타 90% ATK',base:0.05,type:'physical',
+    fx:(a,s)=>({dmg:a*0.9*(1+(s?.str||5)*0.005),hits:4,msg:'⚡ 폭풍 연격!'})},
+  immortal_reaper:{name:'사신의 낫',icon:'💀',desc:'250% ATK + HP 30% 미만 시 추가 200%',base:0.04,type:'physical',
+    fx:(a,s)=>{const base=a*2.5*(1+(s?.str||5)*0.005);return{dmg:base,msg:'💀 사신의 낫!'}}},
+  immortal_void_execute:{name:'공허 처형',icon:'🕳',desc:'200% + 방어 무시 + DEF -50% 2턴',base:0.04,type:'physical',
+    fx:(a,s)=>({dmg:a*2.0*(1+(s?.str||5)*0.006),ignoreDef:true,armorBreak:0.50,msg:'🕳 공허 처형!'})},
+  // ─── 불멸 전용 스킬 (MATK계) ───
+  immortal_nova:{name:'불멸의 노바',icon:'🌌',desc:'350% MATK 전체 공격',base:0.05,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*3.5*(1+(s?.int||3)*0.010),aoe:true,msg:'🌌 불멸의 노바!'})},
+  immortal_void_collapse:{name:'공허 붕괴',icon:'🔮',desc:'400% MATK + 방어 무시',base:0.04,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*4.0*(1+(s?.int||3)*0.010),ignoreDef:true,msg:'🔮 공허 붕괴!'})},
+  immortal_soul_harvest:{name:'영혼 수확',icon:'💜',desc:'220% MATK + HP 10% 흡수',base:0.05,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*2.2*(1+(s?.int||3)*0.010),heal:0.10,msg:'💜 영혼 수확!'})},
+  immortal_arcane_storm:{name:'비전 폭풍',icon:'✨',desc:'3연타 130% MATK',base:0.05,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*1.3*(1+(s?.int||3)*0.010),hits:3,msg:'✨ 비전 폭풍!'})},
 };
 
 // Enchants — 솔로 전용 (물리9/마법9 PRE, 물리9/마법8 SUF 밸런스)
@@ -2098,6 +2116,11 @@ function getSkills(c_arg){
     const gM=GRADES[it.grade]?.skillM||0;if(gM<=0)continue;
     for(const src of[it.prefix,it.suffix]){
       if(src?.sk&&SKILLS[src.sk]){const s=SKILLS[src.sk];sk.push({...s,id:src.sk,item:it.name,proc:s.base*gM*(1+(c.int||3)*0.005)});}
+    }
+    // ★ 불멸 전용 스킬
+    if(it._immortalSk&&SKILLS[it._immortalSk]){
+      const s=SKILLS[it._immortalSk];
+      sk.push({...s,id:it._immortalSk,item:it.name,proc:Math.min(s.base*1.8*(1+(c.int||3)*0.005),0.40)});
     }
   }return sk;
 }
@@ -3688,6 +3711,7 @@ function openIM(it){
   }
   const ph=!it.prefix?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}<br>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name}${skillTypeBadge(it.prefix.sk)} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
   const sh=!it.suffix?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}<br>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name}${skillTypeBadge(it.suffix.sk)} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
+  const immortalSkH=it._immortalSk&&SKILLS[it._immortalSk]?`<div style="margin-top:5px;padding:7px 9px;background:rgba(255,34,68,.08);border:1px solid rgba(255,34,68,.3);border-radius:5px;font-size:11px"><span style="color:#FF2244;font-weight:700">🔱 불멸 고유 스킬: ${SKILLS[it._immortalSk].name}</span><br><span style="color:var(--tx2)">${SKILLS[it._immortalSk].desc}</span></div>`:'';
   const seth=it.grade==='set'?`<div style="margin-top:6px;padding:6px 9px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:11px;color:var(--st)">◆ ${it.setName}</div>`:'';
 
   // 장착 중 아이템 비교 표시
@@ -3733,7 +3757,7 @@ function openIM(it){
       ${it.tradeable===true&&(!it.isScroll||it.isEnchantScroll)?`<span style="font-size:10px;background:rgba(74,143,255,.15);color:var(--blue);padding:2px 6px;border-radius:6px">🏛 거래가능</span>`:''}
     </div>
     ${sr?`<div class="sgrid" style="margin-bottom:7px">${sr}</div>`:''}
-    ${ph}${sh}${seth}
+    ${ph}${sh}${immortalSkH}${seth}
     ${!isAcc&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isScroll?compareHtml:''}
     ${isAcc?accSelHtml:''}
     ${!isAcc?`<div style="display:flex;gap:6px;margin-top:10px">
@@ -7111,13 +7135,21 @@ window.doImmortalForge=async function(slotKey){
     it.gradeName='불멸';
     it.gradeColor='#FF2244';
     it._immortal=true;
-    // 스탯 추가 강화 (불멸 등급 배율 적용)
+    // ★ 스탯 배율: 레전더리(3.8) → 불멸(5.0) 정확한 비율 적용
+    const IMMORTAL_RATIO=5.0/3.8;
     if(it.stats){
       for(const k of Object.keys(it.stats)){
         if(['atk','matk','def','hp','spd'].includes(k))
-          it.stats[k]=Math.round((it.stats[k]||0)*1.3);
+          it.stats[k]=Math.round((it.stats[k]||0)*IMMORTAL_RATIO);
       }
     }
+    // ★ 불멸 전용 스킬 — 무기군(ATK/MATK)에 따라 랜덤 부여
+    const _wt=getWeaponTraits(char.equipment||{});
+    const _isMagic=_wt.isStaff||_wt.isDualgun;
+    const _atkSkills=['immortal_abyss_slash','immortal_storm_chain','immortal_reaper','immortal_void_execute'];
+    const _matkSkills=['immortal_nova','immortal_void_collapse','immortal_soul_harvest','immortal_arcane_storm'];
+    const _pool=_isMagic?_matkSkills:_atkSkills;
+    it._immortalSk=_pool[Math.floor(Math.random()*_pool.length)];
     await saveChar();await saveInv();
     // 시스템 채팅 알림
     await push(ref(db,'chat/system'),{
@@ -9156,7 +9188,7 @@ async function renderChamp(){
         ${(()=>{
           const eq=champ.equipment||{};
           const slotLabel={head:'머리',neck:'목',chest:'상의',legs:'하의',boots:'신발',weapon:'무기',offhand:'보조',accessory1:'장신구1',accessory2:'장신구2',accessory3:'장신구3'};
-          const slots=Object.entries(eq).filter(([,it])=>it);
+          const slots=Object.entries(eq).filter(([sl,it])=>it&&slotLabel[sl]);
           if(!slots.length)return'';
           return`<div style="font-size:9px;color:var(--tx3);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase">장비</div>
           <div style="display:flex;flex-direction:column;gap:3px">
@@ -9353,6 +9385,15 @@ window.enterChampBattle=async function(){
               if(Math.random()<proc){
                 try{const fx=sk.fx(s.atk,s);if(fx?.dmg>0){const sd=Math.min(Math.round(fx.dmg),99999);champHp=Math.max(0,champHp-sd);clog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name} <strong>${sd}</strong></span>`);}}catch(e){}
                 skProced=true;break;
+              }
+            }
+            // ★ 불멸 전용 스킬
+            if(!skProced&&sl._immortalSk&&SKILLS[sl._immortalSk]){
+              const sk=SKILLS[sl._immortalSk];
+              const proc=Math.min(sk.base*1.8*(1+(s.int||3)*0.005)*champSBMult,CHAMP_MAX_PROC);
+              if(Math.random()<proc){
+                try{const fx=sk.fx(s.atk,s);if(fx?.dmg>0){const sd=Math.min(Math.round(fx.dmg),99999);champHp=Math.max(0,champHp-sd);clog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name} <strong>${sd}</strong></span>`);}}catch(e){}
+                skProced=true;
               }
             }
           }
