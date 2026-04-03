@@ -1562,6 +1562,35 @@ const WBASES=[
   {id:'spear',    hand:'2H',slot:'weapon',ar:1.7,dr:0.35,balMin:65,balMax:85}, // 창
   {id:'mace',     hand:'1H',slot:'weapon',ar:1.15,dr:0.25,balMin:45,balMax:65}, // 메이스
 ];
+// ★ 불멸의 탑 전용 레전더리 고유 이름 (엘든링 스타일)
+const IT_UNIQUE_NAMES={
+  sword:     ['재판관의 언도','잔류하는 왕의 검','별 떨어진 자리의 검','영원한 저주의 날','공허 군주의 손'],
+  greatsword:['검은야망','붉은갈기','폐허 왕의 맹세','종말을 부르는 자','무너진 별의 유산'],
+  dagger:    ['달빛 처형자','상처받은 신의 손톱','심연의 절개','균열하는 허공','운명의 가시'],
+  dual:      ['쌍둥이 악의','끝없는 밤의 쌍날','결말을 나누는 자','공허의 두 발톱','잃어버린 왕관의 쌍날'],
+  bow:       ['별의 심판자','소멸의 현','잿빛 사냥꾼의 궁','운명을 꿰뚫는 자','영혼 파괴자'],
+  staff:     ['파멸의 눈','금지된 지식의 근원','심연의 법전','사라진 신의 유물','공허 군주의 지휘봉'],
+  dualgun:   ['최후의 폭풍','소멸의 두 총구','운명의 방아쇠','허공을 가르는 탄환','별 조각 사격기'],
+  axe:       ['학살자의 맹세','잔혹한 집행자','피에 굶주린 자','폐허를 만드는 것','심연의 도끼날'],
+  greataxe:  ['세계를 가르는 것','멸절의 집행','신을 부수는 자','지옥 군주의 망치','종말의 대도끼'],
+  spear:     ['천상의 심판창','용의 이빨','공허를 꿰뚫는 자','붉은 달의 창','운명의 찌르기'],
+  mace:      ['파괴의 의지','혼돈을 지배하는 것','공허의 철권','멸절 군주의 뭉치','세계를 부수는 자'],
+  head:      ['폐허 왕의 면갑','별의 수호자 면갑','공허 군주의 왕관','심연의 가면','어둠의 군주 투구'],
+  chest:     ['심판자의 갑주','폐허의 영주 갑옷','별의 수호자 흉갑','공허 군주의 갑옷','불멸 전사의 갑주'],
+  legs:      ['심판자의 각반','폐허의 영주 각반','별의 수호자 각반','공허 군주의 다리갑옷','불멸 전사의 각반'],
+  boots:     ['망각의 전진','심판자의 발걸음','별의 수호자 부츠','폐허 군주의 발걸음','공허 군주의 부츠'],
+  offhand:   ['마지막 방어선','세계를 지키는 것','폐허 군주의 방패','심연의 방패','불멸의 성벽'],
+  neck:      ['저주받은 맹세','별의 기억','심연의 굴레','공허 군주의 징표','운명의 사슬'],
+  accessory: ['혼돈의 서약','별 조각의 반지','공허의 낙인','파멸의 증표','심연 군주의 봉인'],
+};
+// 장비 종류 한글명
+const SLOT_KR={
+  sword:'한손검',greatsword:'대검',dagger:'단검',dual:'쌍검',
+  bow:'활',staff:'지팡이',dualgun:'듀얼건',axe:'도끼',
+  greataxe:'대도끼',spear:'창',mace:'메이스',
+  head:'투구',chest:'상의',legs:'하의',boots:'신발',
+  offhand:'방패',neck:'목걸이',accessory:'장신구',
+};
 const ABASES=[
   {id:'head',   slot:'head',   dr:0.6},
   {id:'chest',  slot:'chest',  dr:1.0},
@@ -2588,7 +2617,7 @@ function renderEq(){
       ${lk?'<div class="eqem">양손 장착</div>':
         it?`<div style="padding-right:18px">
               <div class="eqit g-${it.grade}">${itName(it)}</div>
-              <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${it.grade==='set'?`◆${it.setName||'유일'}`:GRADES[it.grade]?.name||it.grade}${it.reqLv?' · 필요Lv.'+it.reqLv:''}</div>
+              <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${it.grade==='set'?`◆${it.setName||'유일'}`:GRADES[it.grade]?.name||it.grade} · ${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${it.reqLv?' · Lv.'+it.reqLv:''}</div>
               ${itSkStr(it)?`<div class="eqsk">${itSkStr(it)}</div>`:''}
             </div>
             <button class="equn" onclick="event.stopPropagation();unequip('${sl.k}')">✕</button>`:
@@ -2701,7 +2730,7 @@ const encHint={
   content.innerHTML=`
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-right:18px">
       <span class="icname g-${it.grade}" style="font-size:12px">${it.name}</span>
-      <span style="font-size:9px;color:var(--tx3)">${it.slot}${it.hand?' · '+it.hand:''}${it.reqLv?' · 필요Lv.'+it.reqLv:''}</span>
+      <span style="font-size:9px;color:var(--tx3)">${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${it.hand?' · '+it.hand:''}${it.reqLv?' · 필요Lv.'+it.reqLv:''}</span>
     </div>
     ${statsHtml?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${statsHtml}</div>`:''}
     ${enchantHtml}
@@ -6272,6 +6301,16 @@ async function dungeonClear(){
     else                                             dropGrade='normal';
     const dropLv=dropGrade==='set'?90:99;
     const drop=genItem(dropPool,dropGrade,dropLv,false,4);
+    // ★ 불멸의 탑 전용: 레전더리 장비에 고유 이름 부여
+    if(drop&&drop.grade==='legendary'){
+      const namePool=IT_UNIQUE_NAMES[drop.baseId]||IT_UNIQUE_NAMES[drop.slot];
+      if(namePool){
+        const uniqueName=namePool[Math.floor(Math.random()*namePool.length)];
+        const encPart=[drop.prefix?.n,drop.suffix?.n].filter(Boolean).join(' ');
+        drop.name=(encPart?encPart+' ':'')+uniqueName;
+        drop._itUnique=true;
+      }
+    }
     // ★ 에픽 이상은 인챈트 강제 적용
     if(drop&&['epic','legendary','immortal'].includes(drop.grade)){
       const gi=Object.keys(GRADES).indexOf(drop.grade);
@@ -6293,6 +6332,18 @@ async function dungeonClear(){
         blogAdd(`<span class="l-set">🎁 드랍: <span class="g-${drop.grade}">${drop.name}</span></span>`);
       }else{
         blogAdd(`<span class="l-warn">⚠️ 인벤 가득 — 드랍 아이템 소실</span>`);
+      }
+    }
+
+    // ★ 인챈트 스크롤 추가 드랍 (층 기반 확률)
+    const enchScrollChance=0.10+fb*0.25; // 10%→35%
+    if(Math.random()<enchScrollChance){
+      // 층이 높을수록 고급 티어 스크롤 (floor<=20: tier1~2, <=50: tier1~3, <=80: tier1~4, 100: tier1~5)
+      const maxTier=floor<=20?2:floor<=50?3:floor<=80?4:5;
+      const scroll=genTieredEnchantScroll(maxTier,'vhard');
+      if(scroll){
+        await addItem(scroll);await saveInv();
+        blogAdd(`<span class="l-skill">📜 인챈트 스크롤 추가 드랍: ${scroll.name}</span>`);
       }
     }
 
@@ -8127,7 +8178,13 @@ document.querySelectorAll('.nbtn').forEach(b=>{
     }
     if(tab==='subjugation'){renderSubjugation();}
     if(tab==='champ'){renderChamp();}
-    if(tab==='immortaltower'){renderImmortalTower();}
+    if(tab==='immortaltower'){
+      const itMain=document.getElementById('itMain');
+      if(itMain)itMain.style.display='block';
+      document.getElementById('dungBattle').style.display='none';
+      if(battle&&battle.done){battle=null;updateNavLock();}
+      renderImmortalTower();
+    }
   });
 });
 window.navTo=function(tab){
