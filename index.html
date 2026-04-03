@@ -7200,8 +7200,8 @@ window.startITBattle=async function(floorNum){
   document.getElementById('dungBattle').style.display='block';
   document.getElementById('dungBattle').innerHTML='';
 
-  // ★ pane-dungeon으로 전환해야 dungBattle이 보임
-  document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='dungeon'));
+  // ★ pane-dungeon으로 전환 (dungBattle이 그 안에 있음), 탭은 immortaltower 유지
+  document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='immortaltower'));
   document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-dungeon'));
 
   updateNavLock();
