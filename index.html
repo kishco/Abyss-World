@@ -3483,7 +3483,8 @@ function openIM(it){
       // ── 성공 ──
       const lv=eq.itemLv||1;
       const gm=ENCHANT_GRADE_MULT[eq.grade]||ENCHANT_GRADE_MULT['normal']||1;
-      const scaledB=scaleEnchant(enchData.b,lv,gm);
+      // ★ 추출된 스크롤(enchantData._scaled)은 이미 scaleEnchant 적용됨 — 이중 적용 방지
+      const scaledB=enchData._scaled ? enchData.b : scaleEnchant(enchData.b,lv,gm);
       const enchObj={n:enchData.n,b:scaledB,sk:enchData.sk||null,attr:enchData.attr||null};
       if(isPrefix)eq.prefix=enchObj;else eq.suffix=enchObj;
       const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
@@ -3581,7 +3582,7 @@ function openIM(it){
         grade:et?.grade||'rare',gradeName:et?.name||'레어',gradeColor:et?.color||'#0070dd',
         slot:'scroll',stats:{},
         isEnchantScroll:true,
-        enchantData:enchObj,
+        enchantData:{...enchObj,_scaled:true}, // ★ 이미 scaleEnchant 적용됨 표시
         enchantIsPrefix:isPrefix,
         enchantTier:tier,
         successRate:et?.successRate||0.7,
@@ -5584,8 +5585,8 @@ async function resolvePhase(){
       blogAdd(getWeaponAttackMsg(p,target,dmg,isCrit&&!isMiss,isMiss));
       if(target.hp<=0){target.status='dead';SFX.play('kill');blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
       // ★ 쌍검: 5% 추가타
-      if(wt.isDual&&!isMiss&&target.status==='alive'&&Math.random()<0.05){
-        const bonusDmg=Math.round(dmg*0.5);
+      if(wt.isDual&&!isMiss&&target.status==='alive'&&Math.random()<0.12){
+        const bonusDmg=Math.round(dmg*0.6);
         target.hp=Math.max(0,target.hp-bonusDmg);
         blogAdd(`<span class="l-skill">🗡 ${p.name} 추가 연격! <strong>${bonusDmg}</strong></span>`);
         if(target.hp<=0)target.status='dead';
@@ -8282,7 +8283,7 @@ window.enterSubjBattle=function(){
         const fakeTarget={name:boss.name,dodge:0};
         const fakeP={charData:char,name:char.name};
         slog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
-        if(wt.isDual&&Math.random()<0.05){const b=Math.round(dmg*0.5);totalDmgDealt+=b;slog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
+        if(wt.isDual&&Math.random()<0.12){const b=Math.round(dmg*0.6);totalDmgDealt+=b;slog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
       }
       // ★ 스킬 발동 — 턴당 최대 1회만, 발동하면 즉시 중단
       const subjSkillBonusMult=1+(s.skillBonus||0)/100;
@@ -8612,7 +8613,7 @@ window.enterChampBattle=async function(){
         const fakeTarget={name:champ.name,dodge:0};
         const fakeP={charData:char};
         clog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
-        if(wt.isDual&&champHp>0&&Math.random()<0.05){const b=Math.round(dmg*0.5);champHp=Math.max(0,champHp-b);clog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
+        if(wt.isDual&&champHp>0&&Math.random()<0.12){const b=Math.round(dmg*0.6);champHp=Math.max(0,champHp-b);clog(`<span class="l-skill">🗡 추가 연격! <strong>${b}</strong></span>`);}
         if(wt.isMace)cs.def=Math.round(cs.def*0.95);
       }
     }else if(action==='defend'){
