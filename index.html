@@ -2263,6 +2263,8 @@ async function selChar(id){
     }
     if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))equipMigrated=true;else{it._smv=1;equipStatsDirty=true;}}
     if(it&&migrateItemLv(it,true))equipMigrated=true; // ★ 장착 중 — 레벨 캡 적용
+    if(it&&migrateEnchantName(it))equipMigrated=true;
+    migrateForgeWard(); // ★ forgeWard 분리 마이그레이션
   }
   if(!char.str){char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;}
   if(char.extraPotions===undefined)char.extraPotions=0;
@@ -2279,6 +2281,7 @@ async function selChar(id){
     }
     if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))invMigrated=true;else{it._smv=1;invStatsDirty=true;}}
     if(it&&migrateItemLv(it,false))invMigrated=true;
+    if(it&&migrateEnchantName(it))invMigrated=true;
   }
   // ★ 창고 마이그레이션
   let whMigrated=false;
@@ -2289,6 +2292,7 @@ async function selChar(id){
       else whStatsDirty=true;
     }
     if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))whMigrated=true;else{it._smv=1;whStatsDirty=true;}}
+    if(it&&migrateEnchantName(it))whMigrated=true;
   }
   // ★ 스탯 변화 OR 플래그만 변화 모두 저장 (플래그 미저장 시 매 로그인 재체크 방지)
   if(equipMigrated||equipStatsDirty)await saveChar();
@@ -2922,8 +2926,41 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
     suffix:suf?{n:suf.n,b:suf.b,sk:suf.sk||null}:null,
     attr};
 }
+// ★ forgeWard/deathWard 분리 마이그레이션 (_fwMig)
+// 분리 전엔 _deathWard 하나로 파괴방지+죽음방지 합산 — 분리 후 기존 값을 forgeWard로 이전
+function migrateForgeWard(){
+  if(char._fwMig)return;
+  if((char._deathWard||0)>0&&!(char._forgeWard)){
+    // 죽음방지 부적(흑시장) 구매는 별도 처리됐으므로 전체를 forgeWard로 이전
+    char._forgeWard=(char._deathWard||0);
+    char._deathWard=0;
+  }
+  char._fwMig=true;
+}
 // ★ 아이템레벨 삭제 마이그레이션 (_lv3)
 // isEquipped=true: 장착 중인 아이템 — char.level 이하로 reqLv 캡 (실수 해제 후 재장착 보호)
+// ★ 인챈트 이름 중첩 마이그레이션 (_enchNameMig)
+function migrateEnchantName(it){
+  if(!it||it._enchNameMig)return false;
+  if(!it.prefix&&!it.suffix){it._enchNameMig=true;return false;}
+  // baseName이 있으면 그걸로 재조합, 없으면 현재 이름에서 인챈트명 제거
+  const gAdj=it.grade==='legendary'?'전설의 ':it.grade==='epic'?'정예 ':it.grade==='rare'?'강화된 ':it.grade==='uncommon'?'좋은 ':'';
+  let basePart=it.baseName||'';
+  if(!basePart){
+    let tmp=it.name||'';
+    // 현재 prefix/suffix 이름을 모두 제거 (중복 포함)
+    const pre=it.prefix?.n||'';const suf=it.suffix?.n||'';
+    if(pre){while(tmp.includes(pre))tmp=tmp.replace(pre,'');}
+    if(suf){while(tmp.includes(suf))tmp=tmp.replace(suf,'');}
+    tmp=tmp.replace(/^(전설의|정예|강화된|좋은)\s/,'').trim();
+    basePart=tmp;
+  }
+  const finalGAdj=it.grade==='set'?'':gAdj;
+  const newName=(it.prefix?it.prefix.n+' ':'')+(it.suffix?it.suffix.n+' ':'')+finalGAdj+basePart;
+  it.name=newName;
+  it._enchNameMig=true;
+  return true;
+}
 function migrateItemLv(it,isEquipped){
   if(!it||it._lv3)return false;
   // 전역 교체 전 itemLv가 있었던 경우 (이미 reqLv로 바뀌었을 수 있음)
@@ -3573,8 +3610,20 @@ function openIM(it){
       const enchObj={n:enchData.n,b:scaledB,sk:enchData.sk||null,attr:enchData.attr||null};
       if(isPrefix)eq.prefix=enchObj;else eq.suffix=enchObj;
       const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
-      const basePart=eq.baseName||eq.name.replace(/^.*(전설의|정예|강화된|좋은)\s/,'');
-      eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+gAdj+basePart;
+      // ★ baseName 우선, 없으면 기존 인챈트명 제거하고 베이스만 추출
+      let basePart=eq.baseName||'';
+      if(!basePart){
+        // 현재 prefix/suffix 이름을 앞에서 제거
+        let tmp=eq.name;
+        const oldPre=eq.prefix?.n||'';const oldSuf=eq.suffix?.n||'';
+        if(oldPre)tmp=tmp.replace(oldPre,'').trim();
+        if(oldSuf)tmp=tmp.replace(oldSuf,'').trim();
+        tmp=tmp.replace(/^(전설의|정예|강화된|좋은)\s/,'').trim();
+        basePart=tmp;
+      }
+      // 유일 장비는 gAdj 없이 baseName만
+      const finalGAdj=eq.grade==='set'?'':gAdj;
+      eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+finalGAdj+basePart;
       await saveEqFn();await saveInv();
       trackBounty('enchant',1);
 
