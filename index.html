@@ -2233,6 +2233,7 @@ async function selChar(id){
       else equipStatsDirty=true; // 스탯 변화 없지만 _esv:1 플래그는 DB에 써야 중복체크 방지
     }
     if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))equipMigrated=true;else{it._smv=1;equipStatsDirty=true;}}
+    if(it&&migrateItemLv(it,true))equipMigrated=true; // ★ 장착 중 — 레벨 캡 적용
   }
   if(!char.str){char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;}
   if(char.extraPotions===undefined)char.extraPotions=0;
@@ -2248,6 +2249,7 @@ async function selChar(id){
       else invStatsDirty=true;
     }
     if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))invMigrated=true;else{it._smv=1;invStatsDirty=true;}}
+    if(it&&migrateItemLv(it,false))invMigrated=true;
   }
   // ★ 창고 마이그레이션
   let whMigrated=false;
@@ -2586,7 +2588,7 @@ function renderEq(){
       ${lk?'<div class="eqem">양손 장착</div>':
         it?`<div style="padding-right:18px">
               <div class="eqit g-${it.grade}">${itName(it)}</div>
-              <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${it.grade==='set'?`◆${it.setName||'유일'}`:GRADES[it.grade]?.name||it.grade}${it.itemLv?' · Lv.'+it.itemLv:''}</div>
+              <div style="font-size:8px;color:${GRADES[it.grade]?.color||'#fff'}">${it.grade==='set'?`◆${it.setName||'유일'}`:GRADES[it.grade]?.name||it.grade}${it.reqLv?' · 필요Lv.'+it.reqLv:''}</div>
               ${itSkStr(it)?`<div class="eqsk">${itSkStr(it)}</div>`:''}
             </div>
             <button class="equn" onclick="event.stopPropagation();unequip('${sl.k}')">✕</button>`:
@@ -2699,7 +2701,7 @@ const encHint={
   content.innerHTML=`
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-right:18px">
       <span class="icname g-${it.grade}" style="font-size:12px">${it.name}</span>
-      <span style="font-size:9px;color:var(--tx3)">${it.slot}${it.hand?' · '+it.hand:''}${it.itemLv?' · 아이템Lv.'+it.itemLv:''}</span>
+      <span style="font-size:9px;color:var(--tx3)">${it.slot}${it.hand?' · '+it.hand:''}${it.reqLv?' · 필요Lv.'+it.reqLv:''}</span>
     </div>
     ${statsHtml?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${statsHtml}</div>`:''}
     ${enchantHtml}
@@ -2883,13 +2885,24 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   const bname=getItemName(base,grade);
   const gAdj=grade==='legendary'?'전설의 ':grade==='epic'?'정예 ':grade==='rare'?'강화된 ':grade==='uncommon'?'좋은 ':'';
   const fullN=(pre?pre.n+' ':'')+(suf?suf.n+' ':'')+gAdj+bname;
-  const reqLv=Math.max(1,Math.floor(lv*0.85));
+  const reqLv=Math.max(1,lv);
   return{id:gId(),name:fullN,baseName:bname,baseId:base.id,slot:base.slot,hand:base.hand||null,
     grade,gradeName:GRADES[grade].name,gradeColor:GRADES[grade].color,
-    stats,reqLv,itemLv:lv,_v:2,
+    stats,reqLv,_v:2,
     prefix:pre?{n:pre.n,b:pre.b,sk:pre.sk||null,attr:pre.attr||null}:null,
     suffix:suf?{n:suf.n,b:suf.b,sk:suf.sk||null}:null,
     attr};
+}
+// ★ 아이템레벨 삭제 마이그레이션 (_lv3)
+// isEquipped=true: 장착 중인 아이템 — char.level 이하로 reqLv 캡 (실수 해제 후 재장착 보호)
+function migrateItemLv(it,isEquipped){
+  if(!it||it._lv3)return false;
+  // 전역 교체 전 itemLv가 있었던 경우 (이미 reqLv로 바뀌었을 수 있음)
+  // _lv3가 없다는 건 아직 마이그레이션 안 된 것 → reqLv를 그대로 유지하되 캡만 적용
+  if(isEquipped&&it.reqLv&&char.level&&char.level<it.reqLv){
+    it.reqLv=char.level;
+  }
+  it._lv3=true;return true;
 }
 function genSetItem(forcedLv=null){
   const sid=pick(Object.keys(SETS));const sd=SETS[sid];
@@ -2901,9 +2914,8 @@ function genSetItem(forcedLv=null){
     divine_light:90,arcane_scholar:90,
     dragon_sovereign:90,frost:90,flame:90,
   };
-  const reqLv=SET_LV[sid]||90;
-  const itemLv=Math.max(reqLv,forcedLv||reqLv);
-  const lm=Math.max(1.0,1+(itemLv-reqLv)*0.04);
+  const reqLv=Math.max(SET_LV[sid]||90,forcedLv||0);
+  const lm=1.0;
   const scaledStats={};
   for(const[k,v]of Object.entries(pd.stats))scaledStats[k]=Math.round(v*lm);
   return{id:gId(),name:pd.n,baseId:pid,slot:pd.slot,hand:pd.hand||null,
@@ -2911,7 +2923,7 @@ function genSetItem(forcedLv=null){
     setId:sid,setName:sd.name,
     stats:scaledStats,
     prefix:null,suffix:null,attr:null,
-    reqLv,itemLv,enhance:0,tradeable:true};
+    reqLv,enhance:0,tradeable:true};
 }
 function genShopItem(si){return{id:gId(),name:si.n||si.name,baseId:si.n,slot:si.slot,hand:si.hand||null,grade:'normal',gradeName:'노말',gradeColor:'#9d9d9d',stats:{...si.stats},prefix:null,suffix:null,attr:null,_v:2};}
 // ─── 인챈트 스크롤 아이템화 시스템 ───
@@ -3024,7 +3036,7 @@ function migrateItem(it){
   const allBases=[...WBASES,...ABASES,...ACCBASES];
   const base=allBases.find(b=>b.id===it.baseId);
   if(!base){it._v=2;return it;}
-  const lv=it.itemLv||1;
+  const lv=it.reqLv||it.reqLv||1; // ★ _lv3 마이그레이션 후엔 reqLv 사용
   const grade=it.grade||'normal';
   const newMult=GRADES[grade]?.mult||1;
   const newLm=1+(lv-1)*0.055;
@@ -3133,7 +3145,7 @@ const ENCHANT_STAT_VER=4;
 
 function autoMigrateEnchantStats(it){
   if(!it||it._esv>=ENCHANT_STAT_VER||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
-  const lv=it.itemLv||it.reqLv||1;
+  const lv=it.reqLv||1;
   // ★ v2.3: GRADES.mult 대신 ENCHANT_GRADE_MULT 사용
   const gm=ENCHANT_GRADE_MULT[it.grade==='set'?'set':it.grade]||1;
   let changed=false;
@@ -3153,7 +3165,7 @@ function autoMigrateEnchantStats(it){
 function autoMigrateStaffMatk(it){
   if(!it||it._smv>=1||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
   if(it.baseId!=='staff'||!it.stats)return false; // 지팡이만
-  const lv=it.itemLv||it.reqLv||1;
+  const lv=it.reqLv||1;
   const g=it.grade==='set'?'legendary':it.grade;
   const mult=GRADES[g]?.mult||1;
   const lm=1+(lv-1)*0.055;
@@ -3340,7 +3352,7 @@ function openIM(it){
       const allTargets=[...eqItems2,...invItems2];
       const renderItem=(x)=>{
         const key=x.src==='eq'?`eq:${x.sl}`:`inv:${x.it.id}`;
-        const lv=x.it.itemLv||1;
+        const lv=x.it.reqLv||1;
         const gm=ENCHANT_GRADE_MULT[x.it.grade]||1;
         const ranges=enchData?.b?getEnchantRange(enchData.b,lv,gm):{};
         const rangeHtml=Object.entries(ranges).map(([k,{lo,hi,neg}])=>{
@@ -3393,7 +3405,7 @@ function openIM(it){
       const[src,ref2]=keyStr.split(':');
       const eq=src==='eq'?char.equipment[ref2]:inv[ref2];
       if(!eq)return;
-      const lv=eq.itemLv||1;
+      const lv=eq.reqLv||1;
       const gm=ENCHANT_GRADE_MULT[eq.grade]||1;
       const SET_RATES=[0.20,0.15,0.10,0.08,0.05];
       const actualRate=eq.grade==='set'?SET_RATES[Math.min(tier-1,4)]:successRate;
@@ -3525,7 +3537,7 @@ function openIM(it){
       }
 
       // ── 성공 ──
-      const lv=eq.itemLv||1;
+      const lv=eq.reqLv||1;
       const gm=ENCHANT_GRADE_MULT[eq.grade]||ENCHANT_GRADE_MULT['normal']||1;
       // ★ 추출된 스크롤(enchantData._scaled)은 이미 scaleEnchant 적용됨 — 이중 적용 방지
       const scaledB=enchData._scaled ? enchData.b : scaleEnchant(enchData.b,lv,gm);
@@ -3857,7 +3869,7 @@ document.getElementById('imodal').onclick=e=>{if(e.target===document.getElementB
 
 window.useEnchantScroll=async(scrollId,slotKey,type)=>{
   const eq=char.equipment[slotKey];if(!eq){toast('장비 없음');return;}
-  const lv=eq.itemLv||1;
+  const lv=eq.reqLv||1;
   const gradeMult=ENCHANT_GRADE_MULT[eq.grade]||1;
   if(type==='pre'){
     const en=wRand(PRE);
@@ -3915,7 +3927,7 @@ function getSellPrice(it){
   if(it.isEnchantScroll||it.isProtectScroll||it.isExtractScroll||it.isScroll)return 100;
   const BASE={normal:20,uncommon:70,rare:200,epic:550,legendary:1400,set:2500};
   const base=BASE[it.grade]||20;
-  const lv=it.itemLv||1;
+  const lv=it.reqLv||1;
   const lvMult=1+(lv-1)*0.05;
   const enhBonus=1+((it.enhance||0)*0.15);
   return Math.round(base*lvMult*enhBonus);
@@ -4544,7 +4556,7 @@ window.bmBuy=async(i)=>{
 // ★ 강화 비용 (절감: 골드 수입 대비 현실적 수준)
 function getForgeCost(it){
   const gradeMult={normal:1,uncommon:1.8,rare:3.5,epic:8,legendary:20,set:32};
-  const lv=it.itemLv||1;
+  const lv=it.reqLv||1;
   const enh=(it.enhance||0)+1;
   const gm=gradeMult[it.grade]||1;
   const enchantVal=Object.values(it.prefix?.b||{}).reduce((s,v)=>s+Math.abs(v||0),0)
@@ -5199,7 +5211,11 @@ window.selectMode=async function(tierIdx,mode){
         ?`<span style="color:${TIER_MAX_COLOR[tierIdx]||'#9d9d9d'};font-size:9px"> · 최대 드랍: ${TIER_MAX_GRADE[tierIdx]||'노말'}</span>`:'';
       const msg=dk==='normal'?`기본 난이도 — 포션 1~2개 소모 예상${dropHint}`:
             dk==='hard'?`전투력 <b>${reqScore}</b> 이상 · ${gearHint} 구비 후 도전 권장 · 포션 2~4개`:
-            `전투력 <b>${reqScore}</b> 이상 ⚠️ 장비 손실 가능 · 강화/인챈트 필수 · 매우 위험`;
+            (()=>{
+              const wardCnt=char._deathWard||0;
+              const wardStr=wardCnt>0?` · 🧿 죽음 방지 부적 ${wardCnt}회 보유`:`<span style="color:var(--red)"> · 🧿 죽음 방지 부적 없음</span>`;
+              return `전투력 <b>${reqScore}</b> 이상 ⚠️ 장비 손실 가능 · 강화/인챈트 필수 · 매우 위험${wardStr}`;
+            })()`;
       const locked=dk!=='normal'&&!meets;
       const shortage=(!meets&&reqScore>0)?`<span style="font-size:9px;color:var(--red)"> (${reqScore-myScore} 부족)</span>`:'';
       return`<div style="background:var(--sf2);border:1px solid ${locked?'var(--bd)':dv.color+'44'};border-radius:8px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:8px;${locked?'opacity:.55':''}">
@@ -6238,19 +6254,38 @@ async function dungeonClear(){
     char._immortalSeals=(char._immortalSeals||0)+1;
     blogAdd(`<span class="l-exp">🔱 불멸의 징수 획득! (총 ${char._immortalSeals}개)</span>`);
 
-    // 드랍: 노말~레전더리 Lv.99 / 유일은 매우어려움 T5와 동일 확률로 Lv.90
+    // ★ 층 기반 드랍 테이블 (층이 높을수록 고등급 확률 상승)
     const dropPool=[...WBASES,...ABASES,...ACCBASES];
+    const fb=(floor-1)/99; // 0(1층) ~ 1(100층)
+    const setC   = floor>=100?0.010:0.001;          // 100층만 유일 1%
+    const legC   = 0.014+fb*0.056;                  // 1.4%→7%
+    const epicC  = 0.065+fb*0.135;                  // 6.5%→20%
+    const rareC  = 0.170+fb*0.080;                  // 17%→25%
+    const uncC   = 0.300;
     const gradeRoll=Math.random();
     let dropGrade;
-    // T5 vhard 드랍 테이블 기반 (유일 포함)
-    if(gradeRoll<0.001)       dropGrade='set';       // 유일 ~0.1%
-    else if(gradeRoll<0.015)  dropGrade='legendary'; // 레전더리 ~1.4%
-    else if(gradeRoll<0.08)   dropGrade='epic';       // 에픽 ~6.5%
-    else if(gradeRoll<0.25)   dropGrade='rare';       // 레어 ~17%
-    else if(gradeRoll<0.55)   dropGrade='uncommon';   // 언커먼 ~30%
-    else                       dropGrade='normal';    // 노말
+    if     (gradeRoll<setC)                         dropGrade='set';
+    else if(gradeRoll<setC+legC)                    dropGrade='legendary';
+    else if(gradeRoll<setC+legC+epicC)              dropGrade='epic';
+    else if(gradeRoll<setC+legC+epicC+rareC)        dropGrade='rare';
+    else if(gradeRoll<setC+legC+epicC+rareC+uncC)   dropGrade='uncommon';
+    else                                             dropGrade='normal';
     const dropLv=dropGrade==='set'?90:99;
     const drop=genItem(dropPool,dropGrade,dropLv,false,4);
+    // ★ 에픽 이상은 인챈트 강제 적용
+    if(drop&&['epic','legendary','immortal'].includes(drop.grade)){
+      const gi=Object.keys(GRADES).indexOf(drop.grade);
+      const biasMin=0.6+(gi*0.07),biasMax=1.0+(gi*0.08);
+      const lm2=1+(dropLv-1)*0.055;
+      const gradeMult=GRADES[drop.grade]?.mult||1;
+      function scaleE2(b){const sc={};for(const[k,v]of Object.entries(b)){if(v===0){sc[k]=0;continue;}const base2=Math.abs(v)*lm2*gradeMult;const mn=Math.max(1,Math.round(base2*biasMin));const mx=Math.round(base2*biasMax);sc[k]=(v>0?1:-1)*(mn+Math.floor(Math.random()*(mx-mn+1)));}return sc;}
+      const maxEnchTier=Math.min(5,gi+1);
+      const prePool2=PRE.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
+      const sufPool2=SUF.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
+      if(!drop.prefix&&prePool2.length){const pr=prePool2[Math.floor(Math.random()*prePool2.length)];drop.prefix={n:pr.n,sk:pr.sk||null,attr:pr.attr||null,b:scaleE2(pr.b)};}
+      if(!drop.suffix&&sufPool2.length){const su=sufPool2[Math.floor(Math.random()*sufPool2.length)];drop.suffix={n:su.n,sk:su.sk||null,b:scaleE2(su.b)};}
+      if(drop.prefix&&drop.suffix){const pre=drop.prefix,suf=drop.suffix;drop.name=(pre.n?' '+pre.n:'')+' '+(suf.n?' '+suf.n:'')+' '+drop.name.replace(pre.n||'','').replace(suf.n||'','').trim();}
+    }
     if(drop){
       if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length<(char.invSlots||100)){
         drop.tradeable=(dropGrade!=='set');
@@ -7136,7 +7171,7 @@ window.doImmortalForge=async function(slotKey){
   if(!it){toast('장비를 선택하세요');return;}
   if(it.grade!=='legendary'){toast('⚠️ Lv.99 레전더리 무기만 제련 가능합니다');return;}
   if(it.slot!=='weapon'){toast('⚠️ 무기 슬롯만 불멸 제련 가능합니다');return;}
-  if((it.reqLv||0)<99&&(it.itemLv||0)<90){toast('⚠️ Lv.99 레전더리 무기만 제련 가능합니다');return;}
+  if((it.reqLv||0)<99&&(it.reqLv||0)<90){toast('⚠️ Lv.99 레전더리 무기만 제련 가능합니다');return;}
   const seals=char._immortalSeals||0;
   if(seals<IT_SEALS_REQUIRED){toast(`⚠️ 불멸의 징수가 부족합니다 (${seals}/${IT_SEALS_REQUIRED}개)`);return;}
   if(!confirm(`🔱 불멸 제련 시도\n\n대상: ${it.name}\n징수 소모: ${IT_SEALS_REQUIRED}개\n성공률: 1%\n\n⚠️ 실패 시 징수 ${IT_SEALS_REQUIRED}개가 소멸합니다.\n계속하시겠습니까?`))return;
@@ -7536,7 +7571,7 @@ window.adminGiveItem=async function(cid){
     for(const[k,v]of Object.entries(pd.stats))scaledStats[k]=Math.round(v);
     it={id:gId(),name:pd.n,baseId:pid,slot:pd.slot,hand:pd.hand||null,grade:'set',
       gradeName:'유일',gradeColor:sd.col,setId:sid,setName:sd.name,
-      stats:scaledStats,prefix:null,suffix:null,attr:null,reqLv,itemLv:reqLv,enhance:0,tradeable:false,_adminGift:true};
+      stats:scaledStats,prefix:null,suffix:null,attr:null,reqLv,enhance:0,tradeable:false,_adminGift:true};
   }else{
     let base;
     if(type==='weapon') base=WBASES.find(b=>b.id===sub)||WBASES[0];
@@ -7723,7 +7758,7 @@ window.adminMigrateEnchantStats=async function(){
 
   function migrateItem(it){
     if(!it||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
-    const lv=it.itemLv||it.reqLv||1;
+    const lv=it.reqLv||1;
     const gm=getGradeMult(it);
     let changed=false;
     if(migrateEnchant(it.prefix, lv, gm))changed=true;
@@ -9245,6 +9280,7 @@ window.enterChampBattle=async function(){
 
   const s=calcStats(char);
   let myHp=s.maxHp,myPotions=5+(char.extraPotions||0);
+  let champHpMult=1.5; // ★ 챔프전 HP 배율 — 전투 지속성
   let champLog=[],champDone=false;
   let phase=1;
 
@@ -9306,7 +9342,7 @@ window.enterChampBattle=async function(){
     cs={atk:50,def:20,spd:10,maxHp:500,crit:10,critDmg:150,dodge:5,matk:10};
   }
 
-  let champHp=cs.maxHp||500,champMaxHp=cs.maxHp||500;
+  let champHp=Math.round((cs.maxHp||500)*champHpMult),champMaxHp=Math.round((cs.maxHp||500)*champHpMult);
 
   function clog(html){
     champLog.push(html);
@@ -9543,6 +9579,9 @@ window.enterChampBattle=async function(){
 
   clog(`<span class="l-sys">🥊 챔프전 시작! vs ${champ.name} (Lv.${champ.level||'?'})</span>`);
   const _champIsMag=champ.isMagicWeapon||false;
+  // ★ 챔프 스킬 보유 현황 로그
+  const _champSkills=Object.values(champ.equipment||{}).flatMap(sl=>sl?[[sl.prefix?.sk,sl.grade],[sl.suffix?.sk,sl.grade]].filter(([sk])=>sk&&SKILLS[sk]):[]);
+  if(_champSkills.length>0)clog(`<span class="l-skill">⚡ ${champ.name} 보유 스킬: ${_champSkills.map(([sk])=>SKILLS[sk]?.name).join(', ')}</span>`);
   clog(`<span class="l-sys">챔프 스탯 — ${_champIsMag?'MATK':'ATK'}:${_champIsMag?(cs.matk||0):cs.atk} DEF:${cs.def} HP:${cs.maxHp}</span>`);
   clog(`<span class="l-sys">내 스탯 — ATK:${s.atk} DEF:${s.def} HP:${s.maxHp}</span>`);
   renderChampBattle();
