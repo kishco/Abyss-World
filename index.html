@@ -9362,7 +9362,7 @@ window.enterChampBattle=async function(){
     if(action==='attack'){
       const wt=getWeaponTraits(char.equipment||{});
       let baseDmg=wt.isStaff?s.matk*(1+(s.int||3)*0.004):wt.isDualgun?s.matk*(1+(s.int||3)*0.004+(s.spd||5)*0.002):wt.isBow?s.atk*(1+(s.dex||5)*0.004):wt.isDagger||wt.isDual?s.atk*(1+((s.dex||5)+(s.str||5))*0.003):s.atk*(1+(s.str||5)*0.003);
-      let dmg=Math.max(1,Math.round(baseDmg-cs.def*0.4));
+      let dmg=Math.max(1,Math.round(baseDmg*100/(100+(cs.def||0))));
       const v=Math.round(dmg*0.12);dmg=Math.max(1,dmg+rand(-v,v));
       const critBonus=wt.isDagger?5:0;
       const isCrit=Math.random()*100<(s.crit+critBonus);
@@ -9419,7 +9419,7 @@ window.enterChampBattle=async function(){
       clog(`<span class="l-sys">🛡 ${char.name} 방어 자세</span>`);
     }else if(action==='heal'){
       if(myPotions<=0){toast('포션 없음!');phase=1;renderChampBattle();return;}
-      myPotions--;const heal=Math.round(s.maxHp*0.5);myHp=Math.min(myHp+heal,s.maxHp);
+      myPotions--;const heal=Math.round(s.maxHp*0.4);myHp=Math.min(myHp+heal,s.maxHp);
       clog(`<span class="l-heal">💊 포션! +${heal}HP</span>`);
     }
     // Check champ death
@@ -9474,6 +9474,47 @@ window.enterChampBattle=async function(){
       myHp=Math.max(0,myHp-cDmg);
       if(cCrit)clog(`<span class="l-crit">💥 ${champ.name} 치명타! → ${char.name} -<b>${cDmg}</b></span>`);
       else clog(`<span class="l-dmg">⚔ ${champ.name} → ${char.name} -<b>${cDmg}</b></span>`);
+      // ★ 챔프 스킬 발동
+      if(myHp>0){
+        const CHAMP_SK_MAX=0.30;
+        let cSkProced=false;
+        for(const sl of Object.values(champ.equipment||{})){
+          if(!sl||cSkProced)continue;
+          for(const enc of[sl.prefix,sl.suffix]){
+            if(!enc?.sk)continue;
+            const csk=SKILLS[enc.sk];if(!csk?.fx)continue;
+            const skillM=GRADES[sl.grade]?.skillM||0;if(!skillM)continue;
+            const proc=Math.min(csk.base*skillM*(1+(champ.int||3)*0.005),CHAMP_SK_MAX);
+            if(Math.random()<proc){
+              try{
+                const fx=csk.fx(cs.atk,cs);
+                if(fx?.dmg>0){
+                  const sd=Math.min(Math.round(fx.dmg),99999);
+                  myHp=Math.max(0,myHp-sd);
+                  clog(`<span class="l-skill">${csk.icon||'⚡'} [악몽의] ${csk.name} → ${char.name} -${sd}</span>`);
+                }
+              }catch(e){}
+              cSkProced=true;break;
+            }
+          }
+          // 불멸 스킬
+          if(!cSkProced&&sl._immortalSk&&SKILLS[sl._immortalSk]){
+            const csk=SKILLS[sl._immortalSk];
+            const proc=Math.min(csk.base*1.8*(1+(champ.int||3)*0.005),CHAMP_SK_MAX);
+            if(Math.random()<proc){
+              try{
+                const fx=csk.fx(cs.atk,cs);
+                if(fx?.dmg>0){
+                  const sd=Math.min(Math.round(fx.dmg),99999);
+                  myHp=Math.max(0,myHp-sd);
+                  clog(`<span class="l-skill">🔱 [불멸의] ${csk.name} → ${char.name} -${sd}</span>`);
+                }
+              }catch(e){}
+              cSkProced=true;
+            }
+          }
+        }
+      }
     }
     if(myHp<=0){
       clog(`<span class="l-dead">💀 ${char.name} 쓰러짐... 챔프 방어 성공!</span>`);
