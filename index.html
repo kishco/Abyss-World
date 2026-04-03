@@ -7068,6 +7068,10 @@ window.startITBattle=async function(floorNum){
   `;
   document.getElementById('dungBattle').prepend(headerDiv);
 
+  // ★ pane-dungeon으로 전환해야 dungBattle이 보임
+  document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='dungeon'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-dungeon'));
+
   updateNavLock();
 
   // nextFloor에서 몬스터 생성 시 IT 모드 처리됨
@@ -8063,6 +8067,7 @@ window.navTo=function(tab){
   if(tab==='settings')renderSettings();
   if(tab==='subjugation'){renderSubjugation();}
   if(tab==='champ'){renderChamp();}
+  if(tab==='immortaltower'){renderImmortalTower();}
 };
 
 
@@ -9308,7 +9313,7 @@ window.enterChampBattle=async function(){
       else{
         champHp=Math.max(0,champHp-dmg);
         const fakeTarget={name:champ.name,dodge:0};
-        const fakeP={charData:char};
+        const fakeP={charData:char,name:char.name};
         clog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
         // ★ 쌍검 연격: 기본 12% + SPD/800 추가
         const champDualProb=wt.isDual?Math.min(0.12+(s.spd||0)/800,0.40):0;
