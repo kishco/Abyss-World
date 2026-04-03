@@ -2939,27 +2939,34 @@ function migrateForgeWard(){
 }
 // ★ 아이템레벨 삭제 마이그레이션 (_lv3)
 // isEquipped=true: 장착 중인 아이템 — char.level 이하로 reqLv 캡 (실수 해제 후 재장착 보호)
-// ★ 인챈트 이름 중첩 마이그레이션 (_enchNameMig)
+// ★ 인챈트 이름 중첩 마이그레이션 (_enchNameMig2)
 function migrateEnchantName(it){
-  if(!it||it._enchNameMig)return false;
-  if(!it.prefix&&!it.suffix){it._enchNameMig=true;return false;}
-  // baseName이 있으면 그걸로 재조합, 없으면 현재 이름에서 인챈트명 제거
+  if(!it||it._enchNameMig2)return false;
+  it._enchNameMig2=true;
+  if(!it.prefix&&!it.suffix)return false;
   const gAdj=it.grade==='legendary'?'전설의 ':it.grade==='epic'?'정예 ':it.grade==='rare'?'강화된 ':it.grade==='uncommon'?'좋은 ':'';
-  let basePart=it.baseName||'';
+  // basePart 결정
+  let basePart='';
+  if(it.grade==='set'&&it.setId&&it.baseId){
+    // 유일: SETS에서 정확한 조각 이름 가져오기
+    basePart=SETS[it.setId]?.pcs[it.baseId]?.n||it.baseName||'';
+  }
+  if(!basePart)basePart=it.baseName||'';
   if(!basePart){
+    // baseName 없음 → 이름에서 PRE/SUF 전체 풀의 인챈트명 제거
     let tmp=it.name||'';
-    // 현재 prefix/suffix 이름을 모두 제거 (중복 포함)
-    const pre=it.prefix?.n||'';const suf=it.suffix?.n||'';
-    if(pre){while(tmp.includes(pre))tmp=tmp.replace(pre,'');}
-    if(suf){while(tmp.includes(suf))tmp=tmp.replace(suf,'');}
+    const allEnchNames=[...PRE,...SUF].map(e=>e.n);
+    for(const en of allEnchNames){
+      while(tmp.includes(en+' '))tmp=tmp.replace(en+' ','');
+      while(tmp.startsWith(en))tmp=tmp.replace(en,'');
+    }
     tmp=tmp.replace(/^(전설의|정예|강화된|좋은)\s/,'').trim();
-    basePart=tmp;
+    basePart=tmp||it.name;
   }
   const finalGAdj=it.grade==='set'?'':gAdj;
   const newName=(it.prefix?it.prefix.n+' ':'')+(it.suffix?it.suffix.n+' ':'')+finalGAdj+basePart;
-  it.name=newName;
-  it._enchNameMig=true;
-  return true;
+  if(newName!==it.name){it.name=newName;return true;}
+  return false;
 }
 function migrateItemLv(it,isEquipped){
   if(!it||it._lv3)return false;
