@@ -372,7 +372,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div id="loginScr">
   <div class="lwrap">
     <div class="llogo">⚔ ABYSS WORLD</div>
-    <div class="lsub">DARK FANTASY RPG v2.3.1</div>
+    <div class="lsub">DARK FANTASY RPG v2.4</div>
     <div style="text-align:center;margin-bottom:18px;margin-top:2px">
       <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener"
         style="display:inline-flex;align-items:center;gap:6px;background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.4);color:#7289da;padding:5px 14px;border-radius:20px;font-size:11px;text-decoration:none;font-family:'IBM Plex Mono',monospace;transition:.2s"
@@ -460,41 +460,49 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
 </div>
 
-<!-- 업데이트 팝업 v2.3.1 -->
+<!-- 업데이트 팝업 v2.4 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:500px;width:90%;max-height:88vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
-      <span style="font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:3px 10px;border-radius:5px;font-weight:700">v2.3.1 개선 패치</span>
+      <span style="font-size:12px;color:#FF2244;font-family:'IBM Plex Mono',monospace;background:rgba(255,34,68,.1);border:1px solid rgba(255,34,68,.3);padding:3px 10px;border-radius:5px;font-weight:700">v2.4 — 불멸의 탑 업데이트</span>
     </div>
 
-    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">🔨 강화 / 인챈트 개선</div>
+    <div style="font-size:11px;color:#FF2244;font-weight:700;margin-bottom:6px">🗼 불멸의 탑 (신규 콘텐츠)</div>
     <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--tx3)">인벤토리 아이템 지원</b> — 강화·인챈트 시 장착 장비 외 인벤토리 아이템도 선택 가능<br>
-      <b style="color:var(--tx3)">장착/인벤 구분 표시</b> — 파란색 뱃지(장착) · 회색 뱃지(인벤)로 시각적 구분
+      <b style="color:var(--tx3)">Lv.99 전용 100층 타워</b> — 심연에 오염된 중부 대륙 중앙에 솟아오른 탑<br>
+      <b style="color:var(--tx3)">주간 특성 로테이션</b> — 매주 유저 버프 1종 + 몬스터 강화 2종이 교체됨<br>
+      <b style="color:var(--tx3)">불멸의 징수</b> — 층 클리어 시 1개 획득, 100개 모으면 불멸 제련 가능<br>
+      <b style="color:var(--tx3)">드랍</b> — Lv.99 고정 / T5 매우어려움과 동일한 드랍률
     </div>
 
-    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">📜 인챈트 스크롤 등급별 판매</div>
+    <div style="font-size:11px;color:#FF2244;font-weight:700;margin-bottom:6px">🔱 불멸 등급 (신규)</div>
     <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      판매 탭에서 하급/중급/상급/고급/전설 등급별로 개별 일괄판매 가능<br>
-      <span style="font-size:10px;color:var(--tx3)">전체 일괄판매도 기존과 동일하게 지원합니다.</span>
+      <b style="color:var(--tx3)">대장간 불멸 제련</b> — 징수 100개 + Lv.99 레전더리 무기 → 1% 확률로 <span style="color:#FF2244;font-weight:700;animation:immortalFlame 1.5s infinite">불멸</span> 등급으로 승격<br>
+      <b style="color:var(--tx3)">실패 시</b> 징수 100개 소멸 / 유일 장비는 제련 불가<br>
+      <b style="color:var(--tx3)">제련 성공 시</b> 서버 전체 시스템 공지
     </div>
 
-    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:6px">📊 파생 스탯 설명 추가</div>
+    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">⚔ 무기 특성 전면 적용</div>
     <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      캐릭터 탭 파생 스탯 우측 <b>❓ 스탯 설명</b> 버튼으로 각 스탯 상세 설명 확인 가능<br>
-      밸런스·회피·치명 등 파생 스탯의 작동 방식 안내
+      <b style="color:var(--tx3)">SPD 연격</b> — 모든 무기: SPD/800 확률 추가타 (상한 25%)<br>
+      <b style="color:var(--tx3)">쌍검 연격</b> — 기본 12% + SPD/800 추가 (상한 40%)<br>
+      <b style="color:var(--tx3)">SPD 선공 회피</b> — 몬스터 반격 회피 (상한 20%)<br>
+      <b style="color:var(--tx3)">활 선공</b> — 15%+SPD 기반 반격 회피 (상한 30%)<br>
+      던전·토벌전·챔프전 전 콘텐츠 적용
     </div>
 
-    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:6px">⚖️ 밸런스 스탯 상한 수정</div>
+    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">📊 밸런스 조정</div>
     <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      밸런스 스탯이 100% 이상으로 오르던 비정상 현상 수정 — 상한 <b style="color:var(--gold)">99%</b> 적용<br>
-      기존 유저 장비에 자동 적용 (초과분 클램프)
+      <b style="color:var(--tx3)">스킬 발동률</b> — 절대 상한 35% 적용 / 등급별 배율 하향<br>
+      <b style="color:var(--tx3)">인챈트 추출 버그</b> — 재인챈트 시 수치 폭발 현상 수정<br>
+      <b style="color:var(--tx3)">채팅 3탭 분리</b> — 월드 / 시스템 / 귓속말
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🐛 버그 수정</div>
-    <div style="font-size:11px;color:var(--tx2);line-height:2.0;margin-bottom:18px;padding-left:4px">
-      설정 화면 효과음 끄기 버튼이 실제로 적용되지 않던 버그 수정
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🎁 추천 이벤트 보상 상향</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:18px;padding-left:4px">
+      신규: 파괴방지 스크롤 3개 + 인챈트 스크롤 + 추출 스크롤 + 1,500G<br>
+      추천인: 3,000G + 인챈트 스크롤 2개 + 재조정 주문서
     </div>
 
     <div style="display:flex;gap:8px">
@@ -1856,7 +1864,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v2.3.1';
+  const key='abyssworld_update_v2.4';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1867,7 +1875,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v2.3.1',expire);
+    localStorage.setItem('abyssworld_update_v2.4',expire);
   }
 };
 
@@ -6587,10 +6595,72 @@ function getITWeekRotation(){
     monsters:[IT_MONSTER_DEBUFFS[mIdx1],IT_MONSTER_DEBUFFS[mIdx2]]
   };
 }
+
+// 층 구간별 몬스터 강도
+function getITMonsterMult(floor){
   if(floor<=20)  return {atk:1.8,  hp:1.5,  def:1.5,  dodge:15};
   if(floor<=50)  return {atk:2.8,  hp:2.5,  def:2.2,  dodge:22};
   if(floor<=80)  return {atk:4.5,  hp:4.0,  def:3.5,  dodge:30};
                return {atk:7.0,  hp:6.5,  def:5.5,  dodge:38};
+}
+
+// ★ 불멸의 탑 — 10층 보스 풀
+const IT_BOSSES={
+  10:  {name:'탑의 파수꾼 그라켄',     icon:'👁', atk:1.4, hp:2.0, def:1.3,
+    skills:['m_bite','m_shield_bash','m_fortify']},
+  20:  {name:'오염된 전령 실린',       icon:'🌑', atk:1.6, hp:2.2, def:1.3,
+    skills:['m_curse','m_blind','m_drain']},
+  30:  {name:'사막의 심판자 카잔',     icon:'🦂', atk:1.8, hp:2.5, def:1.4,
+    skills:['m_poison2','m_burn','m_sand']},
+  40:  {name:'요새의 군주 발린',       icon:'⚔️', atk:2.0, hp:2.8, def:1.6,
+    skills:['m_rally','m_shield_bash','m_execute','m_fortify']},
+  50:  {name:'심연의 중간 관문 제크론', icon:'🌀', atk:2.2, hp:3.2, def:1.7,
+    skills:['m_roar','m_curse','m_drain','m_burn']},
+  60:  {name:'불꽃의 망령 이그나르',   icon:'🔥', atk:2.5, hp:3.6, def:1.8,
+    skills:['m_fire_breath','m_burn','m_sand','m_poison2']},
+  70:  {name:'영원의 감시자 카이라',   icon:'✨', atk:2.8, hp:4.0, def:2.0,
+    skills:['m_tail','m_execute','m_rally','m_fortify','m_roar']},
+  80:  {name:'심연의 군주 발로르',     icon:'💀', atk:3.2, hp:4.5, def:2.2,
+    skills:['m_fire_breath','m_tail','m_shield_bash','m_execute','m_curse']},
+  90:  {name:'불멸의 현신 루시엔',     icon:'🌟', atk:3.8, hp:5.0, def:2.5,
+    skills:['m_roar','m_fire_breath','m_drain','m_rally','m_fortify','m_poison2']},
+  100: {name:'불멸의 탑 수호신 아비살', icon:'🔱', atk:5.0, hp:7.0, def:3.0,
+    skills:['m_fire_breath','m_tail','m_execute','m_curse','m_rally','m_fortify','m_roar','m_drain']},
+};
+
+// ★ 불멸의 탑 — 구간별 일반 몬스터 이름 풀
+const IT_MNAMES={
+  early:  [...MNAMES.cave,...MNAMES.darkforest],       // 1~20F
+  mid:    [...MNAMES.darkforest,...MNAMES.desert],      // 21~50F
+  high:   [...MNAMES.fortress,...MNAMES.dragon],        // 51~80F
+  top:    [...MNAMES.dragon,...MNAMES.fortress],         // 81~100F
+};
+
+// ★ 불멸의 탑 — 구간별 스킬 풀 (기존 스킬 조합)
+const IT_MON_SKILLS={
+  early:  [...MON_SKILLS.cave,...MON_SKILLS.darkforest],
+  mid:    [...MON_SKILLS.darkforest,...MON_SKILLS.desert,...MON_SKILLS.cave],
+  high:   [...MON_SKILLS.fortress,...MON_SKILLS.dragon,...MON_SKILLS.desert],
+  top:    [...MON_SKILLS.dragon,...MON_SKILLS.fortress,...MON_SKILLS.darkforest],
+};
+
+function getITZone(floor){
+  if(floor<=20) return 'early';
+  if(floor<=50) return 'mid';
+  if(floor<=80) return 'high';
+  return 'top';
+}
+
+// 스킬 ID → 실제 스킬 객체 조회 (전체 풀 병합)
+function getITSkillById(id){
+  const all=[...MON_SKILLS.cave,...MON_SKILLS.darkforest,...MON_SKILLS.desert,...MON_SKILLS.fortress,...MON_SKILLS.dragon];
+  return all.find(s=>s.id===id)||null;
+}
+
+function getITZoneMonsterPreview(floor){
+  const zone=getITZone(floor);
+  const pool=IT_MNAMES[zone];
+  return pick(pool)||'심연의 전사';
 }
 
 function getITWeekKey(){
@@ -6678,10 +6748,32 @@ async function renderImmortalTower(){
         <div style="height:100%;width:${Math.min(currentFloor/IT_TOTAL_FLOORS*100,100)}%;background:linear-gradient(90deg,#FF2244,#FF6600);border-radius:6px;transition:width .5s"></div>
       </div>
       ${isCleared
-        ?`<div style="text-align:center;color:#FF2244;font-weight:700;font-size:12px">🏆 이번 주 100층 완전 정복!</div>`
-        :`<button class="btn btn-red" style="width:100%;font-size:13px;padding:10px;background:linear-gradient(135deg,#8B0000,#CC0022);border:1px solid #FF2244" onclick="startITBattle(${nextFloor})">
-          ⚔ ${nextFloor}층 도전 — ${getITMonsterName(nextFloor)}
-        </button>`}
+        ?`<div style="margin-bottom:4px">
+            <div style="text-align:center;color:#FF2244;font-weight:700;font-size:12px;margin-bottom:10px">🏆 100층 완전 정복! 구간 선택 재도전 가능</div>
+            <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;text-align:center">시작할 구간을 선택하세요 (해당 구간 1층부터 시작)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              ${[1,11,21,31,41,51,61,71,81,91].map(startF=>{
+                const endF=startF+9;
+                const isBossEnd=endF%10===0;
+                const bossInfo=isBossEnd?IT_BOSSES[endF]:null;
+                const zone=getITZone(endF);
+                const zoneLabel={early:'입문',mid:'중급',high:'고급',top:'최정상'}[zone]||'';
+                const zoneColor={early:'var(--green)',mid:'var(--gold)',high:'var(--orange)',top:'#FF2244'}[zone]||'var(--tx)';
+                return`<button onclick="startITBattle(${startF})" style="background:rgba(255,34,68,.08);border:1px solid rgba(255,34,68,.3);border-radius:8px;padding:8px 6px;cursor:pointer;text-align:left;transition:.2s" onmouseover="this.style.background='rgba(255,34,68,.18)'" onmouseout="this.style.background='rgba(255,34,68,.08)'">
+                  <div style="font-size:11px;font-weight:700;color:#FF2244">${startF}~${endF}층</div>
+                  <div style="font-size:9px;color:${zoneColor};margin-top:1px">${zoneLabel}</div>
+                  ${isBossEnd?`<div style="font-size:8.5px;color:var(--purple);margin-top:2px">⚠ ${bossInfo.name.split(' ').pop()}</div>`:''}
+                </button>`;
+              }).join('')}
+            </div>
+          </div>`
+        :(()=>{
+          const isBoss=nextFloor%10===0;
+          const bossInfo=isBoss?IT_BOSSES[nextFloor]:null;
+          return `<button class="btn btn-red" style="width:100%;font-size:13px;padding:10px;background:${isBoss?'linear-gradient(135deg,#5B0000,#990022)':'linear-gradient(135deg,#8B0000,#CC0022)'};border:1px solid #FF2244" onclick="startITBattle(${nextFloor})">
+            ${isBoss?'⚠ BOSS':'⚔'} ${nextFloor}층 도전 — ${isBoss?bossInfo.name:getITZoneMonsterPreview(nextFloor)}
+          </button>${isBoss?`<div style="font-size:9.5px;color:#FF2244;text-align:center;margin-top:5px">⚠️ 보스층 — 스킬: ${IT_BOSSES[nextFloor].skills.slice(0,3).map(id=>getITSkillById(id)?.n||id).join(', ')}</div>`:''}`;
+        })()}
     </div>
 
     <!-- 난이도 안내 -->
@@ -6709,7 +6801,6 @@ async function renderImmortalTower(){
       </div>
     </div>`;
 }
-}
 
 function getITMonsterName(floor){
   const names={
@@ -6732,34 +6823,62 @@ window.startITBattle=async function(floor){
   const rotation=getITWeekRotation();
   const mult=getITMonsterMult(floor);
   const lv=99;
-  // 기본 몬스터 스탯
+  const isBossFloor=floor%10===0;
+  const bossData=isBossFloor?IT_BOSSES[floor]:null;
+  const zone=getITZone(floor);
+
+  // ── 몬스터 이름 & 스킬 구성 ──
+  let monName, monSkillIds, monIcon;
+  if(isBossFloor){
+    monName=bossData.name;
+    monIcon=bossData.icon;
+    monSkillIds=bossData.skills;
+  }else{
+    // 일반 몬스터: 구간별 이름 풀 + HPFX 접두어
+    const namePool=IT_MNAMES[zone];
+    const baseName=pick(namePool);
+    const hpfx=floor<=20?HPFX[0]:floor<=50?HPFX[1]:HPFX[2];
+    monName=`${hpfx.n} ${baseName}`;
+    monIcon='💀';
+    // 구간별 스킬 풀에서 랜덤 2~3개
+    const skillPool=IT_MON_SKILLS[zone];
+    const shuffled=[...skillPool].sort(()=>Math.random()-0.5);
+    monSkillIds=shuffled.slice(0,floor<=30?2:floor<=60?3:4).map(s=>s.id);
+  }
+  // 실제 스킬 객체 변환
+  const monSkills=monSkillIds.map(id=>getITSkillById(id)).filter(Boolean);
+
+  // ── 스탯 계산 ──
+  // 보스는 기본 배율에 bossData 배율 추가 적용
+  const bAtk=isBossFloor?bossData.atk:1.0;
+  const bHp=isBossFloor?bossData.hp:1.0;
+  const bDef=isBossFloor?bossData.def:1.0;
+  const hpfxMod=isBossFloor?{am:bAtk,hm:bHp}:floor<=20?HPFX[0]:floor<=50?HPFX[1]:HPFX[2];
+
   let monBase={
-    hp:   Math.round((60+lv*20)*mult.hp),
-    atk:  Math.round((10+lv*3.5)*mult.atk*3.2),
-    def:  Math.round((3+lv*1.2)*mult.def),
-    dodge:mult.dodge,
-    _regen:0, _poisonFog:0, _noDodge:false, _cursed:false
+    hp:   Math.round((60+lv*20)*mult.hp*(isBossFloor?bHp:hpfxMod.hm)),
+    atk:  Math.round((10+lv*3.5)*mult.atk*3.2*(isBossFloor?bAtk:hpfxMod.am)),
+    def:  Math.round((3+lv*1.2)*mult.def*(isBossFloor?bDef:1.0)),
+    dodge:mult.dodge+(isBossFloor?5:0),
+    _regen:0,_poisonFog:0,_noDodge:false,_cursed:false
   };
-  // ★ 주간 몬스터 특성 2종 적용
+  // 주간 몬스터 특성 2종 적용
   for(const md of rotation.monsters) monBase=md.apply(monBase);
-  const hpfx=floor<=20?HPFX[0]:floor<=50?HPFX[1]:HPFX[2];
-  const monName=`${hpfx.n} ${getITMonsterName(floor)}`;
-  let monHp=Math.round(monBase.hp*hpfx.hm);
-  const monMaxHp=monHp;
-  const monAtk=Math.round(monBase.atk*hpfx.am);
-  const monDef=Math.round(monBase.def);
+  const monMaxHp=monBase.hp;
+  let monCurHp=monBase.hp;
+  const monAtk=monBase.atk;
+  const monDef=monBase.def;
   const monDodge=Math.min(monBase.dodge,55);
   const monRegen=monBase._regen||0;
   const monPoisonFog=monBase._poisonFog||0;
   const monNoDodge=monBase._noDodge||false;
   const monCursed=monBase._cursed||false;
 
-  // ★ 주간 플레이어 버프 적용
+  // 주간 플레이어 버프 적용
   let s=rotation.player.apply({...calcStats(char)});
   const wt=getWeaponTraits(char.equipment||{});
 
   let myHp=s.maxHp;
-  let monCurHp=monHp;
   let potions=Math.min((char.potions||0)+(char.extraPotions||0),10);
   let done=false;
   let phase=1;
@@ -6774,25 +6893,27 @@ window.startITBattle=async function(floor){
   function renderIT(){
     const hpPct=Math.max(0,Math.round(myHp/s.maxHp*100));
     const mhpPct=Math.max(0,Math.round(monCurHp/monMaxHp*100));
+    const bossLabel=isBossFloor?`<span style="font-size:9px;background:rgba(255,34,68,.2);color:#FF2244;padding:2px 7px;border-radius:8px;border:1px solid rgba(255,34,68,.4);margin-left:6px">⚠ BOSS</span>`:'';
+    const barColor=isBossFloor?'linear-gradient(90deg,#FF2244,#8B0000)':'linear-gradient(90deg,#FF2244,#FF4400)';
     battle.innerHTML=`
       <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px">
         <button class="btn btn-ghost btn-sm" onclick="exitITBattle()">← 탑으로</button>
-        <div class="g-immortal" style="font-size:12px;font-weight:700">🗼 ${floor}층</div>
+        <div class="g-immortal" style="font-size:12px;font-weight:700">🗼 ${floor}층${isBossFloor?' — 보스전':''}</div>
       </div>
-      <!-- 주간 특성 미니 배지 -->
       <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
         <span style="font-size:9px;background:rgba(68,212,136,.12);color:var(--green);padding:2px 7px;border-radius:8px;border:1px solid rgba(68,212,136,.3)">${rotation.player.icon} ${rotation.player.name}</span>
         ${rotation.monsters.map(m=>`<span style="font-size:9px;background:rgba(255,34,68,.1);color:#FF2244;padding:2px 7px;border-radius:8px;border:1px solid rgba(255,34,68,.25)">${m.icon} ${m.name}</span>`).join('')}
       </div>
-      <div style="background:rgba(255,34,68,.07);border:1px solid rgba(255,34,68,.3);border-radius:10px;padding:12px;margin-bottom:10px">
+      <div style="background:${isBossFloor?'rgba(255,34,68,.12)':'rgba(255,34,68,.07)'};border:1px solid ${isBossFloor?'rgba(255,34,68,.5)':'rgba(255,34,68,.3)'};border-radius:10px;padding:12px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <div style="font-size:12px;font-weight:700;color:#FF2244">${monName}</div>
+          <div style="font-size:12px;font-weight:700;color:#FF2244">${monIcon} ${monName}${bossLabel}</div>
           <div style="font-size:11px;color:var(--tx3)">${monCurHp.toLocaleString()} / ${monMaxHp.toLocaleString()}</div>
         </div>
         <div style="background:rgba(0,0,0,.4);border-radius:4px;height:8px;overflow:hidden">
-          <div style="height:100%;width:${mhpPct}%;background:linear-gradient(90deg,#FF2244,#FF4400);border-radius:4px;transition:width .3s"></div>
+          <div style="height:100%;width:${mhpPct}%;background:${barColor};border-radius:4px;transition:width .3s"></div>
         </div>
-        <div style="font-size:9px;color:var(--tx3);margin-top:4px">ATK ${monAtk} · DEF ${monDef} · 회피 ${monDodge}%${monRegen>0?' · 재생':''}${monPoisonFog>0?' · 독안개':''}</div>
+        <div style="font-size:9px;color:var(--tx3);margin-top:4px">ATK ${monAtk} · DEF ${monDef} · 회피 ${monDodge}%${monRegen>0?' · 재생':''}${monPoisonFog>0?' · 독안개':''}${monCursed?' · 저주':''}</div>
+        ${monSkills.length?`<div style="font-size:9px;color:var(--purple);margin-top:3px">스킬: ${monSkills.map(sk=>sk.n).join(', ')}</div>`:''}
       </div>
       <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -6810,7 +6931,10 @@ window.startITBattle=async function(floor){
         <button class="btn btn-ghost" style="padding:10px" id="itDef" onclick="itAction('defend')">🛡 방어</button>
         <button class="btn btn-blue" style="padding:10px" id="itHeal" onclick="itAction('heal')" ${potions<=0?'disabled':''}>💊 포션 (${potions})</button>
         <button class="btn btn-ghost btn-sm" style="padding:10px" onclick="exitITBattle()">💨 도망</button>
-      </div>`:''}`;
+      </div>`:`<div style="text-align:center;padding:12px 0">
+        <button class="btn btn-red" style="width:100%;margin-bottom:8px" onclick="startITBattle(${floor})">🔄 재도전</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%" onclick="exitITBattle()">← 탑으로</button>
+      </div>`}`;
   }
 
   window.exitITBattle=function(){
@@ -6884,11 +7008,18 @@ window.startITBattle=async function(floor){
       itlog(`<span style="color:#FF2244;font-weight:700">💀 ${monName} 처치! ${floor}층 클리어!</span>`);
       // 징수 지급
       char._immortalSeals=(char._immortalSeals||0)+1;
+      itlog(`<span style="color:var(--gold)">🔱 불멸의 징수 +1 (총 ${char._immortalSeals}개)</span>`);
       const wk=getITWeekKey();
-      const newFloor=Math.max((await get(ref(db,`immortalTower/${wk}/${charId}`))).val()?.floor||0, floor);
-      await set(ref(db,`immortalTower/${wk}/${charId}`),{floor:newFloor,ts:Date.now()});
+      const prevData=(await get(ref(db,`immortalTower/${wk}/${charId}`))).val()||{floor:0};
+      const prevFloor=prevData.floor||0;
+      // ★ 자유 모드(100층 이미 달성)면 floor 기록 갱신 안 함 — 징수만 지급
+      const isFreeMode=prevFloor>=IT_TOTAL_FLOORS;
+      if(!isFreeMode){
+        const newFloor=Math.max(prevFloor,floor);
+        await set(ref(db,`immortalTower/${wk}/${charId}`),{floor:newFloor,ts:Date.now()});
+      }
       // 드랍 아이템 (Lv.99 고정)
-      const dropGrade=genGrade(4); // T5 vhard 동일 드랍 풀
+      const dropGrade=genGrade(4);
       const drop=genItem(['weapon','head','chest','legs','boots','accessory'],dropGrade,99,false,4);
       if(drop){
         if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length<(char.invSlots||100)){
@@ -6899,7 +7030,18 @@ window.startITBattle=async function(floor){
       await saveChar();updateTop();
       const sd2=document.getElementById('itSealsDisplay');
       if(sd2)sd2.textContent=`🔱 징수: ${char._immortalSeals}개`;
-      renderIT();
+      // ★ 자유 모드면 다음 층 자동 진행 버튼 / 일반 모드면 다음 층 도전
+      const nextF=floor+1;
+      const canContinue=!isFreeMode&&nextF<=IT_TOTAL_FLOORS;
+      const contLabel=canContinue?`${nextF}층 도전 계속`:'구간 선택으로';
+      const log=document.getElementById('itLog');
+      if(log){
+        const btn=document.createElement('div');
+        btn.style.cssText='display:flex;gap:8px;margin-top:8px';
+        btn.innerHTML=`<button class="btn btn-red btn-sm" style="flex:1" onclick="${canContinue?`startITBattle(${nextF})`:'exitITBattle()'}">${canContinue?`⚔ ${nextF}층 진행`:'📋 구간 선택'}</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="exitITBattle()">← 탑으로</button>`;
+        log.appendChild(btn);
+      }
       return;
     }
 
@@ -6908,23 +7050,43 @@ window.startITBattle=async function(floor){
     if(monRegen>0&&monCurHp>0){const rg=Math.round(monMaxHp*monRegen);monCurHp=Math.min(monCurHp+rg,monMaxHp);itlog(`<span style="color:#80ff40">💉 ${monName} 재생! +${rg}HP</span>`);}
     // ★ 독안개: 플레이어 HP 감소
     if(monPoisonFog>0){const pg=Math.round(s.maxHp*monPoisonFog);myHp=Math.max(0,myHp-pg);itlog(`<span style="color:#80ff40">☠️ 독안개! ${char.name} -${pg}HP</span>`);if(myHp<=0){done=true;itlog(`<span style="color:var(--tx3)">💀 ${char.name} 독안개로 쓰러짐...</span>`);renderIT();return;}}
-    if(wt.isBow){const br=Math.min(0.15+(s.spd||0)/800,0.30);if(Math.random()<br){itlog(`<span style="color:var(--green)">🏹 원거리 선공! 반격 회피</span>`);phase=1;renderIT();return;}}
-    if(Math.random()<Math.min((s.spd||0)/800,0.20)){itlog(`<span style="color:var(--blue)">💨 신속 회피!</span>`);phase=1;renderIT();return;}
-    let mDmg=Math.max(1,Math.round(monAtk*100/(100+s.def)));
-    const mv=Math.round(mDmg*0.15);mDmg=Math.max(1,mDmg+rand(-mv,mv));
-    if(defending)mDmg=Math.round(mDmg*0.5);
-    // ★ 받는 피해 감소 버프 적용
-    if(s._dmgReduce)mDmg=Math.max(1,Math.round(mDmg*(1-s._dmgReduce)));
-    if(Math.random()*100<(s.dodge||0)){itlog(`<span style="color:var(--tx3)">✨ 회피!</span>`);}
-    else{
-      myHp=Math.max(0,myHp-mDmg);
-      itlog(`<span style="color:var(--red)">⚔ ${monName} → ${char.name} -<b>${mDmg}</b> (${myHp}/${s.maxHp})</span>`);
+    // ★ 몬스터 스킬 발동 (보스는 높은 확률)
+    let skillFired=false;
+    const probMult=isBossFloor?1.4:1.0;
+    const fakeTgt={hp:myHp,maxHp:s.maxHp,status:'alive',stats:s,name:char.name,
+      actionChosen:'attack',defending,healing:false,_dot:0,_stunned:0};
+    for(const sk of monSkills){
+      if(skillFired)break;
+      if(Math.random()<(sk.prob||0.15)*probMult){
+        try{
+          const res=sk.fx({atk:monAtk,def:monDef,hp:monCurHp,maxHp:monMaxHp,name:monName},fakeTgt,[fakeTgt]);
+          if(typeof res==='string'){itlog(res);}
+          if(fakeTgt.hp<myHp){myHp=Math.max(0,fakeTgt.hp);}
+          if(fakeTgt._stunned>0){itlog(`<span style="color:var(--yellow)">🧊 ${char.name} 마비! 다음 턴 행동 불가</span>`);}
+          if(fakeTgt._dot>0){myHp=Math.max(0,myHp-Math.round(s.maxHp*0.06));itlog(`<span style="color:#80ff40">☠ 독! -${Math.round(s.maxHp*0.06)}HP</span>`);}
+          skillFired=true;
+        }catch(e){}
+      }
+    }
+    if(myHp<=0){done=true;itlog(`<span style="color:var(--tx3)">💀 ${char.name} 스킬에 쓰러짐...</span>`);renderIT();return;}
+    // ★ 일반 공격 (스킬 미발동 시)
+    if(!skillFired){
+      if(wt.isBow){const br=Math.min(0.15+(s.spd||0)/800,0.30);if(Math.random()<br){itlog(`<span style="color:var(--green)">🏹 원거리 선공! 반격 회피</span>`);phase=1;renderIT();return;}}
+      if(Math.random()<Math.min((s.spd||0)/800,0.20)){itlog(`<span style="color:var(--blue)">💨 신속 회피!</span>`);phase=1;renderIT();return;}
+      let mDmg=Math.max(1,Math.round(monAtk*100/(100+s.def)));
+      const mv=Math.round(mDmg*0.15);mDmg=Math.max(1,mDmg+rand(-mv,mv));
+      if(defending)mDmg=Math.round(mDmg*0.5);
+      if(s._dmgReduce)mDmg=Math.max(1,Math.round(mDmg*(1-s._dmgReduce)));
+      if(Math.random()*100<(s.dodge||0)){itlog(`<span style="color:var(--tx3)">✨ 회피!</span>`);}
+      else{myHp=Math.max(0,myHp-mDmg);itlog(`<span style="color:var(--red)">⚔ ${monName} → ${char.name} -<b>${mDmg}</b> (${myHp}/${s.maxHp})</span>`);}
     }
 
     // ── 패배 체크 ──
     if(myHp<=0){
       done=true;
-      itlog(`<span style="color:var(--tx3)">💀 ${char.name} 쓰러짐... 도전 실패</span>`);
+      const retryMsg=isBossFloor?`<b style="color:#FF2244">${monName}</b>에게 패배했습니다. 재도전하시겠습니까?`:`<b>${floor}층</b> 도전 실패. 같은 층에 재도전할 수 있습니다.`;
+      itlog(`<span style="color:var(--tx3)">💀 ${char.name} 쓰러짐...</span>`);
+      itlog(`<span style="color:var(--tx2);font-size:10px">${retryMsg}</span>`);
       renderIT();
       return;
     }
