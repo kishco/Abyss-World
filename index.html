@@ -5213,9 +5213,9 @@ window.selectMode=async function(tierIdx,mode){
             dk==='hard'?`전투력 <b>${reqScore}</b> 이상 · ${gearHint} 구비 후 도전 권장 · 포션 2~4개`:
             (()=>{
               const wardCnt=char._deathWard||0;
-              const wardStr=wardCnt>0?` · 🧿 죽음 방지 부적 ${wardCnt}회 보유`:`<span style="color:var(--red)"> · 🧿 죽음 방지 부적 없음</span>`;
-              return `전투력 <b>${reqScore}</b> 이상 ⚠️ 장비 손실 가능 · 강화/인챈트 필수 · 매우 위험${wardStr}`;
-            })()`;
+              const wardStr=wardCnt>0?' · 🧿 죽음 방지 부적 '+wardCnt+'회 보유':'<span style="color:var(--red)"> · 🧿 죽음 방지 부적 없음</span>';
+              return '전투력 <b>'+reqScore+'</b> 이상 ⚠️ 장비 손실 가능 · 강화/인챈트 필수 · 매우 위험'+wardStr;
+            })()
       const locked=dk!=='normal'&&!meets;
       const shortage=(!meets&&reqScore>0)?`<span style="font-size:9px;color:var(--red)"> (${reqScore-myScore} 부족)</span>`:'';
       return`<div style="background:var(--sf2);border:1px solid ${locked?'var(--bd)':dv.color+'44'};border-radius:8px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:8px;${locked?'opacity:.55':''}">
