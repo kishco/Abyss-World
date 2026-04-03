@@ -3295,7 +3295,7 @@ function renderInv(){
       ${it.tradeable===true&&(!it.isScroll||it.isEnchantScroll)?`<div style="font-size:8px;color:var(--blue);background:rgba(74,143,255,.12);border:1px solid rgba(74,143,255,.25);border-radius:3px;padding:1px 4px;display:inline-block;margin-bottom:2px">🏛 거래가능</div>`:''}
       <div class="icname g-${it.grade}">${it._locked?'🔒 ':''}${itName(it)}</div>
       <div style="display:flex;align-items:center;gap:2px;margin-bottom:1px">
-        <span class="ictype" style="font-size:9px">${it.isSubjBox?'토벌전 보상':`${it.slot}${it.hand?' · '+it.hand:''}`}</span>
+        <span class="ictype" style="font-size:9px">${it.isSubjBox?'토벌전 보상':`${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${it.hand?' · '+it.hand:''}`}</span>
       </div>
       ${it.reqLv?`<div style="font-size:9px;${lvLock?'color:var(--red)':'color:var(--tx3)'}">Lv.${it.reqLv} 필요${lvLock?' 🔒':''}</div>`:''}
       ${ss?`<div class="icstat">${ss}</div>`:''}
@@ -3793,7 +3793,7 @@ function openIM(it){
   document.getElementById('imbody').innerHTML=`
     <div style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
       <span style="background:${it.gradeColor}22;border:1px solid ${it.gradeColor}44;color:${it.gradeColor};padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700">${it.gradeName}</span>
-      <span style="font-size:11px;color:var(--tx2)">${it.slot}${it.hand?' · '+it.hand:''}</span>
+      <span style="font-size:11px;color:var(--tx2)">${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${it.hand?' · '+it.hand:''}</span>
       ${it.reqLv?`<span style="font-size:11px;font-weight:700;${lvLock?'color:var(--red)':'color:var(--tx3)'}">Lv.${it.reqLv} 필요${lvLock?' 🔒':''}</span>`:''}
       ${it.tradeable===true&&(!it.isScroll||it.isEnchantScroll)?`<span style="font-size:10px;background:rgba(74,143,255,.15);color:var(--blue);padding:2px 6px;border-radius:6px">🏛 거래가능</span>`:''}
     </div>
@@ -3840,7 +3840,7 @@ function openIM(it){
   if(it.isProtectScroll){
     // 현재 보유 개수 확인
     const protectCount=Object.values(inv).filter(i=>i.isProtectScroll).length;
-    const curStack=char._deathWard||0;
+    const curStack=char._forgeWard||0;
     const useBtn=document.createElement('button');
     useBtn.className='btn btn-gold btn-sm';useBtn.style.cssText='margin-top:8px;width:100%';
     if(curStack>0){
@@ -3854,10 +3854,10 @@ function openIM(it){
         ?`파괴방지 스크롤을 사용합니다.\n현재: ${curStack}회 → ${curStack+1}회 적용`
         :'파괴방지 스크롤을 사용합니다.\n강화 파괴 시 1회 자동으로 막아줍니다.';
       if(!confirm(msg))return;
-      char._deathWard=(char._deathWard||0)+1;
+      char._forgeWard=(char._forgeWard||0)+1;
       delete inv[it.id];
       await saveChar();await saveInv();closeIM();renderInv();updateTop();
-      toast(`🛡 파괴방지 적용 완료! (${char._deathWard}회 보호)`,3000);
+      toast(`🛡 파괴방지 적용 완료! (${char._forgeWard}회 보호)`,3000);
     };
     document.getElementById('imbody').appendChild(useBtn);
     // 스택 현황 표시
@@ -4044,7 +4044,7 @@ function renderSell(sb){
           <span class="icname g-${it.grade}" style="font-size:11px">${it.isEnchantScroll?'📜 ':''}${it.name}${isLocked?' 🔒':isEq?' ⚙️':''}</span>
           ${isTrade?`<span style="font-size:8px;background:rgba(74,143,255,.15);color:var(--blue);padding:1px 4px;border-radius:3px">거래가능</span>`:''}
         </div>
-        <div style="font-size:9px;color:var(--tx3)">${it.isEnchantScroll?`성공률 ${Math.round((it.successRate||0.7)*100)}%`:it.slot||''}</div>
+        <div style="font-size:9px;color:var(--tx3)">${it.isEnchantScroll?`성공률 ${Math.round((it.successRate||0.7)*100)}%`:(SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot||'')}</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
         <button class="btn btn-xs" style="background:${isLocked?'rgba(240,192,64,.18)':'rgba(255,255,255,.06)'};border:1px solid ${isLocked?'var(--gold)':'var(--bd2)'};color:${isLocked?'var(--gold)':'var(--tx3)'};" onclick="toggleItemLock('${it.id}')" title="${isLocked?'잠금 해제':'잠금'}">${isLocked?'🔒':'🔓'}</button>
@@ -4661,15 +4661,15 @@ function renderForge(sb){
   }).join('');
 
   const protectInvCnt=Object.values(inv).filter(i=>i.isProtectScroll).length;
-  const deathWardStack=char._deathWard||0;
-  const protectInfo=deathWardStack>0||protectInvCnt>0
+  const forgeWardStack=char._forgeWard||0;
+  const protectInfo=forgeWardStack>0||protectInvCnt>0
     ?`<div style="background:rgba(68,212,136,.07);border:1px solid rgba(68,212,136,.25);border-radius:7px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
         <span style="font-size:16px">🛡</span>
         <div>
           <div style="font-size:11px;font-weight:700;color:var(--green)">파괴방지 보호 중</div>
           <div style="font-size:10px;color:var(--tx3)">
-            ${deathWardStack>0?`사용된 스크롤: ${deathWardStack}회 남음`:''}
-            ${deathWardStack>0&&protectInvCnt>0?' · ':''}
+            ${forgeWardStack>0?`파괴방지: ${forgeWardStack}회 남음`:''}
+            ${forgeWardStack>0&&protectInvCnt>0?' · ':''}
             ${protectInvCnt>0?`인벤 스크롤: ${protectInvCnt}개`:''}
           </div>
         </div>
@@ -4733,12 +4733,12 @@ window.doForge=async sl=>{
     trackBounty('enhance',1);
     if(it.enhance>=3)trackBounty('enhance3',1);
   }else if(roll<table.succ+table.destroy){
-    // ★ 파괴 방지 — 사용된 스크롤(_deathWard) 먼저 소모, 없으면 인벤 스크롤 자동 발동
-    if((char._deathWard||0)>0){
-      char._deathWard--;
+    // ★ 파괴 방지 — forgeWard 먼저 소모, 없으면 인벤 스크롤 자동 발동
+    if((char._forgeWard||0)>0){
+      char._forgeWard--;
       await saveChar();updateTop();renderChar();
-      toast(`🛡 파괴방지 발동! ${it.name} 보호됨! (+${enh} 유지) [남은 보호: ${char._deathWard}회]`,4000);
-      blogAdd&&blogAdd(`<span class="l-heal">🛡 파괴방지가 ${it.name}을(를) 지켰습니다! (+${enh} 유지, 남은 보호: ${char._deathWard}회)</span>`);
+      toast(`🛡 파괴방지 발동! ${it.name} 보호됨! (+${enh} 유지) [남은 보호: ${char._forgeWard}회]`,4000);
+      blogAdd&&blogAdd(`<span class="l-heal">🛡 파괴방지가 ${it.name}을(를) 지켰습니다! (+${enh} 유지, 남은 보호: ${char._forgeWard}회)</span>`);
       const sb2=document.getElementById('secbody');if(sb2)renderForge(sb2);
       return;
     }
@@ -5051,7 +5051,7 @@ async function renderAuction(sb){
               <div style="display:flex;align-items:flex-start;gap:8px">
                 <div style="flex:1;min-width:0">
                   <div class="icname g-${it.grade}" style="font-size:11px;margin-bottom:2px">${it.name}${it.enhance>0?` <span style="color:var(--gold)">+${it.enhance}</span>`:''}</div>
-                  <div style="font-size:9px;color:var(--tx3)">${it.slot}${statStr?' · '+statStr:''}</div>
+                  <div style="font-size:9px;color:var(--tx3)">${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${statStr?' · '+statStr:''}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
                   <input id="ap_${it.id}" type="number" min="1" value="${suggestPrice}" style="width:80px;padding:4px 6px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--gold);font-size:11px;outline:none;font-family:'IBM Plex Mono',monospace"/>
@@ -8540,7 +8540,7 @@ async function renderWarehouse(sb){
         <div style="display:flex;gap:8px;font-size:9px;color:var(--tx3);flex-wrap:wrap">
           ${scrollTag}
           ${!scrollTag&&lvStr?`<span>${lvStr}</span>`:''}
-          ${!scrollTag&&it.slot?`<span>${it.slot}${it.hand?' · '+it.hand:''}</span>`:''}
+          ${!scrollTag&&it.slot?`<span>${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${it.hand?' · '+it.hand:''}</span>`:''}
           ${ss?`<span style="color:var(--green)">${ss}</span>`:''}
           ${it.isEnchantScroll&&it.enchantData?.b?(()=>{
             const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',balance:'밸런스',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드',skillBonus:'스킬발동'};
