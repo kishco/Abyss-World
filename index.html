@@ -5433,14 +5433,14 @@ function evFullHeal(){
   myP.hp=myP.maxHp;
   blogAdd(`<span class="l-heal">✨ 성스러운 힘으로 HP가 완전히 회복되었습니다! (${myP.maxHp}/${myP.maxHp})</span>`);
   renderBattle();
-  setTimeout(()=>startActionPhase(),700);
+  setTimeout(()=>startActionPhase(),350);
 }
 function evGoldRoom(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
   const gold=Math.round((50+battle.tier.recLv*20)*battle.diff.goldMult*(1+char.luk*0.005));
   char.gold+=gold;saveChar();updateTop();
   blogAdd(`<span class="l-exp">💰 금화가 가득! +${gold.toLocaleString()}G 획득!</span>`);
-  setTimeout(()=>startActionPhase(),700);
+  setTimeout(()=>startActionPhase(),350);
 }
 function evTreasure(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
@@ -5459,7 +5459,7 @@ function evTreasure(){
     es.tradeable=true;addItem(es);
     blogAdd(`<span class="l-set">📜 ${es.name}도 발견!</span>`);
   }
-  setTimeout(()=>startActionPhase(),700);
+  setTimeout(()=>startActionPhase(),350);
 }
 function evAmbush(){
   // 추가 몬스터 2~4마리 스폰
@@ -5478,7 +5478,7 @@ function evAmbush(){
   }
   blogAdd(`<span class="l-dead">💀 ${extraCount}마리의 몬스터가 쏟아져 나왔다!</span>`);
   renderBattle();
-  setTimeout(()=>startActionPhase(),700);
+  setTimeout(()=>startActionPhase(),350);
 }
 function evTrap(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
@@ -5487,7 +5487,7 @@ function evTrap(){
   blogAdd(`<span class="l-dmg">⚠️ 함정! -${dmg}HP 피해를 입었습니다!</span>`);
   if(myP.hp<myP.maxHp*0.2)blogAdd(`<span class="l-warn">⚠️ HP가 위험합니다!</span>`);
   renderBattle();
-  setTimeout(()=>startActionPhase(),700);
+  setTimeout(()=>startActionPhase(),350);
 }
 function evDebuff(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
@@ -5501,12 +5501,12 @@ function evDebuff(){
   battle._dungDebuff=db2.n;
   blogAdd(`<span class="l-warn">💀 저주의 방! [${db2.n}] 디버프가 던전 종료까지 지속됩니다!</span>`);
   renderBattle();
-  setTimeout(()=>startActionPhase(),700);
+  setTimeout(()=>startActionPhase(),350);
 }
 function evNothing(){
   const msgs=['벽에 이상한 낙서가 있다...','예전에 누가 살았던 것 같다.','오래된 뼈가 흩어져 있다.','바람이 불어온다.'];
   blogAdd(`<span class="l-sys">😶 ${pick(msgs)}</span>`);
-  setTimeout(()=>startActionPhase(),700);
+  setTimeout(()=>startActionPhase(),350);
 }
 // (히든 상인 제거됨 — 던전 이벤트 시스템으로 대체)
 window.closeMerchant=()=>{
@@ -5518,13 +5518,15 @@ window.closeMerchant=()=>{
 
 function startActionPhase(){
   if(!battle)return;
-  // ★ 기존 타이머 먼저 정리
   if(battle.timer){clearInterval(battle.timer);battle.timer=null;}
   battle.phase=1;battle.timerVal=10;
   battle._phaseStart=Date.now();
   battle.players.forEach(p=>{p.actionChosen=null;p.defending=false;p.healing=false;});
   battle.fleeVotes.clear();
   renderBattle();
+  // ★ 솔로/IT: 타이머 없이 유저 행동 대기 (chooseAction이 즉시 resolve)
+  const isSoloMode=battle.mode==='solo'||battle.mode==='immortaltower';
+  if(isSoloMode)return;
   battle.timer=setInterval(()=>{
     battle.timerVal--;
     updateTimerBar();
@@ -5649,12 +5651,12 @@ async function resolvePhase(){
   const alive=battle.players.filter(p=>p.status==='alive');
   // Check flee (all alive must choose flee)
   if(alive.every(p=>p.actionChosen==='flee')||
-    (battle.mode==='solo'&&alive[0]?.actionChosen==='flee')){
+    (( battle.mode==='solo'||battle.mode==='immortaltower')&&alive[0]?.actionChosen==='flee')){
     SFX.play('flee');
     blogAdd('<span class="l-warn">💨 도망쳤습니다!</span>');
     battle.done=true;
     battle._resolving=false;
-    setTimeout(()=>endBattle(false,true),700);return;
+    setTimeout(()=>endBattle(false,true),350);return;
   }
   // ★ 선제 몬스터 스킬 처리 (행동 취소형: m_flee_debuff 등) — 플레이어 행동 이전에 발동
   const aliveMpre=battle.monsters.filter(m=>m.status==='alive');
@@ -5810,7 +5812,7 @@ async function resolvePhase(){
       dmg=Math.max(1,Math.round(dmg*(1-(tgt.stats._dmgReduce))));
     }
     if(tgt.healing){
-      dmg=Math.round(dmg*(battle.mode==='solo'?0.45:0.65));
+      dmg=Math.round(dmg*((battle.mode==='solo'||battle.mode==='immortaltower')?0.45:0.65));
       if(dmg<1)dmg=1;
     }
     // ★ 블라인드: 회피율 무력화 (2턴)
@@ -5862,11 +5864,11 @@ async function resolvePhase(){
   // Check wipe (all dead)
   const anyAlive=battle.players.some(p=>p.status==='alive');
   if(!anyAlive){
-    blogAdd(battle.mode==='solo'?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
+    blogAdd((battle.mode==='solo'||battle.mode==='immortaltower')?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
     if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');await maybeLoseItem();}
     syncBattleState({success:false,fled:false});
     battle._resolving=false;
-    setTimeout(()=>endBattle(false,false),900);return;
+    setTimeout(()=>endBattle(false,false),500);return;
   }
   // Check monsters dead
   const allMDead=battle.monsters.every(m=>m.status==='dead');
@@ -5874,12 +5876,12 @@ async function resolvePhase(){
     lootPhase();
     syncBattleState();
     battle._resolving=false;
-    setTimeout(()=>{battle.phase=0;nextFloor();},battle.mode==='solo'?900:1800);return;
+    setTimeout(()=>{battle.phase=0;nextFloor();},(battle.mode==='solo'||battle.mode==='immortaltower')?400:1800);return;
   }
   syncBattleState();
   battle._resolving=false;
   renderBattle();
-  setTimeout(()=>startActionPhase(), battle.mode==='solo'?800:2000);
+  setTimeout(()=>startActionPhase(), (battle.mode==='solo'||battle.mode==='immortaltower')?350:2000);
 }
 
 // ★ 무기 고유 특성 반환 헬퍼
@@ -6197,6 +6199,7 @@ async function maybeLoseItem(){
 async function dungeonClear(){
   if(!battle||battle._cleared)return;
   battle._cleared=true;
+  battle.done=true; // ★ 클리어 후 navTo 허용
   const d=battle.diff;const dk=battle.diffKey;
   const mode=battle.mode;
   const tierIdx=battle.tierIdx;
@@ -6264,10 +6267,10 @@ async function dungeonClear(){
       btn.style.cssText='padding:12px;display:flex;gap:8px;flex-direction:column';
       btn.innerHTML= nextF<=IT_TOTAL_FLOORS && !isFreeMode2
         ?`<button class="btn btn-red" onclick="startITBattle(${nextF})">⚔ ${nextF}층 도전</button>
-           <button class="btn btn-ghost btn-sm" onclick="navTo('immortaltower')">← 탑으로</button>`
-        :`<button class="btn btn-ghost" onclick="navTo('immortaltower')">📋 구간 선택으로</button>`;
+           <button class="btn btn-ghost btn-sm" onclick="exitBattle()">← 탑으로</button>`
+        :`<button class="btn btn-ghost" onclick="exitBattle()">📋 구간 선택으로</button>`;
       db2.appendChild(btn);
-    },1200);
+    },600);
     return;
   }
   SFX.play('clear');
@@ -6349,7 +6352,7 @@ async function dungeonClear(){
   gainExp(bonusExp);
   blogAdd(`<span class="l-exp">🎉 클리어 보너스 EXP +${bonusExp}</span>`);
 
-  setTimeout(()=>endBattle(true,false),1200);
+  setTimeout(()=>endBattle(true,false),700);
 }
 
 function endBattle(success,fled){
@@ -6444,16 +6447,19 @@ function renderBattle(){
   const t=battle.tier;const d=battle.diff;
   const myP=battle.players.find(p=>p.id===charId);
   const aliveM=battle.monsters.filter(m=>m.status==='alive');
-  const isSolo=battle.mode==='solo';
+  const isSolo=battle.mode==='solo'||battle.mode==='immortaltower';
+  const isIT=battle.mode==='immortaltower';
   // 솔로 전용 — 적개심 표시 제거됨
 
   db2.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
-      <div class="ptitle" style="margin:0;font-size:12px">${t.icon} ${t.n} — <span style="color:${d.color}">${d.name}</span></div>
-      <div style="font-size:11px;color:var(--tx3)">층 ${battle.floor}/${battle.floors}</div>
+      ${isIT?`<span class="g-immortal" style="font-size:12px;font-weight:700;font-family:'Cinzel',serif">🗼 불멸의 탑 ${battle._itFloor}층${battle._itFloor%10===0?' — BOSS':''}</span>`:`<div class="ptitle" style="margin:0;font-size:12px">${t.icon} ${t.n} — <span style="color:${d.color}">${d.name}</span></div>`}
+      ${isIT?`<button onclick="navTo('immortaltower')" style="background:none;border:1px solid var(--bd2);color:var(--tx3);font-size:10px;padding:2px 8px;border-radius:5px;cursor:pointer">← 탑으로</button>`:`<div style="font-size:11px;color:var(--tx3)">층 ${battle.floor}/${battle.floors}</div>`}
     </div>
-    <!-- Floor dots -->
-    <div class="fdots">${Array.from({length:battle.floors},(_,i)=>`<div class="fdot ${i<battle.floor-1?'done':i===battle.floor-1?'cur':''} ${i===battle.floors-1?'boss':''}">${i===battle.floors-1?'👑':i+1}</div>`).join('')}</div>
+    <!-- Floor dots (일반 던전만) -->
+    <!-- IT 주간 특성 배지 -->
+    ${isIT&&battle._itRotation?`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:8px;padding:5px 8px;background:rgba(255,34,68,.04);border:1px solid rgba(255,34,68,.15);border-radius:7px"><span style="font-size:9px;background:rgba(68,212,136,.12);color:var(--green);padding:1px 7px;border-radius:8px;border:1px solid rgba(68,212,136,.3)">${battle._itRotation.player.icon} ${battle._itRotation.player.name}</span>${battle._itRotation.monsters.map(m=>`<span style="font-size:9px;background:rgba(255,34,68,.1);color:#FF2244;padding:1px 7px;border-radius:8px;border:1px solid rgba(255,34,68,.25)">${m.icon} ${m.name}</span>`).join('')}</div>':''}
+    ${!isIT?`<div class="fdots">${Array.from({length:battle.floors},(_,i)=>`<div class="fdot ${i<battle.floor-1?'done':i===battle.floor-1?'cur':''} ${i===battle.floors-1?'boss':''}">${i===battle.floors-1?'👑':i+1}</div>`).join('')}</div>`:''}
     <!-- 디버프 표시 -->
     ${(battle._dungDebuff||battle._potionSealed)?`<div style="background:rgba(232,68,68,.08);border:1px solid rgba(232,68,68,.3);border-radius:6px;padding:5px 10px;margin-bottom:8px;font-size:10px;color:var(--red);display:flex;gap:8px;flex-wrap:wrap">
       ${battle._dungDebuff?`<span>⚠️ 저주: <b>${battle._dungDebuff}</b></span>`:''}
@@ -6864,6 +6870,8 @@ function getITWeekKey(){
 async function renderImmortalTower(){
   const main=document.getElementById('itMain');
   if(!main)return;
+  main.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:12px">⏳ 로딩 중...</div>';
+  try{
   if(char.level<99){
     main.innerHTML=`<div style="text-align:center;padding:40px 20px">
       <div style="font-size:40px;margin-bottom:12px">🔒</div>
@@ -6991,6 +6999,10 @@ async function renderImmortalTower(){
         • 징수는 초기화되지 않고 영구 누적
       </div>
     </div>`;
+  }catch(e){
+    console.error('[IT] renderImmortalTower error:',e);
+    if(main)main.innerHTML=`<div style="text-align:center;padding:30px;color:var(--red);font-size:12px">⚠️ 오류가 발생했습니다. 새로고침 후 다시 시도해주세요.<br><small>${e.message||e}</small></div>`;
+  }
 }
 
 function getITMonsterName(floor){
@@ -7062,19 +7074,6 @@ window.startITBattle=async function(floorNum){
   document.getElementById('dungMain').style.display='none';
   document.getElementById('dungBattle').style.display='block';
   document.getElementById('dungBattle').innerHTML='';
-
-  // ★ 탑 전용 헤더 (층 정보 + 주간 특성 배지)
-  const isBossFloor=floorNum%10===0;
-  const bossData=isBossFloor?IT_BOSSES[floorNum]:null;
-  const headerDiv=document.createElement('div');
-  headerDiv.style.cssText='background:linear-gradient(90deg,rgba(255,34,68,.1),rgba(100,0,20,.05));border-bottom:1px solid rgba(255,34,68,.25);padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap';
-  headerDiv.innerHTML=`
-    <span class="g-immortal" style="font-size:12px;font-weight:700;font-family:'Cinzel',serif">🗼 ${floorNum}층${isBossFloor?' — BOSS':''}</span>
-    <span style="font-size:9px;background:rgba(68,212,136,.12);color:var(--green);padding:2px 6px;border-radius:8px;border:1px solid rgba(68,212,136,.3)">${rotation.player.icon} ${rotation.player.name}</span>
-    ${rotation.monsters.map(m=>`<span style="font-size:9px;background:rgba(255,34,68,.1);color:#FF2244;padding:2px 6px;border-radius:8px;border:1px solid rgba(255,34,68,.25)">${m.icon} ${m.name}</span>`).join('')}
-    <button onclick="navTo('immortaltower')" style="margin-left:auto;background:none;border:1px solid var(--bd2);color:var(--tx3);font-size:10px;padding:3px 8px;border-radius:5px;cursor:pointer">← 탑으로</button>
-  `;
-  document.getElementById('dungBattle').prepend(headerDiv);
 
   // ★ pane-dungeon으로 전환해야 dungBattle이 보임
   document.querySelectorAll('.nbtn').forEach(x=>x.classList.toggle('on',x.dataset.tab==='dungeon'));
@@ -8075,7 +8074,15 @@ window.navTo=function(tab){
   if(tab==='settings')renderSettings();
   if(tab==='subjugation'){renderSubjugation();}
   if(tab==='champ'){renderChamp();}
-  if(tab==='immortaltower'){renderImmortalTower();}
+  if(tab==='immortaltower'){
+    // ★ IT 전투 후 탑으로 복귀 시 itMain 복구
+    const itMain=document.getElementById('itMain');
+    if(itMain)itMain.style.display='block';
+    document.getElementById('dungBattle').style.display='none';
+    if(battle&&battle.done){battle=null;}
+    updateNavLock();
+    renderImmortalTower();
+  }
 };
 
 
