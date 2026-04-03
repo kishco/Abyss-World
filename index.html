@@ -2951,7 +2951,22 @@ function migrateEnchantName(it){
     // 유일: SETS에서 정확한 조각 이름 가져오기
     basePart=SETS[it.setId]?.pcs[it.baseId]?.n||it.baseName||'';
   }
-  if(!basePart)basePart=it.baseName||'';
+  // ★ IT 고유 이름 아이템: 이미 baseName으로 덮어써진 경우 복구
+  if(it._itUnique){
+    const pool=IT_UNIQUE_NAMES[it.baseId]||IT_UNIQUE_NAMES[it.slot];
+    if(pool){
+      // 현재 이름에서 인챈트명 제거 후 남은 게 baseName과 같으면 → 손상된 것
+      let tmp=it.name||'';
+      const allEnchNames=[...PRE,...SUF].map(e=>e.n);
+      for(const en of allEnchNames){while(tmp.includes(en+' '))tmp=tmp.replace(en+' ','');while(tmp.startsWith(en))tmp=tmp.replace(en,'');}
+      tmp=tmp.replace(/^(전설의|정예|강화된|좋은)\s/,'').trim();
+      // baseName과 같거나 WBASES/ABASES/ACCBASES의 기본명이면 손상된 것
+      const isCorrupted=tmp===it.baseName||tmp===''||[...WBASES,...ABASES,...ACCBASES].some(b=>b.id===it.baseId&&tmp.length<5);
+      if(isCorrupted)basePart=pool[Math.floor(Math.random()*pool.length)];
+      else basePart=tmp;
+    }
+  }
+  if(!basePart&&!it._itUnique)basePart=it.baseName||'';
   if(!basePart){
     // baseName 없음 → 이름에서 PRE/SUF 전체 풀의 인챈트명 제거
     let tmp=it.name||'';
