@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ABYSS WORLD 2.3 - 다크 판타지 RPG</title>
+<title>ABYSS WORLD 2.5 - 다크 판타지 RPG</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
@@ -16,7 +16,7 @@
 
 <!-- Open Graph (카카오톡·디스코드·SNS 링크 공유 미리보기) -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="ABYSS WORLD 2.3 — 다크 판타지 RPG">
+<meta property="og:title" content="ABYSS WORLD 2.5 — 다크 판타지 RPG">
 <meta property="og:description" content="설치 없이 브라우저에서 바로! 5개 던전, 토벌전, 챔프전, 유일 아이템, 99레벨 육성. 무료 온라인 텍스트 RPG.">
 <meta property="og:url" content="https://kishco.github.io/Abyss-World/">
 <meta property="og:locale" content="ko_KR">
@@ -24,7 +24,7 @@
 
 <!-- Twitter 카드 -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ABYSS WORLD 2.3 — 다크 판타지 RPG">
+<meta name="twitter:title" content="ABYSS WORLD 2.5 — 다크 판타지 RPG">
 <meta name="twitter:description" content="설치 없이 브라우저에서 바로! 5개 던전, 토벌전, 챔프전. 무료 온라인 텍스트 RPG.">
 
 <!-- 구글 검색엔진에 크롤링 허용 -->
@@ -130,7 +130,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .btn-sm{padding:4px 9px;font-size:11px;border-radius:5px;}
 .btn-xs{padding:3px 7px;font-size:10px;border-radius:4px;}
 .btn-purple{background:linear-gradient(135deg,#1a0a30,#2a1050);border:1px solid var(--purple);color:var(--purple);}
-.g-normal{color:#9d9d9d!important;}.g-uncommon{color:#1eff00!important;}.g-rare{color:#0070dd!important;}.g-epic{color:#a335ee!important;}.g-legendary{color:#ff8c00!important;}.g-set{color:#00ffcc!important;}.g-immortal{color:#FF2244!important;}
+.g-normal{color:#9d9d9d!important;}.g-uncommon{color:#1eff00!important;}.g-rare{color:#0070dd!important;}.g-epic{color:#a335ee!important;}.g-legendary{color:#ff8c00!important;}.g-set{color:#00ffcc!important;}.g-immortal{color:#FF2244!important;}.g-legacy{color:#44ff88!important;}
 .gb-normal{border-color:#9d9d9d!important;}.gb-uncommon{border-color:#1eff00!important;}.gb-rare{border-color:#0070dd!important;}.gb-epic{border-color:#a335ee!important;}.gb-legendary{border-color:#ff8c00!important;box-shadow:0 0 8px rgba(255,140,0,.1)!important;}.gb-set{border-color:#00ffcc!important;box-shadow:0 0 8px rgba(0,255,204,.1)!important;}.gb-immortal{border-color:#FF2244!important;box-shadow:0 0 12px rgba(255,34,68,.25)!important;}
 
 /* Grade text shimmer effects */
@@ -139,6 +139,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .g-legendary{color:#ff8c00!important;text-shadow:0 0 10px rgba(255,140,0,.6);animation:legendaryShimmer 2s infinite;}
 .g-set{color:#00ffcc!important;text-shadow:0 0 10px rgba(0,255,204,.5);animation:setShimmer 3s infinite;}
 .g-immortal{color:#FF2244!important;text-shadow:0 0 12px rgba(255,34,68,.8);animation:immortalFlame 1.5s infinite;}
+.g-legacy{color:#44ff88!important;text-shadow:0 0 8px rgba(68,255,136,.6);animation:legacyGlow 2.5s infinite;}
+@keyframes legacyGlow{0%,100%{color:#44ff88;text-shadow:0 0 8px rgba(68,255,136,.6),0 0 16px rgba(68,255,136,.3);}50%{color:#88ffbb;text-shadow:0 0 14px rgba(68,255,136,.9),0 0 28px rgba(68,255,136,.5);}}
 @keyframes legendaryShimmer{0%,100%{text-shadow:0 0 8px rgba(255,140,0,.5);}50%{text-shadow:0 0 16px rgba(255,140,0,.9),0 0 24px rgba(255,180,0,.4);}}
 @keyframes setShimmer{0%,100%{text-shadow:0 0 8px rgba(0,255,204,.4);}50%{text-shadow:0 0 16px rgba(0,255,204,.8),0 0 24px rgba(0,200,160,.4);}}
 @keyframes immortalFlame{0%{color:#FF2244;text-shadow:0 0 10px rgba(255,34,68,.8),0 0 20px rgba(255,80,0,.4);}33%{color:#FF4400;text-shadow:0 0 18px rgba(255,80,0,.9),0 0 32px rgba(255,34,68,.6),0 0 48px rgba(255,0,0,.3);}66%{color:#CC0033;text-shadow:0 0 14px rgba(200,0,50,.9),0 0 28px rgba(255,34,68,.5);}100%{color:#FF2244;text-shadow:0 0 10px rgba(255,34,68,.8),0 0 20px rgba(255,80,0,.4);}}
@@ -324,7 +326,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .cw-input{flex:1;padding:7px 9px;background:rgba(0,0,0,.3);border:1.5px solid var(--bd2);border-radius:6px;color:var(--tx);font-family:'Noto Sans KR',sans-serif;font-size:11.5px;outline:none;}
 .cw-input:focus{border-color:var(--blue);}
 .cw-input::placeholder{color:var(--tx3);}
-.cw-send{padding:7px 14px;background:linear-gradient(135deg,#0a1830,#152850);border:1px solid var(--blue);color:var(--blue);border-radius:6px;font-size:11px;cursor:pointer;min-width:44px;min-height:44px;touch-action:manipulation;}
+.cw-send{padding:7px 14px;background:linear-gradient(135deg,#0a1830,#152850);border:1px solid var(--blue);color:var(--blue);border-radius:6px;font-size:11px;cursor:pointer;min-width:44px;min-height:44px;touch-action:manipulation;flex-shrink:0;}
 
 /* ADMIN */
 .akpigrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:14px;}
@@ -372,7 +374,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div id="loginScr">
   <div class="lwrap">
     <div class="llogo">⚔ ABYSS WORLD</div>
-    <div class="lsub">DARK FANTASY RPG v2.4</div>
+    <div class="lsub">DARK FANTASY RPG v2.5</div>
     <div style="text-align:center;margin-bottom:18px;margin-top:2px">
       <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener"
         style="display:inline-flex;align-items:center;gap:6px;background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.4);color:#7289da;padding:5px 14px;border-radius:20px;font-size:11px;text-decoration:none;font-family:'IBM Plex Mono',monospace;transition:.2s"
@@ -443,7 +445,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="bossKillBanner" style="display:none;font-size:9px;color:var(--gold);font-family:'IBM Plex Mono',monospace;animation:pulse 1s infinite"></span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:4px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v2.4</span>
+  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:4px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v2.5</span>
   <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener" class="v2badge"
     style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.35);color:#7289da;padding:2px 7px;border-radius:5px;font-size:9px;text-decoration:none;margin-right:6px;white-space:nowrap;font-family:'IBM Plex Mono',monospace"
     title="디스코드 커뮤니티">
@@ -460,49 +462,55 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
 </div>
 
-<!-- 업데이트 팝업 v2.4 -->
+<!-- 업데이트 팝업 v2.5 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:500px;width:90%;max-height:88vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
-      <span style="font-size:12px;color:#FF2244;font-family:'IBM Plex Mono',monospace;background:rgba(255,34,68,.1);border:1px solid rgba(255,34,68,.3);padding:3px 10px;border-radius:5px;font-weight:700">v2.4 — 불멸의 탑 업데이트</span>
+      <span style="font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;background:rgba(68,212,136,.1);border:1px solid rgba(68,212,136,.3);padding:3px 10px;border-radius:5px;font-weight:700">v2.5 — 인챈트 밸런스 패치</span>
     </div>
 
-    <div style="font-size:11px;color:#FF2244;font-weight:700;margin-bottom:6px">🗼 불멸의 탑 (신규 콘텐츠)</div>
-    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--tx3)">Lv.99 전용 100층 타워</b> — 심연에 오염된 중부 대륙 중앙에 솟아오른 탑<br>
-      <b style="color:var(--tx3)">주간 특성 로테이션</b> — 매주 유저 버프 1종 + 몬스터 강화 2종이 교체됨<br>
-      <b style="color:var(--tx3)">불멸의 징수</b> — 층 클리어 시 1개 획득, 100개 모으면 불멸 제련 가능<br>
-      <b style="color:var(--tx3)">드랍</b> — Lv.99 고정 / T5 매우어려움과 동일한 드랍률
+    <!-- LEGACY 시스템 -->
+    <div style="font-size:11px;color:#44ff88;font-weight:700;margin-bottom:6px">✨ LEGACY 인챈트 등급 신설</div>
+    <div style="background:rgba(68,255,136,.05);border:1px solid rgba(68,255,136,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      기존에 던전 드랍으로 자연 인챈트가 붙은 장비는 스크롤 인챈트보다 스탯이 높게 책정되어 있었습니다.<br>
+      <b style="color:var(--tx)">이번 패치로 두 방식의 스탯 공식이 동일하게 통일됩니다.</b><br>
+      단, 이미 보유 중인 자연 인챈트 장비의 스탯은 <b style="color:#44ff88">그대로 유지</b>되며,<br>
+      해당 인챈트에 <span style="color:#44ff88;font-weight:700;animation:legacyGlow 2.5s infinite">LEGACY</span> 배지가 표시됩니다.<br>
+      <span style="font-size:10px;color:var(--tx3)">→ 기존 유저의 장비 스탯은 변하지 않습니다. 새로 드랍되는 장비부터 균형 공식이 적용됩니다.</span>
     </div>
 
-    <div style="font-size:11px;color:#FF2244;font-weight:700;margin-bottom:6px">🔱 불멸 등급 (신규)</div>
-    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--tx3)">대장간 불멸 제련</b> — 징수 100개 + Lv.99 레전더리 무기 → 1% 확률로 <span style="color:#FF2244;font-weight:700;animation:immortalFlame 1.5s infinite">불멸</span> 등급으로 승격<br>
-      <b style="color:var(--tx3)">실패 시</b> 징수 100개 소멸 / 유일 장비는 제련 불가<br>
-      <b style="color:var(--tx3)">제련 성공 시</b> 서버 전체 시스템 공지
+    <!-- 암시장 -->
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🌑 암시장 시스템 개편</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
+      <b style="color:var(--tx3)">글로벌 스케줄</b> — 이제 모든 유저가 같은 시간에 암시장을 만납니다 (서버 공통 시간)<br>
+      <b style="color:var(--tx3)">등장 배너</b> — 암시장이 열리면 게임 화면에 알림이 표시됩니다<br>
+      <b style="color:var(--tx3)">품목 정리</b> — 이상한 사탕 · 쓸데없는 물건 제거
     </div>
 
-    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">⚔ 무기 특성 전면 적용</div>
-    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--tx3)">SPD 연격</b> — 모든 무기: SPD/800 확률 추가타 (상한 25%)<br>
-      <b style="color:var(--tx3)">쌍검 연격</b> — 기본 12% + SPD/800 추가 (상한 40%)<br>
-      <b style="color:var(--tx3)">SPD 선공 회피</b> — 몬스터 반격 회피 (상한 20%)<br>
-      <b style="color:var(--tx3)">활 선공</b> — 15%+SPD 기반 반격 회피 (상한 30%)<br>
-      던전·토벌전·챔프전 전 콘텐츠 적용
+    <!-- 조작 개선 -->
+    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:6px">⌨ 조작 편의성 개선</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
+      <b style="color:var(--tx3)">토벌전 · 챔프전 키보드</b> — Q/W/E/R 또는 1/2/3/4로 전투 행동 선택<br>
+      <b style="color:var(--tx3)">불멸의 탑 W키</b> — 층 클리어 후 W 키로 다음 층 바로 진입<br>
+      <b style="color:var(--tx3)">전투 화면</b> — 적 표시 영역 크기 고정, 버튼이 움직이지 않음
     </div>
 
-    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">📊 밸런스 조정</div>
-    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--tx3)">스킬 발동률</b> — 절대 상한 35% 적용 / 등급별 배율 하향<br>
-      <b style="color:var(--tx3)">인챈트 추출 버그</b> — 재인챈트 시 수치 폭발 현상 수정<br>
-      <b style="color:var(--tx3)">채팅 3탭 분리</b> — 월드 / 시스템 / 귓속말
+    <!-- 버그 수정 -->
+    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">🔧 버그 수정</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
+      <b style="color:var(--tx3)">불멸의 탑</b> — 구간 선택 재도전 시 91층에서 막히던 문제 수정<br>
+      <b style="color:var(--tx3)">파괴방지 스크롤</b> — Enter 연타로 중복 사용되던 버그 수정<br>
+      <b style="color:var(--tx3)">대장간</b> — 장신구(반지·목걸이 등)가 강화 목록에 표시 안 되던 문제 수정<br>
+      <b style="color:var(--tx3)">대장간 · 인챈트</b> — 장신구를 인챈트 스크롤 대상으로 선택 불가하던 문제 수정<br>
+      <b style="color:var(--tx3)">채팅</b> — 전송 버튼이 잘리던 레이아웃 문제 수정
     </div>
 
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🎁 추천 이벤트 보상 상향</div>
-    <div style="font-size:11px;color:var(--tx2);line-height:2.1;margin-bottom:18px;padding-left:4px">
-      신규: 파괴방지 스크롤 3개 + 인챈트 스크롤 + 추출 스크롤 + 1,500G<br>
-      추천인: 3,000G + 인챈트 스크롤 2개 + 재조정 주문서
+    <!-- 판매 -->
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">💰 아이템 판매 개선</div>
+    <div style="font-size:11px;color:var(--tx2);line-height:2;margin-bottom:18px;padding-left:4px">
+      <b style="color:var(--tx3)">장비 전체 일괄판매</b> — 등급 구분 없이 보유 장비 전부를 한 번에 판매 가능<br>
+      <span style="font-size:10px;color:var(--tx3)">※ 잠금(🔒) 아이템과 장착 중인 장비는 제외됩니다</span>
     </div>
 
     <div style="display:flex;gap:8px">
@@ -696,7 +704,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       </div>
       <div id="dungMode" style="display:none"></div>
       <div id="dungLobby" style="display:none"></div>
-      <div id="dungBattle" style="display:none"></div>
+      <div id="dungBattle" style="display:none;overflow-x:hidden"></div>
     </div>
 
     <!-- 불멸의 탑 -->
@@ -1910,7 +1918,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v2.4';
+  const key='abyssworld_update_v2.5';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -1921,7 +1929,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v2.4',expire);
+    localStorage.setItem('abyssworld_update_v2.5',expire);
   }
 };
 
@@ -2694,14 +2702,18 @@ const encHint={
   luk:v=>{const c=Math.round(v*0.06);return c?`→CRIT+${c}`:'';},
 };
   const enchantHtml=[it.prefix,it.suffix].filter(Boolean).map(enc=>{
+    const isLegacy=!enc._fromScroll; // 스크롤 아닌 인챈트 = 레거시
     const skInfo=enc.sk&&SKILLS[enc.sk]?SKILLS[enc.sk]:null;
     const encStats=Object.entries(enc.b||{}).filter(([,v])=>v!==0).map(([k,v])=>{
       const hint=encHint[k]?` <span style="color:var(--tx3);font-size:9px">(${encHint[k](v)})</span>`:'';
       return`${k}${v>0?'+':''}${v}${hint}`;
     }).join('  ');
     const proc=skInfo?Math.round(skInfo.base*gM*(1+(char.int||3)*0.005)*100):0;
-    return`<div style="margin-top:6px;padding:6px 8px;background:rgba(74,143,255,.06);border:1px solid rgba(74,143,255,.2);border-radius:5px;font-size:10.5px">
-      <div style="font-weight:700;color:var(--blue);margin-bottom:2px">${enc.n}</div>
+    return`<div style="margin-top:6px;padding:6px 8px;background:rgba(74,143,255,.06);border:1px solid ${isLegacy?'rgba(68,255,136,.35)':'rgba(74,143,255,.2)'};border-radius:5px;font-size:10.5px">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
+        <span style="font-weight:700;color:${isLegacy?'#44ff88':'var(--blue)'}">${enc.n}</span>
+        ${isLegacy?`<span style="font-size:8px;background:rgba(68,255,136,.15);color:#44ff88;border:1px solid rgba(68,255,136,.4);padding:0 4px;border-radius:3px;animation:legacyGlow 2.5s infinite">LEGACY</span>`:''}
+      </div>
       ${encStats?`<div style="color:var(--tx2);font-size:10px;line-height:1.8">${encStats}</div>`:''}
       ${skInfo?`<div style="color:var(--purple);font-size:10px;margin-top:2px">⚡ ${skInfo.name} — ${skInfo.desc} <span style="color:var(--gold)">(발동 ${proc}%)</span></div>`:''}
     </div>`;
@@ -2901,19 +2913,10 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   const enchProb=[0, 0.3, 0.5, 0.7, 0.9, 1.0][gi]||0;
   const preRaw=(gi>=1&&Math.random()<enchProb)?wRand(prePool.length?prePool:PRE):null;
   const sufRaw=(gi>=1&&Math.random()<enchProb)?wRand(sufPool.length?sufPool:SUF):null;
-  // 인챈트 스탯도 등급 편향 적용
-  function scaleE(b){
-    const scaled={};const lm2=1+(lv-1)*0.055;
-    for(const[k,v]of Object.entries(b)){
-      if(v===0){scaled[k]=0;continue;}
-      const base2=Math.abs(v)*lm2*gradeMult;
-      const mn=Math.max(1,Math.round(base2*biasMin));
-      const mx=Math.round(base2*biasMax);
-      scaled[k]=(v>0?1:-1)*rand(mn,mx);
-    }return scaled;
-  }
-  const pre=preRaw?{n:preRaw.n,sk:preRaw.sk||null,attr:preRaw.attr||null,b:scaleE(preRaw.b)}:null;
-  const suf=sufRaw?{n:sufRaw.n,sk:sufRaw.sk||null,b:scaleE(sufRaw.b)}:null;
+  // ★ 자연 인챈트 스탯 = 스크롤 인챈트와 동일한 공식 (scaleEnchant 사용)
+  const enchGM=ENCHANT_GRADE_MULT[grade]||1;
+  const pre=preRaw?{n:preRaw.n,sk:preRaw.sk||null,attr:preRaw.attr||null,b:scaleEnchant(preRaw.b,lv,enchGM),_naturalEnchant:true}:null;
+  const suf=sufRaw?{n:sufRaw.n,sk:sufRaw.sk||null,b:scaleEnchant(sufRaw.b,lv,enchGM),_naturalEnchant:true}:null;
   const attr=pre?.attr||(gi>=4?pick(Object.keys(ATTR_N)):null);
   const bname=getItemName(base,grade);
   const gAdj=grade==='legendary'?'전설의 ':grade==='epic'?'정예 ':grade==='rare'?'강화된 ':grade==='uncommon'?'좋은 ':'';
@@ -3437,7 +3440,7 @@ function openIM(it){
     window._enchantTarget=function renderEnchantTarget2(){
       // 매번 최신 장비/인벤 상태로 갱신
       const eqItems2=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k],src:'eq'})).filter(x=>x.it);
-      const invItems2=Object.values(inv).filter(i=>i&&i.slot&&['weapon','head','chest','legs','boots','gloves','ring','necklace'].includes(i.slot)&&!i.isEnchantScroll&&!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox).map(i=>({sl:null,it:i,src:'inv'}));
+      const invItems2=Object.values(inv).filter(i=>i&&i.slot&&['weapon','head','chest','legs','boots','gloves','ring','necklace','accessory'].includes(i.slot)&&!i.isEnchantScroll&&!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox).map(i=>({sl:null,it:i,src:'inv'}));
       const allTargets=[...eqItems2,...invItems2];
       const renderItem=(x)=>{
         const key=x.src==='eq'?`eq:${x.sl}`:`inv:${x.it.id}`;
@@ -3630,7 +3633,7 @@ function openIM(it){
       const gm=ENCHANT_GRADE_MULT[eq.grade]||ENCHANT_GRADE_MULT['normal']||1;
       // ★ 추출된 스크롤(enchantData._scaled)은 이미 scaleEnchant 적용됨 — 이중 적용 방지
       const scaledB=enchData._scaled ? enchData.b : scaleEnchant(enchData.b,lv,gm);
-      const enchObj={n:enchData.n,b:scaledB,sk:enchData.sk||null,attr:enchData.attr||null};
+      const enchObj={n:enchData.n,b:scaledB,sk:enchData.sk||null,attr:enchData.attr||null,_fromScroll:true};
       if(isPrefix)eq.prefix=enchObj;else eq.suffix=enchObj;
       const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
       let basePart='';
@@ -3828,8 +3831,8 @@ function openIM(it){
     const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
     return`<span style="font-size:9px;background:${et.color}22;color:${et.color};border:1px solid ${et.color}44;padding:1px 5px;border-radius:4px;margin-left:5px">${et.name}</span>`;
   }
-  const ph=!it.prefix?'':(`<div style="margin-top:7px;padding:7px 9px;background:rgba(74,143,255,.08);border:1px solid rgba(74,143,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--blue);font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}<br>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name}${skillTypeBadge(it.prefix.sk)} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
-  const sh=!it.suffix?'':(`<div style="margin-top:5px;padding:7px 9px;background:rgba(176,96,255,.08);border:1px solid rgba(176,96,255,.18);border-radius:5px;font-size:11px"><span style="color:var(--purple);font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}<br>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name}${skillTypeBadge(it.suffix.sk)} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
+  const ph=!it.prefix?'':(`<div style="margin-top:7px;padding:7px 9px;background:${!it.prefix._fromScroll?'rgba(68,255,136,.06)':'rgba(74,143,255,.08)'};border:1px solid ${!it.prefix._fromScroll?'rgba(68,255,136,.3)':'rgba(74,143,255,.18)'};border-radius:5px;font-size:11px"><div style="display:flex;align-items:center;gap:5px;margin-bottom:2px"><span style="color:${!it.prefix._fromScroll?'#44ff88':'var(--blue)'};font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}${!it.prefix._fromScroll?`<span style="font-size:8px;background:rgba(68,255,136,.15);color:#44ff88;border:1px solid rgba(68,255,136,.4);padding:0 4px;border-radius:3px;animation:legacyGlow 2.5s infinite">LEGACY</span>`:''}</div>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name}${skillTypeBadge(it.prefix.sk)} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
+  const sh=!it.suffix?'':(`<div style="margin-top:5px;padding:7px 9px;background:${!it.suffix._fromScroll?'rgba(68,255,136,.06)':'rgba(176,96,255,.08)'};border:1px solid ${!it.suffix._fromScroll?'rgba(68,255,136,.3)':'rgba(176,96,255,.18)'};border-radius:5px;font-size:11px"><div style="display:flex;align-items:center;gap:5px;margin-bottom:2px"><span style="color:${!it.suffix._fromScroll?'#44ff88':'var(--purple)'};font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}${!it.suffix._fromScroll?`<span style="font-size:8px;background:rgba(68,255,136,.15);color:#44ff88;border:1px solid rgba(68,255,136,.4);padding:0 4px;border-radius:3px;animation:legacyGlow 2.5s infinite">LEGACY</span>`:''}</div>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name}${skillTypeBadge(it.suffix.sk)} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
   const immortalSkH=it._immortalSk&&SKILLS[it._immortalSk]?`<div style="margin-top:5px;padding:7px 9px;background:rgba(255,34,68,.08);border:1px solid rgba(255,34,68,.3);border-radius:5px;font-size:11px"><span style="color:#FF2244;font-weight:700">🔱 불멸 고유 스킬: ${SKILLS[it._immortalSk].name}</span><br><span style="color:var(--tx2)">${SKILLS[it._immortalSk].desc}</span></div>`:'';
   const seth=it.grade==='set'?`<div style="margin-top:6px;padding:6px 9px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:11px;color:var(--st)">◆ ${it.setName}</div>`:'';
 
@@ -3928,6 +3931,8 @@ function openIM(it){
       useBtn.textContent='🛡 사용 (강화 파괴 1회 방지)';
     }
     useBtn.onclick=async()=>{
+      if(useBtn.disabled)return;
+      useBtn.disabled=true;
       const msg=curStack>0
         ?`파괴방지 스크롤을 사용합니다.\n현재: ${curStack}회 → ${curStack+1}회 적용`
         :'파괴방지 스크롤을 사용합니다.\n강화 파괴 시 1회 자동으로 막아줍니다.';
@@ -4019,7 +4024,7 @@ window.townSec=function(id){
   const sb=document.getElementById('secbody');
   if(id==='shop')renderShop(sb);
   else if(id==='sell')renderSell(sb);
-  else if(id==='blackmarket')renderBlackMarket(sb);
+  else if(id==='blackmarket')renderBlackMarket(sb).catch(()=>{});
   else if(id==='forge')renderForge(sb);
   else if(id==='reroll')renderRerollSec(sb);
   else if(id==='auction')renderAuction(sb);
@@ -4086,6 +4091,16 @@ function renderSell(sb){
     </div>
   </div>`;
 
+  const allSellableGear=Object.values(inv).filter(it=>!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id)&&it.slot&&!['scroll'].includes(it.slot));
+  const allGearTotal=allSellableGear.reduce((s,it)=>s+getSellPrice(it),0);
+  const allGearBulkBtn=allSellableGear.length?`<div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.08);padding-top:7px;margin-top:3px">
+    <span style="font-size:10px;color:var(--tx3)">전체 ${allSellableGear.length}개 (잠금 제외)</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:10px;color:var(--gold)">💰${allGearTotal.toLocaleString()}G</span>
+      <button class="btn btn-red btn-xs" onclick="sellAllGear()">전체 판매</button>
+    </div>
+  </div>`:'';
+
   // ─ 등급별 장비 일괄판매 ─
   const gradeGroups={};
   for(const it of gear.filter(i=>!i.isEnchantScroll)){if(!gradeGroups[it.grade])gradeGroups[it.grade]=[];gradeGroups[it.grade].push(it);}
@@ -4144,7 +4159,10 @@ function renderSell(sb){
     <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">인챈트 스크롤 일괄판매</div>
     ${enchants.length?tierBulkHtml:`<div style="font-size:11px;color:var(--tx3);padding:4px 0 8px">인챈트 스크롤 없음</div>`}
     <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">장비 등급별 일괄판매</div>
-    ${bulkHtml||'<div style="font-size:11px;color:var(--tx3);padding:4px 0 8px">판매 가능한 장비 없음</div>'}
+    <div style="background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.25);border-radius:8px;padding:10px 12px;margin-bottom:5px">
+      ${bulkHtml||'<div style="font-size:11px;color:var(--tx3);padding:4px 0">판매 가능한 장비 없음</div>'}
+      ${allGearBulkBtn}
+    </div>
     <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin:10px 0 7px">개별 판매</div>
     ${itemHtml||'<div style="font-size:11px;color:var(--tx3)">아이템 없음</div>'}
     <div style="margin-top:10px;padding:8px;background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.2);border-radius:6px;font-size:10px;color:var(--tx3)">
@@ -4165,6 +4183,18 @@ window.sellItem=async id=>{
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
 };
 
+window.sellAllGear=async()=>{
+  const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
+  const toSell=Object.values(inv).filter(it=>!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id)&&it.slot&&it.slot!=='scroll');
+  if(!toSell.length){toast('판매할 장비 없음');return;}
+  const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
+  if(!confirm(`장비 전체 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·장착 아이템 제외)`))return;
+  for(const it of toSell)delete inv[it.id];
+  char.gold+=total;
+  await saveChar();await saveInv();updateTop();
+  toast(`💰 장비 ${toSell.length}개 전체 판매! +${total.toLocaleString()}G`);
+  const sb=document.getElementById('secbody');if(sb)renderSell(sb);
+};
 window.sellByGrade=async grade=>{
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
   const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id));
@@ -4544,46 +4574,104 @@ const BM_ITEMS=[
   {id:'bm_reroll',  name:'능력치 재분배 스크롤', icon:'🔮', desc:'모든 스탯 포인트를 재분배합니다', price:50000},
   {id:'bm_protect', name:'파괴 방지 스크롤',      icon:'🛡', desc:'강화 실패 시 장비 파괴를 1번 막아줍니다', price:80000},
   {id:'bm_extract', name:'인챈트 추출 스크롤',    icon:'💎', desc:'장비의 인챈트를 스크롤로 추출합니다', price:120000},
-  {id:'bm_candy',   name:'이상한 사탕',            icon:'🍬', desc:'레벨이 +1 오르거나 -1 내려갑니다 (50%)', price:30000},
   {id:'bm_deathward',name:'죽음 방지 부적',        icon:'🧿', desc:'매우 어려움 사망 시 아이템 손실 1회 방지', price:150000},
-  {id:'bm_junk',    name:'어딘가 쓸데없는 물건',  icon:'🪣', desc:'...팔면 약간의 골드는 된다', price:9999},
 ];
-function getBMSchedule(){
-  const key='bm_schedule';const today=new Date().toDateString();
+
+// ★ 암시장 글로벌 스케줄 (Firebase 기반 — 모든 유저 동일한 시간)
+let _bmScheduleCache=null;
+async function getBMSchedule(){
+  const today=new Date().toDateString();
+  if(_bmScheduleCache&&_bmScheduleCache.date===today)return _bmScheduleCache;
   try{
-    const s=sessionStorage.getItem(key);
-    if(s){const d=JSON.parse(s);if(d.date===today)return d;}
-  }catch{}
-  const base=new Date();base.setHours(0,0,0,0);
-  const hours=[rand(6,10),rand(11,15),rand(16,21)];
-  const slots=hours.map(h=>base.getTime()+h*3600000+rand(0,3600000));
-  const d={date:today,slots};
-  try{sessionStorage.setItem(key,JSON.stringify(d));}catch{}
-  return d;
+    const sn=await get(ref(db,'blackmarket/schedule'));
+    const d=sn.val();
+    if(d&&d.date===today){_bmScheduleCache=d;return d;}
+    // 오늘 스케줄 없으면 생성 (최초 접속자가 생성)
+    const base=new Date();base.setHours(0,0,0,0);
+    // 시드: 날짜 기반 고정 랜덤 (전 유저 동일)
+    const seed=base.getTime();
+    function seededRand(s,mn,mx){let x=Math.sin(s)*10000;x=x-Math.floor(x);return mn+Math.floor(x*(mx-mn+1));}
+    const hours=[seededRand(seed+1,6,10),seededRand(seed+2,11,15),seededRand(seed+3,16,21)];
+    const slots=hours.map((h,i)=>base.getTime()+h*3600000+seededRand(seed+10+i,0,3599)*1000);
+    const nd={date:today,slots};
+    await set(ref(db,'blackmarket/schedule'),nd);
+    _bmScheduleCache=nd;
+    return nd;
+  }catch(e){
+    // Firebase 실패 시 로컬 폴백
+    if(_bmScheduleCache)return _bmScheduleCache;
+    const base=new Date();base.setHours(0,0,0,0);
+    const seed=base.getTime();
+    function seededRand(s,mn,mx){let x=Math.sin(s)*10000;x=x-Math.floor(x);return mn+Math.floor(x*(mx-mn+1));}
+    const hours=[seededRand(seed+1,6,10),seededRand(seed+2,11,15),seededRand(seed+3,16,21)];
+    const slots=hours.map((h,i)=>base.getTime()+h*3600000+seededRand(seed+10+i,0,3599)*1000);
+    return{date:today,slots};
+  }
 }
-function isBMActive(){
-  const sched=getBMSchedule();const now=Date.now();const DUR=30*60*1000;
+async function isBMActive(){
+  const sched=await getBMSchedule();const now=Date.now();const DUR=30*60*1000;
   return sched.slots.some(s=>now>=s&&now<s+DUR);
 }
-function initBlackMarket(){
-  updateBMCard();
-  setInterval(updateBMCard,30000);
+// 암시장 배너 표시 (이미 표시 중이면 무시)
+let _bmBannerShown=false;
+function showBMBanner(){
+  if(_bmBannerShown)return;
+  _bmBannerShown=true;
+  const overlay=document.createElement('div');
+  overlay.id='bmBannerOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;display:flex;align-items:center;justify-content:center;animation:fadeIn .4s ease';
+  overlay.innerHTML=`
+    <div style="text-align:center;user-select:none" onclick="document.getElementById('bmBannerOverlay').remove();_bmBannerShown=false;navTo('town');">
+      <div style="font-family:'Cinzel',serif;font-size:clamp(32px,8vw,64px);font-weight:900;
+        background:linear-gradient(135deg,#ffd700,#ff8c00,#ffd700);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+        text-shadow:none;filter:drop-shadow(0 0 24px rgba(255,200,0,.8));
+        animation:bmBannerPulse 1.5s infinite;letter-spacing:2px;padding:0 20px;line-height:1.2">
+        🌑 암시장 등장 🌑
+      </div>
+      <div style="margin-top:12px;font-size:14px;color:rgba(255,200,100,.8);font-family:'Noto Sans KR',sans-serif">
+        30분간만 열립니다 — 탭하여 이동
+      </div>
+      <div style="margin-top:6px;font-size:11px;color:rgba(255,255,255,.35)">화면을 탭하면 닫힙니다</div>
+    </div>`;
+  document.body.appendChild(overlay);
+  // 5초 후 자동 닫힘
+  setTimeout(()=>{const el=document.getElementById('bmBannerOverlay');if(el){el.style.animation='fadeOut .5s ease forwards';setTimeout(()=>el.remove(),500);}},5000);
 }
-function updateBMCard(){
+// ★ 암시장 CSS 추가
+if(!document.getElementById('_bmBannerStyle')){
+  const st=document.createElement('style');st.id='_bmBannerStyle';
+  st.textContent='@keyframes bmBannerPulse{0%,100%{filter:drop-shadow(0 0 24px rgba(255,200,0,.8));}50%{filter:drop-shadow(0 0 48px rgba(255,200,0,1)) drop-shadow(0 0 80px rgba(255,140,0,.6));}}@keyframes fadeOut{to{opacity:0;}}';
+  document.head.appendChild(st);
+}
+async function initBlackMarket(){
+  await updateBMCard();
+  // 접속 시 이미 열려있으면 배너 표시
+  if(await isBMActive())showBMBanner();
+  // 30초마다 체크 + 배너 표시
+  let _prevBMActive=await isBMActive();
+  setInterval(async()=>{
+    await updateBMCard();
+    const nowActive=await isBMActive();
+    if(nowActive&&!_prevBMActive)showBMBanner();
+    _prevBMActive=nowActive;
+  },30000);
+}
+async function updateBMCard(){
   const card=document.getElementById('blackmarket-card');
   const timer=document.getElementById('blackmarket-timer');
   if(!card)return;
-  const active=isBMActive();
+  const active=await isBMActive();
   card.style.display=active?'':'none';
   if(active&&timer){
-    const sched=getBMSchedule();const now=Date.now();const DUR=30*60*1000;
+    const sched=await getBMSchedule();const now=Date.now();const DUR=30*60*1000;
     const slot=sched.slots.find(s=>now>=s&&now<s+DUR);
     const mins=slot?Math.ceil((slot+DUR-now)/60000):0;
     timer.textContent=`지금 오픈! 남은 ${mins}분`;
   }
 }
-function renderBlackMarket(sb){
-  if(!isBMActive()){
+async function renderBlackMarket(sb){
+  if(!await isBMActive()){
     sb.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--tx3)">
       <div style="font-size:36px;margin-bottom:12px">🌑</div>
       <div style="font-family:'Cinzel',serif;font-size:15px;color:var(--tx2);margin-bottom:8px">암시장이 닫혀 있습니다</div>
@@ -4610,7 +4698,7 @@ function renderBlackMarket(sb){
     </div>`;
 }
 window.bmBuy=async(i)=>{
-  if(!isBMActive()){toast('암시장이 닫혔습니다!');return;}
+  if(!await isBMActive()){toast('암시장이 닫혔습니다!');return;}
   const item=BM_ITEMS[i];
   if(char.gold<item.price){toast('골드 부족');return;}
   if(!confirm(`${item.name}을 ${item.price.toLocaleString()}G에 구매하시겠습니까?`))return;
@@ -4632,28 +4720,9 @@ window.bmBuy=async(i)=>{
   }else if(item.id==='bm_extract'){
     const si={id:gId(),name:'인챈트 추출 스크롤',icon:'💎',isExtractScroll:true,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',slot:'scroll',stats:{},_v:2};
     await addItem(si);await saveInv();toast('💎 인챈트 추출 스크롤 획득!');
-  }else if(item.id==='bm_candy'){
-    if(Math.random()<0.5){
-      char.level=Math.min(99,char.level+1);char.exp=0;char.expNext=expForLevel(char.level);
-      char.maxHp+=1;char.baseAtk+=0.15;char.baseDef+=0.08;char.baseSpd+=0.12;
-      char.hp=Math.min(char.hp+1,char.maxHp);
-      toast('🍬 레벨 +1! 🎉');
-    }else{
-      if(char.level>1){
-        char.level--;char.exp=0;char.expNext=expForLevel(char.level);
-        char.maxHp=Math.max(1,char.maxHp-1);char.baseAtk=Math.max(1,char.baseAtk-0.15);
-        char.baseDef=Math.max(0,char.baseDef-0.08);char.baseSpd=Math.max(1,char.baseSpd-0.12);
-        char.hp=Math.min(char.hp,char.maxHp);
-      }
-      toast('🍬 레벨 -1... 😢');
-    }
-    renderChar();
   }else if(item.id==='bm_deathward'){
     char._deathWard=(char._deathWard||0)+1;
     toast('🧿 죽음 방지 부적 장착! 아이템 손실 1회 방지.',4000);
-  }else if(item.id==='bm_junk'){
-    const sellGold=rand(5000,20000);char.gold+=sellGold;
-    toast(`🪣 쓸데없는 물건을 팔았더니 ${sellGold.toLocaleString()}G이 됐다.`);
   }
   await saveChar();updateTop();
 };
@@ -4713,7 +4782,7 @@ function renderForge(sb){
   }).join('');
 
   // ★ 인벤토리 강화 가능 아이템
-  const invGear=Object.values(inv).filter(i=>i&&i.slot&&['weapon','head','chest','legs','boots','gloves','ring','necklace'].includes(i.slot)&&!i.isEnchantScroll&&!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox);
+  const invGear=Object.values(inv).filter(i=>i&&i.slot&&['weapon','head','chest','legs','boots','gloves','ring','necklace','accessory'].includes(i.slot)&&!i.isEnchantScroll&&!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isSubjBox);
   const invRows=invGear.map(it=>{
     const enh=it.enhance||0;
     const maxed=enh>=9;
@@ -5068,7 +5137,7 @@ async function renderAuction(sb){
                     })()}
                     ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<div style="font-size:9.5px;color:var(--gold);margin-top:2px">⚡ ${SKILLS[it.enchantData.sk].name}${skillTypeBadge(it.enchantData.sk)} — ${SKILLS[it.enchantData.sk].desc}</div>`:''}
                   </div>`:''}
-                  ${!it.isEnchantScroll&&(it.prefix||it.suffix)?`<div style="font-size:9.5px;color:var(--tx3);margin-bottom:2px">${it.prefix?`[접두:${it.prefix.n}]`:''} ${it.suffix?`[접미:${it.suffix.n}]`:''}</div>`:''}
+                  ${!it.isEnchantScroll&&(it.prefix||it.suffix)?`<div style="font-size:9.5px;color:var(--tx3);margin-bottom:2px">${it.prefix?`[접두:${it.prefix.n}${!it.prefix._fromScroll?' <span style="color:#44ff88;font-size:8px">L</span>':''}]`:''} ${it.suffix?`[접미:${it.suffix.n}${!it.suffix._fromScroll?' <span style="color:#44ff88;font-size:8px">L</span>':''}]`:''}</div>`:''}
                   ${(()=>{
                     if(it.isEnchantScroll)return '';
                     const skList=[];
@@ -6406,12 +6475,9 @@ async function dungeonClear(){
       const biasMin=0.6+(gi*0.07),biasMax=1.0+(gi*0.08);
       const lm2=1+(dropLv-1)*0.055;
       const gradeMult=GRADES[drop.grade]?.mult||1;
-      function scaleE2(b){const sc={};for(const[k,v]of Object.entries(b)){if(v===0){sc[k]=0;continue;}const base2=Math.abs(v)*lm2*gradeMult;const mn=Math.max(1,Math.round(base2*biasMin));const mx=Math.round(base2*biasMax);sc[k]=(v>0?1:-1)*(mn+Math.floor(Math.random()*(mx-mn+1)));}return sc;}
-      const maxEnchTier=Math.min(5,gi+1);
-      const prePool2=PRE.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
-      const sufPool2=SUF.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
-      if(!drop.prefix&&prePool2.length){const pr=prePool2[Math.floor(Math.random()*prePool2.length)];drop.prefix={n:pr.n,sk:pr.sk||null,attr:pr.attr||null,b:scaleE2(pr.b)};}
-      if(!drop.suffix&&sufPool2.length){const su=sufPool2[Math.floor(Math.random()*sufPool2.length)];drop.suffix={n:su.n,sk:su.sk||null,b:scaleE2(su.b)};}
+      const enchGM2=ENCHANT_GRADE_MULT[drop.grade]||1;
+      if(!drop.prefix&&prePool2.length){const pr=prePool2[Math.floor(Math.random()*prePool2.length)];drop.prefix={n:pr.n,sk:pr.sk||null,attr:pr.attr||null,b:scaleEnchant(pr.b,dropLv,enchGM2),_naturalEnchant:true};}
+      if(!drop.suffix&&sufPool2.length){const su=sufPool2[Math.floor(Math.random()*sufPool2.length)];drop.suffix={n:su.n,sk:su.sk||null,b:scaleEnchant(su.b,dropLv,enchGM2),_naturalEnchant:true};}
       if(drop.prefix&&drop.suffix){const pre=drop.prefix,suf=drop.suffix;drop.name=(pre.n?' '+pre.n:'')+' '+(suf.n?' '+suf.n:'')+' '+drop.name.replace(pre.n||'','').replace(suf.n||'','').trim();}
     }
     if(drop){
@@ -6464,8 +6530,8 @@ async function dungeonClear(){
       if(actArea)actArea.remove();
       const btn=document.createElement('div');
       btn.style.cssText='padding:12px;display:flex;gap:8px;flex-direction:column';
-      btn.innerHTML= nextF<=IT_TOTAL_FLOORS && !isFreeMode2
-        ?`<button class="btn btn-red" onclick="startITBattle(${nextF})">⚔ ${nextF}층 도전</button>
+      btn.innerHTML= nextF<=IT_TOTAL_FLOORS
+        ?`<button class="btn btn-red" onclick="startITBattle(${nextF})">⚔ ${nextF}층 도전 <span style="font-size:10px;opacity:.6">[W]</span></button>
            <button class="btn btn-ghost btn-sm" onclick="exitBattle()">← 탑으로</button>`
         :`<button class="btn btn-ghost" onclick="exitBattle()">📋 구간 선택으로</button>`;
       db2.appendChild(btn);
@@ -6682,7 +6748,7 @@ function renderBattle(){
     <!-- Timer -->
     ${!isSolo&&battle.phase===1?`<div class="timer-bar"><div class="timer-fill" id="battleTimerBar" style="width:100%"></div></div><div style="text-align:right;font-size:10px;color:var(--tx3);margin-bottom:5px" id="battleTimerTxt">${battle.timerVal}s</div>`:''}
     <!-- Enemies -->
-    <div style="margin-bottom:10px">${aliveM.map(m=>`
+    <div style="margin-bottom:10px;min-height:80px;max-height:220px;overflow-y:auto;border-radius:7px">${aliveM.map(m=>`
       <div class="ebox">
         <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
           <span class="ename-el ${m.hidden?'hidden':''} ${m.isBoss?'boss':''}">${m.name}</span>
@@ -6706,7 +6772,7 @@ function renderBattle(){
       </div>`;}).join('')}
     </div>
     <!-- Action buttons (show if alive and in phase 1) -->
-    <div style="position:sticky;bottom:0;background:var(--sf);border-top:1px solid var(--bd);padding:8px 0 4px;margin-top:8px">
+    <div style="position:sticky;bottom:0;background:var(--sf);border-top:1px solid var(--bd);padding:8px 0 4px;margin-top:8px;z-index:10">
     ${myP&&myP.status==='alive'&&battle.phase===1&&!myP.actionChosen?`
       <div class="act-btns">
         <button id="actbtn-atk" class="act-btn act-atk" onclick="chooseAction('attack')">⚔ 공격<br><span style="font-size:9px;opacity:.6">[Q / 1]</span></button>
@@ -6807,6 +6873,13 @@ function startChat(){
       if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
       if(!battle||battle.done)return;
       if(battle.phase!==1)return;
+      // ★ 불멸의 탑 다음 층 — W키 (battle.done 상태에서 작동)
+      if((e.key==='w'||e.key==='W')&&battle&&battle.done&&battle.mode==='immortaltower'){
+        e.preventDefault();
+        const db2=document.getElementById('dungBattle');
+        if(db2){const nextBtn=db2.querySelector('button.btn-red');if(nextBtn&&!nextBtn.disabled)nextBtn.click();}
+        return;
+      }
       const myP=battle.players?.find(p=>p.id===charId);
       if(!myP||myP.status!=='alive'||myP.actionChosen)return;
       let chosen=null;
@@ -6820,6 +6893,18 @@ function startChat(){
         const btn=document.getElementById(btnMap[chosen]);
         if(btn&&!btn.disabled)btn.click();
         else if(typeof chooseAction==='function')chooseAction(chosen);
+      }
+      // ★ 토벌전 키보드
+      const subjMap={attack:'sbtn-atk',defend:'sbtn-def',heal:'sbtn-heal',flee:null};
+      if(chosen&&typeof window.subjAction==='function'){
+        const sb=document.getElementById(subjMap[chosen]);
+        if(sb&&!sb.disabled)sb.click();
+      }
+      // ★ 챔프전 키보드
+      const champMap={attack:'cbtn-atk',defend:'cbtn-def',heal:'cbtn-heal',flee:null};
+      if(chosen&&typeof window.champAction==='function'){
+        const cb=document.getElementById(champMap[chosen]);
+        if(cb&&!cb.disabled)cb.click();
       }
     });
   }
