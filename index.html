@@ -6890,9 +6890,11 @@ function startChat(){
 
       // ★ 토벌전 키보드 (battle 없어도 독립 동작)
       if(chosen&&typeof window.subjAction==='function'){
-        const subjMap={attack:'sbtn-atk',defend:'sbtn-def',heal:'sbtn-heal',flee:null};
+        const subjMap={attack:'sbtn-atk',defend:'sbtn-def',heal:'sbtn-heal',flee:'sbtn-flee'};
         const sb=document.getElementById(subjMap[chosen]);
         if(sb&&!sb.disabled){e.preventDefault();sb.click();return;}
+        // flee는 별도 함수
+        if(chosen==='flee'&&typeof window.subjFlee==='function'&&document.getElementById('sbtn-atk')){e.preventDefault();window.subjFlee();return;}
       }
 
       // ★ 챔프전 키보드 (battle 없어도 독립 동작)
@@ -6900,6 +6902,8 @@ function startChat(){
         const champMap={attack:'cbtn-atk',defend:'cbtn-def',heal:'cbtn-heal',flee:null};
         const cb=document.getElementById(champMap[chosen]);
         if(cb&&!cb.disabled){e.preventDefault();cb.click();return;}
+        // flee는 exitChampBattle
+        if(chosen==='flee'&&document.getElementById('cbtn-atk')){e.preventDefault();if(typeof window.exitChampBattle==='function')window.exitChampBattle();return;}
       }
 
       // ★ 던전 전투 키보드
@@ -9209,10 +9213,10 @@ window.enterSubjBattle=function(){
       <div class="clog" id="subjLog" style="max-height:200px;margin-bottom:10px">${subjLog.map(l=>`<div>${l}</div>`).join('')}</div>
       <!-- Action Buttons -->
       ${!done?`<div class="act-btns">
-        <button class="act-btn act-atk" id="sbtn-atk" onclick="subjAction('attack')">⚔️ 공격</button>
-        <button class="act-btn act-def" id="sbtn-def" onclick="subjAction('defend')">🛡 방어</button>
-        <button class="act-btn act-heal" id="sbtn-heal" onclick="subjAction('heal')">💊 회복 (${myPotions}개)</button>
-        <button class="act-btn act-flee" onclick="subjFlee()">💨 도망</button>
+        <button class="act-btn act-atk" id="sbtn-atk" onclick="subjAction('attack')">⚔️ 공격<br><span style="font-size:9px;opacity:.6">[Q / 1]</span></button>
+        <button class="act-btn act-def" id="sbtn-def" onclick="subjAction('defend')">🛡 방어<br><span style="font-size:9px;opacity:.6">[W / 2]</span></button>
+        <button class="act-btn act-heal" id="sbtn-heal" onclick="subjAction('heal')">💊 회복 (${myPotions}개)<br><span style="font-size:9px;opacity:.6">[E / 3]</span></button>
+        <button class="act-btn act-flee" onclick="subjFlee()">💨 도망<br><span style="font-size:9px;opacity:.6">[R / 4]</span></button>
       </div>`:`<div style="text-align:center;padding:12px 0">
         <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:10px">전투 종료 — 데미지: <span style="color:var(--red)">${totalDmgDealt.toLocaleString()}</span></div>
         <button class="btn btn-gold" style="padding:10px 28px" onclick="exitSubjBattle()">← 토벌전으로 돌아가기</button>
@@ -9620,10 +9624,10 @@ window.enterChampBattle=async function(){
       <!-- Log -->
       <div class="clog" id="champLog" style="max-height:220px;margin-bottom:10px">${champLog.map(l=>`<div>${l}</div>`).join('')}</div>
       ${!champDone?`<div class="act-btns">
-        <button class="act-btn act-atk" id="cbtn-atk" onclick="champAction('attack')">⚔️ 공격</button>
-        <button class="act-btn act-def" id="cbtn-def" onclick="champAction('defend')">🛡 방어</button>
-        <button class="act-btn act-heal" id="cbtn-heal" onclick="champAction('heal')">💊 회복 (${myPotions}개)</button>
-        <button class="act-btn act-flee" onclick="exitChampBattle()">💨 도망</button>
+        <button class="act-btn act-atk" id="cbtn-atk" onclick="champAction('attack')">⚔️ 공격<br><span style="font-size:9px;opacity:.6">[Q / 1]</span></button>
+        <button class="act-btn act-def" id="cbtn-def" onclick="champAction('defend')">🛡 방어<br><span style="font-size:9px;opacity:.6">[W / 2]</span></button>
+        <button class="act-btn act-heal" id="cbtn-heal" onclick="champAction('heal')">💊 회복 (${myPotions}개)<br><span style="font-size:9px;opacity:.6">[E / 3]</span></button>
+        <button class="act-btn act-flee" onclick="exitChampBattle()">💨 도망<br><span style="font-size:9px;opacity:.6">[R / 4]</span></button>
       </div>`:`<div style="text-align:center;padding:12px 0">
         <button class="btn btn-gold" style="padding:10px 28px" onclick="exitChampBattle()">← 챔프전으로 돌아가기</button>
       </div>`}`;
