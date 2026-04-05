@@ -2927,8 +2927,8 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   return{id:gId(),name:fullN,baseName:bname,baseId:base.id,slot:base.slot,hand:base.hand||null,
     grade,gradeName:GRADES[grade].name,gradeColor:GRADES[grade].color,
     stats,reqLv,_v:2,
-    prefix:pre?{n:pre.n,b:pre.b,sk:pre.sk||null,attr:pre.attr||null}:null,
-    suffix:suf?{n:suf.n,b:suf.b,sk:suf.sk||null}:null,
+    prefix:pre?{n:pre.n,b:pre.b,sk:pre.sk||null,attr:pre.attr||null,_naturalEnchant:true}:null,
+    suffix:suf?{n:suf.n,b:suf.b,sk:suf.sk||null,_naturalEnchant:true}:null,
     attr};
 }
 // ★ forgeWard/deathWard 분리 마이그레이션 (_fwMig)
@@ -3987,11 +3987,11 @@ window.useEnchantScroll=async(scrollId,slotKey,type)=>{
   const gradeMult=ENCHANT_GRADE_MULT[eq.grade]||1;
   if(type==='pre'){
     const en=wRand(PRE);
-    eq.prefix={n:en.n,b:scaleEnchant(en.b,lv,gradeMult),sk:en.sk||null,attr:en.attr||null};
+    eq.prefix={n:en.n,b:scaleEnchant(en.b,lv,gradeMult),sk:en.sk||null,attr:en.attr||null,_fromScroll:true};
     toast(`✨ ${eq.name}에 접두 [${en.n}] 부여!`);
   }else{
     const en=wRand(SUF);
-    eq.suffix={n:en.n,b:scaleEnchant(en.b,lv,gradeMult),sk:en.sk||null};
+    eq.suffix={n:en.n,b:scaleEnchant(en.b,lv,gradeMult),sk:en.sk||null,_fromScroll:true};
     toast(`✨ ${eq.name}에 접미 [${en.n}] 부여!`);
   }
   delete inv[scrollId];
@@ -6519,17 +6519,17 @@ async function dungeonClear(){
 
     // ★ done 처리 — navLock 해제 + action 버튼 제거
     battle.done=true;
+    battle.ended=true; // ★ renderBattle 재진입 차단
     if(battle.timer){clearInterval(battle.timer);battle.timer=null;}
     updateNavLock();
 
     // 클리어 후 버튼
-    const isFreeMode2=(Math.max(prevFloor,floor))>=IT_TOTAL_FLOORS;
     const nextF=floor+1;
     setTimeout(()=>{
       const db2=document.getElementById('dungBattle');
       if(!db2)return;
-      const actArea=db2.querySelector('[style*="sticky"]');
-      if(actArea)actArea.remove();
+      // ★ 액션 영역 전체 제거 (sticky 선택자로 못 찾는 경우 대비)
+      db2.querySelectorAll('[style*="sticky"]').forEach(el=>el.remove());
       const btn=document.createElement('div');
       btn.style.cssText='padding:12px;display:flex;gap:8px;flex-direction:column';
       btn.innerHTML= nextF<=IT_TOTAL_FLOORS
@@ -7835,7 +7835,7 @@ window.adminGiveItem=async function(cid){
     const preData=PRE.find(p=>p.n===preN);
     if(preData){
       const gm=ENCHANT_GRADE_MULT[grade]||1;
-      it.prefix={n:preData.n,b:scaleEnchant(preData.b,lv,gm),sk:preData.sk||null,attr:preData.attr||null};
+      it.prefix={n:preData.n,b:scaleEnchant(preData.b,lv,gm),sk:preData.sk||null,attr:preData.attr||null,_fromScroll:true};
     }
   }
   // 접미 적용
@@ -7843,7 +7843,7 @@ window.adminGiveItem=async function(cid){
     const sufData=SUF.find(s=>s.n===sufN);
     if(sufData){
       const gm=ENCHANT_GRADE_MULT[grade]||1;
-      it.suffix={n:sufData.n,b:scaleEnchant(sufData.b,lv,gm),sk:sufData.sk||null};
+      it.suffix={n:sufData.n,b:scaleEnchant(sufData.b,lv,gm),sk:sufData.sk||null,_fromScroll:true};
     }
   }
 
