@@ -1127,7 +1127,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,sendPasswordResetEmail,updatePassword,EmailAuthProvider,reauthenticateWithCredential}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-import{getDatabase,ref,set,push,onValue,get,remove,serverTimestamp,update,onDisconnect}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+import{getDatabase,ref,set,push,onValue,get,remove,serverTimestamp,update,onDisconnect,query,limitToLast,orderByKey}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 const app=initializeApp({apiKey:"AIzaSyAUkBrBb9UFj-kC45vJ-T3eiFwh8tCT1Hw",authDomain:"game1-ea736.firebaseapp.com",databaseURL:"https://game1-ea736-default-rtdb.firebaseio.com",projectId:"game1-ea736",storageBucket:"game1-ea736.firebasestorage.app",messagingSenderId:"277606211416",appId:"1:277606211416:web:1cf3a4bbb5780ecd708f2d"});
 const auth=getAuth(app),db=getDatabase(app),gp=new GoogleAuthProvider();
@@ -5294,7 +5294,7 @@ async function renderAuction(sb){
   renderAuctionTab('browse');
   // 실시간 업데이트 — 초기 렌더 완료 후 연결 (즉시 발동 방지)
   setTimeout(()=>{
-    _auctionUnsub=onValue(ref(db,'auction'),()=>{
+    _auctionUnsub=onValue(query(ref(db,'auction'),orderByKey(),limitToLast(50)),()=>{
       const currentTab=document.querySelector('#atab-browse.btn-gold')?'browse':
                        document.querySelector('#atab-mine.btn-gold')?'mine':'sell';
       if(document.getElementById('auctionContent'))renderAuctionTab(currentTab);
@@ -6835,15 +6835,15 @@ const cwUnsub={world:null,party:null,whisper:null,system:null};
 function startChat(){
   if(cwActive)return; // ★ 이미 초기화된 경우 중복 등록 방지
   cwActive=true;
-  // 월드 채팅 리스너 1회만 등록
+  // 월드 채팅 리스너 1회만 등록 — 최근 100개만
   if(cwUnsub.world)cwUnsub.world();
-  cwUnsub.world=onValue(ref(db,'chat/world'),sn=>{
+  cwUnsub.world=onValue(query(ref(db,'chat/world'),orderByKey(),limitToLast(100)),sn=>{
     if(cwMode!=='world')return;
     renderChatMsgs(sn.val()||{},'world');
   });
-  // ★ 시스템 채널 리스너 — 항상 감시, 탭 안 봐도 뱃지 갱신
+  // ★ 시스템 채널 리스너 — 최근 50개만
   if(cwUnsub.system)cwUnsub.system();
-  cwUnsub.system=onValue(ref(db,'chat/system'),sn=>{
+  cwUnsub.system=onValue(query(ref(db,'chat/system'),orderByKey(),limitToLast(50)),sn=>{
     const msgs=sn.val()||{};
     if(cwMode==='system'){
       renderChatMsgs(msgs,'system');
@@ -6941,7 +6941,7 @@ window.cwTab=function(m){
     get(ref(db,'chat/system')).then(sn=>renderChatMsgs(sn.val()||{},'system'));
   }else if(m==='whisper'){
     if(cwUnsub.whisper)cwUnsub.whisper();
-    cwUnsub.whisper=onValue(ref(db,`chat/whisper/${charId}`),sn=>{
+    cwUnsub.whisper=onValue(query(ref(db,`chat/whisper/${charId}`),orderByKey(),limitToLast(50)),sn=>{
       if(cwMode==='whisper')renderChatMsgs(sn.val()||{},'whisper');
     });
   }
@@ -8970,7 +8970,7 @@ function startSubjugationWatcher(){
     }
   });
   // Watch this week's subjugation ranking for chat title
-  onValue(ref(db,'subjugation/weeklyRanking'),sn=>{
+  onValue(query(ref(db,'subjugation/weeklyRanking'),orderByKey(),limitToLast(50)),sn=>{
     const data=sn.val()||{};
     const sorted=Object.entries(data).sort((a,b)=>(b[1].totalDmg||0)-(a[1].totalDmg||0));
     const TITLE_COLORS=['#ffd700','#c0c0c0','#cd7f32'];
