@@ -7127,11 +7127,12 @@ function getITWeekRotation(){
   const d=new Date();
   const mon=new Date(d);mon.setHours(0,0,0,0);
   mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+  // ★ getITWeekKey와 동일한 월요일 기준 seed
   const seed=Math.floor(mon.getTime()/(7*24*60*60*1000));
-  // 시드로 인덱스 결정 (항상 같은 주에 같은 특성)
-  const pIdx=seed%IT_PLAYER_BUFFS.length;
-  const mIdx1=seed%IT_MONSTER_DEBUFFS.length;
-  const mIdx2=(seed+3)%IT_MONSTER_DEBUFFS.length===mIdx1?(seed+4)%IT_MONSTER_DEBUFFS.length:(seed+3)%IT_MONSTER_DEBUFFS.length;
+  const weekNum=mon.getFullYear()*100+mon.getMonth()*10+Math.ceil(mon.getDate()/7);
+  const pIdx=weekNum%IT_PLAYER_BUFFS.length;
+  const mIdx1=weekNum%IT_MONSTER_DEBUFFS.length;
+  const mIdx2=(weekNum+3)%IT_MONSTER_DEBUFFS.length===mIdx1?(weekNum+4)%IT_MONSTER_DEBUFFS.length:(weekNum+3)%IT_MONSTER_DEBUFFS.length;
   return{
     player:IT_PLAYER_BUFFS[pIdx],
     monsters:[IT_MONSTER_DEBUFFS[mIdx1],IT_MONSTER_DEBUFFS[mIdx2]]
