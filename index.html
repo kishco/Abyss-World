@@ -320,11 +320,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .cw-time{font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--tx3);margin-left:5px;}
 .cw-text{font-size:11px;color:var(--tx);line-height:1.5;margin-top:1px;}
 .cw-whisper-tag{font-size:9px;color:var(--purple);margin-right:4px;}
-.cw-inp-area{padding:7px;border-top:1px solid var(--bd);flex-shrink:0;}
+.cw-inp-area{padding:7px;border-top:1px solid var(--bd);flex-shrink:0;box-sizing:border-box;width:100%;overflow:hidden;}
 .cw-whisper-row{display:flex;gap:4px;margin-bottom:4px;}
 .cw-winput{flex:1;padding:4px 8px;background:rgba(0,0,0,.3);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10.5px;outline:none;}
 .cw-winput::placeholder{color:var(--tx3);}
-.cw-row{display:flex;gap:5px;}
+.cw-row{display:flex;gap:5px;min-width:0;}
 .cw-input{flex:1;padding:7px 9px;background:rgba(0,0,0,.3);border:1.5px solid var(--bd2);border-radius:6px;color:var(--tx);font-family:'Noto Sans KR',sans-serif;font-size:11.5px;outline:none;}
 .cw-input:focus{border-color:var(--blue);}
 .cw-input::placeholder{color:var(--tx3);}
@@ -2704,7 +2704,7 @@ const encHint={
   luk:v=>{const c=Math.round(v*0.06);return c?`→CRIT+${c}`:'';},
 };
   const enchantHtml=[it.prefix,it.suffix].filter(Boolean).map(enc=>{
-    const isLegacy=!enc._fromScroll&&!enc._naturalEnchant;
+    const isLegacy=enc._legacy===true;
     const skInfo=enc.sk&&SKILLS[enc.sk]?SKILLS[enc.sk]:null;
     const encStats=Object.entries(enc.b||{}).filter(([,v])=>v!==0).map(([k,v])=>{
       const hint=encHint[k]?` <span style="color:var(--tx3);font-size:9px">(${encHint[k](v)})</span>`:'';
@@ -2926,7 +2926,7 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   const reqLv=Math.max(1,lv);
   return{id:gId(),name:fullN,baseName:bname,baseId:base.id,slot:base.slot,hand:base.hand||null,
     grade,gradeName:GRADES[grade].name,gradeColor:GRADES[grade].color,
-    stats,reqLv,_v:2,
+    stats,reqLv,_v:2,_esv:ENCHANT_STAT_VER,
     prefix:pre?{n:pre.n,b:pre.b,sk:pre.sk||null,attr:pre.attr||null,_naturalEnchant:true}:null,
     suffix:suf?{n:suf.n,b:suf.b,sk:suf.sk||null,_naturalEnchant:true}:null,
     attr};
@@ -3235,20 +3235,21 @@ const ENCHANT_STAT_MAP={
 };
 
 // ★ 이 숫자만 올리면 다음 접속 시 모든 유저 아이템 재마이그레이션
-const ENCHANT_STAT_VER=4;
+const ENCHANT_STAT_VER=5;
 
 function autoMigrateEnchantStats(it){
   if(!it||it._esv>=ENCHANT_STAT_VER||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
   const lv=it.reqLv||1;
-  // ★ v2.3: GRADES.mult 대신 ENCHANT_GRADE_MULT 사용
   const gm=ENCHANT_GRADE_MULT[it.grade==='set'?'set':it.grade]||1;
   let changed=false;
   for(const enc of[it.prefix,it.suffix]){
     if(!enc||!enc.n)continue;
     const newBase=ENCHANT_STAT_MAP[enc.n];
-    if(!newBase)continue;
-    enc.b=scaleEnchant(newBase,lv,gm);
-    changed=true;
+    if(newBase){enc.b=scaleEnchant(newBase,lv,gm);changed=true;}
+    // ★ v5: 플래그 없는 기존 인챈트 = LEGACY 마킹
+    if(!enc._fromScroll&&!enc._naturalEnchant&&!enc._legacy){
+      enc._legacy=true;changed=true;
+    }
   }
   it._esv=ENCHANT_STAT_VER;
   return changed;
@@ -3833,8 +3834,8 @@ function openIM(it){
     const et=ENCHANT_TIERS[tier]||ENCHANT_TIERS[2];
     return`<span style="font-size:9px;background:${et.color}22;color:${et.color};border:1px solid ${et.color}44;padding:1px 5px;border-radius:4px;margin-left:5px">${et.name}</span>`;
   }
-  const ph=!it.prefix?'':(`<div style="margin-top:7px;padding:7px 9px;background:${(!it.prefix._fromScroll&&!it.prefix._naturalEnchant)?'rgba(68,255,136,.06)':'rgba(74,143,255,.08)'};border:1px solid ${(!it.prefix._fromScroll&&!it.prefix._naturalEnchant)?'rgba(68,255,136,.3)':'rgba(74,143,255,.18)'};border-radius:5px;font-size:11px"><div style="display:flex;align-items:center;gap:5px;margin-bottom:2px"><span style="color:${(!it.prefix._fromScroll&&!it.prefix._naturalEnchant)?'#44ff88':'var(--blue)'};font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}${(!it.prefix._fromScroll&&!it.prefix._naturalEnchant)?`<span style="font-size:8px;background:rgba(68,255,136,.15);color:#44ff88;border:1px solid rgba(68,255,136,.4);padding:0 4px;border-radius:3px;animation:legacyGlow 2.5s infinite">LEGACY</span>`:''}</div>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name}${skillTypeBadge(it.prefix.sk)} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
-  const sh=!it.suffix?'':(`<div style="margin-top:5px;padding:7px 9px;background:${(!it.suffix._fromScroll&&!it.suffix._naturalEnchant)?'rgba(68,255,136,.06)':'rgba(176,96,255,.08)'};border:1px solid ${(!it.suffix._fromScroll&&!it.suffix._naturalEnchant)?'rgba(68,255,136,.3)':'rgba(176,96,255,.18)'};border-radius:5px;font-size:11px"><div style="display:flex;align-items:center;gap:5px;margin-bottom:2px"><span style="color:${(!it.suffix._fromScroll&&!it.suffix._naturalEnchant)?'#44ff88':'var(--purple)'};font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}${(!it.suffix._fromScroll&&!it.suffix._naturalEnchant)?`<span style="font-size:8px;background:rgba(68,255,136,.15);color:#44ff88;border:1px solid rgba(68,255,136,.4);padding:0 4px;border-radius:3px;animation:legacyGlow 2.5s infinite">LEGACY</span>`:''}</div>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name}${skillTypeBadge(it.suffix.sk)} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
+  const ph=!it.prefix?'':(`<div style="margin-top:7px;padding:7px 9px;background:${it.prefix._legacy?'rgba(68,255,136,.06)':'rgba(74,143,255,.08)'};border:1px solid ${it.prefix._legacy?'rgba(68,255,136,.3)':'rgba(74,143,255,.18)'};border-radius:5px;font-size:11px"><div style="display:flex;align-items:center;gap:5px;margin-bottom:2px"><span style="color:${it.prefix._legacy?'#44ff88':'var(--blue)'};font-weight:700">접두: ${it.prefix.n}</span>${enchTierBadge(it.prefix.n)}${it.prefix._legacy?`<span style="font-size:8px;background:rgba(68,255,136,.15);color:#44ff88;border:1px solid rgba(68,255,136,.4);padding:0 4px;border-radius:3px;animation:legacyGlow 2.5s infinite">LEGACY</span>`:''}</div>${Object.entries(it.prefix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.prefix.sk&&SKILLS[it.prefix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.prefix.sk].name}${skillTypeBadge(it.prefix.sk)} — ${SKILLS[it.prefix.sk].desc}</span>`:''}</div>`);
+  const sh=!it.suffix?'':(`<div style="margin-top:5px;padding:7px 9px;background:${it.suffix._legacy?'rgba(68,255,136,.06)':'rgba(176,96,255,.08)'};border:1px solid ${it.suffix._legacy?'rgba(68,255,136,.3)':'rgba(176,96,255,.18)'};border-radius:5px;font-size:11px"><div style="display:flex;align-items:center;gap:5px;margin-bottom:2px"><span style="color:${it.suffix._legacy?'#44ff88':'var(--purple)'};font-weight:700">접미: ${it.suffix.n}</span>${enchTierBadge(it.suffix.n)}${it.suffix._legacy?`<span style="font-size:8px;background:rgba(68,255,136,.15);color:#44ff88;border:1px solid rgba(68,255,136,.4);padding:0 4px;border-radius:3px;animation:legacyGlow 2.5s infinite">LEGACY</span>`:''}</div>${Object.entries(it.suffix.b||{}).map(([k,v])=>fmtEncStat(k,v)).join(', ')}${it.suffix.sk&&SKILLS[it.suffix.sk]?`<br><span style="color:var(--purple)">⚡${SKILLS[it.suffix.sk].name}${skillTypeBadge(it.suffix.sk)} — ${SKILLS[it.suffix.sk].desc}</span>`:''}</div>`);
   const immortalSkH=it._immortalSk&&SKILLS[it._immortalSk]?`<div style="margin-top:5px;padding:7px 9px;background:rgba(255,34,68,.08);border:1px solid rgba(255,34,68,.3);border-radius:5px;font-size:11px"><span style="color:#FF2244;font-weight:700">🔱 불멸 고유 스킬: ${SKILLS[it._immortalSk].name}</span><br><span style="color:var(--tx2)">${SKILLS[it._immortalSk].desc}</span></div>`:'';
   const seth=it.grade==='set'?`<div style="margin-top:6px;padding:6px 9px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.2);border-radius:5px;font-size:11px;color:var(--st)">◆ ${it.setName}</div>`:'';
 
@@ -5139,7 +5140,7 @@ async function renderAuction(sb){
                     })()}
                     ${it.enchantData?.sk&&SKILLS[it.enchantData.sk]?`<div style="font-size:9.5px;color:var(--gold);margin-top:2px">⚡ ${SKILLS[it.enchantData.sk].name}${skillTypeBadge(it.enchantData.sk)} — ${SKILLS[it.enchantData.sk].desc}</div>`:''}
                   </div>`:''}
-                  ${!it.isEnchantScroll&&(it.prefix||it.suffix)?`<div style="font-size:9.5px;color:var(--tx3);margin-bottom:2px">${it.prefix?`[접두:${it.prefix.n}${(!it.prefix._fromScroll&&!it.prefix._naturalEnchant)?' <span style="color:#44ff88;font-size:8px">L</span>':''}]`:''} ${it.suffix?`[접미:${it.suffix.n}${(!it.suffix._fromScroll&&!it.suffix._naturalEnchant)?' <span style="color:#44ff88;font-size:8px">L</span>':''}]`:''}</div>`:''}
+                  ${!it.isEnchantScroll&&(it.prefix||it.suffix)?`<div style="font-size:9.5px;color:var(--tx3);margin-bottom:2px">${it.prefix?`[접두:${it.prefix.n}${it.prefix._legacy?' <span style="color:#44ff88;font-size:8px">L</span>':''}]`:''} ${it.suffix?`[접미:${it.suffix.n}${it.suffix._legacy?' <span style="color:#44ff88;font-size:8px">L</span>':''}]`:''}</div>`:''}
                   ${(()=>{
                     if(it.isEnchantScroll)return '';
                     const skList=[];
@@ -5809,6 +5810,7 @@ async function resolvePhase(){
   // ★ 중복 실행 완벽 차단
   if(battle._resolving){return;}
   battle._resolving=true;
+  try{
   battle.totalTurns=(battle.totalTurns||0)+1; // ★ 턴수 증가
   if(battle._leaderFallbackTimer){clearTimeout(battle._leaderFallbackTimer);battle._leaderFallbackTimer=null;}
   battle.phase=2;
@@ -6110,6 +6112,10 @@ async function resolvePhase(){
   battle._resolving=false;
   renderBattle();
   setTimeout(()=>startActionPhase(), (battle.mode==='solo'||battle.mode==='immortaltower')?350:2000);
+  }catch(err){
+    console.error('resolvePhase 오류:', err);
+    if(battle)battle._resolving=false;
+  }
 }
 
 // ★ 무기 고유 특성 반환 헬퍼
