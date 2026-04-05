@@ -5473,10 +5473,10 @@ function startBattle(tierIdx,mode,diffKey,players){
   nextFloor();
 }
 
-function nextFloor(){
-  if(!battle||battle.done)return; // ★ done이면 진행 차단
+async function nextFloor(){
+  if(!battle||battle.done)return;
   battle.floor++;
-  if(battle.floor>battle.floors){dungeonClear();return;}
+  if(battle.floor>battle.floors){await dungeonClear();return;}
   // 부활 큐 처리 (파티)
   for(const pid of battle.reviveQueue){
     const pm=battle.players.find(p=>p.id===pid);if(!pm)continue;
@@ -6106,7 +6106,27 @@ async function resolvePhase(){
     lootPhase();
     syncBattleState();
     battle._resolving=false;
-    setTimeout(()=>{battle.phase=0;nextFloor();},(battle.mode==='solo'||battle.mode==='immortaltower')?400:1800);return;
+    setTimeout(async()=>{
+      try{
+        battle.phase=0;
+        await nextFloor();
+      }catch(err){
+        console.error('nextFloor 오류:',err);
+        // ★ 에러 시 강제 클리어 처리로 복구
+        if(battle){
+          battle.done=true;battle.ended=true;
+          const db2=document.getElementById('dungBattle');
+          if(db2){
+            db2.querySelectorAll('[style*="sticky"]').forEach(el=>el.remove());
+            const recov=document.createElement('div');
+            recov.style.cssText='padding:12px;display:flex;gap:8px;flex-direction:column;position:sticky;bottom:0;background:var(--sf);border-top:1px solid var(--bd)';
+            recov.innerHTML=`<div style="font-size:11px;color:var(--tx3);text-align:center;margin-bottom:6px">⚠️ 처리 중 오류 — 저장이 지연될 수 있습니다</div>
+              <button class="btn btn-ghost" onclick="exitBattle()">← 탑으로 돌아가기</button>`;
+            db2.appendChild(recov);
+          }
+        }
+      }
+    },(battle.mode==='solo'||battle.mode==='immortaltower')?400:1800);return;
   }
   syncBattleState();
   battle._resolving=false;
@@ -6114,7 +6134,13 @@ async function resolvePhase(){
   setTimeout(()=>startActionPhase(), (battle.mode==='solo'||battle.mode==='immortaltower')?350:2000);
   }catch(err){
     console.error('resolvePhase 오류:', err);
-    if(battle)battle._resolving=false;
+    if(battle){
+      battle._resolving=false;
+      // ★ 에러 시 전투 상태 복구 — 버튼 재활성화
+      for(const p of battle.players){p.actionChosen=null;p.defending=false;p.healing=false;}
+      battle.phase=1;
+      renderBattle();
+    }
   }
 }
 
@@ -6534,10 +6560,9 @@ async function dungeonClear(){
     setTimeout(()=>{
       const db2=document.getElementById('dungBattle');
       if(!db2)return;
-      // ★ 액션 영역 전체 제거 (sticky 선택자로 못 찾는 경우 대비)
       db2.querySelectorAll('[style*="sticky"]').forEach(el=>el.remove());
       const btn=document.createElement('div');
-      btn.style.cssText='padding:12px;display:flex;gap:8px;flex-direction:column';
+      btn.style.cssText='padding:12px;display:flex;gap:8px;flex-direction:column;position:sticky;bottom:0;background:var(--sf);border-top:1px solid var(--bd);z-index:10';
       btn.innerHTML= nextF<=IT_TOTAL_FLOORS
         ?`<button class="btn btn-red" onclick="startITBattle(${nextF})">⚔ ${nextF}층 도전 <span style="font-size:10px;opacity:.6">[W]</span></button>
            <button class="btn btn-ghost btn-sm" onclick="exitBattle()">← 탑으로</button>`
