@@ -6510,6 +6510,9 @@ async function dungeonClear(){
       const lm2=1+(dropLv-1)*0.055;
       const gradeMult=GRADES[drop.grade]?.mult||1;
       const enchGM2=ENCHANT_GRADE_MULT[drop.grade]||1;
+      const maxEnchTier=Math.min(5,gi+1);
+      const prePool2=PRE.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
+      const sufPool2=SUF.filter(e=>getEnchantTier(e.n)<=maxEnchTier);
       if(!drop.prefix&&prePool2.length){const pr=prePool2[Math.floor(Math.random()*prePool2.length)];drop.prefix={n:pr.n,sk:pr.sk||null,attr:pr.attr||null,b:scaleEnchant(pr.b,dropLv,enchGM2),_naturalEnchant:true};}
       if(!drop.suffix&&sufPool2.length){const su=sufPool2[Math.floor(Math.random()*sufPool2.length)];drop.suffix={n:su.n,sk:su.sk||null,b:scaleEnchant(su.b,dropLv,enchGM2),_naturalEnchant:true};}
       if(drop.prefix&&drop.suffix){const pre=drop.prefix,suf=drop.suffix;drop.name=(pre.n?' '+pre.n:'')+' '+(suf.n?' '+suf.n:'')+' '+drop.name.replace(pre.n||'','').replace(suf.n||'','').trim();}
