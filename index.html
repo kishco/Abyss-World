@@ -6873,40 +6873,46 @@ function startChat(){
     document.addEventListener('keydown',e=>{
       const tag=document.activeElement?.tagName;
       if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
-      if(!battle||battle.done)return;
-      if(battle.phase!==1)return;
-      // ★ 불멸의 탑 다음 층 — W키 (battle.done 상태에서 작동)
+
+      let chosen=null;
+      if(e.key==='q'||e.key==='Q'||e.key==='1')chosen='attack';
+      else if(e.key==='w'||e.key==='W'||e.key==='2')chosen='defend';
+      else if(e.key==='e'||e.key==='E'||e.key==='3')chosen='heal';
+      else if(e.key==='r'||e.key==='R'||e.key==='4')chosen='flee';
+
+      // ★ 불멸의 탑 다음 층 — W키 (클리어 후)
       if((e.key==='w'||e.key==='W')&&battle&&battle.done&&battle.mode==='immortaltower'){
         e.preventDefault();
         const db2=document.getElementById('dungBattle');
         if(db2){const nextBtn=db2.querySelector('button.btn-red');if(nextBtn&&!nextBtn.disabled)nextBtn.click();}
         return;
       }
+
+      // ★ 토벌전 키보드 (battle 없어도 독립 동작)
+      if(chosen&&typeof window.subjAction==='function'){
+        const subjMap={attack:'sbtn-atk',defend:'sbtn-def',heal:'sbtn-heal',flee:null};
+        const sb=document.getElementById(subjMap[chosen]);
+        if(sb&&!sb.disabled){e.preventDefault();sb.click();return;}
+      }
+
+      // ★ 챔프전 키보드 (battle 없어도 독립 동작)
+      if(chosen&&typeof window.champAction==='function'){
+        const champMap={attack:'cbtn-atk',defend:'cbtn-def',heal:'cbtn-heal',flee:null};
+        const cb=document.getElementById(champMap[chosen]);
+        if(cb&&!cb.disabled){e.preventDefault();cb.click();return;}
+      }
+
+      // ★ 던전 전투 키보드
+      if(!battle||battle.done)return;
+      if(battle.phase!==1)return;
       const myP=battle.players?.find(p=>p.id===charId);
       if(!myP||myP.status!=='alive'||myP.actionChosen)return;
-      let chosen=null;
-      if(e.key==='q'||e.key==='Q'||e.key==='1')chosen='attack';
-      else if(e.key==='w'||e.key==='W'||e.key==='2')chosen='defend';
-      else if(e.key==='e'||e.key==='E'||e.key==='3')chosen='heal';
-      else if(e.key==='r'||e.key==='R'||e.key==='4')chosen='flee';
       if(chosen){
         e.preventDefault();
         const btnMap={attack:'actbtn-atk',defend:'actbtn-def',heal:'actbtn-heal',flee:'actbtn-flee'};
         const btn=document.getElementById(btnMap[chosen]);
         if(btn&&!btn.disabled)btn.click();
         else if(typeof chooseAction==='function')chooseAction(chosen);
-      }
-      // ★ 토벌전 키보드
-      const subjMap={attack:'sbtn-atk',defend:'sbtn-def',heal:'sbtn-heal',flee:null};
-      if(chosen&&typeof window.subjAction==='function'){
-        const sb=document.getElementById(subjMap[chosen]);
-        if(sb&&!sb.disabled)sb.click();
-      }
-      // ★ 챔프전 키보드
-      const champMap={attack:'cbtn-atk',defend:'cbtn-def',heal:'cbtn-heal',flee:null};
-      if(chosen&&typeof window.champAction==='function'){
-        const cb=document.getElementById(champMap[chosen]);
-        if(cb&&!cb.disabled)cb.click();
       }
     });
   }
