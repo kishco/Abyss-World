@@ -2381,16 +2381,26 @@ async function selChar(id){
     if(it&&migrateEnchantName(it))equipMigrated=true;
     migrateForgeWard(); // ★ forgeWard 분리 마이그레이션
   }
-  // ★ 도감 키 정리 — Firebase 금지 문자 포함된 키 수정 (장비 루프 밖에서 1회)
+  // ★ 도감 키 정리 — Firebase 금지 문자 + 접두/접미 변형 통합 (장비 루프 밖에서 1회)
   if(char._codex){
-    const badKeys=Object.keys(char._codex).filter(k=>/[.\#\$\/\[\]]/.test(k));
-    if(badKeys.length){
-      for(const bk of badKeys){
-        const cleaned=bk.replace(/[.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
-        if(!char._codex[cleaned])char._codex[cleaned]=char._codex[bk];
-        else char._codex[cleaned].kills=(char._codex[cleaned].kills||0)+(char._codex[bk].kills||0);
-        delete char._codex[bk];
+    const oldKeys=Object.keys(char._codex);
+    const newCodex={};
+    let codexChanged=false;
+    for(const ok of oldKeys){
+      const entry=char._codex[ok];if(!entry)continue;
+      const baseName=entry.isBoss?(entry.name||ok):(typeof _codexBaseName==='function'?_codexBaseName(entry.name||ok):entry.name||ok);
+      const newKey=baseName.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+      if(!newKey)continue;
+      if(ok!==newKey)codexChanged=true;
+      if(!newCodex[newKey]){
+        newCodex[newKey]={...entry,name:baseName};
+      }else{
+        newCodex[newKey].kills=(newCodex[newKey].kills||0)+(entry.kills||0);
+        if(entry.isBoss)newCodex[newKey].isBoss=true;
       }
+    }
+    if(codexChanged){
+      char._codex=newCodex;
       equipMigrated=true;
     }
   }
@@ -3068,26 +3078,40 @@ function renderPresets(){
 // ════════════════════════════════════════════
 // ★ 몬스터 도감 시스템
 // ════════════════════════════════════════════
+// ★ 몬스터 이름에서 접두/접미 변형 제거 → 기본 이름만 도감에 등록 (항목 폭발 방지)
+const _CODEX_STRIP_PRE=['\\[숨겨진\\]','\\[전설의\\]','\\[악몽의\\]','분노한','굶주린','저주받은','야생의','돌연변이','타락한','노련한','광폭화한','강철','독이 오른'];
+const _CODEX_STRIP_SUF=['대장','광전사','수호자','지배자','학살자','고대의','저주받은'];
+const _CODEX_STRIP_RE=new RegExp(`^(${_CODEX_STRIP_PRE.join('|')})\\s*|\\s*(${_CODEX_STRIP_SUF.join('|')})$`,'g');
+function _codexBaseName(name){return name.replace(_CODEX_STRIP_RE,'').trim();}
+
 function trackMonsterKill(monsterName,area,attr,isBoss){
   if(!char._codex)char._codex={};
+  const baseName=isBoss?monsterName:_codexBaseName(monsterName); // ★ 보스는 원본 이름 유지
   // ★ Firebase 키 금지 문자 제거: . # $ / [ ]
-  const key=monsterName.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+  const key=baseName.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+  if(!key)return; // 빈 키 방지
   if(!char._codex[key]){
-    char._codex[key]={name:monsterName,kills:0,area:area||'unknown',attr:attr||null,isBoss:!!isBoss,firstKill:Date.now()};
+    char._codex[key]={name:baseName,kills:0,area:area||'unknown',attr:attr||null,isBoss:!!isBoss,firstKill:Date.now()};
   }
   char._codex[key].kills++;
+  // ★ 속성 업데이트 (같은 몬스터라도 속성이 다를 수 있음 — 마지막 처치 기준)
+  if(attr)char._codex[key].attr=attr;
   // ★ 첫 처치 보상
   if(char._codex[key].kills===1){
     char.gold+=100;
-    blogAdd(`<span class="l-exp" style="color:var(--gold)">📖 도감 등록: ${monsterName} (+100G)</span>`);
+    blogAdd(`<span class="l-exp" style="color:var(--gold)">📖 도감 등록: ${baseName} (+100G)</span>`);
   }
 }
 function getCodexCompletion(){
   const codex=char._codex||{};
   const total=Object.keys(codex).length;
-  // 전체 몬스터 수 (대략적)
-  const allMonsters=Object.values(MNAMES).flat().length+Object.values(IT_MNAMES||{}).flat().length;
-  return{discovered:total,total:Math.max(allMonsters,total),pct:Math.round(total/Math.max(1,allMonsters)*100)};
+  // 전체 몬스터 수 (기본 이름 기준 — 변형 제외)
+  const baseMons=Object.values(MNAMES).flat().length; // 50
+  const itMons=[...new Set(Object.values(IT_MNAMES||{}).flat())].length;
+  const bosses=(typeof BOSSN!=='undefined'?BOSSN.length:5)+(typeof SUBJ_BOSSES!=='undefined'?SUBJ_BOSSES.length:3)
+    +Object.keys(IT_BOSSES||{}).length+TA_BOSSES.length;
+  const allMonsters=baseMons+itMons+bosses;
+  return{discovered:total,total:Math.max(allMonsters,total),pct:Math.min(100,Math.round(total/Math.max(1,allMonsters)*100))};
 }
 function getCodexBonus(){
   const{pct}=getCodexCompletion();
