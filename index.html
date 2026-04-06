@@ -2642,7 +2642,8 @@ function renderChar(){
   if(_attrEl){
     if(_curAttr&&ATTR_N[_curAttr]){
       const ae=ATTR_EFFECT[_curAttr];
-      _attrEl.innerHTML=`<span style="color:${ATTR_C[_curAttr]}">${ATTR_N[_curAttr]}</span> <span style="font-size:8px;color:var(--tx3)">${ae?.desc||''}</span>`;
+      const _isFixed=!!(char.equipment?.weapon?.attr);
+      _attrEl.innerHTML=`<span style="color:${ATTR_C[_curAttr]}">${ATTR_N[_curAttr]}</span> <span style="font-size:8px;color:${_isFixed?'var(--lg)':'var(--blue)'}">${_isFixed?'고유':'인챈트'}</span>`;
     }else{_attrEl.textContent='없음';_attrEl.style.color='var(--tx3)';}
   }
   document.getElementById('s-cdmg').textContent=s.critDmg+'%';
@@ -3986,6 +3987,19 @@ function openIM(it){
     </div>
     ${sr?`<div class="sgrid" style="margin-bottom:7px">${sr}</div>`:''}
     ${ph}${sh}${immortalSkH}${seth}
+    ${(()=>{
+      if(!it.slot||it.isScroll||it.isEnchantScroll||it.isProtectScroll||it.isExtractScroll)return'';
+      const selfAttr=it.attr;
+      const enchAttr=it.prefix?.attr;
+      const finalAttr=selfAttr||enchAttr||null;
+      if(!finalAttr)return`<div style="margin-top:5px;padding:6px 9px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:5px;font-size:10px;color:var(--tx3)">🌀 속성: 없음 <span style="font-size:9px">(속성 접두 인챈트로 부여 가능)</span></div>`;
+      const isFixed=!!selfAttr;
+      return`<div style="margin-top:5px;padding:6px 9px;background:${ATTR_C[finalAttr]}08;border:1px solid ${ATTR_C[finalAttr]}33;border-radius:5px;font-size:10.5px">
+        🌀 속성: <span style="color:${ATTR_C[finalAttr]};font-weight:700">${ATTR_N[finalAttr]}</span>
+        <span style="font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px;${isFixed?`background:rgba(255,140,0,.15);color:var(--lg);border:1px solid rgba(255,140,0,.3)`:`background:rgba(74,143,255,.12);color:var(--blue);border:1px solid rgba(74,143,255,.3)`}">${isFixed?'고유 속성 (변경 불가)':'인챈트 속성 (변경 가능)'}</span>
+        <div style="font-size:9px;color:var(--tx3);margin-top:3px">${ATTR_EFFECT[finalAttr]?.desc||''} · 상성 유리 +25% / 불리 -20% / 동속성 -50%</div>
+      </div>`;
+    })()}
     ${!isAcc&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isScroll?compareHtml:''}
     ${isAcc?accSelHtml:''}
     ${!isAcc?`<div style="display:flex;gap:6px;margin-top:10px">
