@@ -4274,6 +4274,7 @@ window.equipItemSlot=async(itemId,slot)=>{
   toast(`${it.name} → 장신구${slot.slice(-1)} 장착!`);
 };
 function closeIM(){document.getElementById('imodal').classList.remove('open');}
+window.closeIM=closeIM;
 document.getElementById('imc').onclick=closeIM;
 document.getElementById('imodal').onclick=e=>{if(e.target===document.getElementById('imodal'))closeIM();};
 
@@ -6867,7 +6868,7 @@ function trySkillProc(p,s,target,allM){
   }
 }
 
-function lootPhase(){
+async function lootPhase(){
   const t=battle.tier;const d=battle.diff;
   // ★ IT 모드: 클리어 보상은 dungeonClear에서 처리 — lootPhase는 스킵
   if(battle.mode==='immortaltower'){
@@ -6876,7 +6877,7 @@ function lootPhase(){
   }
   // ★ 타임어택: 전용 클리어 처리
   if(battle.mode==='timeattack'){
-    handleTAClear();
+    await handleTAClear();
     battle.done=true;battle.ended=true;
     updateNavLock();
     setTimeout(()=>endBattle(true,false),500);
