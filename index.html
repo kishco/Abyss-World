@@ -5850,11 +5850,12 @@ async function handleTAClear(){
   // ★ 타임어택 보스 도감 등록
   for(const m of battle.monsters.filter(m=>m.status==='dead'))trackMonsterKill(m.name,'timeattack',m._attr,true);
   let mySn;try{mySn=await get(ref(db,`timeAttack/${wk}/${char.name}`));}catch(e){}
-  const prev=mySn?.val()||{attempts:1,bestTurns:0};
-  const isNewBest=prev.bestTurns<=0||turns<prev.bestTurns;
+  const prevData=mySn?.val()||{};
+  const prevBest=prevData.bestTurns||0;
+  const isNewBest=prevBest===0||turns<prevBest;
   if(isNewBest)await update(ref(db,`timeAttack/${wk}/${char.name}`),{bestTurns:turns,ts:Date.now()});
   let rewardGold=5000;
-  if(isNewBest&&prev.bestTurns>0){rewardGold+=10000;blogAdd(`<span class="l-exp" style="color:var(--gold)">🏆 최고 기록 갱신! ${prev.bestTurns}턴 → ${turns}턴</span>`);}
+  if(isNewBest&&prevBest>0){rewardGold+=10000;blogAdd(`<span class="l-exp" style="color:var(--gold)">🏆 최고 기록 갱신! ${prevBest}턴 → ${turns}턴</span>`);}
   char.gold+=rewardGold;
   // ★ 스크롤 2개 (고급 티어)
   for(let i=0;i<2;i++){const sc=genTieredEnchantScroll(4,'hard');await addItem(sc);blogAdd(`<span class="l-set">📜 ${sc.name} 획득!</span>`);}
