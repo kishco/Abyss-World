@@ -2026,6 +2026,7 @@ onAuthStateChanged(auth,async user=>{
   }else{
     // ★ 로그아웃 시 리스너/인터벌 정리
     if(_presenceInterval){clearInterval(_presenceInterval);_presenceInterval=null;}
+    if(_bmInterval){clearInterval(_bmInterval);_bmInterval=null;}
     for(const k of Object.keys(cwUnsub)){if(cwUnsub[k]){cwUnsub[k]();cwUnsub[k]=null;}}
     cwActive=false;
     if(_charUnsub){_charUnsub();_charUnsub=null;}
@@ -5004,13 +5005,13 @@ if(!document.getElementById('_bmBannerStyle')){
   st.textContent='@keyframes bmBannerPulse{0%,100%{filter:drop-shadow(0 0 24px rgba(255,200,0,.8));}50%{filter:drop-shadow(0 0 48px rgba(255,200,0,1)) drop-shadow(0 0 80px rgba(255,140,0,.6));}}@keyframes fadeOut{to{opacity:0;}}';
   document.head.appendChild(st);
 }
+let _bmInterval=null;
 async function initBlackMarket(){
   await updateBMCard();
-  // 접속 시 이미 열려있으면 배너 표시
   if(await isBMActive())showBMBanner();
-  // 30초마다 체크 + 배너 표시
   let _prevBMActive=await isBMActive();
-  setInterval(async()=>{
+  if(_bmInterval){clearInterval(_bmInterval);_bmInterval=null;}
+  _bmInterval=setInterval(async()=>{
     await updateBMCard();
     const nowActive=await isBMActive();
     if(nowActive&&!_prevBMActive)showBMBanner();
@@ -5458,9 +5459,8 @@ async function renderAuction(sb){
       };
       window._aucPage=0;
       try{
-        // ★ 전체 active 경매 로드 (limitToLast 제거 — 클라이언트 페이지네이션으로 대체)
-        const sn=await get(ref(db,'auction'));
-        const all=sn.val()||{};
+        // ★ 전체 active 경매 로드 (cachedGet으로 대역폭 절약)
+        const all=await cachedGet('auction')||{};
         _allListings=Object.entries(all).filter(([,v])=>v&&v.status==='active'&&v.item);
         window.applyAuctionFilter();
       }catch(err){
@@ -5550,7 +5550,7 @@ async function renderAuction(sb){
         w.innerHTML=html;
       }
     }else if(tab==='mine'){
-      const sn=await get(ref(db,'auction'));const all=sn.val()||{};
+      const all=await cachedGet('auction')||{};
       const mine=Object.entries(all).filter(([,v])=>v&&v.sellerCharId===charId&&v.status==='active');
       if(!mine.length){ac.innerHTML=`<div style="font-size:11.5px;color:var(--tx3);text-align:center;padding:24px">등록한 경매 없음<br><span style="font-size:10px">인벤토리의 드랍 아이템을 등록해보세요.</span></div>`;return;}
       ac.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px">${mine.map(([lid,v])=>{
@@ -5614,8 +5614,8 @@ async function renderAuction(sb){
     const price=parseInt(priceEl?.value||0);
     if(price<1){toast('가격을 입력하세요');return;}
     if(price>99999999){toast('최대 9,999만G까지 등록 가능');return;}
-    const existing=await get(ref(db,'auction'));
-    const myActive=Object.values(existing.val()||{}).filter(v=>v&&v.sellerCharId===charId&&v.status==='active');
+    const existingAll=await cachedGet('auction')||{};
+    const myActive=Object.values(existingAll).filter(v=>v&&v.sellerCharId===charId&&v.status==='active');
     if(myActive.length>=10){toast('경매 등록은 최대 10개까지');return;}
     const listing={
       sellerCharId:charId,sellerName:char.name,
@@ -5625,6 +5625,7 @@ async function renderAuction(sb){
     };
     const lid=push(ref(db,'auction')).key;
     await set(ref(db,`auction/${lid}`),listing);
+    invalidateCache('auction');
     delete inv[itemId];
     await saveInv();
     toast(`🏛️ ${it.name} 경매 등록! (${price.toLocaleString()}G)`);
@@ -5640,6 +5641,7 @@ async function renderAuction(sb){
     inv[v.item.id]={...v.item};
     await saveInv();
     await set(ref(db,`auction/${lid}/status`),'cancelled');
+    invalidateCache('auction');
     toast(`✅ ${v.item.name} 등록 취소 · 인벤 반환`);
     renderAuctionTab('mine');
   };
@@ -5666,6 +5668,7 @@ async function renderAuction(sb){
     await saveInv();
     // 경매 상태 완료 처리
     await update(ref(db,`auction/${lid}`),{status:'sold',buyerCharId:charId,buyerName:char.name,soldAt:Date.now()});
+    invalidateCache('auction');
     updateTop();
     toast(`✅ ${v.item.name} 구매 완료! -${v.price.toLocaleString()}G`,3000);
     trackBounty('auction_buy',1);
@@ -5774,6 +5777,7 @@ function getTABossIdx(){
   const weekNum=Math.floor(mon.getTime()/(7*24*60*60*1000));
   return weekNum%TA_BOSSES.length;
 }
+let _taBannerCache={ts:0,data:null};
 async function renderTABanner(){
   const banner=document.getElementById('timeAttackBanner');
   if(!banner||!char)return;
@@ -5782,14 +5786,21 @@ async function renderTABanner(){
   const wk=getTAWeekKey();
   const weakAttr=Object.entries(ATTR_ADVANTAGE).find(([,v])=>v===boss._attr)?.[0]||null;
   let myData=null,myRank=-1,attempts=0;
-  try{
-    const mySn=await get(ref(db,`timeAttack/${wk}/${char.name}`));
-    myData=mySn.val();attempts=myData?.attempts||0;
-    const allSn=await get(ref(db,`timeAttack/${wk}`));
-    const allData=allSn.val()||{};
-    const sorted=Object.entries(allData).filter(([,d])=>d.bestTurns>0).sort((a,b)=>a[1].bestTurns-b[1].bestTurns);
-    myRank=sorted.findIndex(([n])=>n===char.name);
-  }catch(e){}
+  const now=Date.now();
+  if(_taBannerCache.ts>now-60000&&_taBannerCache.wk===wk){
+    // ★ 캐시 사용 (60초 TTL)
+    myData=_taBannerCache.data?.myData;myRank=_taBannerCache.data?.myRank??-1;attempts=myData?.attempts||0;
+  }else{
+    try{
+      const mySn=await get(ref(db,`timeAttack/${wk}/${char.name}`));
+      myData=mySn.val();attempts=myData?.attempts||0;
+      const allSn=await get(ref(db,`timeAttack/${wk}`));
+      const allData=allSn.val()||{};
+      const sorted=Object.entries(allData).filter(([,d])=>d.bestTurns>0).sort((a,b)=>a[1].bestTurns-b[1].bestTurns);
+      myRank=sorted.findIndex(([n])=>n===char.name);
+      _taBannerCache={ts:now,wk,data:{myData,myRank}};
+    }catch(e){}
+  }
   const canEnter=attempts<TA_MAX_ATTEMPTS&&!isInBattle();
   const pAttr=getWeaponAttr(char.equipment||{});
   const matchMult=calcAttrMult(pAttr,boss._attr);
@@ -5860,6 +5871,7 @@ window.enterTABattle=async function(){
   const myData=mySn?.val()||{attempts:0,bestTurns:0};
   if(myData.attempts>=TA_MAX_ATTEMPTS){toast('⚠️ 이번 주 도전 횟수 소진');return;}
   await update(ref(db,`timeAttack/${wk}/${char.name}`),{attempts:(myData.attempts||0)+1});
+  _taBannerCache.ts=0; // ★ 캐시 무효화
   const bossIdx=getTABossIdx();const boss=TA_BOSSES[bossIdx];
   const s=calcStats(char);
   const monSkills=(boss.skills||[]).map(sid=>{
@@ -5904,6 +5916,7 @@ async function handleTAClear(){
   const prevBest=prevData.bestTurns||0;
   const isNewBest=prevBest===0||turns<prevBest;
   if(isNewBest)await update(ref(db,`timeAttack/${wk}/${char.name}`),{bestTurns:turns,ts:Date.now()});
+  _taBannerCache.ts=0; // ★ 캐시 무효화
   let rewardGold=5000;
   if(isNewBest&&prevBest>0){rewardGold+=10000;blogAdd(`<span class="l-exp" style="color:var(--gold)">🏆 최고 기록 갱신! ${prevBest}턴 → ${turns}턴</span>`);}
   char.gold+=rewardGold;
