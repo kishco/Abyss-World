@@ -803,6 +803,32 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <button class="btn btn-ghost btn-sm" onclick="settingUnlockAll()">전체 잠금 해제</button>
         </div>
 
+        <!-- ★ 자동판매 설정 -->
+        <div class="card2" style="border-color:rgba(240,192,64,.25)">
+          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:4px">💰 자동판매 필터</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.6">설정한 등급 <b style="color:var(--tx)">미만</b>의 장비/스크롤은 던전 드랍 시 자동으로 판매됩니다.<br>※ 유일·불멸·잠금·프리셋 아이템은 자동판매 대상에서 제외</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-size:11px;color:var(--tx2)">장비 자동판매</span>
+            <select id="autoSellGrade" onchange="settingAutoSell()" style="flex:1;padding:6px 8px;background:var(--bg);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:11px;outline:none">
+              <option value="">끄기 (수동)</option>
+              <option value="uncommon">언커먼 미만 (노말 자동판매)</option>
+              <option value="rare">레어 미만 (노말+언커먼 자동판매)</option>
+              <option value="epic">에픽 미만 (레어 이하 자동판매)</option>
+              <option value="legendary">레전더리 미만 (에픽 이하 자동판매)</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;color:var(--tx2)">스크롤 자동판매</span>
+            <select id="autoSellScroll" onchange="settingAutoSellScroll()" style="flex:1;padding:6px 8px;background:var(--bg);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:11px;outline:none">
+              <option value="">끄기</option>
+              <option value="2">2티어 미만 (1티어 자동판매)</option>
+              <option value="3">3티어 미만 (2티어 이하 자동판매)</option>
+              <option value="4">4티어 미만 (3티어 이하 자동판매)</option>
+            </select>
+          </div>
+          <div id="autoSellStatus" style="font-size:9.5px;color:var(--tx3);margin-top:8px"></div>
+        </div>
+
         <!-- 비밀번호 변경 — Google 로그인 유저 자동 숨김 -->
         <div class="card2" id="pwChangeCard">
           <div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:4px">🔑 비밀번호 변경</div>
@@ -4882,9 +4908,9 @@ window.claimWeekly=async function(){
 };
 
 window.exchangeShards=async function(){
-  if((char.bountyShards||0)<2){toast('조각 2개 필요');return;}
-  if(!confirm('조각 2개를 소모해 인챈트 스크롤 1개를 받겠습니까?'))return;
-  char.bountyShards-=2;
+  if((char.bountyShards||0)<3){toast('조각 3개 필요');return;}
+  if(!confirm('조각 3개를 소모해 인챈트 스크롤 1개를 받겠습니까?'))return;
+  char.bountyShards-=3;
   const sc=genEnchantScroll(char.level,Math.random()<0.5);
   await addItem(sc);
   await saveChar();updateTop();
@@ -7016,8 +7042,10 @@ async function lootPhase(){
   blogAdd(`<span class="l-exp">📊 EXP +${totalExp} | 💰 +${finalGold.toLocaleString()}G${goldMult>1?` <span style="color:var(--gold);font-size:9px">(골드보너스 +${Math.round((goldMult-1)*100)}%)</span>`:''}</span>`);
   if(!lvUp)saveChar();updateTop();
 
-  // 솔로: 드랍 아이템 바로 인벤에
-  for(const it of droppedItems)addItem(it);
+  // 솔로: 드랍 아이템 바로 인벤에 (자동판매 필터 적용)
+  for(const it of droppedItems){
+    if(!tryAutoSell(it))addItem(it);
+  }
 }
 
 async function maybeLoseItem(){
@@ -7122,8 +7150,10 @@ async function dungeonClear(){
       if(drop.prefix&&drop.suffix){const pre=drop.prefix,suf=drop.suffix;drop.name=(pre.n?' '+pre.n:'')+' '+(suf.n?' '+suf.n:'')+' '+drop.name.replace(pre.n||'','').replace(suf.n||'','').trim();}
     }
     if(drop){
-      if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length<(char.invSlots||100)){
-        drop.tradeable=(dropGrade!=='set');
+      drop.tradeable=(dropGrade!=='set');
+      if(tryAutoSell(drop)){
+        // 자동판매됨
+      }else if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length<(char.invSlots||100)){
         await addItem(drop);await saveInv();
         blogAdd(`<span class="l-set">🎁 드랍: <span class="g-${drop.grade}">${drop.name}</span></span>`);
       }else{
@@ -7138,8 +7168,10 @@ async function dungeonClear(){
       const maxTier=floor<=20?2:floor<=50?3:floor<=80?4:5;
       const scroll=genTieredEnchantScroll(maxTier,'vhard');
       if(scroll){
-        await addItem(scroll);await saveInv();
-        blogAdd(`<span class="l-skill">📜 인챈트 스크롤 추가 드랍: ${scroll.name}</span>`);
+        if(!tryAutoSell(scroll)){
+          await addItem(scroll);await saveInv();
+          blogAdd(`<span class="l-skill">📜 인챈트 스크롤 추가 드랍: ${scroll.name}</span>`);
+        }
       }
     }
 
@@ -9129,6 +9161,19 @@ function renderSettings(){
   }
   // ★ 추천인 카드 — 이미 완료한 경우 표시 변경
   const refCard=document.getElementById('referralCard');
+  // ★ 자동판매 설정 복원
+  const asg=document.getElementById('autoSellGrade');
+  if(asg)asg.value=char._autoSellGrade||'';
+  const ass=document.getElementById('autoSellScroll');
+  if(ass)ass.value=char._autoSellScrollTier||'';
+  const asSt=document.getElementById('autoSellStatus');
+  if(asSt){
+    const g=char._autoSellGrade;const st=char._autoSellScrollTier;
+    const parts=[];
+    if(g)parts.push(`장비: ${GRADES[g]?.name||g} 미만 자동판매`);
+    if(st)parts.push(`스크롤: ${st}티어 미만 자동판매`);
+    asSt.textContent=parts.length?`현재: ${parts.join(' · ')}`:'자동판매 꺼짐';
+  }
   if(refCard){
     if(char.referredBy){
       refCard.innerHTML=`<div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px">✅ 추천인 등록 완료</div>
@@ -9146,6 +9191,49 @@ window.settingToggleSfx=function(){
   renderSettings();
   toast(SFX.isMuted()?'🔇 효과음 꺼짐':'🔊 효과음 켜짐');
 };
+
+// ★ 자동판매 설정
+window.settingAutoSell=async function(){
+  const v=document.getElementById('autoSellGrade')?.value||'';
+  char._autoSellGrade=v||null;
+  await saveChar();renderSettings();
+  toast(v?`💰 장비 자동판매: ${GRADES[v]?.name||v} 미만`:'💰 장비 자동판매 해제');
+};
+window.settingAutoSellScroll=async function(){
+  const v=document.getElementById('autoSellScroll')?.value||'';
+  char._autoSellScrollTier=v?parseInt(v):null;
+  await saveChar();renderSettings();
+  toast(v?`💰 스크롤 자동판매: ${v}티어 미만`:'💰 스크롤 자동판매 해제');
+};
+// ★ 자동판매 처리 함수 — 드랍 아이템에 적용
+const GRADE_RANK={normal:0,uncommon:1,rare:2,epic:3,legendary:4,set:5,immortal:6};
+function tryAutoSell(item){
+  if(!item)return false;
+  // 보호 대상 제외
+  if(item.grade==='set'||item.grade==='immortal')return false;
+  if(item._locked||isInPreset(item.id))return false;
+  // 장비 자동판매
+  if(!item.isEnchantScroll&&!item.isScroll&&char._autoSellGrade){
+    const threshold=GRADE_RANK[char._autoSellGrade]||0;
+    const itemRank=GRADE_RANK[item.grade]||0;
+    if(itemRank<threshold){
+      const price=getSellPrice(item);
+      char.gold+=price;
+      blogAdd(`<span class="l-sys" style="color:var(--tx3)">💰 자동판매: ${item.name} (+${price}G)</span>`);
+      return true; // 판매됨 — 인벤에 추가하지 않음
+    }
+  }
+  // 스크롤 자동판매
+  if(item.isEnchantScroll&&char._autoSellScrollTier){
+    const scrollTier=item.enchantTier||2;
+    if(scrollTier<char._autoSellScrollTier){
+      char.gold+=100;
+      blogAdd(`<span class="l-sys" style="color:var(--tx3)">💰 자동판매: ${item.name} (+100G)</span>`);
+      return true;
+    }
+  }
+  return false;
+}
 
 // ★ 닉네임 변경 시 관련 DB 전체 전파
 async function propagateNickname(oldName,newName,targetCharId){
