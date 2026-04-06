@@ -1354,13 +1354,13 @@ function attrMatchMsg(atkAttr,defAttr){
   if(m<1)return`<span style="color:var(--red);font-size:9px"> ▼별로 효과 없음</span>`;
   return'';
 }
-// ★ 던전 지역별 몬스터 속성 풀 (가중 랜덤)
+// ★ 던전 지역별 몬스터 속성 풀 — 각 던전 주 속성 강화 (유저 피드백 반영)
 const AREA_ATTR_POOL={
-  cave:     [{a:'poison',w:4},{a:'dark',w:3},{a:null,w:3}],
-  darkforest:[{a:'dark',w:4},{a:'poison',w:3},{a:'ice',w:2},{a:null,w:1}],
-  desert:   [{a:'fire',w:5},{a:'lightning',w:2},{a:null,w:3}],
-  fortress: [{a:'lightning',w:4},{a:'dark',w:3},{a:'holy',w:2},{a:null,w:1}],
-  dragon:   [{a:'fire',w:5},{a:'dark',w:2},{a:'lightning',w:2},{a:null,w:1}],
+  cave:     [{a:'poison',w:7},{a:'dark',w:2},{a:null,w:1}],       // 동굴: ☠독 중심
+  darkforest:[{a:'dark',w:7},{a:'poison',w:2},{a:null,w:1}],      // 숲:   🌑어둠 중심
+  desert:   [{a:'fire',w:7},{a:'lightning',w:2},{a:null,w:1}],     // 사막: 🔥화염 중심
+  fortress: [{a:'lightning',w:7},{a:'holy',w:2},{a:null,w:1}],     // 요새: ⚡번개 중심
+  dragon:   [{a:'fire',w:5},{a:'dark',w:3},{a:'lightning',w:2}],   // 용둥: 🔥화염+🌑어둠
 };
 function rollMonsterAttr(area){
   const pool=AREA_ATTR_POOL[area];if(!pool)return null;
@@ -1826,15 +1826,15 @@ const SETS={
 
 // Dungeons
 const DTIERS=[
-  {tier:1,n:'버려진 동굴',icon:'⛏',minLv:1,floors:5,recLv:5,areas:['cave'],
+  {tier:1,n:'버려진 동굴',icon:'⛏',minLv:1,floors:5,recLv:5,areas:['cave'],_attr:'poison',
    lore:'갈리아 인근 지하, 심연의 균열이 뚫린 이후 오염된 동굴. 균열의 수호자가 지상을 노려보고 있다.'},
-  {tier:2,n:'저주받은 숲',icon:'🌿',minLv:20,floors:7,recLv:25,areas:['darkforest'],
+  {tier:2,n:'저주받은 숲',icon:'🌿',minLv:20,floors:7,recLv:25,areas:['darkforest'],_attr:'dark',
    lore:'세미아가 지키던 서쪽 깊은 숲. 베니아 의회의 성지였으나 이제 80%가 심연에 잠식되었다.'},
-  {tier:3,n:'오염된 사막',icon:'🏜️',minLv:40,floors:8,recLv:45,areas:['desert'],
+  {tier:3,n:'오염된 사막',icon:'🏜️',minLv:40,floors:8,recLv:45,areas:['desert'],_attr:'fire',
    lore:'수천 년 전 루가 태초의 신의 일격을 막아낸 곳. 그 충격으로 대륙 중앙 전체가 사막이 되었고, 그 아래에 어비스의 중심이 잠들어 있다.'},
-  {tier:4,n:'요새',icon:'🏰',minLv:60,floors:10,recLv:65,areas:['fortress'],
+  {tier:4,n:'요새',icon:'🏰',minLv:60,floors:10,recLv:65,areas:['fortress'],_attr:'lightning',
    lore:'중앙에서 동쪽으로 향하는 길목, 벨린 왕국의 요새. 왕 카르도스는 심연의 속삭임에 굴복해 백성을 제물로 바쳤고, 이제 그 자신이 심연이 되었다.'},
-  {tier:5,n:'용의 둥지',icon:'🐉',minLv:80,floors:12,recLv:85,areas:['dragon'],
+  {tier:5,n:'용의 둥지',icon:'🐉',minLv:80,floors:12,recLv:85,areas:['dragon'],_attr:'fire',
    lore:'수천 년 전 엘비아를 군림하던 고대 용들의 영역. 위대한 용들은 사라졌고, 남은 하급용들은 심연에 완전히 잠식되었다.'},
 ];
 const DIFF={
@@ -2380,6 +2380,19 @@ async function selChar(id){
     if(it&&migrateItemLv(it,true))equipMigrated=true; // ★ 장착 중 — 레벨 캡 적용
     if(it&&migrateEnchantName(it))equipMigrated=true;
     migrateForgeWard(); // ★ forgeWard 분리 마이그레이션
+  }
+  // ★ 도감 키 정리 — Firebase 금지 문자 포함된 키 수정 (장비 루프 밖에서 1회)
+  if(char._codex){
+    const badKeys=Object.keys(char._codex).filter(k=>/[.\#\$\/\[\]]/.test(k));
+    if(badKeys.length){
+      for(const bk of badKeys){
+        const cleaned=bk.replace(/[.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+        if(!char._codex[cleaned])char._codex[cleaned]=char._codex[bk];
+        else char._codex[cleaned].kills=(char._codex[cleaned].kills||0)+(char._codex[bk].kills||0);
+        delete char._codex[bk];
+      }
+      equipMigrated=true;
+    }
   }
   if(!char.str){char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;}
   if(char.extraPotions===undefined)char.extraPotions=0;
@@ -3057,7 +3070,8 @@ function renderPresets(){
 // ════════════════════════════════════════════
 function trackMonsterKill(monsterName,area,attr,isBoss){
   if(!char._codex)char._codex={};
-  const key=monsterName.replace(/\s/g,'_');
+  // ★ Firebase 키 금지 문자 제거: . # $ / [ ]
+  const key=monsterName.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
   if(!char._codex[key]){
     char._codex[key]={name:monsterName,kills:0,area:area||'unknown',attr:attr||null,isBoss:!!isBoss,firstKill:Date.now()};
   }
@@ -3203,7 +3217,7 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   const bname=getItemName(base,grade);
   const gAdj=grade==='legendary'?'전설의 ':grade==='epic'?'정예 ':grade==='rare'?'강화된 ':grade==='uncommon'?'좋은 ':'';
   const fullN=(pre?pre.n+' ':'')+(suf?suf.n+' ':'')+gAdj+bname;
-  const reqLv=Math.max(1,lv);
+  const reqLv=Math.min(99,Math.max(1,lv)); // ★ 레벨 상한 99 강제
   return{id:gId(),name:fullN,baseName:bname,baseId:base.id,slot:base.slot,hand:base.hand||null,
     grade,gradeName:GRADES[grade].name,gradeColor:GRADES[grade].color,
     stats,reqLv,_v:2,_esv:ENCHANT_STAT_VER,
@@ -5662,6 +5676,12 @@ function renderDungeon(){
       <div class="dname">${t.icon} ${t.n}</div>
       <div class="drange" style="font-size:10px">최소 Lv.${t.minLv} / 권장 Lv.${t.recLv} / ${t.floors}층</div>
       <div style="font-size:9px;margin-top:3px">최대 드랍: <span style="color:${maxColor};font-weight:700">${maxGrade}</span></div>
+      ${t._attr?(()=>{
+        const weakAttr=Object.entries(ATTR_ADVANTAGE).find(([,v])=>v===t._attr)?.[0];
+        return`<div style="font-size:9px;margin-top:2px;display:flex;align-items:center;gap:4px">
+        속성: <span style="background:${ATTR_C[t._attr]}22;color:${ATTR_C[t._attr]};border:1px solid ${ATTR_C[t._attr]}44;padding:0 5px;border-radius:8px;font-weight:700">${ATTR_N[t._attr]}</span>
+        <span style="color:var(--tx3)">약점:</span> <span style="color:${weakAttr?ATTR_C[weakAttr]:'var(--tx3)'}">${weakAttr?ATTR_N[weakAttr]:'?'}</span>
+      </div>`;})():''}
       ${t.lore?`<div style="font-size:9.5px;color:var(--tx3);margin-top:4px;line-height:1.6;font-style:italic">${t.lore}</div>`:''}
       <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;align-items:center">
         <span class="diff-btn diff-normal" style="font-size:9px;padding:2px 7px;cursor:default">노말</span>
@@ -6636,7 +6656,7 @@ async function resolvePhase(){
   // Check monsters dead
   const allMDead=battle.monsters.every(m=>m.status==='dead');
   if(allMDead){
-    lootPhase();
+    await lootPhase();
     syncBattleState();
     battle._resolving=false;
     setTimeout(async()=>{
@@ -6872,7 +6892,7 @@ async function lootPhase(){
   const t=battle.tier;const d=battle.diff;
   // ★ IT 모드: 클리어 보상은 dungeonClear에서 처리 — lootPhase는 스킵
   if(battle.mode==='immortaltower'){
-    dungeonClear();
+    await dungeonClear();
     return;
   }
   // ★ 타임어택: 전용 클리어 처리
