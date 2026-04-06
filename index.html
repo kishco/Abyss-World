@@ -6262,7 +6262,7 @@ function startActionPhase(){
   battle.fleeVotes.clear();
   renderBattle();
   // ★ 솔로/IT: 타이머 없이 유저 행동 대기 (chooseAction이 즉시 resolve)
-  const isSoloMode=battle.mode==='solo'||battle.mode==='immortaltower';
+  const isSoloMode=battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack';
   if(isSoloMode)return;
   battle.timer=setInterval(()=>{
     battle.timerVal--;
@@ -6373,7 +6373,7 @@ async function resolvePhase(){
   const alive=battle.players.filter(p=>p.status==='alive');
   // Check flee (all alive must choose flee)
   if(alive.every(p=>p.actionChosen==='flee')||
-    (( battle.mode==='solo'||battle.mode==='immortaltower')&&alive[0]?.actionChosen==='flee')){
+    (( battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack')&&alive[0]?.actionChosen==='flee')){
     SFX.play('flee');
     blogAdd('<span class="l-warn">💨 도망쳤습니다!</span>');
     battle.done=true;
@@ -6555,7 +6555,7 @@ async function resolvePhase(){
       dmg=Math.max(1,Math.round(dmg*(1-(tgt.stats._dmgReduce))));
     }
     if(tgt.healing){
-      dmg=Math.round(dmg*((battle.mode==='solo'||battle.mode==='immortaltower')?0.70:0.75)); // ★ 회복 자세 피해감소 30%→25% (밸런스 패치)
+      dmg=Math.round(dmg*((battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack')?0.70:0.75)); // ★ 회복 자세 피해감소 30%→25% (밸런스 패치)
       if(dmg<1)dmg=1;
     }
     // ★ 블라인드: 회피율 무력화 (_blind 감소는 루프 밖에서 턴당 1회 처리)
@@ -6625,7 +6625,7 @@ async function resolvePhase(){
   // Check wipe (all dead)
   const anyAlive=battle.players.some(p=>p.status==='alive');
   if(!anyAlive){
-    blogAdd((battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack')?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
+    blogAdd((battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack'||battle.mode==='timeattack')?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
     if(battle.mode==='timeattack')await handleTAFail();
     else if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');await maybeLoseItem();}
     syncBattleState({success:false,fled:false});
@@ -6658,12 +6658,12 @@ async function resolvePhase(){
           }
         }
       }
-    },(battle.mode==='solo'||battle.mode==='immortaltower')?400:1800);return;
+    },(battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack')?400:1800);return;
   }
   syncBattleState();
   battle._resolving=false;
   renderBattle();
-  setTimeout(()=>startActionPhase(), (battle.mode==='solo'||battle.mode==='immortaltower')?350:2000);
+  setTimeout(()=>startActionPhase(), (battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack')?350:2000);
   }catch(err){
     console.error('resolvePhase 오류:', err);
     if(battle){
@@ -7344,7 +7344,7 @@ function renderBattle(){
   const t=battle.tier;const d=battle.diff;
   const myP=battle.players.find(p=>p.id===charId);
   const aliveM=battle.monsters.filter(m=>m.status==='alive');
-  const isSolo=battle.mode==='solo'||battle.mode==='immortaltower';
+  const isSolo=battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack';
   const isIT=battle.mode==='immortaltower';
   // 솔로 전용 — 적개심 표시 제거됨
 
