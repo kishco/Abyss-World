@@ -670,6 +670,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <button onclick="closeEqDetail()" style="position:absolute;top:6px;right:8px;background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;line-height:1">✕</button>
             <div id="eqDetailContent"></div>
           </div>
+          <!-- ★ 장비 프리셋 시스템 -->
+          <div style="margin-top:10px">
+            <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">⚡ 장비 프리셋</div>
+            <div id="presetPanel" style="display:flex;flex-direction:column;gap:4px"></div>
+            <button class="btn btn-ghost btn-xs" style="width:100%;margin-top:5px" onclick="savePreset()">💾 현재 장비를 프리셋으로 저장</button>
+          </div>
         </div>
       </div>
     </div>
@@ -720,6 +726,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="pane" id="pane-dungeon">
       <div class="ptitle">던전</div>
       <div id="dungMain">
+        <div id="timeAttackBanner" style="display:none"></div>
         <div class="dgrid" id="dgrid"></div>
       </div>
       <div id="dungMode" style="display:none"></div>
@@ -759,6 +766,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <button class="atab" onclick="rankTab('clear')">던전 클리어</button>
         <button class="atab" onclick="rankTab('subjugation')">토벌전</button>
         <button class="atab" onclick="rankTab('champ')">챔프전</button>
+        <button class="atab" onclick="rankTab('codex')">📖 도감</button>
       </div>
       <div id="rankBody"></div>
     </div>
@@ -2218,6 +2226,9 @@ function calcStats(c){
   const sb=calcSetB(eq);
   atk+=sb.atk||0;def+=sb.def||0;spd+=sb.spd||0;hp+=sb.hp||0;crit+=sb.crit||0;
   dodge+=sb.dodge||0; // ★ 세트 보너스 회피 적용
+  // ★ 도감 보너스: 10% 달성마다 ATK/DEF +1%
+  const _cb=getCodexBonus();
+  atk*=_cb.atkMult;def*=_cb.defMult;
   return{atk:Math.round(atk),matk:Math.round(matk),def:Math.round(def),spd:Math.round(spd),
     maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),35),
     crit:Math.min(Math.round(crit),75),critDmg:Math.round(critDmg),
@@ -2675,7 +2686,7 @@ function renderChar(){
   const maxP=5+(char.extraPotions||0);
   document.getElementById('charPotions').textContent=maxP;
   document.getElementById('charMaxPotions').textContent=maxP;
-  renderEq();renderSetPanel();
+  renderEq();renderSetPanel();renderPresets();
 }
 function renderEq(){
   const is2H=char.equipment?.weapon?.hand==='2H';
@@ -2943,6 +2954,171 @@ async function equipItem(it){
   char.equipment[sl]=it;delete inv[it.id];
   await saveChar();await saveInv();closeIM();
   renderChar();renderEq();renderSetPanel();
+}
+
+// ════════════════════════════════════════════
+// ★ 장비 프리셋 시스템
+// ════════════════════════════════════════════
+const MAX_PRESETS=3;
+function getPresets(){return char._presets||[];}
+// ★ 프리셋에 포함된 아이템인지 확인 — 판매/버리기/경매 차단
+function isInPreset(itemId){
+  for(const p of getPresets()){
+    if(!p?.equipment)continue;
+    for(const it of Object.values(p.equipment)){
+      if(it&&it.id===itemId)return p.name||'프리셋';
+    }
+  }
+  return false;
+}
+window.savePreset=async function(){
+  const presets=getPresets();
+  if(presets.length>=MAX_PRESETS){toast(`⚠️ 프리셋 최대 ${MAX_PRESETS}개`);return;}
+  const eq=char.equipment||{};
+  const hasAny=Object.values(eq).some(Boolean);
+  if(!hasAny){toast('장착된 장비가 없습니다');return;}
+  const wAttr=getWeaponAttr(eq);
+  const attrTag=wAttr?ATTR_N[wAttr]:'';
+  const defName=`${attrTag||'범용'} ${eq.weapon?.name||'세트'} #${presets.length+1}`;
+  const name=prompt('프리셋 이름 (최대 15자)',defName);
+  if(!name)return;
+  const trimmed=name.trim().slice(0,15);
+  // 장비 딥 복사
+  const snapshot={};
+  for(const[sl,it]of Object.entries(eq)){
+    if(it)snapshot[sl]={...it,stats:{...it.stats},prefix:it.prefix?{...it.prefix}:null,suffix:it.suffix?{...it.suffix}:null};
+  }
+  presets.push({name:trimmed,equipment:snapshot,ts:Date.now()});
+  char._presets=presets;
+  await saveChar();
+  renderPresets();
+  toast(`💾 프리셋 저장: ${trimmed}`);
+};
+window.loadPreset=async function(idx){
+  const presets=getPresets();
+  const p=presets[idx];if(!p?.equipment)return;
+  if(!confirm(`[${p.name}] 프리셋을 장착합니까?\n현재 장비는 인벤으로 이동됩니다.`))return;
+  // 현재 장비 → 인벤
+  for(const[sl,it]of Object.entries(char.equipment||{})){
+    if(it){inv[it.id]=it;char.equipment[sl]=null;}
+  }
+  // 프리셋 장비 → 장착 (인벤/창고에서 찾기)
+  let missing=[];
+  for(const[sl,pIt]of Object.entries(p.equipment)){
+    if(!pIt)continue;
+    // 인벤에서 찾기
+    if(inv[pIt.id]){
+      char.equipment[sl]=inv[pIt.id];
+      delete inv[pIt.id];
+    }else{
+      // 이미 장착 중이면 스킵 (다른 슬롯에 있을 수 있음)
+      const alreadyEq=Object.values(char.equipment).find(e=>e&&e.id===pIt.id);
+      if(!alreadyEq)missing.push(pIt.name||sl);
+    }
+  }
+  await saveChar();await saveInv();
+  renderChar();renderEq();renderInv();renderPresets();updateTop();
+  if(missing.length)toast(`⚠️ 일부 장비를 찾을 수 없음: ${missing.join(', ')}`,4000);
+  else toast(`⚡ 프리셋 적용: ${p.name}`);
+};
+window.deletePreset=async function(idx){
+  const presets=getPresets();
+  const p=presets[idx];if(!p)return;
+  if(!confirm(`[${p.name}] 프리셋을 삭제합니까?`))return;
+  presets.splice(idx,1);
+  char._presets=presets;
+  await saveChar();
+  renderPresets();
+  toast(`🗑 프리셋 삭제: ${p.name}`);
+};
+function renderPresets(){
+  const panel=document.getElementById('presetPanel');if(!panel)return;
+  const presets=getPresets();
+  if(!presets.length){panel.innerHTML=`<div style="font-size:10px;color:var(--tx3);padding:6px 0">저장된 프리셋 없음 (최대 ${MAX_PRESETS}개)</div>`;return;}
+  panel.innerHTML=presets.map((p,i)=>{
+    const eq=p.equipment||{};
+    const wName=eq.weapon?.name||'무기 없음';
+    const wAttr=eq.weapon?.attr||eq.weapon?.prefix?.attr||null;
+    const attrBadge=wAttr?`<span style="font-size:8px;background:${ATTR_C[wAttr]}22;color:${ATTR_C[wAttr]};border:1px solid ${ATTR_C[wAttr]}44;padding:0 4px;border-radius:6px">${ATTR_N[wAttr]}</span>`:'';
+    const eqCount=Object.values(eq).filter(Boolean).length;
+    return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;display:flex;align-items:center;gap:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:4px">${p.name} ${attrBadge}</div>
+        <div style="font-size:9px;color:var(--tx3)">${wName} · ${eqCount}부위</div>
+      </div>
+      <button class="btn btn-blue btn-xs" onclick="loadPreset(${i})">착용</button>
+      <button class="btn btn-ghost btn-xs" onclick="deletePreset(${i})" style="padding:3px 5px">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+// ★ 몬스터 도감 시스템
+// ════════════════════════════════════════════
+function trackMonsterKill(monsterName,area,attr,isBoss){
+  if(!char._codex)char._codex={};
+  const key=monsterName.replace(/\s/g,'_');
+  if(!char._codex[key]){
+    char._codex[key]={name:monsterName,kills:0,area:area||'unknown',attr:attr||null,isBoss:!!isBoss,firstKill:Date.now()};
+  }
+  char._codex[key].kills++;
+  // ★ 첫 처치 보상
+  if(char._codex[key].kills===1){
+    char.gold+=100;
+    blogAdd(`<span class="l-exp" style="color:var(--gold)">📖 도감 등록: ${monsterName} (+100G)</span>`);
+  }
+}
+function getCodexCompletion(){
+  const codex=char._codex||{};
+  const total=Object.keys(codex).length;
+  // 전체 몬스터 수 (대략적)
+  const allMonsters=Object.values(MNAMES).flat().length+Object.values(IT_MNAMES||{}).flat().length;
+  return{discovered:total,total:Math.max(allMonsters,total),pct:Math.round(total/Math.max(1,allMonsters)*100)};
+}
+function getCodexBonus(){
+  const{pct}=getCodexCompletion();
+  // 10% 단위로 ATK/DEF +1%
+  return{atkMult:1+Math.floor(pct/10)*0.01,defMult:1+Math.floor(pct/10)*0.01};
+}
+function renderCodex(){
+  const rb=document.getElementById('rankBody');if(!rb)return;
+  const codex=char._codex||{};
+  const entries=Object.values(codex).sort((a,b)=>(b.kills||0)-(a.kills||0));
+  const comp=getCodexCompletion();
+  const bonus=getCodexBonus();
+  const areas={cave:'⛏ 동굴',darkforest:'🌿 숲',desert:'🏜 사막',fortress:'🏰 요새',dragon:'🐉 용의둥지',immortaltower:'🗼 불멸의 탑',timeattack:'🏆 타임어택',subjugation:'⚔ 토벌전',unknown:'❓ 기타'};
+  rb.innerHTML=`
+    <div style="background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:12px;font-weight:700;color:var(--gold)">📖 몬스터 도감</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--green)">${comp.discovered}종 발견 (${comp.pct}%)</span>
+      </div>
+      <div style="width:100%;height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden;margin-bottom:6px">
+        <div style="width:${comp.pct}%;height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:3px;transition:width .5s"></div>
+      </div>
+      <div style="font-size:9px;color:var(--tx3)">도감 보너스: ATK +${Math.round((bonus.atkMult-1)*100)}% · DEF +${Math.round((bonus.defMult-1)*100)}% (10% 달성마다 +1%)</div>
+    </div>
+    ${!entries.length?`<div style="color:var(--tx3);font-size:11px;padding:20px;text-align:center">아직 처치한 몬스터가 없습니다.<br>던전에서 몬스터를 처치하면 자동 등록됩니다.</div>`:`
+    <div style="display:flex;flex-direction:column;gap:4px">
+      ${entries.map(e=>{
+        const areaName=areas[e.area]||areas.unknown;
+        const attrBadge=e.attr&&ATTR_N[e.attr]?`<span style="font-size:8px;background:${ATTR_C[e.attr]}22;color:${ATTR_C[e.attr]};border:1px solid ${ATTR_C[e.attr]}44;padding:0 5px;border-radius:8px">${ATTR_N[e.attr]}</span>`:'';
+        const weakAttr=e.attr?Object.entries(ATTR_ADVANTAGE).find(([,v])=>v===e.attr)?.[0]:null;
+        return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;display:flex;align-items:center;gap:8px">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
+              <span style="font-size:11px;font-weight:700;color:${e.isBoss?'var(--red)':'var(--tx)'}">${e.isBoss?'👹 ':''}${e.name}</span>
+              ${attrBadge}
+            </div>
+            <div style="font-size:9px;color:var(--tx3)">${areaName}${weakAttr?` · 약점: <span style="color:${ATTR_C[weakAttr]}">${ATTR_N[weakAttr]}</span>`:''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green);font-weight:700">${e.kills}회</div>
+            <div style="font-size:8px;color:var(--tx3)">처치</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`}`;
 }
 
 // ═══ ITEM GENERATION ═══
@@ -4034,6 +4210,8 @@ function openIM(it){
   // 버리기
   document.getElementById('discBtn').onclick=async()=>{
     if(it._locked){toast('🔒 잠금된 아이템은 버릴 수 없습니다');return;}
+    const presetName=isInPreset(it.id);
+    if(presetName){toast(`⚡ 프리셋 [${presetName}]에 등록된 아이템입니다. 프리셋 삭제 후 버릴 수 있습니다.`,4000);return;}
     if(!confirm('버리시겠습니까?'))return;
     delete inv[it.id];await saveInv();closeIM();renderInv();toast('버림');
   };
@@ -4294,6 +4472,8 @@ function renderSell(sb){
 window.sellItem=async id=>{
   const it=inv[id];if(!it)return;
   if(it._locked){toast('🔒 잠금된 아이템은 판매할 수 없습니다');return;}
+  const presetName=isInPreset(id);
+  if(presetName){toast(`⚡ 프리셋 [${presetName}]에 등록된 아이템입니다`,4000);return;}
   const isEquipped=Object.values(char.equipment||{}).some(e=>e&&e.id===id);
   if(isEquipped){toast('장착 중인 장비는 판매할 수 없습니다');return;}
   const price=getSellPrice(it);
@@ -4305,10 +4485,10 @@ window.sellItem=async id=>{
 
 window.sellAllGear=async()=>{
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
-  const toSell=Object.values(inv).filter(it=>!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id)&&it.slot&&it.slot!=='scroll');
+  const toSell=Object.values(inv).filter(it=>!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id)&&!isInPreset(it.id)&&it.slot&&it.slot!=='scroll');
   if(!toSell.length){toast('판매할 장비 없음');return;}
   const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
-  if(!confirm(`장비 전체 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·장착 아이템 제외)`))return;
+  if(!confirm(`장비 전체 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·장착·프리셋 아이템 제외)`))return;
   for(const it of toSell)delete inv[it.id];
   char.gold+=total;
   await saveChar();await saveInv();updateTop();
@@ -4317,7 +4497,7 @@ window.sellAllGear=async()=>{
 };
 window.sellByGrade=async grade=>{
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
-  const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id));
+  const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id)&&!isInPreset(it.id));
   if(!toSell.length){toast('판매할 아이템 없음');return;}
   const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
   if(!confirm(`${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금 아이템 제외)`))return;
@@ -4380,72 +4560,72 @@ window.toggleEquipLock=async function(itemId){
 const BOUNTY_POOLS={
   // 입문 Lv1~29
   novice:[
-    {id:'n1',t:'던전 클리어',desc:'T1 던전 노말 3회 클리어',goal:3,track:'dung_t1_normal',gold:500,shard:1},
-    {id:'n2',t:'몬스터 처치',desc:'몬스터 30마리 처치',goal:30,track:'kill',gold:400,shard:0},
-    {id:'n3',t:'던전 클리어',desc:'T1 던전 어려움 1회 클리어',goal:1,track:'dung_t1_hard',gold:600,shard:1},
-    {id:'n4',t:'도전',desc:'포션 없이 던전 클리어 1회',goal:1,track:'dung_nopotion',gold:700,shard:1},
-    {id:'n5',t:'강화',desc:'장비 강화 1회 시도',goal:1,track:'enhance',gold:300,shard:0},
-    {id:'n6',t:'인챈트',desc:'인챈트 스크롤 1회 사용',goal:1,track:'enchant',gold:500,shard:1},
-    {id:'n7',t:'상점',desc:'상점에서 아이템 구매 1회',goal:1,track:'shop_buy',gold:300,shard:0},
+    {id:'n1',t:'던전 클리어',desc:'T1 던전 노말 3회 클리어',goal:3,track:'dung_t1_normal',gold:2500,shard:2},
+    {id:'n2',t:'몬스터 처치',desc:'몬스터 30마리 처치',goal:30,track:'kill',gold:2000,shard:1},
+    {id:'n3',t:'던전 클리어',desc:'T1 던전 어려움 1회 클리어',goal:1,track:'dung_t1_hard',gold:3000,shard:2},
+    {id:'n4',t:'도전',desc:'포션 없이 던전 클리어 1회',goal:1,track:'dung_nopotion',gold:3500,shard:2},
+    {id:'n5',t:'강화',desc:'장비 강화 1회 시도',goal:1,track:'enhance',gold:1500,shard:1},
+    {id:'n6',t:'인챈트',desc:'인챈트 스크롤 1회 사용',goal:1,track:'enchant',gold:2500,shard:2},
+    {id:'n7',t:'상점',desc:'상점에서 아이템 구매 1회',goal:1,track:'shop_buy',gold:1500,shard:1},
   ],
   // 성장 Lv30~49
   growth:[
-    {id:'g1',t:'던전 클리어',desc:'T2 던전 노말 3회 클리어',goal:3,track:'dung_t2_normal',gold:800,shard:1},
-    {id:'g2',t:'던전 클리어',desc:'T2 던전 어려움 1회 클리어',goal:1,track:'dung_t2_hard',gold:1000,shard:1},
-    {id:'g3',t:'몬스터 처치',desc:'몬스터 50마리 처치',goal:50,track:'kill',gold:700,shard:0},
-    {id:'g4',t:'보스 처치',desc:'보스 몬스터 5마리 처치',goal:5,track:'boss_kill',gold:900,shard:1},
-    {id:'g5',t:'강화',desc:'장비 강화 +3 이상 달성',goal:1,track:'enhance3',gold:800,shard:1},
-    {id:'g6',t:'인챈트',desc:'인챈트 스크롤 2회 사용',goal:2,track:'enchant',gold:700,shard:1},
-    {id:'g7',t:'골드',desc:'던전에서 골드 5,000 획득',goal:5000,track:'gold_earn',gold:600,shard:0},
-    {id:'g8',t:'도전',desc:'T2 던전 매우어려움 1회 클리어',goal:1,track:'dung_t2_vhard',gold:1500,shard:2},
+    {id:'g1',t:'던전 클리어',desc:'T2 던전 노말 3회 클리어',goal:3,track:'dung_t2_normal',gold:4000,shard:2},
+    {id:'g2',t:'던전 클리어',desc:'T2 던전 어려움 1회 클리어',goal:1,track:'dung_t2_hard',gold:5000,shard:2},
+    {id:'g3',t:'몬스터 처치',desc:'몬스터 50마리 처치',goal:50,track:'kill',gold:3500,shard:1},
+    {id:'g4',t:'보스 처치',desc:'보스 몬스터 5마리 처치',goal:5,track:'boss_kill',gold:4500,shard:2},
+    {id:'g5',t:'강화',desc:'장비 강화 +3 이상 달성',goal:1,track:'enhance3',gold:4000,shard:2},
+    {id:'g6',t:'인챈트',desc:'인챈트 스크롤 2회 사용',goal:2,track:'enchant',gold:3500,shard:2},
+    {id:'g7',t:'골드',desc:'던전에서 골드 5,000 획득',goal:5000,track:'gold_earn',gold:3000,shard:1},
+    {id:'g8',t:'도전',desc:'T2 던전 매우어려움 1회 클리어',goal:1,track:'dung_t2_vhard',gold:7500,shard:3},
   ],
   // 중급 Lv50~69
   mid:[
-    {id:'m1',t:'던전 클리어',desc:'T3 던전 노말 3회 클리어',goal:3,track:'dung_t3_normal',gold:1500,shard:1},
-    {id:'m2',t:'던전 클리어',desc:'T3 던전 어려움 2회 클리어',goal:2,track:'dung_t3_hard',gold:2000,shard:1},
-    {id:'m3',t:'던전 클리어',desc:'T3 던전 매우어려움 1회 클리어',goal:1,track:'dung_t3_vhard',gold:3000,shard:2},
-    {id:'m4',t:'몬스터 처치',desc:'몬스터 70마리 처치',goal:70,track:'kill',gold:1200,shard:0},
-    {id:'m5',t:'보스 처치',desc:'보스 몬스터 8마리 처치',goal:8,track:'boss_kill',gold:1500,shard:1},
-    {id:'m6',t:'토벌전',desc:'토벌전 1회 참전',goal:1,track:'subj',gold:1800,shard:1},
-    {id:'m7',t:'토벌전',desc:'토벌전 데미지 5,000 이상',goal:5000,track:'subj_dmg',gold:2500,shard:2},
-    {id:'m8',t:'경매',desc:'경매장 아이템 1회 구매',goal:1,track:'auction_buy',gold:1200,shard:1},
-    {id:'m9',t:'챔프전',desc:'챔프전 1회 도전',goal:1,track:'champ_try',gold:2000,shard:2},
+    {id:'m1',t:'던전 클리어',desc:'T3 던전 노말 3회 클리어',goal:3,track:'dung_t3_normal',gold:7500,shard:2},
+    {id:'m2',t:'던전 클리어',desc:'T3 던전 어려움 2회 클리어',goal:2,track:'dung_t3_hard',gold:10000,shard:2},
+    {id:'m3',t:'던전 클리어',desc:'T3 던전 매우어려움 1회 클리어',goal:1,track:'dung_t3_vhard',gold:15000,shard:3},
+    {id:'m4',t:'몬스터 처치',desc:'몬스터 70마리 처치',goal:70,track:'kill',gold:6000,shard:1},
+    {id:'m5',t:'보스 처치',desc:'보스 몬스터 8마리 처치',goal:8,track:'boss_kill',gold:7500,shard:2},
+    {id:'m6',t:'토벌전',desc:'토벌전 1회 참전',goal:1,track:'subj',gold:9000,shard:2},
+    {id:'m7',t:'토벌전',desc:'토벌전 데미지 5,000 이상',goal:5000,track:'subj_dmg',gold:12500,shard:3},
+    {id:'m8',t:'경매',desc:'경매장 아이템 1회 구매',goal:1,track:'auction_buy',gold:6000,shard:2},
+    {id:'m9',t:'챔프전',desc:'챔프전 1회 도전',goal:1,track:'champ_try',gold:10000,shard:3},
   ],
   // 고급 Lv70~89
   high:[
-    {id:'h1',t:'던전 클리어',desc:'T4 던전 노말 3회 클리어',goal:3,track:'dung_t4_normal',gold:3000,shard:1},
-    {id:'h2',t:'던전 클리어',desc:'T4 던전 어려움 2회 클리어',goal:2,track:'dung_t4_hard',gold:3500,shard:2},
-    {id:'h3',t:'던전 클리어',desc:'T4 던전 매우어려움 1회 클리어',goal:1,track:'dung_t4_vhard',gold:5000,shard:2},
-    {id:'h4',t:'몬스터 처치',desc:'몬스터 100마리 처치',goal:100,track:'kill',gold:2500,shard:0},
-    {id:'h5',t:'보스 처치',desc:'보스 몬스터 10마리 처치',goal:10,track:'boss_kill',gold:3000,shard:1},
-    {id:'h6',t:'토벌전',desc:'토벌전 데미지 20,000 이상',goal:20000,track:'subj_dmg',gold:4000,shard:2},
-    {id:'h7',t:'토벌전',desc:'토벌전 참전 후 랭킹 기록',goal:1,track:'subj',gold:3500,shard:2},
-    {id:'h8',t:'챔프전',desc:'챔프전 2회 도전',goal:2,track:'champ_try',gold:4500,shard:2},
-    {id:'h9',t:'경매',desc:'레어 이상 장비 경매 등록 1회',goal:1,track:'auction_reg',gold:3000,shard:1},
+    {id:'h1',t:'던전 클리어',desc:'T4 던전 노말 3회 클리어',goal:3,track:'dung_t4_normal',gold:15000,shard:2},
+    {id:'h2',t:'던전 클리어',desc:'T4 던전 어려움 2회 클리어',goal:2,track:'dung_t4_hard',gold:17500,shard:3},
+    {id:'h3',t:'던전 클리어',desc:'T4 던전 매우어려움 1회 클리어',goal:1,track:'dung_t4_vhard',gold:25000,shard:3},
+    {id:'h4',t:'몬스터 처치',desc:'몬스터 100마리 처치',goal:100,track:'kill',gold:12500,shard:1},
+    {id:'h5',t:'보스 처치',desc:'보스 몬스터 10마리 처치',goal:10,track:'boss_kill',gold:15000,shard:2},
+    {id:'h6',t:'토벌전',desc:'토벌전 데미지 20,000 이상',goal:20000,track:'subj_dmg',gold:20000,shard:3},
+    {id:'h7',t:'토벌전',desc:'토벌전 참전 후 랭킹 기록',goal:1,track:'subj',gold:17500,shard:3},
+    {id:'h8',t:'챔프전',desc:'챔프전 2회 도전',goal:2,track:'champ_try',gold:22500,shard:3},
+    {id:'h9',t:'경매',desc:'레어 이상 장비 경매 등록 1회',goal:1,track:'auction_reg',gold:15000,shard:2},
   ],
   // 최상급 Lv90~99
   elite:[
-    {id:'e1',t:'던전 클리어',desc:'T5 던전 노말 3회 클리어',goal:3,track:'dung_t5_normal',gold:5000,shard:2},
-    {id:'e2',t:'던전 클리어',desc:'T5 던전 어려움 2회 클리어',goal:2,track:'dung_t5_hard',gold:6000,shard:2},
-    {id:'e3',t:'던전 클리어',desc:'T5 던전 매우어려움 1회 클리어',goal:1,track:'dung_t5_vhard',gold:8000,shard:3},
-    {id:'e4',t:'몬스터 처치',desc:'몬스터 150마리 처치',goal:150,track:'kill',gold:4000,shard:1},
-    {id:'e5',t:'보스 처치',desc:'보스 몬스터 15마리 처치',goal:15,track:'boss_kill',gold:5000,shard:2},
-    {id:'e6',t:'토벌전',desc:'토벌전 데미지 50,000 이상',goal:50000,track:'subj_dmg',gold:7000,shard:2},
-    {id:'e7',t:'토벌전',desc:'토벌전 참전 후 랭킹 기록',goal:1,track:'subj',gold:6000,shard:2},
-    {id:'e8',t:'챔프전',desc:'챔프전 3회 도전',goal:3,track:'champ_try',gold:8000,shard:3},
-    {id:'e9',t:'경매',desc:'레전더리 장비 경매 등록 1회',goal:1,track:'auction_reg_lg',gold:6000,shard:2},
-    {id:'e10',t:'도전',desc:'T5 매우어려움 포션 없이 클리어',goal:1,track:'dung_t5_vhard_nopotion',gold:10000,shard:3},
+    {id:'e1',t:'던전 클리어',desc:'T5 던전 노말 3회 클리어',goal:3,track:'dung_t5_normal',gold:25000,shard:3},
+    {id:'e2',t:'던전 클리어',desc:'T5 던전 어려움 2회 클리어',goal:2,track:'dung_t5_hard',gold:30000,shard:3},
+    {id:'e3',t:'던전 클리어',desc:'T5 던전 매우어려움 1회 클리어',goal:1,track:'dung_t5_vhard',gold:40000,shard:4},
+    {id:'e4',t:'몬스터 처치',desc:'몬스터 150마리 처치',goal:150,track:'kill',gold:20000,shard:2},
+    {id:'e5',t:'보스 처치',desc:'보스 몬스터 15마리 처치',goal:15,track:'boss_kill',gold:25000,shard:3},
+    {id:'e6',t:'토벌전',desc:'토벌전 데미지 50,000 이상',goal:50000,track:'subj_dmg',gold:35000,shard:3},
+    {id:'e7',t:'토벌전',desc:'토벌전 참전 후 랭킹 기록',goal:1,track:'subj',gold:30000,shard:3},
+    {id:'e8',t:'챔프전',desc:'챔프전 3회 도전',goal:3,track:'champ_try',gold:40000,shard:4},
+    {id:'e9',t:'경매',desc:'레전더리 장비 경매 등록 1회',goal:1,track:'auction_reg_lg',gold:30000,shard:3},
+    {id:'e10',t:'도전',desc:'T5 매우어려움 포션 없이 클리어',goal:1,track:'dung_t5_vhard_nopotion',gold:50000,shard:4},
   ],
 };
 
 // 주간 미션 (구간별 보상만 다름)
 const WEEKLY_MISSIONS=[
   {id:'w1',desc:'일일 미션 5회 완료',goal:5,track:'daily_complete',
-    reward:{novice:{gold:0,scroll:1},growth:{gold:3000,scroll:1},mid:{gold:5000,scroll:1},high:{gold:8000,scroll:2},elite:{gold:10000,scroll:2}}},
+    reward:{novice:{gold:2000,scroll:2},growth:{gold:8000,scroll:2},mid:{gold:15000,scroll:3},high:{gold:20000,scroll:3},elite:{gold:30000,scroll:4}}},
   {id:'w2',desc:'던전 누적 10회 클리어',goal:10,track:'any_dung',
-    reward:{novice:{gold:0,scroll:1},growth:{gold:3000,scroll:1},mid:{gold:5000,scroll:1},high:{gold:8000,scroll:2},elite:{gold:10000,scroll:2}}},
+    reward:{novice:{gold:2000,scroll:2},growth:{gold:8000,scroll:2},mid:{gold:15000,scroll:3},high:{gold:20000,scroll:3},elite:{gold:30000,scroll:4}}},
   {id:'w3',desc:'토벌전 3회 참전',goal:3,track:'subj',
-    reward:{novice:null,growth:{gold:3000,scroll:1},mid:{gold:5000,scroll:1},high:{gold:8000,scroll:2},elite:{gold:10000,scroll:2}}},
+    reward:{novice:null,growth:{gold:8000,scroll:2},mid:{gold:15000,scroll:3},high:{gold:20000,scroll:3},elite:{gold:30000,scroll:4}}},
 ];
 
 function getBountyTier(lv){
@@ -4663,9 +4843,9 @@ window.claimWeekly=async function(){
 };
 
 window.exchangeShards=async function(){
-  if((char.bountyShards||0)<3){toast('조각 3개 필요');return;}
-  if(!confirm('조각 3개를 소모해 인챈트 스크롤 1개를 받겠습니까?'))return;
-  char.bountyShards-=3;
+  if((char.bountyShards||0)<2){toast('조각 2개 필요');return;}
+  if(!confirm('조각 2개를 소모해 인챈트 스크롤 1개를 받겠습니까?'))return;
+  char.bountyShards-=2;
   const sc=genEnchantScroll(char.level,Math.random()<0.5);
   await addItem(sc);
   await saveChar();updateTop();
@@ -5363,6 +5543,8 @@ async function renderAuction(sb){
     const it=inv[itemId];if(!it){toast('아이템 없음');return;}
     if(!it.tradeable){toast('거래 불가 아이템');return;}
     if(it._locked){toast('🔒 잠금된 아이템은 경매 등록할 수 없습니다');return;}
+    const presetName=isInPreset(itemId);
+    if(presetName){toast(`⚡ 프리셋 [${presetName}]에 등록된 아이템입니다. 프리셋 삭제 후 등록 가능합니다.`,4000);return;}
     const priceEl=document.getElementById('ap_'+itemId);
     const price=parseInt(priceEl?.value||0);
     if(price<1){toast('가격을 입력하세요');return;}
@@ -5488,6 +5670,186 @@ function renderDungeon(){
       <div class="dicon">${t.icon}</div>
     </div>`;
   }).join('');
+  // ★ 타임어택 배너 렌더
+  renderTABanner();
+}
+
+// ════════════════════════════════════════════
+// ★ 주간 타임어택 시스템
+// ════════════════════════════════════════════
+const TA_BOSSES=[
+  {id:'ta_fire',  name:'화염의 수호자',  icon:'🔥', _attr:'fire',    color:'#ff6030', hp:50000, atk:2200, def:600, dodge:15,
+   skills:['m_fire_breath','m_burn','m_roar']},
+  {id:'ta_ice',   name:'빙결의 감시자',  icon:'❄️', _attr:'ice',     color:'#60c8ff', hp:55000, atk:2000, def:700, dodge:18,
+   skills:['m_curse','m_blind','m_fortify']},
+  {id:'ta_light', name:'뇌전의 심판관',  icon:'⚡', _attr:'lightning',color:'#ffe040', hp:45000, atk:2500, def:500, dodge:22,
+   skills:['m_tail','m_execute','m_shield_bash']},
+  {id:'ta_dark',  name:'암흑의 집행자',  icon:'🌑', _attr:'dark',    color:'#a060ff', hp:52000, atk:2300, def:650, dodge:16,
+   skills:['m_curse','m_drain','m_blind']},
+  {id:'ta_holy',  name:'성스러운 파수꾼',icon:'✨', _attr:'holy',    color:'#fff080', hp:48000, atk:2100, def:750, dodge:14,
+   skills:['m_rally','m_fortify','m_shield_bash']},
+  {id:'ta_poison',name:'독의 지배자',    icon:'☠️', _attr:'poison',  color:'#80ff40', hp:47000, atk:2400, def:550, dodge:20,
+   skills:['m_poison2','m_sand','m_burn']},
+];
+const TA_MAX_ATTEMPTS=3;
+function getTAWeekKey(){
+  const d=new Date();const mon=new Date(d);mon.setHours(0,0,0,0);
+  mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+  return`ta_w${mon.getFullYear()}${mon.getMonth()+1}${mon.getDate()}`;
+}
+function getTABossIdx(){
+  const d=new Date();const mon=new Date(d);mon.setHours(0,0,0,0);
+  mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+  const weekNum=Math.floor(mon.getTime()/(7*24*60*60*1000));
+  return weekNum%TA_BOSSES.length;
+}
+async function renderTABanner(){
+  const banner=document.getElementById('timeAttackBanner');
+  if(!banner||!char)return;
+  if(char.level<50){banner.style.display='none';return;}
+  const boss=TA_BOSSES[getTABossIdx()];
+  const wk=getTAWeekKey();
+  const weakAttr=Object.entries(ATTR_ADVANTAGE).find(([,v])=>v===boss._attr)?.[0]||null;
+  let myData=null,myRank=-1,attempts=0;
+  try{
+    const mySn=await get(ref(db,`timeAttack/${wk}/${char.name}`));
+    myData=mySn.val();attempts=myData?.attempts||0;
+    const allSn=await get(ref(db,`timeAttack/${wk}`));
+    const allData=allSn.val()||{};
+    const sorted=Object.entries(allData).filter(([,d])=>d.bestTurns>0).sort((a,b)=>a[1].bestTurns-b[1].bestTurns);
+    myRank=sorted.findIndex(([n])=>n===char.name);
+  }catch(e){}
+  const canEnter=attempts<TA_MAX_ATTEMPTS&&!isInBattle();
+  const pAttr=getWeaponAttr(char.equipment||{});
+  const matchMult=calcAttrMult(pAttr,boss._attr);
+  const matchHint=matchMult>1?`<span style="color:var(--green)">▲유리</span>`:matchMult<=0.5?`<span style="color:var(--red)">▼내성</span>`:matchMult<1?`<span style="color:var(--red)">▼불리</span>`:`<span style="color:var(--tx3)">중립</span>`;
+  banner.style.display='block';
+  banner.innerHTML=`
+    <div style="background:linear-gradient(135deg,${boss.color}11,${boss.color}05);border:1px solid ${boss.color}44;border-radius:10px;padding:12px 14px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:${boss.color}">🏆 주간 타임어택</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:${attempts>=TA_MAX_ATTEMPTS?'var(--red)':'var(--green)'}">도전 ${TA_MAX_ATTEMPTS-attempts}/${TA_MAX_ATTEMPTS}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+        <div style="font-size:28px">${boss.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:var(--tx)">${boss.name}</div>
+          <div style="font-size:9.5px;color:var(--tx3)">HP ${boss.hp.toLocaleString()} · ATK ${boss.atk} · DEF ${boss.def} · 회피 ${boss.dodge}%</div>
+          <div style="display:flex;gap:6px;margin-top:3px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:9px;background:${boss.color}22;color:${boss.color};border:1px solid ${boss.color}44;padding:1px 6px;border-radius:8px">${ATTR_N[boss._attr]}</span>
+            ${weakAttr?`<span style="font-size:9px;color:var(--tx3)">약점: <span style="color:${ATTR_C[weakAttr]}">${ATTR_N[weakAttr]}</span></span>`:''}
+            <span style="font-size:9px">내 무기: ${pAttr?`<span style="color:${ATTR_C[pAttr]}">${ATTR_N[pAttr]}</span>`:'없음'} ${matchHint}</span>
+          </div>
+        </div>
+        ${myData?.bestTurns?`<div style="text-align:right;flex-shrink:0">
+          <div style="font-size:9px;color:var(--tx3)">최고 기록</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:900;color:var(--gold)">${myData.bestTurns}턴</div>
+          ${myRank>=0?`<div style="font-size:9px;color:${myRank<3?'var(--gold)':'var(--tx3)'}">${myRank+1}위</div>`:''}
+        </div>`:''}
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn ${canEnter?'btn-red':'btn-ghost'}" style="flex:1;padding:10px;font-size:12px;font-weight:700"
+          ${canEnter?`onclick="enterTABattle()"`:'disabled'}>
+          ${attempts>=TA_MAX_ATTEMPTS?'이번 주 도전 완료':'⚔️ 타임어택 도전!'}
+        </button>
+        <button class="btn btn-ghost" style="padding:10px;font-size:11px" onclick="showTARanking()">📊 랭킹</button>
+      </div>
+      <div style="font-size:9px;color:var(--tx3);margin-top:6px;text-align:center">
+        포션 3개 고정 · 최소 턴수로 처치 · 매주 월요일 갱신 · Lv.50+
+      </div>
+    </div>`;
+}
+window.showTARanking=async function(){
+  const wk=getTAWeekKey();const boss=TA_BOSSES[getTABossIdx()];
+  let sorted=[];
+  try{const sn=await get(ref(db,`timeAttack/${wk}`));const d=sn.val()||{};sorted=Object.entries(d).filter(([,v])=>v.bestTurns>0).sort((a,b)=>a[1].bestTurns-b[1].bestTurns);}catch(e){}
+  const titles=['⏱ 시간의 지배자','⏱ 시간의 추적자','⏱ 시간의 도전자'];
+  const modal=document.getElementById('imodal');
+  document.getElementById('imtitle').innerHTML=`<span style="color:${boss.color}">🏆 타임어택 랭킹 — ${boss.icon} ${boss.name}</span>`;
+  document.getElementById('imbody').innerHTML=`
+    ${!sorted.length?`<div style="color:var(--tx3);font-size:11px;padding:20px;text-align:center">이번 주 기록 없음</div>`:`
+    <div style="overflow-x:auto"><table class="utbl">
+      <thead><tr><th>순위</th><th>캐릭터</th><th>턴수</th></tr></thead>
+      <tbody>${sorted.slice(0,20).map(([name,d],i)=>`
+        <tr style="${name===char.name?'background:rgba(240,192,64,.07)':''}">
+          <td><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--tx3)'}">${i<3?titles[i]:i+1}</span></td>
+          <td style="font-family:'Cinzel',serif;font-size:11px;color:${name===char.name?'var(--gold)':'var(--tx)'}">${name}${name===char.name?' <span style="font-size:9px;color:var(--blue)">나</span>':''}</td>
+          <td style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--green)">${d.bestTurns}턴</td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`}
+    <button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="closeIM()">닫기</button>`;
+  modal.classList.add('open');
+};
+window.enterTABattle=async function(){
+  if(char.level<50){toast('⚠️ Lv.50 이상만 참여 가능');return;}
+  if(battle&&!battle.done){toast('⚔️ 전투 중에는 참여 불가');return;}
+  const wk=getTAWeekKey();
+  let mySn;try{mySn=await get(ref(db,`timeAttack/${wk}/${char.name}`));}catch(e){}
+  const myData=mySn?.val()||{attempts:0,bestTurns:0};
+  if(myData.attempts>=TA_MAX_ATTEMPTS){toast('⚠️ 이번 주 도전 횟수 소진');return;}
+  await update(ref(db,`timeAttack/${wk}/${char.name}`),{attempts:(myData.attempts||0)+1});
+  const bossIdx=getTABossIdx();const boss=TA_BOSSES[bossIdx];
+  const s=calcStats(char);
+  const monSkills=(boss.skills||[]).map(sid=>{
+    const allPools=[...Object.values(MON_SKILLS)].flat();
+    return allPools.find(sk=>sk.id===sid);
+  }).filter(Boolean);
+  battle={
+    tierIdx:4,tier:{tier:6,n:'타임어택',icon:'🏆',minLv:50,floors:1,recLv:99,areas:['dragon']},
+    mode:'timeattack',diffKey:'vhard',
+    diff:{name:'타임어택',color:boss.color,monMult:1,dmgMult:1,expMult:0,goldMult:0,dropMult:0,reqScore:0,canWipe:false},
+    players:[{id:charId,name:char.name,charData:char,stats:s,hp:s.maxHp,maxHp:s.maxHp,potions:3,
+      status:'alive',buffs:{},aggro:0,actionChosen:null,defending:false}],
+    floor:0,floors:1,phase:0,soloMult:1.0,log:[],done:false,timer:null,timerVal:0,
+    fleeVotes:new Set(),reviveQueue:new Set(),combatMs:0,totalTurns:0,_phaseStart:null,_presence:{},
+    _taBossIdx:bossIdx,_taWeekKey:wk,
+  };
+  document.getElementById('dungMain').style.display='none';
+  document.getElementById('dungMode').style.display='none';
+  document.getElementById('dungLobby').style.display='none';
+  document.getElementById('dungBattle').style.display='block';
+  document.getElementById('dungBattle').innerHTML='';
+  document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-dungeon'));
+  updateNavLock();
+  battle.floor=1;
+  battle.monsters=[{
+    id:'ta_boss_0',name:boss.name,hp:boss.hp,maxHp:boss.hp,atk:boss.atk,def:boss.def,
+    dodge:boss.dodge,_attr:boss._attr,
+    isBoss:true,hidden:false,aggro:0,expR:0,goldR:0,status:'alive',
+    skills:monSkills,gimmick:{rage50:false,chargeWarn:false,chargeCount:0}
+  }];
+  blogAdd(`<span class="l-sys" style="color:${boss.color}">🏆 주간 타임어택 — ${boss.icon} ${boss.name}</span>`);
+  blogAdd(`<span class="l-sys">포션 3개 · 최소 턴수로 처치하세요!</span>`);
+  renderBattle();startActionPhase();
+};
+async function handleTAClear(){
+  if(!battle||battle.mode!=='timeattack')return;
+  const turns=battle.totalTurns||999;const wk=battle._taWeekKey;const boss=TA_BOSSES[battle._taBossIdx];
+  // ★ 타임어택 보스 도감 등록
+  for(const m of battle.monsters.filter(m=>m.status==='dead'))trackMonsterKill(m.name,'timeattack',m._attr,true);
+  let mySn;try{mySn=await get(ref(db,`timeAttack/${wk}/${char.name}`));}catch(e){}
+  const prev=mySn?.val()||{attempts:1,bestTurns:0};
+  const isNewBest=prev.bestTurns<=0||turns<prev.bestTurns;
+  if(isNewBest)await update(ref(db,`timeAttack/${wk}/${char.name}`),{bestTurns:turns,ts:Date.now()});
+  let rewardGold=5000;
+  if(isNewBest&&prev.bestTurns>0){rewardGold+=10000;blogAdd(`<span class="l-exp" style="color:var(--gold)">🏆 최고 기록 갱신! ${prev.bestTurns}턴 → ${turns}턴</span>`);}
+  char.gold+=rewardGold;
+  // ★ 스크롤 2개 (고급 티어)
+  for(let i=0;i<2;i++){const sc=genTieredEnchantScroll(4,'hard');await addItem(sc);blogAdd(`<span class="l-set">📜 ${sc.name} 획득!</span>`);}
+  blogAdd(`<span class="l-exp">💰 +${rewardGold.toLocaleString()}G</span>`);
+  await saveChar();await saveInv();updateTop();
+  blogAdd(`<span class="l-sys" style="color:var(--gold)">⏱ 클리어: ${turns}턴${isNewBest?' — 🏆 신기록!':''}</span>`);
+  try{
+    const allSn=await get(ref(db,`timeAttack/${wk}`));const allData=allSn.val()||{};
+    const sorted=Object.entries(allData).filter(([,d])=>d.bestTurns>0).sort((a,b)=>a[1].bestTurns-b[1].bestTurns);
+    const myRank=sorted.findIndex(([n])=>n===char.name);
+    if(myRank>=0)blogAdd(`<span class="l-sys">📊 현재 순위: ${myRank+1}위 / ${sorted.length}명</span>`);
+  }catch(e){}
+}
+async function handleTAFail(){
+  if(!battle||battle.mode!=='timeattack')return;
+  blogAdd(`<span class="l-dead">💀 타임어택 실패 — 기록 없음</span>`);
 }
 window.selectDungeon=function(tierIdx){
   const t=DTIERS[tierIdx];
@@ -5808,7 +6170,7 @@ function evFullHeal(){
 }
 function evGoldRoom(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
-  const gold=Math.round((50+battle.tier.recLv*20)*battle.diff.goldMult*(1+char.luk*0.005));
+  const gold=Math.round((100+battle.tier.recLv*35)*battle.diff.goldMult*(1+char.luk*0.005)); // ★ 골드의 방 보상 상향
   char.gold+=gold;saveChar();updateTop();
   blogAdd(`<span class="l-exp">💰 금화가 가득! +${gold.toLocaleString()}G 획득!</span>`);
   setTimeout(()=>startActionPhase(),350);
@@ -6263,8 +6625,9 @@ async function resolvePhase(){
   // Check wipe (all dead)
   const anyAlive=battle.players.some(p=>p.status==='alive');
   if(!anyAlive){
-    blogAdd((battle.mode==='solo'||battle.mode==='immortaltower')?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
-    if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');await maybeLoseItem();}
+    blogAdd((battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack')?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
+    if(battle.mode==='timeattack')await handleTAFail();
+    else if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');await maybeLoseItem();}
     syncBattleState({success:false,fled:false});
     battle._resolving=false;
     setTimeout(()=>endBattle(false,false),500);return;
@@ -6511,6 +6874,14 @@ function lootPhase(){
     dungeonClear();
     return;
   }
+  // ★ 타임어택: 전용 클리어 처리
+  if(battle.mode==='timeattack'){
+    handleTAClear();
+    battle.done=true;battle.ended=true;
+    updateNavLock();
+    setTimeout(()=>endBattle(true,false),500);
+    return;
+  }
   let totalExp=0,totalGold=0;
   const droppedItems=[];
   // ★ 현상금 게시판 몬스터/보스 처치 트래킹
@@ -6519,6 +6890,9 @@ function lootPhase(){
   const bossKills=deadMons.filter(m=>m.isBoss).length;
   if(killCount>0)trackBounty('kill',killCount);
   if(bossKills>0)trackBounty('boss_kill',bossKills);
+  // ★ 몬스터 도감 등록
+  const area=battle.tier?.areas?.[0]||'unknown';
+  for(const m of deadMons)trackMonsterKill(m.name,area,m._attr,m.isBoss);
   for(const m of battle.monsters){
     const lv=t.recLv;
     // ★ 월급루팡 처치 시 현재 레벨 최대 경험치의 50% 지급
@@ -6530,7 +6904,7 @@ function lootPhase(){
       continue;
     }
     const exp=Math.round((30+lv*8)*m.expR*d.expMult*(_globalExpMult||1.0));
-    const gold=Math.round((15+lv*3)*m.goldR*d.goldMult*(1+char.luk*0.005));
+    const gold=Math.round((25+lv*5)*m.goldR*d.goldMult*(1+char.luk*0.005)); // ★ 골드 기본값 상향
     totalExp+=exp;totalGold+=gold;
     const dropR=d.dropMult*(1+char.luk*0.003);
     const dropRoll=Math.random();
@@ -6650,6 +7024,9 @@ async function dungeonClear(){
     const floor=battle._itFloor||1;
     SFX.play('clear');
     blogAdd(`<span class="l-exp" style="color:#FF2244">🗼 ${floor}층 클리어!</span>`);
+
+    // ★ IT 몬스터 도감 등록
+    for(const m of battle.monsters.filter(m=>m.status==='dead'))trackMonsterKill(m.name,'immortaltower',m._attr,m.isBoss);
 
     // 징수 지급
     char._immortalSeals=(char._immortalSeals||0)+1;
@@ -6850,20 +7227,23 @@ function endBattle(success,fled){
 
   const resultColor=success?'var(--green)':fled?'var(--tx2)':'var(--red)';
   const resultMsg=success
-    ?(battle.mode==='immortaltower'?`🗼 ${battle._itFloor}층 클리어!`:'🏆 던전 클리어!')
+    ?(battle.mode==='immortaltower'?`🗼 ${battle._itFloor}층 클리어!`:battle.mode==='timeattack'?`🏆 타임어택 클리어! — ${battle.totalTurns||'?'}턴`:'🏆 던전 클리어!')
     :fled?'💨 도망쳤습니다':'💀 전멸';
   const _lastTierIdx=battle.tierIdx;
   const _lastDiffKey=battle.diffKey;
   const _lastITFloor=battle._itFloor;
   const _isIT=battle.mode==='immortaltower';
+  const _isTA=battle.mode==='timeattack';
 
   const resultHtml=`
     <div style="text-align:center;padding:24px 0 14px;position:sticky;top:0;background:var(--sf);z-index:10;border-bottom:1px solid var(--bd);margin-bottom:12px">
       <div style="font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:${resultColor};margin-bottom:10px">${resultMsg}</div>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-gold" style="padding:12px 28px;font-size:14px;font-weight:700" onclick="exitBattle()">← ${_isIT?'탑으로':'던전 목록'}</button>
+        <button class="btn btn-gold" style="padding:12px 28px;font-size:14px;font-weight:700" onclick="exitBattle()">← ${_isIT?'탑으로':_isTA?'던전 목록':'던전 목록'}</button>
         ${_isIT
           ?`<button class="btn btn-red" style="padding:12px 28px;font-size:14px;font-weight:700" onclick="startITBattle(${_lastITFloor})">🔄 재도전</button>`
+          :_isTA
+          ?`<button class="btn btn-blue" style="padding:12px 28px;font-size:14px;font-weight:700" onclick="showTARanking()">📊 랭킹 보기</button>`
           :`<button class="btn btn-blue" style="padding:12px 28px;font-size:14px;font-weight:700" onclick="reEnterDungeon(${_lastTierIdx},'solo','${_lastDiffKey}')">🔄 재입장</button>`}
       </div>
       ${_isIT&&!success?`
@@ -9696,6 +10076,18 @@ window.enterSubjBattle=function(){
     // ★ 현상금 트래킹
     trackBounty('subj',1);
     trackBounty('subj_dmg',dmg);
+    // ★ 토벌전 참전 보상: 데미지 비례 골드 + 첫 일일 참전 스크롤
+    const subjGold=Math.round(Math.min(dmg*0.5, 15000)); // 데미지의 50%, 상한 15,000G
+    char.gold+=subjGold;
+    slog(`<span class="l-exp">💰 토벌 보상: +${subjGold.toLocaleString()}G (데미지 비례)</span>`);
+    // 첫 일일 참전 보너스: 인챈트 스크롤 1개
+    const todayKey=getTodayKey();
+    if(!char._lastSubjRewardDay||char._lastSubjRewardDay!==todayKey){
+      char._lastSubjRewardDay=todayKey;
+      const sc=genTieredEnchantScroll(3,'normal');
+      await addItem(sc);
+      slog(`<span class="l-set">📜 일일 첫 토벌 보너스: ${sc.name} 획득!</span>`);
+    }
     // Update server boss HP (deduct our damage)
     const bossHpSn=await get(ref(db,'subjugation/bossHp'));
     const curBossHp=bossHpSn.val()??boss.hp;
@@ -9718,6 +10110,7 @@ window.enterSubjBattle=function(){
       await saveInv();
       // Broadcast banner
       await push(ref(db,'chat/system'),{author:'SYSTEM',text:`🎉 ${boss.name}가 처치되었습니다!! 처치자: ${char.name}`,ts:Date.now(),isAdmin:true});
+      trackMonsterKill(boss.name,'subjugation',boss._attr,true); // ★ 도감 등록
     }
     toast(`✅ 토벌전 데미지 ${dmg.toLocaleString()} 기록!`,3000);
   }
@@ -10066,6 +10459,12 @@ window.enterChampBattle=async function(){
       const newWSnap=await get(newWinsRef);
       await set(newWinsRef,Math.max(newWSnap.val()||0, 1));
       await push(ref(db,'chat/system'),{author:'SYSTEM',text:`🥊 ${char.name}이(가) ${champ.name}을(를) 꺾고 새 챔프가 되었습니다!`,ts:Date.now(),isAdmin:true});
+      // ★ 챔프 등극 보상
+      const champRewardGold=10000;
+      char.gold+=champRewardGold;
+      clog(`<span class="l-exp">💰 챔프 등극 보상: +${champRewardGold.toLocaleString()}G</span>`);
+      for(let i=0;i<2;i++){const sc=genTieredEnchantScroll(4,'vhard');await addItem(sc);clog(`<span class="l-set">📜 ${sc.name} 획득!</span>`);}
+      await saveChar();await saveInv();updateTop();
       toast('🥊 챔프 등극!',4000);
       renderChampBattle();return;
     }
@@ -10188,7 +10587,7 @@ let rankMode='level';
 window.rankTab=function(mode){
   rankMode=mode;
   document.querySelectorAll('#rankTabs .atab').forEach((t,i)=>
-    t.classList.toggle('on',['level','gold','clear','subjugation','champ'][i]===mode));
+    t.classList.toggle('on',['level','gold','clear','subjugation','champ','codex'][i]===mode));
   loadRanking();
 };
 
@@ -10281,6 +10680,12 @@ async function loadRanking(){
           </tbody>
         </table>
       </div>`}`;
+    return;
+  }
+
+  // ★ 몬스터 도감
+  if(rankMode==='codex'){
+    renderCodex();
     return;
   }
 
