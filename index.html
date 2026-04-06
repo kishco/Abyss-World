@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>ABYSS WORLD 2.5 - 다크 판타지 RPG</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <!-- SEO 기본 -->
 <meta name="description" content="ABYSS WORLD는 브라우저에서 바로 즐기는 다크 판타지 텍스트 RPG입니다. 던전 탐험, 장비 수집, 토벌전, 챔프전을 무료로 즐겨보세요.">
@@ -1567,7 +1565,7 @@ const WBASES=[
   {id:'dual',     hand:'2H',slot:'weapon',ar:1.75,sr:0.6,balMin:35,balMax:55}, // 쌍검
   {id:'axe',      hand:'1H',slot:'weapon',ar:1.15,  balMin:40,balMax:60}, // 도끼
   {id:'greataxe', hand:'2H',slot:'weapon',ar:2.0,   balMin:25,balMax:45}, // 대도끼
-  {id:'dagger',   hand:'1H',slot:'weapon',ar:0.85,sr:0.8,balMin:55,balMax:75}, // 단검
+  {id:'dagger',   hand:'1H',slot:'weapon',ar:0.95,sr:0.8,balMin:55,balMax:75}, // 단검 — ar 0.95 (상향)
   {id:'greatsword',hand:'2H',slot:'weapon',ar:2.2,  balMin:35,balMax:55}, // 대검
   {id:'spear',    hand:'2H',slot:'weapon',ar:1.7,dr:0.35,balMin:65,balMax:85}, // 창
   {id:'mace',     hand:'1H',slot:'weapon',ar:1.15,dr:0.25,balMin:45,balMax:65}, // 메이스
@@ -1752,7 +1750,7 @@ const DTIERS=[
 const DIFF={
   normal:{name:'노말',color:'var(--green)',monMult:0.85,dmgMult:0.85,expMult:1.0,goldMult:1.0,dropMult:1.0,reqScore:0},
   hard:{name:'어려움',color:'#ff9900',monMult:1.4,dmgMult:1.6,expMult:3.0,goldMult:2.5,dropMult:2.0,reqScore:180,canWipe:false},
-  vhard:{name:'매우어려움',color:'var(--red)',monMult:2.8,dmgMult:3.2,expMult:7.0,goldMult:6.0,dropMult:4.0,reqScore:280,canWipe:true},
+  vhard:{name:'매우어려움',color:'var(--red)',monMult:2.8,dmgMult:3.2,expMult:10.0,goldMult:9.0,dropMult:6.0,reqScore:280,canWipe:true},
 };
 const MNAMES={
   cave:      ['고블린 전사','동굴 박쥐','바위 두더지','함정 거미','굴 뱀','광부 좀비','동굴 슬라임','야간 도둑','동굴 거북','독 유충'],
@@ -1910,6 +1908,17 @@ onAuthStateChanged(auth,async user=>{
     startPresence();
     checkChatReset();
   }else{
+    // ★ 로그아웃 시 리스너/인터벌 정리
+    if(_presenceInterval){clearInterval(_presenceInterval);_presenceInterval=null;}
+    for(const k of Object.keys(cwUnsub)){if(cwUnsub[k]){cwUnsub[k]();cwUnsub[k]=null;}}
+    cwActive=false;
+    if(_charUnsub){_charUnsub();_charUnsub=null;}
+    if(_invUnsub){_invUnsub();_invUnsub=null;}
+    if(_auctionUnsub){_auctionUnsub();_auctionUnsub=null;}
+    if(_champWatcherUnsub){_champWatcherUnsub();_champWatcherUnsub=null;}
+    if(_subjBossKillUnsub){_subjBossKillUnsub();_subjBossKillUnsub=null;}
+    if(_subjRankUnsub){_subjRankUnsub();_subjRankUnsub=null;}
+    if(_noticeUnsub){_noticeUnsub();_noticeUnsub=null;}
     document.getElementById('loginScr').classList.remove('h');
     document.getElementById('charScr').classList.remove('open');
     document.getElementById('topbar').style.display='none';
@@ -2042,29 +2051,32 @@ window.showChangePw=async function(){
     toast('❌ '+e.message);
   }
 };
+let _presenceInterval=null;
 function startPresence(){
+  // ★ 중복 호출 방지
+  if(_presenceInterval){clearInterval(_presenceInterval);_presenceInterval=null;}
   const pRef=ref(db,`presence/${curUser.uid}`);
-  const update_p=()=>set(pRef,{charName:char?.name||'',lastSeen:Date.now()});
+  const update_p=async()=>{
+    await set(pRef,{charName:char?.name||'',lastSeen:Date.now()});
+    // ★ onValue 대신 get()으로 접속자 수 폴링 — 대역폭 절약 핵심
+    try{
+      const sn=await get(ref(db,'presence'));
+      const ps=sn.val()||{};
+      const now=Date.now();
+      const valid=Object.entries(ps).filter(([,p])=>p.lastSeen>now-60000);
+      // 만료 항목 정리: 자기 것만 삭제 (어드민도 자기 것만 — 연쇄 쓰기 방지)
+      Object.entries(ps).forEach(([uid,p])=>{
+        if(p.lastSeen<=now-60000&&uid===curUser.uid)remove(ref(db,`presence/${uid}`));
+      });
+      document.getElementById('cwOnline').textContent=valid.length;
+    }catch(e){/* 네트워크 오류 무시 */}
+  };
   update_p();
-  // 30초마다 갱신
-  const interval=setInterval(update_p,30000);
-  // 브라우저 닫히면 즉시 삭제
+  _presenceInterval=setInterval(update_p,30000);
   onDisconnect(pRef).remove();
-  // 탭 닫힐 때도 삭제 시도
   window.addEventListener('beforeunload',()=>{
-    clearInterval(interval);
+    if(_presenceInterval){clearInterval(_presenceInterval);_presenceInterval=null;}
     remove(pRef);
-  });
-  // 접속 인원: 60초 이내만 유효로 단축 + 만료된 항목 자동 정리
-  onValue(ref(db,'presence'),sn=>{
-    const ps=sn.val()||{};
-    const now=Date.now();
-    const valid=Object.entries(ps).filter(([,p])=>p.lastSeen>now-60000);
-    // ★ 만료 항목 삭제: 본인 것 또는 어드민만
-    Object.entries(ps).forEach(([uid,p])=>{
-      if(p.lastSeen<=now-60000&&(uid===curUser.uid||isAdmin))remove(ref(db,`presence/${uid}`));
-    });
-    document.getElementById('cwOnline').textContent=valid.length;
   });
 }
 
@@ -3807,11 +3819,11 @@ function openIM(it){
       for(const[k,v]of Object.entries(enc.b)){
         const cv=cap(v);if(cv===0)continue;
         if(['atk','def','hp','spd','crit','matk','balance'].includes(k)) t[k]=(t[k]||0)+cv;
-        if(k==='str') t.atk=(t.atk||0)+Math.round(cv*1.8);
-        if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
-        if(k==='int') t.matk=(t.matk||0)+Math.round(cv*2);
-        if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*10);t.def=(t.def||0)+Math.round(cv*0.6);}
-        if(k==='luk') t.crit=(t.crit||0)+Math.round(cv*0.08);
+        if(k==='str') t.atk=(t.atk||0)+Math.round(cv*0.8);
+        if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.25);t.crit=(t.crit||0)+Math.round(cv*0.06);}
+        if(k==='int') t.matk=(t.matk||0)+Math.round(cv*1.5);
+        if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*3);t.def=(t.def||0)+Math.round(cv*0.3);}
+        if(k==='luk') t.crit=(t.crit||0)+Math.round(cv*0.06);
       }
     }
     return t;
@@ -3824,7 +3836,7 @@ function openIM(it){
 
   // ★ 인챈트 스탯을 "str+3 (→ATK+5)" 형태로 표시하는 헬퍼
   function fmtEncStat(k,v){
-    const hint={str:`→ATK+${Math.round(v*1.8)}`,dex:`→SPD+${Math.round(v*0.4)}/CRIT+${Math.round(v*0.08)}`,int:`→MATK+${Math.round(v*2)}`,vit:`→HP+${Math.round(v*10)}/DEF+${Math.round(v*0.6)}`,luk:`→CRIT+${Math.round(v*0.08)}`};
+    const hint={str:`→ATK+${Math.round(v*0.8)}`,dex:`→SPD+${Math.round(v*0.25)}/CRIT+${Math.round(v*0.06)}`,int:`→MATK+${Math.round(v*1.5)}`,vit:`→HP+${Math.round(v*3)}/DEF+${Math.round(v*0.3)}`,luk:`→CRIT+${Math.round(v*0.06)}`};
     const suf=hint[k]?` <span style="color:var(--tx3);font-size:9px">(${hint[k]})</span>`:'';
     return`${k}${v>0?'+':''}${v}${suf}`;
   }
@@ -3939,7 +3951,7 @@ function openIM(it){
       const msg=curStack>0
         ?`파괴방지 스크롤을 사용합니다.\n현재: ${curStack}회 → ${curStack+1}회 적용`
         :'파괴방지 스크롤을 사용합니다.\n강화 파괴 시 1회 자동으로 막아줍니다.';
-      if(!confirm(msg))return;
+      if(!confirm(msg)){useBtn.disabled=false;return;}
       char._forgeWard=(char._forgeWard||0)+1;
       delete inv[it.id];
       await saveChar();await saveInv();closeIM();renderInv();updateTop();
@@ -4412,8 +4424,6 @@ window.trackBounty=function(trackKey,amount=1){
       m.progress=Math.min((m.progress||0)+amount,m.goal);
       if(m.progress>=m.goal){m.done=true;changed=true;toast(`✅ 미션 완료: ${m.desc}`);}
     }
-    // 범용 kill 트래킹
-    if(trackKey==='kill'&&m.track==='kill'){}
     // any_dung: 모든 던전 클리어
     if(trackKey.startsWith('dung_')&&m.track==='any_dung'){
       m.progress=Math.min((m.progress||0)+1,m.goal);
@@ -4425,13 +4435,6 @@ window.trackBounty=function(trackKey,amount=1){
   if(wq&&!wq.done&&!wq.claimed&&wq.track===trackKey){
     wq.progress=Math.min((wq.progress||0)+amount,wq.goal);
     if(wq.progress>=wq.goal){wq.done=true;changed=true;toast(`🏆 주간 미션 완료: ${wq.desc}`);}
-  }
-  // daily_complete 체크 (일일 미션 완료 시 주간 카운트)
-  if(trackKey.startsWith('dung_')||trackKey==='subj'||trackKey==='champ_try'){
-    const allDone=char.dailyQuests.missions.filter(m=>m.done&&!m.claimed).length;
-    if(allDone>0&&wq&&!wq.done&&!wq.claimed&&wq.track==='daily_complete'){
-      // 보상 받은 수 기준으로 카운트
-    }
   }
   if(changed){saveChar();updateBountyCardDesc();}
 };
@@ -4524,8 +4527,12 @@ window.claimBounty=async function(idx){
   const allClaimed=dq.missions.filter(x=>x.claimed).length;
   const wq=char.weeklyQuest;
   if(wq&&!wq.done&&!wq.claimed&&wq.track==='daily_complete'){
-    wq.progress=allClaimed;
-    if(wq.progress>=wq.goal){wq.done=true;toast('🏆 주간 미션 완료!');}
+    // ★ 오늘 미션 3개 모두 수령 시 1일 완료로 카운트 (하루 1회만)
+    if(allClaimed>=dq.missions.length&&!dq._weeklyTracked){
+      dq._weeklyTracked=true; // 오늘 이미 카운트됨 표시
+      wq.progress=(wq.progress||0)+1;
+      if(wq.progress>=wq.goal){wq.done=true;toast('🏆 주간 미션 완료!');}
+    }
   }
   await saveChar();updateTop();
   toast(`💰 보상 수령! +${m.gold.toLocaleString()}G${m.shard?` +조각${m.shard}`:''}`,3000);
@@ -5031,8 +5038,9 @@ async function renderAuction(sb){
     if(!ac)return;
     if(tab==='browse'){
       ac.innerHTML=`
-        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-          <select id="auc-cat" onchange="applyAuctionFilter()" style="flex:1;min-width:90px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
+          <input id="auc-search" type="text" placeholder="🔍 아이템 이름 검색" oninput="applyAuctionFilter()" style="flex:2;min-width:120px;padding:5px 8px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
+          <select id="auc-cat" onchange="applyAuctionFilter()" style="flex:1;min-width:70px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
             <option value="">전체 종류</option>
             <option value="weapon">무기</option>
             <option value="armor">방어구</option>
@@ -5040,7 +5048,7 @@ async function renderAuction(sb){
             <option value="set">유일</option>
             <option value="scroll">인챈트 스크롤</option>
           </select>
-          <select id="auc-grade" onchange="applyAuctionFilter()" style="flex:1;min-width:80px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
+          <select id="auc-grade" onchange="applyAuctionFilter()" style="flex:1;min-width:70px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
             <option value="">전체 등급</option>
             <option value="normal">노말</option>
             <option value="uncommon">언커먼</option>
@@ -5049,22 +5057,27 @@ async function renderAuction(sb){
             <option value="legendary">레전더리</option>
             <option value="set">유일</option>
           </select>
-          <select id="auc-sort" onchange="applyAuctionFilter()" style="flex:1;min-width:80px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
+          <select id="auc-sort" onchange="applyAuctionFilter()" style="flex:1;min-width:70px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
             <option value="newest">최신순</option>
             <option value="price_asc">낮은가격</option>
             <option value="price_desc">높은가격</option>
             <option value="grade">등급순</option>
           </select>
         </div>
-        <div id="auc-list-wrap"><div style="font-size:11px;color:var(--tx3);text-align:center;padding:12px">불러오는 중...</div></div>`;
-      let _allListings=[];
-      window.applyAuctionFilter=function(){
+        <div id="auc-list-wrap"><div style="font-size:11px;color:var(--tx3);text-align:center;padding:12px">불러오는 중...</div></div>
+        <div id="auc-pager" style="display:flex;justify-content:center;gap:6px;margin-top:8px"></div>`;
+      let _allListings=[],_aucPage=0;
+      const AUC_PER_PAGE=20;
+      window.applyAuctionFilter=function(resetPage){
+        if(resetPage!==false)_aucPage=0;
         const cat=document.getElementById('auc-cat')?.value||'';
         const grade=document.getElementById('auc-grade')?.value||'';
         const sort=document.getElementById('auc-sort')?.value||'newest';
+        const search=(document.getElementById('auc-search')?.value||'').trim().toLowerCase();
         const gradeOrder=['normal','uncommon','rare','epic','legendary','set'];
         let filtered=_allListings.filter(([,v])=>{
           const it=v.item||{};
+          if(search&&!(it.name||'').toLowerCase().includes(search))return false;
           const catOk=!cat
             ||(cat==='weapon'&&it.slot==='weapon')
             ||(cat==='armor'&&['head','chest','legs','boots','offhand','neck'].includes(it.slot))
@@ -5077,9 +5090,25 @@ async function renderAuction(sb){
         if(sort==='price_asc')filtered.sort((a,b)=>(a[1].price||0)-(b[1].price||0));
         else if(sort==='price_desc')filtered.sort((a,b)=>(b[1].price||0)-(a[1].price||0));
         else if(sort==='grade')filtered.sort((a,b)=>gradeOrder.indexOf(b[1].item?.grade)-gradeOrder.indexOf(a[1].item?.grade));
-        renderAuctionList(filtered);
+        // ★ 페이지네이션
+        const totalPages=Math.max(1,Math.ceil(filtered.length/AUC_PER_PAGE));
+        _aucPage=Math.min(_aucPage,totalPages-1);
+        const paged=filtered.slice(_aucPage*AUC_PER_PAGE,(_aucPage+1)*AUC_PER_PAGE);
+        renderAuctionList(paged);
+        // ★ 페이저 렌더
+        const pager=document.getElementById('auc-pager');
+        if(pager){
+          if(totalPages<=1){pager.innerHTML='';return;}
+          let ph='';
+          if(_aucPage>0)ph+=`<button class="btn btn-ghost btn-xs" onclick="_aucPage--;applyAuctionFilter(false)">← 이전</button>`;
+          ph+=`<span style="font-size:10px;color:var(--tx3);padding:4px 8px">${_aucPage+1} / ${totalPages} (${filtered.length}건)</span>`;
+          if(_aucPage<totalPages-1)ph+=`<button class="btn btn-ghost btn-xs" onclick="_aucPage++;applyAuctionFilter(false)">다음 →</button>`;
+          pager.innerHTML=ph;
+        }
       };
+      window._aucPage=0;
       try{
+        // ★ 전체 active 경매 로드 (limitToLast 제거 — 클라이언트 페이지네이션으로 대체)
         const sn=await get(ref(db,'auction'));
         const all=sn.val()||{};
         _allListings=Object.entries(all).filter(([,v])=>v&&v.status==='active'&&v.item);
@@ -5110,10 +5139,10 @@ async function renderAuction(sb){
               for(const[k,val]of Object.entries(enc.b)){
                 if(!isFinite(val)||Math.abs(val)>9999)continue;
                 if(['atk','matk','def','hp','spd','crit','balance'].includes(k))ts[k]=(ts[k]||0)+val;
-                if(k==='str')ts.atk=(ts.atk||0)+Math.round(val*1.5);
+                if(k==='str')ts.atk=(ts.atk||0)+Math.round(val*0.8);
                 if(k==='int')ts.matk=(ts.matk||0)+Math.round(val*1.5);
-                if(k==='dex'){ts.spd=(ts.spd||0)+Math.round(val*0.8);ts.crit=(ts.crit||0)+Math.round(val*0.25);}
-                if(k==='vit'){ts.hp=(ts.hp||0)+Math.round(val*6);ts.def=(ts.def||0)+Math.round(val*0.6);}
+                if(k==='dex'){ts.spd=(ts.spd||0)+Math.round(val*0.25);ts.crit=(ts.crit||0)+Math.round(val*0.06);}
+                if(k==='vit'){ts.hp=(ts.hp||0)+Math.round(val*3);ts.def=(ts.def||0)+Math.round(val*0.3);}
               }
             }
             const statStr=Object.entries(ts).filter(([k,v2])=>v2>0&&['atk','matk','def','hp','spd','crit'].includes(k)).map(([k,v2])=>`${k.toUpperCase()}+${v2}`).join(' ');
@@ -5295,7 +5324,8 @@ async function renderAuction(sb){
   renderAuctionTab('browse');
   // 실시간 업데이트 — 초기 렌더 완료 후 연결 (즉시 발동 방지)
   setTimeout(()=>{
-    _auctionUnsub=onValue(query(ref(db,'auction'),orderByKey(),limitToLast(50)),()=>{
+    _auctionUnsub=onValue(query(ref(db,'auction'),orderByKey(),limitToLast(50)),sn=>{
+      // ★ snapshot 데이터 직접 사용 — 별도 get() 중복 호출 제거
       const currentTab=document.querySelector('#atab-browse.btn-gold')?'browse':
                        document.querySelector('#atab-mine.btn-gold')?'mine':'sell';
       if(document.getElementById('auctionContent'))renderAuctionTab(currentTab);
@@ -5567,6 +5597,11 @@ function spawnMonsters(b,isBoss){
       atk:monBase.atk, def:monBase.def,
       dodge:Math.min(monBase.dodge,55),
       _itMonBase:monBase, // 재생/독안개 등 특수 효과 전달
+      // ★ 주간 특성 프로퍼티를 최상위에도 복사 (resolvePhase에서 m._cursed 등으로 접근)
+      _regen:monBase._regen||0,
+      _poisonFog:monBase._poisonFog||0,
+      _noDodge:monBase._noDodge||false,
+      _cursed:monBase._cursed||false,
       isBoss:isBossFloor, hidden:false,
       aggro:0, expR:0, goldR:0,
       status:'alive',
@@ -5701,7 +5736,11 @@ function evAmbush(){
     const atk=Math.round((12+lv*4)*am.am*d.dmgMult*sm*0.7);
     const def=Math.round((2+lv*0.9)*d.monMult*sm);
     const mn=pick(MNAMES[area]||MNAMES.cave);
+    const tierIdx=battle.tierIdx||0;
+    const tierDodgeMin=[8,12,18,25,33][tierIdx]||8;
+    const tierDodgeMax=[12,18,25,33,42][tierIdx]||12;
     battle.monsters.push({id:gId(),name:am.n+' '+mn,hp,maxHp:hp,atk,def,
+      dodge:rand(tierDodgeMin,tierDodgeMax),
       isBoss:false,hidden:false,aggro:0,expR:0.8,goldR:0.8,status:'alive',
       skills:MON_SKILLS[area]||[],gimmick:null});
   }
@@ -5851,12 +5890,6 @@ async function resolvePhase(){
       blogAdd(`<span class="l-skill">☠ ${m.name} 독 피해 -${dotDmg}HP (남은 턴: ${m._dot})</span>`);
       if(m.hp<=0){m.status='dead';blogAdd(`<span class="l-dead">💀 ${m.name} 독으로 처치!</span>`);}
     }
-    // ★ 불멸의 탑 — 몬스터 재생 (주간 특성)
-    if(battle.mode==='immortaltower'&&m._regen&&m._regen>0&&m.status==='alive'){
-      const rg=Math.round(m.maxHp*m._regen);
-      m.hp=Math.min(m.hp+rg,m.maxHp);
-      blogAdd(`<span class="l-heal">💉 ${m.name} 심연 재생! +${rg}HP</span>`);
-    }
   }
   // ★ DoT(독) 틱 처리 — 플레이어
   for(const p of battle.players.filter(p=>p.status==='alive')){
@@ -5866,16 +5899,6 @@ async function resolvePhase(){
       p._dot--;
       blogAdd(`<span class="l-dmg">☠ ${p.name} 독 피해 -${dotDmg}HP (남은 턴: ${p._dot})</span>`);
       if(p.hp<=1&&p._dot>0)blogAdd(`<span class="l-warn">⚠️ ${p.name} 독으로 위험!</span>`);
-    }
-    // ★ 불멸의 탑 — 독안개 (주간 특성, 살아있는 몬스터에서 발원)
-    if(battle.mode==='immortaltower'&&p.status==='alive'){
-      const fogMon=battle.monsters.find(m=>m.status==='alive'&&m._poisonFog>0);
-      if(fogMon){
-        const pg=Math.round(p.maxHp*fogMon._poisonFog);
-        p.hp=Math.max(0,p.hp-pg);
-        blogAdd(`<span class="l-dmg">☠️ 독안개! ${p.name} -${pg}HP</span>`);
-        if(p.hp<=0){p.hp=0;p.status='dead';}
-      }
     }
   }
   const alive=battle.players.filter(p=>p.status==='alive');
@@ -5932,10 +5955,10 @@ async function resolvePhase(){
       const wt=getWeaponTraits(eq);
       let dmg=calcPlayerDmg(p,s);
       if(p._atkBuff&&p._atkBuffTurns>0){dmg=Math.round(dmg*(1+p._atkBuff));p._atkBuffTurns--;if(p._atkBuffTurns<=0)p._atkBuff=0;}
-      // ★ 단검: CRIT +5%
-      const critBonus=wt.isDagger?5:0;
+      // ★ 단검: CRIT +8%
+      const critBonus=wt.isDagger?8:0;
       // ★ 불멸의 탑 — 저주 특성: 플레이어 크리 -20%
-      const cursedPenalty=(battle.mode==='immortaltower'&&battle.monsters.some(m=>m.status==='alive'&&m._cursed))?-20:0;
+      const cursedPenalty=(battle.mode==='immortaltower'&&battle.monsters.some(m=>m.status==='alive'&&(m._itMonBase?._cursed||m._cursed)))?-20:0;
       let isCrit=Math.random()*100<Math.max(0,s.crit+critBonus+cursedPenalty);
       // ★ 대도끼: 치명타 데미지 +10%, 대검: +5%
       const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
@@ -5943,22 +5966,26 @@ async function resolvePhase(){
       // ★ 창: 방어 무시 8%
       if(wt.isSpear&&!isCrit)dmg=Math.round(dmg*1.08);
       // ★ 밸런스로 몬스터 회피 상쇄 / 불멸의 탑 — noDodge: 회피 완전 무효
-      const monNoDodge=battle.mode==='immortaltower'&&target._noDodge;
+      const monNoDodge=battle.mode==='immortaltower'&&(target._itMonBase?._noDodge||target._noDodge);
       const effDodge=monNoDodge?0:Math.max(0,(target.dodge||0)*(1-(s.balance||0)/100));
       const isMiss=Math.random()*100<effDodge;
       if(isMiss){dmg=0;SFX.play('miss');}
       else target.hp=Math.max(0,target.hp-dmg);
-      // ★ 메이스: DEF 5% 감소 디버프
+      // ★ 메이스: DEF 5% 감소 디버프 (원래 DEF의 30% 이하로는 안 내려감)
       if(wt.isMace&&!isMiss&&target.status==='alive'){
-        target._maceDebuff=(target._maceDebuff||0)+1;
-        target.def=Math.round((target.def||0)*0.95);
+        if(!target._origDef)target._origDef=target.def||0;
+        const floor=Math.round(target._origDef*0.3);
+        if(target.def>floor){
+          target._maceDebuff=(target._maceDebuff||0)+1;
+          target.def=Math.max(floor,Math.round((target.def||0)*0.95));
+        }
       }
       p.aggro=(p.aggro||0)+(isCrit?dmg*1.5:dmg);
       if(!isMiss){isCrit?SFX.play('crit'):SFX.play('attack');}
       blogAdd(getWeaponAttackMsg(p,target,dmg,isCrit&&!isMiss,isMiss));
       if(target.hp<=0){target.status='dead';SFX.play('kill');blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
       // ★ 쌍검 연격: 기본 12% + SPD/800 추가 확률
-      const dualRate=wt.isDual?Math.min(0.12+(s.spd||0)/800+(s._extraDual||0), 0.50):0; // ★ 상한 50% (IT 버프 포함)
+      const dualRate=wt.isDual?Math.min(0.12+(s.spd||0)/800+(s._extraDual||0), 0.40):0; // ★ 상한 40% (밸런스 패치)
       if(wt.isDual&&!isMiss&&target.status==='alive'&&Math.random()<dualRate){
         const bonusDmg=Math.round(dmg*0.6);
         target.hp=Math.max(0,target.hp-bonusDmg);
@@ -6042,12 +6069,11 @@ async function resolvePhase(){
       dmg=Math.max(1,Math.round(dmg*(1-(tgt.stats._dmgReduce))));
     }
     if(tgt.healing){
-      dmg=Math.round(dmg*((battle.mode==='solo'||battle.mode==='immortaltower')?0.45:0.65));
+      dmg=Math.round(dmg*((battle.mode==='solo'||battle.mode==='immortaltower')?0.70:0.75)); // ★ 회복 자세 피해감소 30%→25% (밸런스 패치)
       if(dmg<1)dmg=1;
     }
-    // ★ 블라인드: 회피율 무력화 (2턴)
+    // ★ 블라인드: 회피율 무력화 (_blind 감소는 루프 밖에서 턴당 1회 처리)
     const dodge=tgt._blind?0:(tgt.stats?tgt.stats.dodge:calcStats(tgt.charData||char).dodge)||0;
-    if(tgt._blind>0)tgt._blind--;
 
     // ★ 몬스터 스킬 발동 체크 (기본 공격 전 또는 대신)
     const monSkills=(m.skills||[]).filter(sk=>sk.id!=='m_flee_debuff'); // ★ 행동취소 스킬은 선제 처리됨
@@ -6090,6 +6116,10 @@ async function resolvePhase(){
       battle.reviveQueue.add(tgt.id);
     }
     }catch(e){console.error('Monster attack error:',e);}
+  }
+  // ★ 블라인드 틱: 턴당 1회만 감소 (몬스터 공격 후 처리 — 몹 2마리일 때 중복 감소 방지)
+  for(const p of battle.players.filter(p=>p.status==='alive')){
+    if(p._blind&&p._blind>0)p._blind--;
   }
   // Check wipe (all dead)
   const anyAlive=battle.players.some(p=>p.status==='alive');
@@ -6179,7 +6209,7 @@ function calcPlayerDmg(p,s){
   }else{
     base=Math.round((s.atk||10)*(1+(s.str||5)*0.003));
   }
-  // ★ 단검: CRIT +5% (calcStats에 없으므로 여기서 반영)
+  // ★ 단검: CRIT +8% (calcStats에 없으므로 여기서 반영)
   // ★ 대도끼: 치명타 데미지 +10% → 나중에 크리 시 적용
   const variance=Math.round(base*0.1);
   return Math.max(1,Math.min(base+rand(-variance,variance),99999));
@@ -6702,13 +6732,33 @@ function endBattle(success,fled){
       </div>`:''}
     </div>
     <div style="padding:0 4px">
-      <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">전투 기록</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px">전투 기록</div>
+        <button class="btn btn-ghost btn-xs" onclick="exportBattleLog()">📋 로그 복사</button>
+      </div>
       <div class="clog" id="resultLog">${(battle.log||[]).map(l=>`<div>${l}</div>`).join('')}</div>
     </div>`;
   db2.innerHTML=resultHtml;
   // ★ 결과창 로그 스크롤 하단으로
   setTimeout(()=>{const rl=document.getElementById('resultLog');if(rl)rl.scrollTop=rl.scrollHeight;},50);
 }
+
+// ★ 전투 로그 내보내기 — 클립보드 복사
+window.exportBattleLog=function(){
+  const logEl=document.getElementById('resultLog')||document.getElementById('battleLog');
+  if(!logEl){toast('로그 없음');return;}
+  // HTML 태그 제거하고 텍스트만 추출
+  const lines=logEl.querySelectorAll('div');
+  const header=`═══ ABYSS WORLD 전투 기록 ═══\n캐릭터: ${char?.name||'?'} (Lv.${char?.level||'?'})\n전투력: ${equipScore(char)}\n날짜: ${new Date().toLocaleString('ko')}\n${'═'.repeat(30)}\n`;
+  const text=header+[...lines].map(d=>d.textContent.trim()).filter(Boolean).join('\n');
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>toast('📋 전투 로그 복사 완료!'));
+  }else{
+    // 폴백: textarea 방식
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+    toast('📋 전투 로그 복사 완료!');
+  }
+};
 
 window.reEnterDungeon=function(tierIdx,mode,diffKey){
   const s=calcStats(char);
@@ -6824,7 +6874,10 @@ function renderBattle(){
     </div>
     <!-- Log -->
     <div style="margin-top:10px">
-      <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">전투 기록</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px">전투 기록</div>
+        <button class="btn btn-ghost btn-xs" onclick="exportBattleLog()" style="font-size:9px;padding:2px 6px">📋 복사</button>
+      </div>
       <div class="clog" id="battleLog">${battle.log.map(l=>`<div>${l}</div>`).join('')}</div>
     </div>
     <!-- 파티 입찰 패널 (v2.0 제거됨) -->
@@ -6839,21 +6892,36 @@ window.startPartyLootBid=function(){};
 window.renderLootBidPanel=function(){};
 window.confirmExitBattle=function(){};
 
-// ★ 만료 경매 자동 취소 (7일 경과 + 본인 등록 건은 인벤 반환)
+// ★ 만료 경매 자동 취소 (7일 경과 + 본인 등록 건은 인벤 반환) + 완료/만료 건 아카이브
 async function cleanExpiredAuctions(){
   const sn=await get(ref(db,'auction'));
   const all=sn.val()||{};
   const now=Date.now();
   const EXPIRE=7*24*60*60*1000;
+  const ARCHIVE_AGE=2*24*60*60*1000; // 완료/만료 후 2일 지나면 아카이브
+  const archiveOps={};
   for(const[lid,v]of Object.entries(all)){
-    if(!v||v.status!=='active')continue;
-    if(now-(v.registeredAt||now)<EXPIRE)continue;
-    await update(ref(db,`auction/${lid}`),{status:'expired'});
-    if(v.sellerCharId===charId){
-      inv[v.item.id]={...v.item};
-      await saveInv();
-      toast(`📦 경매 만료: ${v.item.name} 인벤 반환`);
+    if(!v)continue;
+    // ★ 만료 처리
+    if(v.status==='active'&&now-(v.registeredAt||now)>=EXPIRE){
+      await update(ref(db,`auction/${lid}`),{status:'expired',expiredAt:now});
+      if(v.sellerCharId===charId){
+        inv[v.item.id]={...v.item};
+        await saveInv();
+        toast(`📦 경매 만료: ${v.item.name} 인벤 반환`);
+      }
     }
+    // ★ 아카이브: expired/sold/cancelled 상태이고 2일 경과 → auction에서 제거
+    if(v.status&&v.status!=='active'){
+      const endTs=v.expiredAt||v.soldAt||v.cancelledAt||v.registeredAt||0;
+      if(now-endTs>=ARCHIVE_AGE){
+        archiveOps[lid]=null; // auction에서 삭제
+      }
+    }
+  }
+  // 일괄 삭제 (아카이브 — 데이터 경량화)
+  if(Object.keys(archiveOps).length>0){
+    await update(ref(db,'auction'),archiveOps);
   }
 }
 
@@ -6922,8 +6990,8 @@ function startChat(){
         return;
       }
 
-      // ★ 토벌전 키보드 (battle 없어도 독립 동작)
-      if(chosen&&typeof window.subjAction==='function'){
+      // ★ 토벌전 키보드 (battle 없어도 독립 동작, 토벌 패널 활성 시만)
+      if(chosen&&typeof window.subjAction==='function'&&document.getElementById('pane-subjugation')?.classList.contains('on')){
         const subjMap={attack:'sbtn-atk',defend:'sbtn-def',heal:'sbtn-heal',flee:'sbtn-flee'};
         const sb=document.getElementById(subjMap[chosen]);
         if(sb&&!sb.disabled){e.preventDefault();sb.click();return;}
@@ -6931,8 +6999,8 @@ function startChat(){
         if(chosen==='flee'&&typeof window.subjFlee==='function'&&document.getElementById('sbtn-atk')){e.preventDefault();window.subjFlee();return;}
       }
 
-      // ★ 챔프전 키보드 (battle 없어도 독립 동작)
-      if(chosen&&typeof window.champAction==='function'){
+      // ★ 챔프전 키보드 (battle 없어도 독립 동작, 챔프 패널 활성 시만)
+      if(chosen&&typeof window.champAction==='function'&&document.getElementById('pane-champ')?.classList.contains('on')){
         const champMap={attack:'cbtn-atk',defend:'cbtn-def',heal:'cbtn-heal',flee:null};
         const cb=document.getElementById(champMap[chosen]);
         if(cb&&!cb.disabled){e.preventDefault();cb.click();return;}
@@ -6993,7 +7061,7 @@ function renderChatMsgs(msgs,type){
           <span style="font-size:9px;color:var(--blue);font-weight:700">⚙ SYSTEM</span>
           <span class="cw-time">${new Date(m.ts||Date.now()).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'})}</span>
         </div>
-        <div class="cw-text" style="color:var(--tx)">${escapeHtml(m.text)}</div>
+        <div class="cw-text" style="color:var(--tx)">${processChatText(m.text)}</div>
       </div>`).join('');
     el.scrollTop=el.scrollHeight;
     return;
@@ -7009,7 +7077,7 @@ function renderChatMsgs(msgs,type){
     if(isNotice){
       return`<div class="cw-msg cw-notice-msg">
         <div style="font-size:9px;color:var(--blue);font-weight:700;margin-bottom:2px">📢 공지</div>
-        <div class="cw-text" style="color:var(--tx);font-weight:600">${escapeHtml(m.text)}</div>
+        <div class="cw-text" style="color:var(--tx);font-weight:600">${processChatText(m.text)}</div>
         <div style="font-size:8.5px;color:var(--tx3);margin-top:2px">${new Date(m.ts||Date.now()).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'})}</div>
       </div>`;
     }
@@ -7021,7 +7089,7 @@ function renderChatMsgs(msgs,type){
       <span class="cw-time">${new Date(m.ts||Date.now()).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'})}</span>
       ${m.whisperTo?`<span class="cw-whisper-tag">→${m.whisperTo}</span>`:''}
     </div>
-    <div class="cw-text">${escapeHtml(m.text)}</div>
+    <div class="cw-text">${processChatText(m.text)}</div>
   </div>`;
   }).join('');
   el.scrollTop=el.scrollHeight;
@@ -7031,6 +7099,19 @@ function renderChatMsgs(msgs,type){
   }
 }
 function escapeHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// ★ 채팅 이모지 단축코드 + @멘션 처리
+const CHAT_EMOJI={':sword:':'⚔️',':shield:':'🛡',':fire:':'🔥',':ice:':'❄️',':lightning:':'⚡',':poison:':'☠️',':holy:':'✨',':dark:':'🌑',':heal:':'💊',':gold:':'💰',':star:':'⭐',':skull:':'💀',':heart:':'❤️',':gem:':'💎',':scroll:':'📜',':key:':'🔑',':crown:':'👑',':muscle:':'💪',':eyes:':'👀',':wave:':'👋',':gg:':'🎉',':lol:':'😂',':cry:':'😢',':angry:':'😡',':cool:':'😎',':think:':'🤔',':ok:':'👍',':no:':'👎',':run:':'💨',':boss:':'👹',':dragon:':'🐉',':tower:':'🗼',':champ:':'🥊',':party:':'🎊',':rip:':'⚰️',':up:':'📈',':down:':'📉',':check:':'✅',':x:':'❌'};
+function processChatText(raw){
+  let t=escapeHtml(raw);
+  // ★ 이모지 단축코드 변환 (:sword: → ⚔️)
+  t=t.replace(/:[a-z_]+:/g,m=>CHAT_EMOJI[m]||m);
+  // ★ @멘션 하이라이트 (@닉네임 → 강조 표시, 본인이면 금색)
+  t=t.replace(/@(\S{2,12})/g,(m,name)=>{
+    const isMe=name===char?.name;
+    return`<span style="color:${isMe?'var(--gold)':'var(--blue)'};font-weight:700;${isMe?'background:rgba(240,192,64,.15);padding:0 3px;border-radius:3px;':''}">${m}</span>`;
+  });
+  return t;
+}
 
 let _lastChatTs=0;
 // ★ 귓속말 대상 캐시 — 매 전송마다 전체 chars 읽기 방지 (2분 TTL)
@@ -7443,7 +7524,7 @@ window.doImmortalForge=async function(slotKey){
   if(!it){toast('장비를 선택하세요');return;}
   if(it.grade!=='legendary'){toast('⚠️ Lv.99 레전더리 무기만 제련 가능합니다');return;}
   if(it.slot!=='weapon'){toast('⚠️ 무기 슬롯만 불멸 제련 가능합니다');return;}
-  if((it.reqLv||0)<99&&(it.reqLv||0)<90){toast('⚠️ Lv.99 레전더리 무기만 제련 가능합니다');return;}
+  if((it.reqLv||0)<99){toast('⚠️ Lv.99 레전더리 무기만 제련 가능합니다');return;}
   const seals=char._immortalSeals||0;
   if(seals<IT_SEALS_REQUIRED){toast(`⚠️ 불멸의 징수가 부족합니다 (${seals}/${IT_SEALS_REQUIRED}개)`);return;}
   if(!confirm(`🔱 불멸 제련 시도\n\n대상: ${it.name}\n징수 소모: ${IT_SEALS_REQUIRED}개\n성공률: 1%\n\n⚠️ 실패 시 징수 ${IT_SEALS_REQUIRED}개가 소멸합니다.\n계속하시겠습니까?`))return;
@@ -7551,7 +7632,7 @@ async function loadAdmin(){
   const chatArr=Object.entries(chatD).sort((a,b)=>(a[1].ts||0)-(b[1].ts||0)).slice(-50);
   document.getElementById('adminchat').innerHTML=chatArr.map(([mid,m])=>`
     <div style="margin-bottom:3px">
-      <span style="color:var(--gold)">${m.author}:</span> ${escapeHtml(m.text)}
+      <span style="color:var(--gold)">${m.author}:</span> ${processChatText(m.text)}
       <button class="btn btn-red btn-xs" style="margin-left:5px" onclick="delChat('${mid}')">삭제</button>
     </div>`).join('');
 
@@ -8732,9 +8813,9 @@ async function renderWarehouse(sb){
       for(const[k,v]of Object.entries(enc.b)){
         if(!isFinite(v)||Math.abs(v)>9999)continue;
         if(['atk','def','hp','spd','crit','matk','balance'].includes(k))ts[k]=(ts[k]||0)+v;
-        if(k==='str')ts.atk=(ts.atk||0)+Math.round(v*1.8);
-        if(k==='int')ts.matk=(ts.matk||0)+Math.round(v*2);
-        if(k==='vit'){ts.hp=(ts.hp||0)+Math.round(v*10);ts.def=(ts.def||0)+Math.round(v*0.6);}
+        if(k==='str')ts.atk=(ts.atk||0)+Math.round(v*0.8);
+        if(k==='int')ts.matk=(ts.matk||0)+Math.round(v*1.5);
+        if(k==='vit'){ts.hp=(ts.hp||0)+Math.round(v*3);ts.def=(ts.def||0)+Math.round(v*0.3);}
       }
     }
     return Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk','balance'].includes(k))
@@ -8983,8 +9064,12 @@ function formatTimeLeft(ms){
   return `${h}시간 ${m}분`;
 }
 
+let _subjBossKillUnsub=null,_subjRankUnsub=null;
 function startSubjugationWatcher(){
-  // ★ weekMeta에서 bossIdx 로드 — 로드 완료 후 토벌전 탭 갱신
+  // ★ 기존 리스너 해제 (selChar 재호출 시 누수 방지)
+  if(_subjBossKillUnsub){_subjBossKillUnsub();_subjBossKillUnsub=null;}
+  if(_subjRankUnsub){_subjRankUnsub();_subjRankUnsub=null;}
+  // ★ weekMeta는 일회성 get()으로 충분
   get(ref(db,'subjugation/weekMeta')).then(sn=>{
     const meta=sn.val()||{};
     if(meta.bossIdx!==undefined){
@@ -8995,7 +9080,7 @@ function startSubjugationWatcher(){
     }
   });
   // Listen for boss kill banner
-  onValue(ref(db,'subjugation/bossKill'),sn=>{
+  _subjBossKillUnsub=onValue(ref(db,'subjugation/bossKill'),sn=>{
     const d=sn.val();if(!d)return;
     const banner=document.getElementById('bossKillBanner');
     if(banner&&d.name&&d.ts&&Date.now()-d.ts<60000){
@@ -9005,7 +9090,7 @@ function startSubjugationWatcher(){
     }
   });
   // Watch this week's subjugation ranking for chat title
-  onValue(query(ref(db,'subjugation/weeklyRanking'),orderByKey(),limitToLast(50)),sn=>{
+  _subjRankUnsub=onValue(query(ref(db,'subjugation/weeklyRanking'),orderByKey(),limitToLast(50)),sn=>{
     const data=sn.val()||{};
     const sorted=Object.entries(data).sort((a,b)=>(b[1].totalDmg||0)-(a[1].totalDmg||0));
     const TITLE_COLORS=['#ffd700','#c0c0c0','#cd7f32'];
@@ -9337,7 +9422,7 @@ window.enterSubjBattle=function(){
       let baseDmg=wt.isStaff?s.matk*(1+(s.int||3)*0.004):wt.isDualgun?s.matk*(1+(s.int||3)*0.004+(s.spd||5)*0.002):wt.isBow?s.atk*(1+(s.dex||5)*0.004):wt.isDagger||wt.isDual?s.atk*(1+((s.dex||5)+(s.str||5))*0.003):s.atk*(1+(s.str||5)*0.003);
       let dmg=Math.max(1,Math.round(baseDmg-boss.def*0.3));
       const variance=Math.round(dmg*0.15);dmg=Math.max(1,dmg+rand(-variance,variance));
-      const critBonus=wt.isDagger?5:0;
+      const critBonus=wt.isDagger?8:0;
       const isCrit=Math.random()*100<(s.crit+critBonus);
       const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
       if(isCrit)dmg=Math.round(dmg*(s.critDmg/100)*critDmgBonus);
@@ -9678,7 +9763,7 @@ window.enterChampBattle=async function(){
       let baseDmg=wt.isStaff?s.matk*(1+(s.int||3)*0.004):wt.isDualgun?s.matk*(1+(s.int||3)*0.004+(s.spd||5)*0.002):wt.isBow?s.atk*(1+(s.dex||5)*0.004):wt.isDagger||wt.isDual?s.atk*(1+((s.dex||5)+(s.str||5))*0.003):s.atk*(1+(s.str||5)*0.003);
       let dmg=Math.max(1,Math.round(baseDmg*100/(100+(cs.def||0))));
       const v=Math.round(dmg*0.12);dmg=Math.max(1,dmg+rand(-v,v));
-      const critBonus=wt.isDagger?5:0;
+      const critBonus=wt.isDagger?8:0;
       const isCrit=Math.random()*100<(s.crit+critBonus);
       const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
       if(isCrit)dmg=Math.round(dmg*(s.critDmg/100)*critDmgBonus);
@@ -10116,8 +10201,10 @@ window.closeNoticeBanner=async function(){
   if(n?.id)localStorage.setItem('dismissedNotice',n.id);
 };
 
+let _noticeUnsub=null;
 function initNoticeBanner(){
-  onValue(ref(db,'admin/notice'),sn=>{
+  if(_noticeUnsub){_noticeUnsub();_noticeUnsub=null;}
+  _noticeUnsub=onValue(ref(db,'admin/notice'),sn=>{
     const n=sn.val();
     const banner=document.getElementById('noticeBanner');
     const txt=document.getElementById('noticeBannerText');
