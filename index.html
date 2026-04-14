@@ -374,7 +374,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div id="loginScr">
   <div class="lwrap">
     <div class="llogo">⚔ ABYSS WORLD</div>
-    <div class="lsub">DARK FANTASY RPG v2.6</div>
+    <div class="lsub">DARK FANTASY RPG v2.7</div>
     <div style="text-align:center;margin-bottom:18px;margin-top:2px">
       <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener"
         style="display:inline-flex;align-items:center;gap:6px;background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.4);color:#7289da;padding:5px 14px;border-radius:20px;font-size:11px;text-decoration:none;font-family:'IBM Plex Mono',monospace;transition:.2s"
@@ -445,7 +445,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="bossKillBanner" style="display:none;font-size:9px;color:var(--gold);font-family:'IBM Plex Mono',monospace;animation:pulse 1s infinite"></span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:4px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v2.6</span>
+  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:4px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v2.7</span>
   <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener" class="v2badge"
     style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.35);color:#7289da;padding:2px 7px;border-radius:5px;font-size:9px;text-decoration:none;margin-right:6px;white-space:nowrap;font-family:'IBM Plex Mono',monospace"
     title="디스코드 커뮤니티">
@@ -462,74 +462,44 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
 </div>
 
-<!-- 업데이트 팝업 v2.6 -->
+<!-- 업데이트 팝업 v2.7 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:520px;width:90%;max-height:88vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
-      <span style="font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;background:rgba(68,212,136,.1);border:1px solid rgba(68,212,136,.3);padding:3px 10px;border-radius:5px;font-weight:700">v2.6 — 속성 상성 & 밸런스 대규모 패치</span>
+      <span style="font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;background:rgba(68,212,136,.1);border:1px solid rgba(68,212,136,.3);padding:3px 10px;border-radius:5px;font-weight:700">v2.7 — 은행 시스템 & 불멸의 탑 강화</span>
     </div>
 
-    <!-- 속성 상성 시스템 -->
-    <div style="font-size:11px;color:#ff6030;font-weight:700;margin-bottom:6px">🌀 속성 상성 시스템 신설</div>
-    <div style="background:rgba(255,96,48,.05);border:1px solid rgba(255,96,48,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      <b style="color:var(--tx)">6가지 속성과 삼각 상성이 추가됩니다.</b><br>
-      🔥화염 → ❄냉기 → ⚡번개 → 🔥화염<br>
-      🌑어둠 → ✨신성 → ☠독 → 🌑어둠<br>
-      <span style="color:var(--green)">▲ 상성 유리: +25% 피해</span> ·
-      <span style="color:var(--red)">▼ 상성 불리: -20% 피해</span> ·
-      <span style="color:var(--red)">▼ 동속성 내성: -50% 피해</span><br>
-      <span style="font-size:10px;color:var(--tx3)">→ 모든 전투(던전·토벌전·챔프전·불멸의탑)에 적용됩니다.<br>→ 몬스터·보스에 속성이 부여되어 전투 화면에서 확인 가능합니다.</span>
+    <!-- 은행 시스템 -->
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🏦 은행 시스템 신설</div>
+    <div style="background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      <b style="color:var(--tx)">창고에 은행 탭이 추가됩니다.</b><br>
+      💰 은행 보관 한도: <b style="color:var(--gold)">100억G</b> (소지금 한도: 1억G)<br>
+      💳 입금: 소지금 → 은행으로 자유롭게 이동<br>
+      💵 출금: 은행 → 소지금 (소지금 1억 한도 초과 불가)<br>
+      <span style="font-size:10px;color:var(--tx3)">→ 마을 → 창고 → 💰 은행 탭에서 이용 가능합니다.</span>
     </div>
 
-    <!-- 속성 전투 효과 -->
-    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">⚡ 속성별 전투 효과</div>
-    <div style="font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
-      <span style="color:#ff6030">🔥 화염</span> — 피해 +10% ·
-      <span style="color:#60c8ff">❄ 냉기</span> — 적 회피 -8%p<br>
-      <span style="color:#ffe040">⚡ 번개</span> — 8% 확률 마비 ·
-      <span style="color:#a060ff">🌑 어둠</span> — 방어 15% 무시<br>
-      <span style="color:#fff080">✨ 신성</span> — 적중 시 HP 3% 회복 ·
-      <span style="color:#80ff40">☠ 독</span> — 1턴 독 부여
-    </div>
-
-    <!-- 밸런스 패치 -->
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">⚖ 무기 밸런스 패치</div>
-    <div style="font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--tx3)">단검</b> — 공격 계수 0.85→0.95, 치명타 +5%→+8%<br>
-      <b style="color:var(--tx3)">메이스</b> — DEF 감소 하한 추가 (원래 DEF의 30%까지만)<br>
-      <b style="color:var(--tx3)">쌍검</b> — 연격 상한 50%→40%<br>
-      <b style="color:var(--tx3)">포션</b> — 회복 중 피해감소 55%→30% (방어 행동의 가치 상승)<br>
-      <b style="color:var(--tx3)">매우어려움</b> — 보상 대폭 상향 (경험치 ×10, 골드 ×9, 드랍 ×6)
-    </div>
-
-    <!-- 경매장 -->
-    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:6px">🏛 경매장 개편</div>
-    <div style="font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--tx3)">이름 검색</b> — 아이템 이름으로 경매 검색 가능<br>
-      <b style="color:var(--tx3)">페이지네이션</b> — 20건씩 페이지 전환 (전체 경매 열람 가능)<br>
-      <b style="color:var(--tx3)">자동 정리</b> — 만료/완료 경매 2일 후 자동 삭제
-    </div>
-
-    <!-- 채팅 -->
-    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">💬 채팅 기능 추가</div>
-    <div style="font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--tx3)">이모지</b> — :sword: :fire: :gg: 등 35종 단축코드<br>
-      <b style="color:var(--tx3)">@멘션</b> — @닉네임으로 상대 강조 표시 (본인이면 금색)
-    </div>
-
-    <!-- 전투 로그 -->
-    <div style="font-size:11px;color:var(--tx2);font-weight:700;margin-bottom:6px">📋 전투 로그 내보내기</div>
-    <div style="font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
-      전투 중·결과 화면에서 📋 버튼으로 전투 기록 클립보드 복사
+    <!-- 불멸의 탑 강화 -->
+    <div style="font-size:11px;color:#FF2244;font-weight:700;margin-bottom:6px">🗼 불멸의 탑 고층 보상 대폭 강화</div>
+    <div style="background:rgba(255,34,68,.05);border:1px solid rgba(255,34,68,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      <b style="color:var(--tx)">고층일수록 확실한 보상을 받습니다.</b><br>
+      <span style="color:var(--tx3)">🔱 징수 지급량 차등화:</span> 1~20층 1개 → 21~50층 2개 → 51~80층 3개 → 81~99층 4개 → 100층 5개<br>
+      <span style="color:var(--tx3)">📦 최소 등급 보장:</span> 51층+ <b style="color:var(--ep)">에픽 확정</b> · 81층+ <b style="color:var(--lg)">레전더리 확정</b><br>
+      <span style="color:var(--tx3)">✨ 유일 확률:</span> 81~99층 2% · 100층 <b style="color:var(--st)">5%</b><br>
+      <span style="color:var(--tx3)">💰 고층 보너스 골드:</span> 51층부터 층당 추가 골드 지급<br>
+      <span style="color:var(--tx3)">📜 스크롤 드랍률:</span> 51층+ 35% · 81층+ 55%
     </div>
 
     <!-- 버그 수정 -->
-    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:6px">🔧 버그 수정 (12건)</div>
-    <div style="font-size:10px;color:var(--tx3);line-height:1.9;margin-bottom:18px;padding-left:4px">
-      Firebase 대역폭 최적화 · 리스너 누수 4건 수정 · 로그아웃 시 리스너 미정리 ·
-      아이템 스탯 표시 환산율 불일치 · 파괴방지 버튼 잠김 · 암흑 디버프 중복 감소 ·
-      불멸제련 레벨체크 · 키보드 단축키 충돌 · 주간미션 진행도 리셋 · 매복 몬스터 회피 누락
+    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">🔧 버그 수정 & 밸런스</div>
+    <div style="font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
+      <b style="color:var(--gold)">💀 크리티컬 피해 스탯 신설</b> — 인챈트로 크뎀(%) 직접 강화 가능<br>
+      <span style="font-size:10px;color:var(--tx3);padding-left:8px">접두 3종 (치명적인·급소노리는·파괴자의) + 접미 3종 (급소·치명타·멸살)</span><br>
+      <span style="font-size:10px;color:var(--tx3);padding-left:8px">기존 세트 보너스(크림슨·분노) 크뎀 수치 실적용 수정</span><br>
+      <b style="color:var(--tx3)">던전 클리어 보상</b> — 보스 클리어 보너스 장비에 자동판매 필터 미적용 수정<br>
+      <b style="color:var(--tx3)">랭킹 오류</b> — 타임어택 기록이 던전 클리어 랭킹에 혼입되는 현상 수정<br>
+      <b style="color:var(--tx3)">랭킹 기록</b> — 매우어려움 솔로 모드에서만 정확히 기록되도록 보강
     </div>
 
     <div style="display:flex;gap:8px">
@@ -584,18 +554,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <button class="nbtn" data-tab="admin" id="adminNav" style="display:none"><div class="ni">🛡</div><div class="nl">관리자</div></button>
   </nav>
   <main class="main">
-    <!-- ★ 추천 이벤트 상단 배너 -->
-    <div id="referralBanner" style="margin:10px 10px 0;background:linear-gradient(135deg,rgba(176,96,255,.15),rgba(74,143,255,.12));border:1px solid rgba(176,96,255,.4);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;position:relative"
-      onclick="document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-settings'));document.querySelectorAll('.nbtn').forEach(b=>b.classList.toggle('on',b.dataset.tab==='settings'))">
-      <span style="font-size:22px;flex-shrink:0">🎁</span>
+    <!-- ★ v2.7 업데이트 상단 배너 -->
+    <div id="referralBanner" style="margin:10px 10px 0;background:linear-gradient(135deg,rgba(240,192,64,.15),rgba(255,34,68,.12));border:1px solid rgba(240,192,64,.4);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;position:relative">
+      <span style="font-size:22px;flex-shrink:0">🏦</span>
       <div style="flex:1;min-width:0">
-        <div style="font-size:11px;font-weight:700;color:#B060FF;margin-bottom:2px">친구 추천 이벤트 진행 중!</div>
-        <div style="font-size:10px;color:var(--tx2)">친구를 추천하면 <b style="color:var(--gold)">3,000G + 인챈트 스크롤 2개 + 재조정 주문서</b> 지급!</div>
-        <div style="font-size:9px;color:var(--tx3);margin-top:2px">신규 유저도 파괴방지 스크롤 3개 + 인챈트 스크롤 + 추출 스크롤 + 1,500G 수령</div>
+        <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:2px">v2.7 업데이트 — 은행 시스템 & 불멸의 탑 강화</div>
+        <div style="font-size:10px;color:var(--tx2)"><b style="color:var(--gold)">💰 은행</b> 창고에서 최대 100억G 보관 · <b style="color:#FF2244">🗼 불멸의 탑</b> 고층 보상 대폭 강화 · <b style="color:var(--purple)">💀 크뎀</b> 인챈트 신설</div>
+        <div style="font-size:9px;color:var(--tx3);margin-top:2px">🔧 던전 클리어 보상 자동판매 적용 · 랭킹 오류 수정</div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <span style="font-size:9px;background:rgba(176,96,255,.2);color:#B060FF;padding:2px 8px;border-radius:10px;border:1px solid rgba(176,96,255,.4);white-space:nowrap">설정 → 추천인 코드</span>
-        <button onclick="event.stopPropagation();document.getElementById('referralBanner').style.display='none'" style="background:none;border:none;color:var(--tx3);font-size:11px;cursor:pointer;padding:0">✕ 닫기</button>
+      <div style="flex-shrink:0">
+        <button onclick="document.getElementById('referralBanner').style.display='none'" style="background:none;border:none;color:var(--tx3);font-size:11px;cursor:pointer;padding:0">✕</button>
       </div>
     </div>
 
@@ -636,7 +604,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <div><span style="color:var(--tx)">🌀 회피</span> — 적 공격 회피율(%). 상한 35%. DEX 영향.</div>
               <div><span style="color:var(--tx)">⚖️ 밸런스</span> — 무기 명중률에 관여. 높을수록 적 회피를 무시. 100%시 적 회피 완전 상쇄. 상한 99%.</div>
               <div><span style="color:var(--tx)">🔮 MATK</span> — 마법 공격력. INT 스탯 + 지팡이/듀얼건 MATK.</div>
-              <div><span style="color:var(--tx)">💀 치명피해</span> — 치명타 시 배율(%). 기본 140%+. STR·LUK 영향.</div>
+              <div><span style="color:var(--tx)">💀 치명피해</span> — 치명타 시 배율(%). 기본 140%+. STR·LUK·인챈트 영향.</div>
               <div><span style="color:var(--gold)">⚙️ 전투력</span> — 장비 강화·인챈트·세트 등 종합 전투 수치.</div>
             </div>
             <div class="sgrid">
@@ -1572,6 +1540,10 @@ const PRE=[
   {n:'피에 굶주린',attr:'dark',      b:{atk:5,crit:4,hp:-40}, sk:'blood_rage',     w:5},  // 고딜+HP페널티
   {n:'잔혹한',     attr:null,        b:{atk:7,def:-4,spd:-2}, sk:'armor_break',    w:4},  // 물리 고딜+방속페널티
   {n:'광기어린',   attr:null,        b:{crit:7,atk:4,hp:-30}, sk:'berserk',        w:4},  // 크리특화+HP페널티
+  // ─── 크리티컬 피해 특화 ───
+  {n:'치명적인',   attr:null,        b:{critDmg:15,crit:3},   sk:null,             w:5},  // 크뎀+크확
+  {n:'급소노리는', attr:null,        b:{critDmg:20,hp:-25},   sk:'doom_strike',    w:4},  // 고크뎀+HP페널티
+  {n:'파괴자의',   attr:'dark',      b:{critDmg:25,atk:4,def:-5},sk:'armor_break', w:3},  // 최고크뎀+리스크
   // ─── 리스크형 고성능 (마법) ───
   {n:'영혼의',     attr:'dark',      b:{matk:6,int:2,hp:-30}, sk:'soul_drain',     w:6},  // 마법딜+HP페널티
   {n:'낙뢰의',     attr:'lightning', b:{matk:5,int:2,def:-3}, sk:'thunder_crash',  w:5},  // 마법+방어페널티
@@ -1636,6 +1608,10 @@ const SUF=[
   {n:'학살',      b:{atk:10,crit:5,hp:-60},      sk:'doom_strike',    w:3},  // 최고ATK+대형HP페널티
   {n:'공격광',    b:{atk:7,str:3,def:-6},        sk:'berserk',        w:5},  // 공격특화+방어페널티
   {n:'역습',      b:{atk:6,crit:5,spd:-4},       sk:'counter_strike', w:5},  // 반격특화+속도페널티
+  // ─── 크리티컬 피해 특화 ───
+  {n:'급소',      b:{critDmg:12,crit:2},               sk:null,             w:6},  // 크뎀 기본
+  {n:'치명타',    b:{critDmg:18,dex:2},                sk:null,             w:4},  // 크뎀+DEX
+  {n:'멸살',      b:{critDmg:25,atk:5,hp:-40},         sk:'doom_strike',    w:3},  // 최고크뎀+리스크
   // ─── 리스크형 고성능 (마법) ───
   {n:'낙뢰',      b:{matk:7,int:3,def:-4},       sk:'thunder_crash',  w:5},  // 마법+방어페널티
   {n:'공허',      b:{matk:8,int:4,hp:-50},       sk:'void_nova',      w:3},  // 최고MATK+대형HP페널티
@@ -1751,7 +1727,7 @@ const SETS={
     cb_sword:  {n:'크림슨 대검',     slot:'weapon',hand:'2H',stats:{atk:265,crit:16}},
     cb_boots:  {n:'크림슨 장화',     slot:'boots', stats:{atk:85, spd:25}},
   },bonuses:[
-    {cnt:2,desc:'CRIT+10% 크리티컬 피해+20%',b:{crit:10}},
+    {cnt:2,desc:'CRIT+10% 크리티컬 피해+20%',b:{crit:10,critDmg:20}},
     {cnt:3,desc:'ATK+100',b:{atk:100}},
     {cnt:4,desc:'ATK+180 CRIT+18%',b:{atk:180,crit:18}},
   ]},
@@ -1846,7 +1822,7 @@ const SETS={
   },bonuses:[
     {cnt:2,desc:'ATK+60 CRIT+8%',b:{atk:60,crit:8}},
     {cnt:3,desc:'ATK+110 CRIT+14%',b:{atk:110,crit:14}},
-    {cnt:4,desc:'ATK+190 CRIT+22% 크리티컬 피해+30%',b:{atk:190,crit:22}},
+    {cnt:4,desc:'ATK+190 CRIT+22% 크리티컬 피해+30%',b:{atk:190,crit:22,critDmg:30}},
   ]},
 };
 
@@ -2046,7 +2022,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v2.6';
+  const key='abyssworld_update_v2.7';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -2057,7 +2033,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v2.6',expire);
+    localStorage.setItem('abyssworld_update_v2.7',expire);
   }
 };
 
@@ -2238,11 +2214,11 @@ function calcStats(c){
   for(const it of Object.values(eq)){
     if(!it)continue;
     const s=it.stats||{};
-    atk+=s.atk||0;def+=s.def||0;spd+=s.spd||0;hp+=s.hp||0;matk+=s.matk||0;crit+=s.crit||0;balance+=s.balance||0;
+    atk+=s.atk||0;def+=s.def||0;spd+=s.spd||0;hp+=s.hp||0;matk+=s.matk||0;crit+=s.crit||0;balance+=s.balance||0;critDmg+=s.critDmg||0;
     const ab=b=>{if(!b)return;
       const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
       atk+=cap(b.atk)||0;def+=cap(b.def)||0;spd+=cap(b.spd)||0;hp+=cap(b.hp)||0;
-      matk+=cap(b.matk)||0;crit+=cap(b.crit)||0;
+      matk+=cap(b.matk)||0;crit+=cap(b.crit)||0;critDmg+=cap(b.critDmg)||0;
       goldBonus+=cap(b.goldBonus)||0;skillBonus+=cap(b.skillBonus)||0;
       if(b.str)atk+=cap(b.str)*0.8;if(b.dex){dodge+=cap(b.dex)*0.15;spd+=cap(b.dex)*0.25;crit+=cap(b.dex)*0.06;}
       if(b.int)matk+=cap(b.int)*1.5;if(b.vit){hp+=cap(b.vit)*3;def+=cap(b.vit)*0.3;}  // VIT→HP 3 (기존5), VIT→DEF 0.3
@@ -2251,7 +2227,7 @@ function calcStats(c){
     ab(it.prefix?.b);ab(it.suffix?.b);
   }
   const sb=calcSetB(eq);
-  atk+=sb.atk||0;def+=sb.def||0;spd+=sb.spd||0;hp+=sb.hp||0;crit+=sb.crit||0;
+  atk+=sb.atk||0;def+=sb.def||0;spd+=sb.spd||0;hp+=sb.hp||0;crit+=sb.crit||0;critDmg+=sb.critDmg||0;
   dodge+=sb.dodge||0; // ★ 세트 보너스 회피 적용
   // ★ 도감 보너스: 10% 달성마다 ATK/DEF +1%
   const _cb=getCodexBonus();
@@ -2319,6 +2295,7 @@ async function saveChar(){
   // ★ 저장 전 수치 검증
   if(char){
     char.gold=Math.min(Math.floor(char.gold||0),99999999);
+    char._bankGold=Math.min(Math.floor(char._bankGold||0),10000000000);
     char.level=Math.max(1,Math.min(99,char.level||1));
     char.exp=Math.max(0,char.exp||0);
     for(const k of['str','dex','int','vit','luk']){
@@ -2542,10 +2519,8 @@ async function selChar(id){
   // ★ 일일/주간 미션 초기화 (날짜가 바뀌면 자동 갱신)
   getOrInitDailyQuests();
   getOrInitWeeklyQuest();
-  // ★ 추천 이벤트 배너 — 이미 추천인 등록한 유저는 숨김
+  // ★ 추천 이벤트 — 이미 추천인 등록한 유저는 마을카드 숨김
   if(char.referredBy){
-    const banner=document.getElementById('referralBanner');
-    if(banner)banner.style.display='none';
     const townCard=document.getElementById('townReferralCard');
     if(townCard)townCard.style.display='none';
   }
@@ -2746,7 +2721,7 @@ function renderEq(){
     const it=char.equipment[sl.k];const lk=sl.k==='offhand'&&is2H;
     let tooltip='';
     if(it){
-      const statLabels={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',balance:'밸런스'};
+      const statLabels={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',critDmg:'크뎀',matk:'MATK',balance:'밸런스'};
       // ★ 인챈트 포함 총합 스탯 계산
       const ts=(()=>{
         const t={...it.stats};
@@ -2755,7 +2730,7 @@ function renderEq(){
           const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
           for(const[k,v]of Object.entries(enc.b)){
             const cv=cap(v);if(cv===0)continue;
-            if(['atk','def','hp','spd','crit','matk','balance'].includes(k))t[k]=(t[k]||0)+cv;
+            if(['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))t[k]=(t[k]||0)+cv;
             if(k==='str')t.atk=(t.atk||0)+Math.round(cv*1.8);
             if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
             if(k==='int')t.matk=(t.matk||0)+Math.round(cv*2);
@@ -2765,7 +2740,7 @@ function renderEq(){
         }
         return t;
       })();
-      const statRows=Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk','balance'].includes(k))
+      const statRows=Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))
         .map(([k,v])=>`<div class="sk-tooltip-stat-row"><span>${statLabels[k]||k.toUpperCase()}</span><span>${k==='balance'?v+'%':'+'+v}</span></div>`).join('');
       const gM=GRADES[it.grade]?.skillM||0;
       const skillInfos=[];
@@ -2848,7 +2823,7 @@ window.openEqDetail=function(slotKey){
     const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
     for(const[k,v]of Object.entries(enc.b)){
       const cv=cap(v);if(cv===0)continue;
-      if(['atk','def','hp','spd','crit','matk','balance'].includes(k))totalSt[k]=(totalSt[k]||0)+cv;
+      if(['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))totalSt[k]=(totalSt[k]||0)+cv;
       if(k==='str')totalSt.atk=(totalSt.atk||0)+Math.round(cv*1.8);
       if(k==='dex'){totalSt.spd=(totalSt.spd||0)+Math.round(cv*0.4);totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.08);}
       if(k==='int')totalSt.matk=(totalSt.matk||0)+Math.round(cv*2);
@@ -2856,7 +2831,7 @@ window.openEqDetail=function(slotKey){
       if(k==='luk')totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.08);
     }
   }
-  const statsHtml=Object.entries(totalSt).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk','balance'].includes(k))
+  const statsHtml=Object.entries(totalSt).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))
     .map(([k,v])=>`<span style="background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--green)">${k.toUpperCase()} +${v}</span>`).join(' ');
 
   // 인챈트
@@ -3640,7 +3615,7 @@ function autoMigrateStaffMatk(it){
 const GRADE_ORDER=['set','legendary','epic','rare','uncommon','normal'];
 // ★ 스탯 값 포맷 헬퍼 — balance는 % 표기
 function fmtStatVal(k,v){return k==='balance'?v+'%':(v>0?'+':'')+v;}
-function fmtStatKV(k,v){return k==='balance'?'밸런스 '+v+'%':(k.toUpperCase()+'+'+v);}
+function fmtStatKV(k,v){return k==='balance'?'밸런스 '+v+'%':k==='critDmg'?'크뎀+'+v+'%':(k.toUpperCase()+'+'+v);}
 // ★ 스킬 타입 뱃지
 function skillTypeBadge(skId){
   const sk=SKILLS[skId];if(!sk)return'';
@@ -3686,7 +3661,7 @@ function renderInv(){
         const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
         for(const[k,v]of Object.entries(enc.b)){
           const cv=cap(v);if(cv===0)continue;
-          if(['atk','def','hp','spd','crit','matk','balance'].includes(k))t[k]=(t[k]||0)+cv;
+          if(['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))t[k]=(t[k]||0)+cv;
           if(k==='str')t.atk=(t.atk||0)+Math.round(cv*1.8);
           if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
           if(k==='int')t.matk=(t.matk||0)+Math.round(cv*2);
@@ -3696,7 +3671,7 @@ function renderInv(){
       }
       return t;
     })();
-    const ss=Object.entries(ts).filter(([k,v])=>v>0&&v<=999999&&['atk','def','hp','spd','crit','matk','balance'].includes(k)).map(([k,v])=>fmtStatKV(k,v)).join(' ');
+    const ss=Object.entries(ts).filter(([k,v])=>v>0&&v<=999999&&['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k)).map(([k,v])=>fmtStatKV(k,v)).join(' ');
     const lvLock=it.reqLv&&char.level<it.reqLv;
     return`<div class="icard gb-${it.grade} ${lvLock?'lv-locked':''}" data-id="${it.id}">
       ${it.grade==='set'?`<div style="font-size:8.5px;color:var(--st);font-weight:700;margin-bottom:2px">◆ 유일 · ${it.setName||''}</div>`:''}
@@ -4151,7 +4126,7 @@ function openIM(it){
       const cap=v=>(!isFinite(v)||Math.abs(v)>9999)?0:v;
       for(const[k,v]of Object.entries(enc.b)){
         const cv=cap(v);if(cv===0)continue;
-        if(['atk','def','hp','spd','crit','matk','balance'].includes(k)) t[k]=(t[k]||0)+cv;
+        if(['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k)) t[k]=(t[k]||0)+cv;
         if(k==='str') t.atk=(t.atk||0)+Math.round(cv*0.8);
         if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.25);t.crit=(t.crit||0)+Math.round(cv*0.06);}
         if(k==='int') t.matk=(t.matk||0)+Math.round(cv*1.5);
@@ -5512,7 +5487,7 @@ async function renderAuction(sb){
                     <div style="font-size:10px;font-weight:700;color:var(--purple);margin-bottom:3px">📜 ${it.enchantIsPrefix!==false?'[접두]':'[접미]'} ${it.enchantData?.n||''} <span style="font-size:9px;font-weight:400;color:var(--tx3)">성공률 ${Math.round((it.successRate||0.7)*100)}%</span></div>
                     ${(()=>{
                       const b=it.enchantData?.b||{};
-                      const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',balance:'밸런스',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드보너스',skillBonus:'스킬발동'};
+                      const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',critDmg:'크뎀',matk:'MATK',balance:'밸런스',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드보너스',skillBonus:'스킬발동'};
                       const parts=Object.entries(b).filter(([,v])=>v!==0&&isFinite(v)&&Math.abs(v)<=9999)
                         .map(([k,v])=>`<span style="color:${v>0?'var(--green)':'var(--red)'}">${labelMap[k]||k}${v>0?'+':''}${v}</span>`);
                       return parts.length?`<div style="font-size:10px;display:flex;flex-wrap:wrap;gap:5px">${parts.join('')}</div>`:'';
@@ -7106,8 +7081,12 @@ async function dungeonClear(){
   const mode=battle.mode;
   const tierIdx=battle.tierIdx;
 
+  // ★ 타임어택은 handleTAClear에서 처리 — dungeonClear 진입 차단
+  if(mode==='timeattack')return;
+
   // ★ 불멸의 탑 클리어 처리
   if(mode==='immortaltower'){
+
     const floor=battle._itFloor||1;
     SFX.play('clear');
     blogAdd(`<span class="l-exp" style="color:#FF2244">🗼 ${floor}층 클리어!</span>`);
@@ -7115,18 +7094,42 @@ async function dungeonClear(){
     // ★ IT 몬스터 도감 등록
     for(const m of battle.monsters.filter(m=>m.status==='dead'))trackMonsterKill(m.name,'immortaltower',m._attr,m.isBoss);
 
-    // 징수 지급
-    char._immortalSeals=(char._immortalSeals||0)+1;
-    blogAdd(`<span class="l-exp">🔱 불멸의 징수 획득! (총 ${char._immortalSeals}개)</span>`);
+    // 징수 지급 — 고층일수록 추가 징수
+    const sealReward=floor<=20?1:floor<=50?2:floor<=80?3:floor<=99?4:5;
+    char._immortalSeals=(char._immortalSeals||0)+sealReward;
+    blogAdd(`<span class="l-exp">🔱 불멸의 징수 ${sealReward>1?'×'+sealReward+' ':''}획득! (총 ${char._immortalSeals}개)</span>`);
 
-    // ★ 층 기반 드랍 테이블 (층이 높을수록 고등급 확률 상승)
+    // ★ 고층 보너스 골드 (51층부터)
+    if(floor>=51){
+      const itGold=Math.round(5000+floor*200);
+      char.gold=(char.gold||0)+itGold;
+      blogAdd(`<span class="l-exp">💰 고층 보너스 +${itGold.toLocaleString()}G</span>`);
+    }
+
+    // ★ 층 기반 드랍 테이블 — 고층 메리트 대폭 강화
     const dropPool=[...WBASES,...ABASES,...ACCBASES];
     const fb=(floor-1)/99; // 0(1층) ~ 1(100층)
-    const setC   = floor>=100?0.010:0.001;          // 100층만 유일 1%
-    const legC   = 0.014+fb*0.056;                  // 1.4%→7%
-    const epicC  = 0.065+fb*0.135;                  // 6.5%→20%
-    const rareC  = 0.170+fb*0.080;                  // 17%→25%
-    const uncC   = 0.300;
+    // 구간별 최소 등급: 1~50=없음, 51~80=epic, 81~99=legendary, 100=legendary
+    let setC,legC,epicC,rareC,uncC;
+    if(floor>=81){
+      // 81층+: 레전더리 최소, 유일 확률 대폭 상승
+      setC   = floor>=100?0.05:0.005+fb*0.015;   // 100층 5%, 81~99층 2%
+      legC   = 1.0-setC;                          // 나머지 전부 레전더리
+      epicC=0;rareC=0;uncC=0;
+    }else if(floor>=51){
+      // 51~80층: 에픽 최소, 레전더리 비중 강화
+      setC   = 0.002;
+      legC   = 0.08+fb*0.12;                      // 8%→20%
+      epicC  = 1.0-setC-legC;                     // 나머지 전부 에픽
+      rareC=0;uncC=0;
+    }else{
+      // 1~50층: 기존과 유사하되 약간 상향
+      setC   = 0.001;
+      legC   = 0.014+fb*0.056;                    // 1.4%→7%
+      epicC  = 0.065+fb*0.135;                    // 6.5%→20%
+      rareC  = 0.170+fb*0.080;                    // 17%→25%
+      uncC   = 0.300;
+    }
     const gradeRoll=Math.random();
     let dropGrade;
     if     (gradeRoll<setC)                         dropGrade='set';
@@ -7174,8 +7177,8 @@ async function dungeonClear(){
       }
     }
 
-    // ★ 인챈트 스크롤 추가 드랍 (층 기반 확률)
-    const enchScrollChance=0.10+fb*0.25; // 10%→35%
+    // ★ 인챈트 스크롤 추가 드랍 (층 기반 확률 — 고층 강화)
+    const enchScrollChance=floor>=81?0.55:floor>=51?0.35:0.10+fb*0.25; // 81+:55%, 51+:35%, 1~50:10~35%
     if(Math.random()<enchScrollChance){
       // 층이 높을수록 고급 티어 스크롤 (floor<=20: tier1~2, <=50: tier1~3, <=80: tier1~4, 100: tier1~5)
       const maxTier=floor<=20?2:floor<=50?3:floor<=80?4:5;
@@ -7254,8 +7257,12 @@ async function dungeonClear(){
   const bonusLv=battle.tier.recLv+rand(0,5);
   const bonusItem=genItem(bonusPool,bonusGrade,bonusLv);
   bonusItem.tradeable=true;
-  await addItem(bonusItem);
-  blogAdd(`<span class="l-set">🎁 보스 클리어 보너스: ${bonusItem.name}</span>`);
+  if(tryAutoSell(bonusItem)){
+    blogAdd(`<span class="l-sys">🎁 보스 클리어 보너스: ${bonusItem.name} → 자동판매</span>`);
+  }else{
+    await addItem(bonusItem);
+    blogAdd(`<span class="l-set">🎁 보스 클리어 보너스: ${bonusItem.name}</span>`);
+  }
 
   // ★ 물약 +1: vhard 최초 1회만 (솔로/파티 각각 별도, 최대 15개 = 기본5 + 최대10)
   if(dk==='vhard'){
@@ -7273,8 +7280,8 @@ async function dungeonClear(){
       await saveChar();
     }
   }
-  // ★ 매우어려움 클리어 랭킹 기록 (솔로 전용)
-  if(dk==='vhard'){
+  // ★ 매우어려움 클리어 랭킹 기록 (솔로 전용, 타임어택/IT 제외)
+  if(dk==='vhard'&&mode==='solo'){
     const totalTurns=battle.totalTurns||0;
     const tierIdx=battle.tierIdx;
     const record={
@@ -9491,13 +9498,13 @@ async function renderWarehouse(sb){
       if(!enc?.b)continue;
       for(const[k,v]of Object.entries(enc.b)){
         if(!isFinite(v)||Math.abs(v)>9999)continue;
-        if(['atk','def','hp','spd','crit','matk','balance'].includes(k))ts[k]=(ts[k]||0)+v;
+        if(['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))ts[k]=(ts[k]||0)+v;
         if(k==='str')ts.atk=(ts.atk||0)+Math.round(v*0.8);
         if(k==='int')ts.matk=(ts.matk||0)+Math.round(v*1.5);
         if(k==='vit'){ts.hp=(ts.hp||0)+Math.round(v*3);ts.def=(ts.def||0)+Math.round(v*0.3);}
       }
     }
-    return Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','matk','balance'].includes(k))
+    return Object.entries(ts).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))
       .map(([k,v])=>fmtStatKV(k,v)).join(' ');
   }
 
@@ -9524,7 +9531,7 @@ async function renderWarehouse(sb){
           ${!scrollTag&&it.slot?`<span>${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${it.hand?' · '+it.hand:''}</span>`:''}
           ${ss?`<span style="color:var(--green)">${ss}</span>`:''}
           ${it.isEnchantScroll&&it.enchantData?.b?(()=>{
-            const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',matk:'MATK',balance:'밸런스',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드',skillBonus:'스킬발동'};
+            const labelMap={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',critDmg:'크뎀',matk:'MATK',balance:'밸런스',str:'STR',dex:'DEX',int:'INT',vit:'VIT',luk:'LUK',goldBonus:'골드',skillBonus:'스킬발동'};
             const parts=Object.entries(it.enchantData.b).filter(([,v])=>v!==0&&isFinite(v)&&Math.abs(v)<=9999)
               .map(([k,v])=>`${labelMap[k]||k}${v>0?'+':''}${v}`).join(' ');
             return parts?`<span style="color:var(--purple)">${parts}</span>`:'';
@@ -9541,6 +9548,7 @@ async function renderWarehouse(sb){
     <div style="display:flex;gap:6px;margin-bottom:8px">
       <button id="whtab-deposit" class="btn btn-blue btn-sm" style="flex:1" onclick="whTab('deposit')">🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length}/100</span></button>
       <button id="whtab-withdraw" class="btn btn-ghost btn-sm" style="flex:1" onclick="whTab('withdraw')">🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${wCnt}/200</span></button>
+      <button id="whtab-bank" class="btn btn-ghost btn-sm" style="flex:1" onclick="whTab('bank')">💰 은행</button>
     </div>
     <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
       <select id="whFilterType" onchange="whRefresh()" style="flex:1;min-width:80px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
@@ -9586,8 +9594,65 @@ async function renderWarehouse(sb){
     document.getElementById('whtab-deposit').style.flex='1';
     document.getElementById('whtab-withdraw').className=`btn ${tab==='withdraw'?'btn-green':'btn-ghost'} btn-sm`;
     document.getElementById('whtab-withdraw').style.flex='1';
+    document.getElementById('whtab-bank').className=`btn ${tab==='bank'?'btn-gold':'btn-ghost'} btn-sm`;
+    document.getElementById('whtab-bank').style.flex='1';
     const wc=document.getElementById('whContent');
     if(!wc)return;
+    if(tab==='bank'){
+      const BANK_MAX=10000000000; // 100억
+      const GOLD_MAX=99999999; // ~1억
+      const bankGold=char._bankGold||0;
+      const userGold=char.gold||0;
+      const canDeposit=Math.min(userGold,BANK_MAX-bankGold);
+      const canWithdraw=Math.min(bankGold,GOLD_MAX-userGold);
+      wc.innerHTML=`
+        <div style="background:linear-gradient(135deg,rgba(240,192,64,.08),rgba(240,192,64,.02));border:1px solid rgba(240,192,64,.3);border-radius:10px;padding:16px;margin-bottom:12px">
+          <div style="text-align:center;margin-bottom:14px">
+            <div style="font-size:10px;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">은행 잔고</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:var(--gold)">💰 ${bankGold.toLocaleString()}G</div>
+            <div style="font-size:9px;color:var(--tx3);margin-top:2px">한도: ${BANK_MAX.toLocaleString()}G</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <div style="flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:9px;color:var(--tx3)">소지금</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--green)">${userGold.toLocaleString()}G</div>
+              <div style="font-size:8px;color:var(--tx3)">한도: ${GOLD_MAX.toLocaleString()}G</div>
+            </div>
+            <div style="flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:9px;color:var(--tx3)">은행</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--gold)">${bankGold.toLocaleString()}G</div>
+              <div style="font-size:8px;color:var(--tx3)">한도: ${BANK_MAX.toLocaleString()}G</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:12px">
+            <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:8px">💳 입금 <span style="font-size:9px;color:var(--tx3);font-weight:400">(소지금 → 은행)</span></div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="bankDepositAmt" type="number" min="0" max="${canDeposit}" value="" placeholder="금액 입력" style="flex:1;padding:7px 10px;background:var(--bg);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace">
+              <button class="btn btn-gold btn-sm" onclick="bankDeposit()" style="white-space:nowrap">입금</button>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:6px">
+              <button class="btn btn-ghost btn-xs" onclick="document.getElementById('bankDepositAmt').value=${Math.floor(canDeposit*0.25)}">25%</button>
+              <button class="btn btn-ghost btn-xs" onclick="document.getElementById('bankDepositAmt').value=${Math.floor(canDeposit*0.5)}">50%</button>
+              <button class="btn btn-ghost btn-xs" onclick="document.getElementById('bankDepositAmt').value=${canDeposit}">전액</button>
+            </div>
+          </div>
+          <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:12px">
+            <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:8px">💵 출금 <span style="font-size:9px;color:var(--tx3);font-weight:400">(은행 → 소지금, 소지금 한도 ${GOLD_MAX.toLocaleString()}G)</span></div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="bankWithdrawAmt" type="number" min="0" max="${canWithdraw}" value="" placeholder="금액 입력" style="flex:1;padding:7px 10px;background:var(--bg);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace">
+              <button class="btn btn-green btn-sm" onclick="bankWithdraw()" style="white-space:nowrap">출금</button>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:6px">
+              <button class="btn btn-ghost btn-xs" onclick="document.getElementById('bankWithdrawAmt').value=${Math.floor(canWithdraw*0.25)}">25%</button>
+              <button class="btn btn-ghost btn-xs" onclick="document.getElementById('bankWithdrawAmt').value=${Math.floor(canWithdraw*0.5)}">50%</button>
+              <button class="btn btn-ghost btn-xs" onclick="document.getElementById('bankWithdrawAmt').value=${canWithdraw}">전액</button>
+            </div>
+          </div>
+        </div>`;
+      return;
+    }
     if(tab==='deposit'){
       const items=whFilterItems(Object.values(inv).filter(i=>!i.isSubjBox))
         .sort((a,b)=>GRADE_ORDER_W.indexOf(a.grade)-GRADE_ORDER_W.indexOf(b.grade));
@@ -9635,6 +9700,39 @@ window.whWithdraw=async function(id){
   if(window.whTab)window.whTab('withdraw');
   else{const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);}
   renderInv();
+};
+
+// ═══ 은행 시스템 ═══
+const BANK_MAX=10000000000; // 100억
+const GOLD_MAX=99999999;    // ~1억
+
+window.bankDeposit=async function(){
+  const input=document.getElementById('bankDepositAmt');
+  const amt=Math.floor(Number(input?.value||0));
+  if(!amt||amt<=0){toast('입금 금액을 입력해 주세요');return;}
+  const bankGold=char._bankGold||0;
+  const maxDeposit=Math.min(char.gold||0,BANK_MAX-bankGold);
+  if(amt>maxDeposit){toast(`최대 입금 가능: ${maxDeposit.toLocaleString()}G`);return;}
+  char.gold-=amt;
+  char._bankGold=(bankGold)+amt;
+  await saveChar();updateTop();
+  toast(`💰 ${amt.toLocaleString()}G 입금 완료`);
+  if(window.whTab)window.whTab('bank');
+};
+
+window.bankWithdraw=async function(){
+  const input=document.getElementById('bankWithdrawAmt');
+  const amt=Math.floor(Number(input?.value||0));
+  if(!amt||amt<=0){toast('출금 금액을 입력해 주세요');return;}
+  const bankGold=char._bankGold||0;
+  const maxWithdraw=Math.min(bankGold,GOLD_MAX-(char.gold||0));
+  if(maxWithdraw<=0){toast(`⚠️ 소지금이 한도(${GOLD_MAX.toLocaleString()}G)에 도달했습니다`);return;}
+  if(amt>maxWithdraw){toast(`최대 출금 가능: ${maxWithdraw.toLocaleString()}G (소지금 한도 초과 방지)`);return;}
+  char._bankGold=bankGold-amt;
+  char.gold=(char.gold||0)+amt;
+  await saveChar();updateTop();
+  toast(`💵 ${amt.toLocaleString()}G 출금 완료`);
+  if(window.whTab)window.whTab('bank');
 };
 
 // ═══ 토벌전 시스템 ═══
