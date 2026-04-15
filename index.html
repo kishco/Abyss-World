@@ -6122,8 +6122,9 @@ function spawnMonsters(b,isBoss){
     }else{
       const namePool=IT_MNAMES[zone];
       const baseName=pick(namePool);
-      const hpfx=floor<=20?HPFX[0]:floor<=50?HPFX[1]:HPFX[2];
-      monName=`${hpfx.n} ${baseName}`;
+      // ★ 이름 접두사만 사용 (스탯 배율은 getITMonsterMult가 담당)
+      const itPrefix=floor<=20?'[심연의]':floor<=50?'[오염된]':floor<=80?'[각성한]':'[불멸의]';
+      monName=`${itPrefix} ${baseName}`;
       const skillPool=IT_MON_SKILLS[zone];
       const shuffled=[...skillPool].sort(()=>Math.random()-0.5);
       const skCnt=floor<=30?2:floor<=60?3:4;
@@ -6135,10 +6136,9 @@ function spawnMonsters(b,isBoss){
     const bAtk=isBossFloor?bossData.atk:1.0;
     const bHp=isBossFloor?bossData.hp:1.0;
     const bDef=isBossFloor?bossData.def:1.0;
-    const hpfxMod=!isBossFloor?(floor<=20?HPFX[0]:floor<=50?HPFX[1]:HPFX[2]):{am:bAtk,hm:bHp};
 
-    let monHp=Math.round((60+lv*20)*mult.hp*hpfxMod.hm);
-    let monAtk=Math.round((10+lv*3.5)*mult.atk*2.5*hpfxMod.am);
+    let monHp=Math.round((60+lv*20)*mult.hp*(isBossFloor?bHp:1.0));
+    let monAtk=Math.round((10+lv*3.5)*mult.atk*2.5*(isBossFloor?bAtk:1.0));
     let monDef=Math.round((3+lv*1.2)*mult.def*(isBossFloor?bDef:1.0));
 
     // 주간 몬스터 강화 2종 적용
