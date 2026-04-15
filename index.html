@@ -4232,7 +4232,7 @@ function openIM(it){
     ${sr?`<div class="sgrid" style="margin-bottom:7px">${sr}</div>`:''}
     ${ph}${sh}${immortalSkH}${seth}
     ${(()=>{
-      if(!it.slot||it.isScroll||it.isEnchantScroll||it.isProtectScroll||it.isExtractScroll)return'';
+      if(!it.slot||it.slot!=='weapon'||it.isScroll||it.isEnchantScroll||it.isProtectScroll||it.isExtractScroll)return'';
       const selfAttr=it.attr;
       const enchAttr=it.prefix?.attr;
       const finalAttr=selfAttr||enchAttr||null;
