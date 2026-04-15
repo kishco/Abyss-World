@@ -2297,7 +2297,15 @@ async function saveChar(){
   if(!db||!charId)return;
   // ★ 저장 전 수치 검증
   if(char){
-    char.gold=Math.min(Math.floor(char.gold||0),99999999);
+    // ★ 골드 상한 — 초과분 자동 은행 입금
+    const rawGold=Math.floor(char.gold||0);
+    if(rawGold>99999999){
+      const overflow=rawGold-99999999;
+      char._bankGold=Math.min((char._bankGold||0)+overflow,10000000000);
+      char.gold=99999999;
+    }else{
+      char.gold=Math.max(0,rawGold);
+    }
     char._bankGold=Math.min(Math.floor(char._bankGold||0),10000000000);
     char.level=Math.max(1,Math.min(99,char.level||1));
     char.exp=Math.max(0,char.exp||0);
@@ -5658,10 +5666,22 @@ async function renderAuction(sb){
     // 골드 차감 + 판매자에게 지급
     char.gold-=v.price;
     await saveChar();
-    // 판매자 골드 지급 (본인 캐릭터면 제외)
+    // 판매자 골드 지급 (본인 캐릭터면 제외) — ★ 상한 초과분은 은행으로
     if(v.sellerCharId && v.sellerCharId!==charId){
       const selSn=await get(ref(db,`chars/${v.sellerCharId}`));const sel=selSn.val();
-      if(sel)await update(ref(db,`chars/${v.sellerCharId}`),{gold:(sel.gold||0)+v.price});
+      if(sel){
+        const GOLD_MAX=99999999;
+        const curGold=sel.gold||0;
+        const curBank=sel._bankGold||0;
+        const total=curGold+v.price;
+        if(total<=GOLD_MAX){
+          await update(ref(db,`chars/${v.sellerCharId}`),{gold:total});
+        }else{
+          const overflow=total-GOLD_MAX;
+          const newBank=Math.min(curBank+overflow,10000000000); // 은행 100억 상한
+          await update(ref(db,`chars/${v.sellerCharId}`),{gold:GOLD_MAX,_bankGold:newBank});
+        }
+      }
     }
     // 구매한 아이템은 재판매 불가
     const bought={...v.item,tradeable:false};
@@ -8638,8 +8658,16 @@ window.adminGiveGold=async function(cid){
   const amt=parseInt(document.getElementById('giGold').value)||0;
   if(amt<=0)return;
   const cSn=await get(ref(db,`chars/${cid}`));const c=cSn.val();if(!c)return;
-  await update(ref(db,`chars/${cid}`),{gold:(c.gold||0)+amt});
-  toast(`💰 ${amt.toLocaleString()} 골드 지급 완료!`);
+  const GOLD_MAX=99999999;
+  const total=(c.gold||0)+amt;
+  if(total<=GOLD_MAX){
+    await update(ref(db,`chars/${cid}`),{gold:total});
+  }else{
+    const overflow=total-GOLD_MAX;
+    const newBank=Math.min((c._bankGold||0)+overflow,10000000000);
+    await update(ref(db,`chars/${cid}`),{gold:GOLD_MAX,_bankGold:newBank});
+  }
+  toast(`💰 ${amt.toLocaleString()} 골드 지급 완료!${total>GOLD_MAX?' (초과분 은행 입금)':''}`);
   adminOpenUser(cid);
 };
 
