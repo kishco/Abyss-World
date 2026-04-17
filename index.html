@@ -6158,7 +6158,7 @@ function spawnMonsters(b,isBoss){
     const bDef=isBossFloor?bossData.def:1.0;
 
     let monHp=Math.round((60+lv*20)*mult.hp*(isBossFloor?bHp:1.0));
-    let monAtk=Math.round((10+lv*3.5)*mult.atk*2.5*(isBossFloor?bAtk:1.0));
+    let monAtk=Math.round((10+lv*3.5)*mult.atk*1.2*(isBossFloor?bAtk:1.0)); // ★ 2.5→1.2 (HPFX 제거 후 밸런스)
     let monDef=Math.round((3+lv*1.2)*mult.def*(isBossFloor?bDef:1.0));
 
     // 주간 몬스터 강화 2종 적용
@@ -7917,23 +7917,23 @@ function getITMonsterMult(floor){
 const IT_BOSSES={
   10:  {name:'탑의 파수꾼 그라켄',     icon:'👁', atk:1.4, hp:2.0, def:1.3, _attr:'poison',
     skills:['m_bite','m_shield_bash','m_fortify']},
-  20:  {name:'오염된 전령 실린',       icon:'🌑', atk:1.6, hp:2.2, def:1.3, _attr:'dark',
+  20:  {name:'오염된 전령 실린',       icon:'🌑', atk:1.5, hp:2.2, def:1.3, _attr:'dark',
     skills:['m_curse','m_blind','m_drain']},
-  30:  {name:'사막의 심판자 카잔',     icon:'🦂', atk:1.8, hp:2.5, def:1.4, _attr:'fire',
+  30:  {name:'사막의 심판자 카잔',     icon:'🦂', atk:1.6, hp:2.5, def:1.4, _attr:'fire',
     skills:['m_poison2','m_burn','m_sand']},
-  40:  {name:'요새의 군주 발린',       icon:'⚔️', atk:2.0, hp:2.8, def:1.6, _attr:'lightning',
+  40:  {name:'요새의 군주 발린',       icon:'⚔️', atk:1.8, hp:2.8, def:1.6, _attr:'lightning',
     skills:['m_rally','m_shield_bash','m_execute','m_fortify']},
-  50:  {name:'심연의 중간 관문 제크론', icon:'🌀', atk:2.2, hp:3.2, def:1.7, _attr:'dark',
+  50:  {name:'심연의 중간 관문 제크론', icon:'🌀', atk:2.0, hp:3.2, def:1.7, _attr:'dark',
     skills:['m_roar','m_curse','m_drain','m_burn']},
-  60:  {name:'불꽃의 망령 이그나르',   icon:'🔥', atk:2.5, hp:3.6, def:1.8, _attr:'fire',
+  60:  {name:'불꽃의 망령 이그나르',   icon:'🔥', atk:2.2, hp:3.6, def:1.8, _attr:'fire',
     skills:['m_fire_breath','m_burn','m_sand','m_poison2']},
-  70:  {name:'영원의 감시자 카이라',   icon:'✨', atk:2.8, hp:4.0, def:2.0, _attr:'holy',
+  70:  {name:'영원의 감시자 카이라',   icon:'✨', atk:2.2, hp:4.0, def:2.0, _attr:'holy',
     skills:['m_tail','m_execute','m_rally','m_fortify','m_roar']},
-  80:  {name:'심연의 군주 발로르',     icon:'💀', atk:3.2, hp:4.5, def:2.2, _attr:'dark',
+  80:  {name:'심연의 군주 발로르',     icon:'💀', atk:2.5, hp:4.5, def:2.2, _attr:'dark',
     skills:['m_fire_breath','m_tail','m_shield_bash','m_execute','m_curse']},
-  90:  {name:'불멸의 현신 루시엔',     icon:'🌟', atk:3.8, hp:5.0, def:2.5, _attr:'holy',
+  90:  {name:'불멸의 현신 루시엔',     icon:'🌟', atk:2.8, hp:5.0, def:2.5, _attr:'holy',
     skills:['m_roar','m_fire_breath','m_drain','m_rally','m_fortify','m_poison2']},
-  100: {name:'불멸의 탑 수호신 아비살', icon:'🔱', atk:5.0, hp:7.0, def:3.0, _attr:'dark',
+  100: {name:'불멸의 탑 수호신 아비살', icon:'🔱', atk:3.2, hp:7.0, def:3.0, _attr:'dark',
     skills:['m_fire_breath','m_tail','m_execute','m_curse','m_rally','m_fortify','m_roar','m_drain']},
 };
 
@@ -8242,12 +8242,7 @@ window.doImmortalForge=async function(slotKey){
     // 시스템 채팅 알림
     await push(ref(db,'chat/system'),{
       author:'SYSTEM',
-      text:`🔱 ${char.name}이(가) 불멸의 무기 [${it.name}]를 제련하였습니다!`,
-      ts:Date.now(),isAdmin:true
-    });
-    await push(ref(db,'chat/world'),{
-      author:'SYSTEM',
-      text:`🔱✨ ${char.name}이(가) 불멸의 무기를 제련하였습니다! 심연을 정복한 전사가 등장했습니다.`,
+      text:`🔱✨ ${char.name}이(가) 불멸의 무기 [${it.name}]를 제련하였습니다! 심연을 정복한 전사가 등장했습니다.`,
       ts:Date.now(),isAdmin:true
     });
     updateTop();renderChar();renderForge(document.getElementById('secbody'));
