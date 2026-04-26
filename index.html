@@ -1724,7 +1724,7 @@ const SETS={
   crimson_blade:{name:'크림슨 블레이드',col:'#ff4444',pcs:{
     cb_helm:   {n:'크림슨 투구',     slot:'head',  stats:{atk:95, crit:14}},
     cb_chest:  {n:'크림슨 흉갑',     slot:'chest', stats:{atk:110,crit:10}},
-    cb_sword:  {n:'크림슨 대검',     slot:'weapon',hand:'2H',stats:{atk:265,crit:16}},
+    cb_sword:  {n:'크림슨 대검',     slot:'weapon',hand:'2H',stats:{atk:265,crit:16,balance:65}},
     cb_boots:  {n:'크림슨 장화',     slot:'boots', stats:{atk:85, spd:25}},
   },bonuses:[
     {cnt:2,desc:'CRIT+10% 크리티컬 피해+20%',b:{crit:10,critDmg:20}},
@@ -1735,7 +1735,7 @@ const SETS={
   shadow_hunter:{name:'그림자 사냥꾼',col:'#9060ff',pcs:{
     sh_hood:   {n:'암영 두건',        slot:'head',  stats:{spd:55, crit:16}},
     sh_cloak:  {n:'암영 망토',        slot:'chest', stats:{spd:45, atk:85}},
-    sh_dagger: {n:'암영 이도류',      slot:'weapon',hand:'2H',stats:{atk:245,spd:65}},
+    sh_dagger: {n:'암영 이도류',      slot:'weapon',hand:'2H',stats:{atk:245,spd:65,balance:72}},
     sh_ring:   {n:'암영 반지',        slot:'accessory',stats:{spd:55,crit:20}},
   },bonuses:[
     {cnt:2,desc:'SPD+20 회피+10%',b:{spd:20}},
@@ -1769,7 +1769,7 @@ const SETS={
   divine_light:{name:'신성한 빛',col:'#ffee80',pcs:{
     dl_crown:  {n:'신성 왕관',        slot:'head',  stats:{hp:360, matk:88}},
     dl_robe:   {n:'신성 로브',        slot:'chest', stats:{hp:430, matk:125}},
-    dl_staff:  {n:'신성 지팡이',      slot:'weapon',hand:'1H',stats:{matk:188,hp:260}},
+    dl_staff:  {n:'신성 지팡이',      slot:'weapon',hand:'1H',stats:{matk:188,hp:260,balance:60}},
     dl_earring:{n:'신성 귀걸이',      slot:'accessory',stats:{matk:92,hp:260}},
     dl_neck:   {n:'신성 목걸이',      slot:'neck',  stats:{hp:420, matk:78}},
   },bonuses:[
@@ -1782,7 +1782,7 @@ const SETS={
   arcane_scholar:{name:'비전 학자',col:'#cc88ff',pcs:{
     as_hat:    {n:'학자 모자',         slot:'head',  stats:{matk:92, hp:180}},
     as_robe:   {n:'학자 로브',         slot:'chest', stats:{matk:122,hp:220}},
-    as_staff:  {n:'학자 지팡이',       slot:'weapon',hand:'2H',stats:{matk:265,hp:160}},
+    as_staff:  {n:'학자 지팡이',       slot:'weapon',hand:'2H',stats:{matk:265,hp:160,balance:68}},
     as_amulet: {n:'학자 부적',         slot:'accessory',stats:{matk:85,hp:160}},
   },bonuses:[
     {cnt:2,desc:'MATK+60 INT 효율+20%',b:{matk:60}},
@@ -1793,7 +1793,7 @@ const SETS={
   dragon_sovereign:{name:'용군주',col:'#ff8c00',pcs:{
     ds_helm:   {n:'용군주 왕관',      slot:'head',  stats:{atk:55, def:55, hp:160}},
     ds_chest:  {n:'용군주 갑주',      slot:'chest', stats:{atk:70, def:80, hp:220}},
-    ds_weapon: {n:'용군주 창',        slot:'weapon',hand:'2H',stats:{atk:220,crit:12}},
+    ds_weapon: {n:'용군주 창',        slot:'weapon',hand:'2H',stats:{atk:220,crit:12,balance:80}},
     ds_ring:   {n:'용군주 반지',      slot:'accessory',stats:{atk:50, def:40}},
     ds_amulet: {n:'용군주 부적',      slot:'accessory',stats:{matk:65,hp:200}},
   },bonuses:[
@@ -1806,7 +1806,7 @@ const SETS={
   frost:{name:'서리 군주',col:'#00ffcc',pcs:{
     frost_helm: {n:'서리군주 투구',   slot:'head',  stats:{spd:45, def:55, hp:180}},
     frost_chest:{n:'서리군주 흉갑',   slot:'chest', stats:{spd:35, def:85, hp:280}},
-    frost_sword:{n:'서리군주 검',     slot:'weapon',hand:'1H',stats:{atk:182,spd:50}},
+    frost_sword:{n:'서리군주 검',     slot:'weapon',hand:'1H',stats:{atk:182,spd:50,balance:75}},
     frost_boots:{n:'서리군주 장화',   slot:'boots', stats:{spd:60, def:50}},
   },bonuses:[
     {cnt:2,desc:'회피+8% SPD+20',b:{spd:20,dodge:8}},
@@ -1816,7 +1816,7 @@ const SETS={
   // ★ 광폭 딜러 — ATK 높고 HP 희생
   flame:{name:'불꽃의 분노',col:'#ff6030',pcs:{
     flame_chest:{n:'분노의 흉갑',     slot:'chest', stats:{atk:105,crit:10}},
-    flame_sword:{n:'분노의 화염검',   slot:'weapon',hand:'2H',stats:{atk:260,crit:18}},
+    flame_sword:{n:'분노의 화염검',   slot:'weapon',hand:'2H',stats:{atk:260,crit:18,balance:62}},
     flame_helm: {n:'분노의 투구',     slot:'head',  stats:{atk:92, crit:12}},
     flame_ring: {n:'분노의 반지',     slot:'accessory',stats:{atk:75, crit:16}},
   },bonuses:[
@@ -2520,6 +2520,8 @@ async function selChar(id){
         if(!it._v||it._v<2){migrateItem(it);dirty=true;}
         if(!it._esv||it._esv<ENCHANT_STAT_VER){if(autoMigrateEnchantStats(it))dirty=true;else it._esv=ENCHANT_STAT_VER;}
         if(!it._smv||it._smv<1){if(autoMigrateStaffMatk(it))dirty=true;else it._smv=1;}
+        // ★ 유일(set) 무기 balance 마이그레이션 — WBASES에 없는 baseId라 일반 마이그가 못 잡음
+        if(autoMigrateSetWeaponBalance(it))dirty=true;
         // ★ balance 마이그레이션 — 무기인데 balance 없으면 baseId 기준으로 부여
         if(it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
           const wb=WBASES.find(b=>b.id===it.baseId);
@@ -2546,6 +2548,8 @@ async function selChar(id){
       if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
       if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){if(autoMigrateEnchantStats(it))needSave=true;else it._esv=ENCHANT_STAT_VER;}
       if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))needSave=true;else it._smv=1;}
+      // ★ 유일(set) 무기 balance 마이그레이션 (인벤)
+      if(it&&autoMigrateSetWeaponBalance(it))needSave=true;
       // ★ 인벤 무기 balance 마이그레이션
       if(it&&it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
         const wb=WBASES.find(b=>b.id===it.baseId);
@@ -3683,6 +3687,24 @@ function autoMigrateStaffMatk(it){
     }
   }
   it._smv=1;
+  return true;
+}
+
+// ★ 유일(set) 무기 밸런스 마이그레이션 — 기존에 드랍된 유일 무기는 balance 스탯이 없어
+//   강화를 해도 밸런스가 안 붙는 버그가 있었음. SETS 정의에서 base balance를 끌어와 부여.
+function autoMigrateSetWeaponBalance(it){
+  if(!it||it.grade!=='set'||it.slot!=='weapon')return false;
+  if(!it.stats||it.stats.balance!==undefined)return false;
+  if(!it.setId||!it.baseId)return false;
+  const sd=SETS[it.setId];if(!sd)return false;
+  const pd=sd.pcs?.[it.baseId];if(!pd)return false;
+  const bal=pd.stats?.balance;if(bal===undefined)return false;
+  // 이미 강화된 무기라면 강화 단계만큼 스케일 적용 (다른 스탯과 동일 공식)
+  const enh=it.enhance||0;
+  const enhMult=1+Math.pow(enh,1.3)*0.06;
+  it.stats.balance=Math.min(99,Math.round(bal*enhMult));
+  // _baseStats가 이미 캡처돼 있다면 base 값을 기록 — 향후 강화 시 정상 스케일
+  if(it._baseStats)it._baseStats.balance=bal;
   return true;
 }
 
