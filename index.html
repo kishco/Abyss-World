@@ -3944,20 +3944,21 @@ const GUIDE_BUILDERS={
     <p style="margin-bottom:14px">엘비아 대륙은 심연(Abyss)의 침공으로 위기에 빠졌습니다. 당신은 그 균열을 막을 마지막 모험가.</p>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📌 첫 진행 루트</h3>
     <ol style="padding-left:18px;line-height:2">
-      <li>캐릭터 생성 → 시작 장비 자동 지급</li>
-      <li><b>마을 → 던전</b>으로 이동, T1(동굴) 노말 시작</li>
+      <li>캐릭터 생성 → <b>마을 → 던전</b>으로 이동</li>
+      <li>T1(동굴) 노말 시작 — 가장 약한 장비로도 충분</li>
       <li>드랍 장비 즉시 장착 (<b>인벤 → 클릭 → 착용</b>)</li>
       <li>레벨 업 시 스탯 포인트 분배 (<b>캐릭터 탭</b>)</li>
-      <li>골드 모이면 마을 상점에서 더 좋은 장비 구매</li>
+      <li>골드 모이면 마을 상점 / 가구 상점에서 장비/슬롯 확장</li>
       <li>Lv.20+ → T2(어둠숲) 시도</li>
     </ol>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💡 핵심 팁</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>장비 <b>잠금</b> 기능으로 실수 판매 방지</li>
+      <li>장비 <b>잠금</b> 기능으로 실수 판매 방지 (장착해도 잠금 유지)</li>
       <li>캐릭터 <b>프리셋</b> 3개까지 저장 (장비 세팅 빠른 전환)</li>
       <li>매일 <b>일일 / 주간 미션</b> 챙기기 (마을 → 현상금)</li>
       <li>HP 관리 — 던전 전 <b>포션 5개</b> 자동 충전</li>
-      <li>매우어려움 사망 시 <b>장비 분실 가능</b> — 주의</li>
+      <li>매우어려움 사망 시 <b>장비 분실 가능</b> — 죽음 방지 부적 활용</li>
+      <li>진행 중인 <b>이벤트</b>가 있다면 마을에서 확인 (한정 보상)</li>
     </ul>
   `,
   combat:()=>`
@@ -3967,22 +3968,23 @@ const GUIDE_BUILDERS={
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🎯 행동 4종</h3>
     <ul style="padding-left:18px;line-height:2">
       <li><b>⚔ 공격</b>: 평타 + 무기 스킬 / 인챈트 스킬 발동 가능</li>
-      <li><b>🛡 방어</b>: 받는 데미지 60% 감소 + 어그로 +20</li>
-      <li><b>💊 회복</b>: 포션 1개 사용 (최대 HP 50% 회복, 시작 시 5개)</li>
+      <li><b>🛡 방어</b>: 받는 데미지 50% 감소</li>
+      <li><b>💊 회복</b>: 포션 1개 사용 (최대 HP 40~50% 회복, 시작 시 5개)</li>
       <li><b>💨 도주</b>: 던전 탈출 (보상 X)</li>
     </ul>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚙ 데미지 공식</h3>
     <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.9">
       <div><b>물리</b>: ATK × (100 / (100 + DEF))</div>
-      <div><b>마법</b>: MATK × (100 / (100 + DEF×0.5))</div>
-      <div style="color:var(--tx3);font-size:10px;margin-top:4px">DEF는 곱셈식 감소 — 빼기가 아닌 비율 감소</div>
+      <div><b>마법</b>: MATK × (100 / (100 + DEF))</div>
+      <div style="color:var(--tx3);font-size:10px;margin-top:4px">DEF는 곱셈식 감소 (빼기가 아닌 비율 감소). STR/DEX/INT는 무기 타입별 추가 보너스</div>
     </div>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🎲 추가 효과</h3>
     <ul style="padding-left:18px;line-height:2">
       <li><b>치명타</b>: CRIT% 확률, CRITDMG 배율 데미지 (기본 ×1.5)</li>
-      <li><b>회피</b>: SPD 기반 + DEX 보너스. 최대 50%</li>
+      <li><b>회피</b>: SPD 기반 + DEX 보너스. <b>최대 35%</b></li>
       <li><b>밸런스</b>: 무기 데미지 변동폭. 99%면 거의 고정 데미지</li>
-      <li><b>SPD 선공</b>: SPD/800 확률로 보스 반격 회피 (최대 20%)</li>
+      <li><b>SPD 선공 회피</b>: SPD/800 확률로 보스 반격 회피 (최대 20%)</li>
+      <li><b>활 선공</b>: 15% + SPD/800 (최대 30%) — 보스 반격 회피</li>
     </ul>
   `,
   weapons:()=>{
@@ -4104,31 +4106,33 @@ const GUIDE_BUILDERS={
   },
   gear:()=>`
     <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">💎 등급 & 장비 시스템</h2>
-    <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">⭐ 6단계 등급</h3>
+    <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">⭐ 7단계 등급</h3>
     <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden;margin-bottom:14px">
       <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px;text-align:left">등급</th><th style="padding:7px 10px">스탯 배율</th><th style="padding:7px 10px">설명</th></tr></thead>
       <tbody>
-        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#aaa">⚪ 노말</td><td style="padding:7px 10px;text-align:center">×1.0</td><td style="padding:7px 10px;color:var(--tx3)">기본</td></tr>
-        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#44ff88">🟢 언커먼</td><td style="padding:7px 10px;text-align:center">×1.3</td><td style="padding:7px 10px;color:var(--tx3)">+30%</td></tr>
-        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#4a8fff">🔵 레어</td><td style="padding:7px 10px;text-align:center">×1.6</td><td style="padding:7px 10px;color:var(--tx3)">+60%</td></tr>
-        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#b060ff">🟣 에픽</td><td style="padding:7px 10px;text-align:center">×2.0</td><td style="padding:7px 10px;color:var(--tx3)">+100% / 인챈트 1슬롯</td></tr>
-        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#f0c040">🟡 레전더리</td><td style="padding:7px 10px;text-align:center">×2.5</td><td style="padding:7px 10px;color:var(--tx3)">+150% / 인챈트 2슬롯</td></tr>
-        <tr><td style="padding:7px 10px;color:#00ffcc">💎 유일</td><td style="padding:7px 10px;text-align:center">×3.0</td><td style="padding:7px 10px;color:var(--tx3)">세트 효과 / 거래 가능</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#9d9d9d">⚪ 노말</td><td style="padding:7px 10px;text-align:center">×0.75</td><td style="padding:7px 10px;color:var(--tx3)">기본</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#1eff00">🟢 언커먼</td><td style="padding:7px 10px;text-align:center">×1.2</td><td style="padding:7px 10px;color:var(--tx3)">인챈트 ~30%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#0070dd">🔵 레어</td><td style="padding:7px 10px;text-align:center">×1.8</td><td style="padding:7px 10px;color:var(--tx3)">인챈트 ~50%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#a335ee">🟣 에픽</td><td style="padding:7px 10px;text-align:center">×2.6</td><td style="padding:7px 10px;color:var(--tx3)">인챈트 ~70%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#ff8c00">🟡 레전더리</td><td style="padding:7px 10px;text-align:center">×3.8</td><td style="padding:7px 10px;color:var(--tx3)">인챈트 ~90%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#00ffcc">💎 유일</td><td style="padding:7px 10px;text-align:center">×3.0</td><td style="padding:7px 10px;color:var(--tx3)">세트 효과 / 거래 가능</td></tr>
+        <tr><td style="padding:7px 10px;color:#FF2244">🔱 불멸</td><td style="padding:7px 10px;text-align:center">×5.0</td><td style="padding:7px 10px;color:var(--tx3)">불멸의 탑 제련 한정</td></tr>
       </tbody>
     </table>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🔨 강화 (+0 ~ +9)</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>강화 단계마다 스탯 증가 (+9 = 약 +85%)</li>
-      <li>+5 이상부터 <b style="color:var(--red)">파괴 위험</b></li>
-      <li><b>파괴 방지 스크롤</b>로 1회 보호 가능</li>
-      <li>강화 비용 = 장비 레벨 × 등급 × 인챈트 가치</li>
+      <li>강화 단계마다 스탯 증가 (강화수치^1.3 × 6% 가산)</li>
+      <li>강화 단계가 높을수록 <b style="color:var(--red)">파괴 확률 증가</b> (+5 이후 본격 위험)</li>
+      <li><b>파괴 방지 스크롤</b> / <b>파괴방지 보호</b>로 1회 보호 가능</li>
+      <li>강화 비용 = 장비 레벨 × 등급 × 인챈트 가치 × 강화 단계</li>
     </ul>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">✨ 인챈트 (접두 / 접미)</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>에픽 = 1슬롯 / 레전더리 = 2슬롯 (접두 + 접미)</li>
-      <li><b>인챈트 스크롤</b> 사용 시 랜덤 효과 부여</li>
+      <li>장비 등급에 따라 인챈트 슬롯 부여 (자연 발생 + 스크롤 부여)</li>
+      <li>접두 / 접미 각 1개씩 부여 가능 (총 2슬롯)</li>
+      <li><b>인챈트 스크롤</b> 사용 시 해당 슬롯에 효과 부여</li>
       <li>인챈트는 추가 스탯 + 발동형 스킬 가능</li>
-      <li>티어 1 / 2 / 3 — 높을수록 강력</li>
+      <li>티어 5단계: 하급 / 중급 / 상급 / 고급 / 전설</li>
       <li><b>추출 스크롤</b>로 인챈트만 분리 가능</li>
     </ul>
   `,
@@ -4136,28 +4140,28 @@ const GUIDE_BUILDERS={
     <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🏰 던전 시스템</h2>
     <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">📌 5티어 — 영역별</h3>
     <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden;margin-bottom:14px">
-      <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px">티어</th><th style="padding:7px 10px">영역</th><th style="padding:7px 10px">권장 Lv</th></tr></thead>
+      <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px">티어</th><th style="padding:7px 10px">영역</th><th style="padding:7px 10px">권장 Lv</th><th style="padding:7px 10px">총 층수</th></tr></thead>
       <tbody>
-        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T1</td><td style="padding:7px 10px">⛏ 동굴</td><td style="padding:7px 10px">1~20</td></tr>
-        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T2</td><td style="padding:7px 10px">🌿 어둠숲</td><td style="padding:7px 10px">20~40</td></tr>
-        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T3</td><td style="padding:7px 10px">🏜 사막</td><td style="padding:7px 10px">40~60</td></tr>
-        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T4</td><td style="padding:7px 10px">🏰 요새</td><td style="padding:7px 10px">60~80</td></tr>
-        <tr><td style="padding:7px 10px">T5</td><td style="padding:7px 10px">🐉 용의둥지</td><td style="padding:7px 10px">80~99</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T1</td><td style="padding:7px 10px">⛏ 버려진 동굴</td><td style="padding:7px 10px">1~20</td><td style="padding:7px 10px">5층</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T2</td><td style="padding:7px 10px">🌿 저주받은 숲</td><td style="padding:7px 10px">20~40</td><td style="padding:7px 10px">7층</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T3</td><td style="padding:7px 10px">🏜 오염된 사막</td><td style="padding:7px 10px">40~60</td><td style="padding:7px 10px">8층</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T4</td><td style="padding:7px 10px">🏰 요새</td><td style="padding:7px 10px">60~80</td><td style="padding:7px 10px">10층</td></tr>
+        <tr><td style="padding:7px 10px">T5</td><td style="padding:7px 10px">🐉 용의 둥지</td><td style="padding:7px 10px">80~99</td><td style="padding:7px 10px">12층</td></tr>
       </tbody>
     </table>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚙ 4난이도</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li><b>쉬움</b>: 학습용. 보상 적음</li>
-      <li><b>보통</b>: 표준 난이도</li>
-      <li><b>어려움</b>: 보상 ↑, 보스 강함</li>
-      <li><b style="color:var(--red)">매우어려움</b>: 사망 시 <b>장비 손실 가능</b>! 죽음 방지 부적 필수</li>
+      <li><b>쉬움</b>: 학습용. 보상 적음 (×0.6)</li>
+      <li><b>노말</b>: 표준 난이도 (×1.0)</li>
+      <li><b>어려움</b>: 보상 높음 (드랍 ×2.0). 보스 강함</li>
+      <li><b style="color:var(--red)">매우어려움</b>: 사망 시 <b>장비 손실 가능</b>! 보상 (드랍 ×6.0) — 죽음 방지 부적 권장</li>
     </ul>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏆 페이즈 진행</h3>
     <ul style="padding-left:18px;line-height:2">
       <li>각 층 = 몬스터 그룹 1개</li>
-      <li>1~4층: 일반 몬스터 → <b>5층: 보스</b></li>
+      <li><b>마지막 층 = 보스</b> (티어별 5/7/8/10/12층)</li>
       <li>보스 처치 시 <b>등급 상향 보너스 드랍</b> 1개 확정</li>
-      <li>티어 5 매우어려움 = <b>유일(set) 등급</b> 가능</li>
+      <li>티어 5 매우어려움 + Lv.90+ = <b>유일(set) 등급</b> 가능</li>
     </ul>
   `,
   endgame:()=>`
@@ -13342,6 +13346,12 @@ window.townSec=function(id){
 async function grantNewbieWelcome(){
   if(!char||!charId)return;
   if(char._newbieWelcomeGranted)return; // 중복 방지 (실제 지급 마킹)
+  // ★ v3.x — 위령제 이벤트 한정 (이벤트 종료 후 신규 캐릭터에는 미지급)
+  if(typeof isMemorialActive==='function'&&!isMemorialActive()){
+    char._newbieWelcomeGranted=true; // 영구 차단 마킹
+    if(db&&charId)set(ref(db,`chars/${charId}/_newbieWelcomeGranted`),true).catch(()=>{});
+    return;
+  }
   try{
     // 레어 등급 무기 1
     const wPool=WBASES.filter(b=>b.slot==='weapon');
@@ -13699,7 +13709,13 @@ window.startMemorialBoss=async function(){
 // 추모의 빛 챌린지 진행 (던전 클리어 시 호출)
 window.trackMemorialChallenge=async function(){
   if(!isMemorialActive())return;
+  if(!char._memorialEvent)char._memorialEvent={};
   if(char._memorialEvent.challengeClaimed)return;
+  // ★ v3.x — 챌린지 조건 강화: T3(사막, recLv 45) 이상만 카운트 + Lv.40 이상
+  // 6레벨 캐릭이 T1을 50회 도는 우회 방지
+  const t=battle?.tier;
+  if(!t||(t.tier||1)<3)return;       // T3 미만 던전 카운트 제외
+  if((char.level||1)<40)return;       // 레벨 40 미만 카운트 제외
   char._memorialEvent.dungeonCount=(char._memorialEvent.dungeonCount||0)+1;
   if(char._memorialEvent.dungeonCount>=MEMORIAL_EVENT.challenge.targetDungeons){
     if(!char._memorialEvent.challengeClaimed){
@@ -13799,7 +13815,8 @@ window.renderMemorial=function(){
   const challengeDone=ev.challengeClaimed;
   html+=`<div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px">
     <div style="font-size:11px;color:#80a0ff;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">✨ 추모의 빛 챌린지</div>
-    <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">이벤트 기간 누적 던전 ${challengeTarget}회 클리어</div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:4px">이벤트 기간 누적 던전 ${challengeTarget}회 클리어 → <b style="color:var(--lg)">심연의 잔영</b> 가구</div>
+    <div style="font-size:10px;color:var(--tx3);margin-bottom:6px">⚠ 조건: <b>T3(사막) 이상</b> 던전 + <b>Lv.40 이상</b> 캐릭터만 카운트</div>
     <div style="background:rgba(0,0,0,.3);border-radius:5px;height:14px;overflow:hidden;margin-bottom:6px">
       <div style="background:linear-gradient(90deg,#80a0ff,#b060ff);height:100%;width:${challengePct}%;transition:width .3s"></div>
     </div>
