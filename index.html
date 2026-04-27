@@ -1725,17 +1725,17 @@ const ACCN={
   bracelet:['구리팔찌','은팔찌','금팔찌','루비팔찌','사파이어팔찌','에메랄드팔찌','다이아팔찌','마법사팔찌','심연팔찌','전설팔찌'],
 };
 const WBASES=[
-  {id:'sword',    hand:'1H',slot:'weapon',ar:1.0,   balMin:50,balMax:70}, // 한손검
-  {id:'staff',    hand:'1H',slot:'weapon',mr:1.05,hr:0.4,balMin:30,balMax:50}, // 지팡이
-  {id:'dualgun',  hand:'2H',slot:'weapon',mr:1.55,sr:0.5,balMin:40,balMax:65}, // 듀얼건 — 마법 원거리 2H. MATK 최고, 스킬발동 +15%
+  {id:'sword',    hand:'1H',slot:'weapon',ar:1.1,   balMin:50,balMax:70}, // 한손검 — ar 1.0→1.1 (1H 약체 보강)
+  {id:'staff',    hand:'1H',slot:'weapon',mr:1.25,hr:0.4,balMin:30,balMax:50}, // 지팡이 — mr 1.05→1.25 (1H 마법 명확화)
+  {id:'dualgun',  hand:'2H',slot:'weapon',mr:1.80,sr:0.5,balMin:40,balMax:65}, // 듀얼건 — mr 1.55→1.80 (MATK 최강 컨셉 회복)
   {id:'bow',      hand:'2H',slot:'weapon',ar:1.6,   balMin:60,balMax:80}, // 활
   {id:'dual',     hand:'2H',slot:'weapon',ar:1.75,sr:0.6,balMin:35,balMax:55}, // 쌍검
   {id:'axe',      hand:'1H',slot:'weapon',ar:1.15,  balMin:40,balMax:60}, // 도끼
   {id:'greataxe', hand:'2H',slot:'weapon',ar:2.0,   balMin:25,balMax:45}, // 대도끼
-  {id:'dagger',   hand:'1H',slot:'weapon',ar:0.95,sr:0.8,balMin:55,balMax:75}, // 단검 — ar 0.95 (상향)
+  {id:'dagger',   hand:'1H',slot:'weapon',ar:0.95,sr:0.8,balMin:55,balMax:75}, // 단검
   {id:'greatsword',hand:'2H',slot:'weapon',ar:2.2,  balMin:35,balMax:55}, // 대검
-  {id:'spear',    hand:'2H',slot:'weapon',ar:1.7,dr:0.35,balMin:65,balMax:85}, // 창
-  {id:'mace',     hand:'1H',slot:'weapon',ar:1.15,dr:0.25,balMin:45,balMax:65}, // 메이스
+  {id:'spear',    hand:'2H',slot:'weapon',ar:1.7,dr:0.20,balMin:65,balMax:85}, // 창 — dr 0.35→0.20 (너프)
+  {id:'mace',     hand:'1H',slot:'weapon',ar:1.15,dr:0.25,balMin:45,balMax:65}, // 메이스 — 유지
 ];
 // ★ 불멸의 탑 전용 레전더리 고유 이름 (엘든링 스타일)
 const IT_UNIQUE_NAMES={
@@ -1813,7 +1813,7 @@ const SETS={
     sh_dagger: {n:'암영 이도류',      slot:'weapon',hand:'2H',stats:{atk:245,spd:65,balance:72}},
     sh_ring:   {n:'암영 반지',        slot:'accessory',stats:{spd:55,crit:20}},
   },bonuses:[
-    {cnt:2,desc:'SPD+20 회피+10%',b:{spd:20}},
+    {cnt:2,desc:'SPD+20 회피+10%',b:{spd:20,dodge:10}},
     {cnt:3,desc:'ATK+70 CRIT+12%',b:{atk:70,crit:12}},
     {cnt:4,desc:'스킬 발동률+18% ATK+130',b:{atk:130,skillBonus:18}},
   ]},
@@ -1828,7 +1828,7 @@ const SETS={
     {cnt:2,desc:'DEF+50 HP+200',b:{def:50,hp:200}},
     {cnt:3,desc:'DEF+100 HP+400',b:{def:100,hp:400}},
     {cnt:4,desc:'DEF+160 HP+500',b:{def:160,hp:500}},
-    {cnt:5,desc:'HP+800 DEF+200 무적 발동 확률↑',b:{def:200,hp:800}},
+    {cnt:5,desc:'HP+800 DEF+200 매 턴 5% 확률 1턴 무적',b:{def:200,hp:800},proc:{type:'invuln_chance',rate:0.05,turns:1}},
   ]},
   // ★ 밸런스 탱 — DEF+HP 중간, 딜 약함
   stone_guardian:{name:'석상 수호자',col:'#88aacc',pcs:{
@@ -1848,9 +1848,9 @@ const SETS={
     dl_earring:{n:'신성 귀걸이',      slot:'accessory',stats:{matk:92,hp:260}},
     dl_neck:   {n:'신성 목걸이',      slot:'neck',  stats:{hp:420, matk:78}},
   },bonuses:[
-    {cnt:2,desc:'HP+250 포션 회복량+20%',b:{hp:250}},
+    {cnt:2,desc:'HP+250 포션 회복량+20%',b:{hp:250,_potionBonus:0.20}},
     {cnt:3,desc:'MATK+80 스킬발동+10%',b:{matk:80,skillBonus:10}},
-    {cnt:4,desc:'포션 회복량+30% HP+500',b:{hp:500}},
+    {cnt:4,desc:'포션 회복량+30% HP+500',b:{hp:500,_potionBonus:0.30}},
     {cnt:5,desc:'MATK+160 HP+800 스킬발동+20%',b:{matk:160,hp:800,skillBonus:20}},
   ]},
   // ★ 순수 MATK — 스킬 최강, 생존 취약
@@ -1860,9 +1860,9 @@ const SETS={
     as_staff:  {n:'학자 지팡이',       slot:'weapon',hand:'2H',stats:{matk:265,hp:160,balance:68}},
     as_amulet: {n:'학자 부적',         slot:'accessory',stats:{matk:85,hp:160}},
   },bonuses:[
-    {cnt:2,desc:'MATK+60 INT 효율+20%',b:{matk:60}},
+    {cnt:2,desc:'MATK+60 INT 효율+20%',b:{matk:60,_intBonus:0.20}},
     {cnt:3,desc:'스킬 발동+15% MATK+110',b:{matk:110,skillBonus:15}},
-    {cnt:4,desc:'MATK+200 모든 스킬 피해+25%',b:{matk:200,skillBonus:25}},
+    {cnt:4,desc:'MATK+200 모든 스킬 피해+25%',b:{matk:200,skillBonus:25,_skillDmgBonus:0.25}},
   ]},
   // ★ 올라운더 — 어느쪽도 최강 아님, 섞어쓰기 최적화
   dragon_sovereign:{name:'용군주',col:'#ff8c00',pcs:{
@@ -2524,7 +2524,14 @@ function calcStats(c){
   }
   const sb=calcSetB(eq);
   atk+=sb.atk||0;def+=sb.def||0;spd+=sb.spd||0;hp+=sb.hp||0;crit+=sb.crit||0;critDmg+=sb.critDmg||0;
+  matk+=sb.matk||0;skillBonus+=sb.skillBonus||0;
   dodge+=sb.dodge||0; // ★ 세트 보너스 회피 적용
+  // ★ v3.x — 특수 보너스 (포션/INT/스킬 피해 — calcStats 결과에 누적)
+  const _potionBonus=sb._potionBonus||0;     // divine_light 2pc/4pc
+  const _intBonus=sb._intBonus||0;           // arcane_scholar 2pc
+  const _skillDmgBonus=sb._skillDmgBonus||0; // arcane_scholar 4pc
+  // INT 효율 보너스 — MATK에 추가 적용 (INT 기반 MATK 증가분 재적용)
+  if(_intBonus>0){matk+=Math.round((c.int||3)*1.5*_intBonus);}
   // ★ v3.0 — 거점 활성 패시브 가구 스탯 합산 (도감 % 보너스 직전, 세트와 동일 단계)
   if(c===char&&typeof getActivePassiveStats==='function'){
     const ps=getActivePassiveStats();
@@ -2543,12 +2550,25 @@ function calcStats(c){
     maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),35),
     crit:Math.min(Math.round(crit),75),critDmg:Math.round(critDmg),
     goldBonus:Math.round(goldBonus),skillBonus:Math.round(skillBonus),
-    balance:Math.min(99,Math.round(balance))};
+    balance:Math.min(99,Math.round(balance)),
+    _potionBonus,_intBonus,_skillDmgBonus};
 }
 function calcSetB(eq){
   const sc={};for(const it of Object.values(eq)){if(!it||it.grade!=='set'||!it.setId)continue;sc[it.setId]=(sc[it.setId]||0)+1;}
   const b={};for(const[sid,cnt]of Object.entries(sc)){const sd=SETS[sid];if(!sd)continue;for(const bn of sd.bonuses){if(cnt>=bn.cnt)for(const[k,v]of Object.entries(bn.b))b[k]=(b[k]||0)+v;}}
   return b;
+}
+// ★ v3.x — 활성 세트 효과(proc) 추출 (cnt 충족 + proc 정의된 보너스만)
+function getActiveSetProcs(eq){
+  const sc={};for(const it of Object.values(eq||{})){if(!it||it.grade!=='set'||!it.setId)continue;sc[it.setId]=(sc[it.setId]||0)+1;}
+  const procs=[];
+  for(const[sid,cnt]of Object.entries(sc)){
+    const sd=SETS[sid];if(!sd)continue;
+    for(const bn of sd.bonuses){
+      if(cnt>=bn.cnt&&bn.proc)procs.push({setId:sid,setName:sd.name,...bn.proc});
+    }
+  }
+  return procs;
 }
 // ★ 전투력: ATK/DEF/HP/SPD/CRIT 가중 합산 (강화·인챈트·세트 모두 반영)
 function equipScore(c){
@@ -3997,17 +4017,17 @@ const GUIDE_BUILDERS={
   weapons:()=>{
     // ★ WBASES에서 자동 추출 + 정적 설명 혼합
     const W_DESC={
-      sword:     {n:'한손검', emoji:'⚔', stat:'STR',   feat:'균형형 — ATK + 1H로 방패 병행', tip:'초보자 추천. 방패와 같이 쓰면 안정적'},
-      greatsword:{n:'대검',   emoji:'🗡', stat:'STR',   feat:'최고 ATK (2.2배). 2H 무기',     tip:'순수 데미지 딜러 — 방패 못 씀'},
-      dagger:    {n:'단검',   emoji:'🔪', stat:'DEX',   feat:'SPD 보너스 + 치명 발동 빠름',   tip:'CRIT 빌드 추천 — 짧은 사거리지만 빠름'},
-      dual:      {n:'쌍검',   emoji:'⚔⚔', stat:'STR/DEX',feat:'2H지만 SPD 보너스',           tip:'공격속도 + 데미지 균형'},
-      axe:       {n:'도끼',   emoji:'🪓', stat:'STR',   feat:'1H ATK 강함',                   tip:'한손검보다 데미지 우선'},
-      greataxe:  {n:'대도끼', emoji:'⛏', stat:'STR',   feat:'최고 ATK 배율 (2.0)',           tip:'느리지만 압도적 데미지'},
+      sword:     {n:'한손검', emoji:'⚔', stat:'STR',   feat:'1H + 방패 시 <b style="color:var(--gold)">받는 데미지 -15%</b>', tip:'초보자 추천. 방패와 같이 쓰면 안정적'},
+      greatsword:{n:'대검',   emoji:'🗡', stat:'STR',   feat:'최고 ATK + 치명타 데미지 +5%',     tip:'순수 데미지 딜러 — 방패 못 씀'},
+      dagger:    {n:'단검',   emoji:'🔪', stat:'DEX',   feat:'CRIT +8% + SPD 보너스',           tip:'CRIT 빌드 추천 — 짧은 사거리지만 빠름'},
+      dual:      {n:'쌍검',   emoji:'⚔⚔', stat:'STR/DEX',feat:'추가 연격 12~40% (SPD↑)',       tip:'공격속도 + 데미지 균형'},
+      axe:       {n:'도끼',   emoji:'🪓', stat:'STR',   feat:'1H + 비치명 데미지 +5%',          tip:'한손검보다 데미지 우선'},
+      greataxe:  {n:'대도끼', emoji:'⛏', stat:'STR',   feat:'최고 ATK + 치명타 데미지 +10%',    tip:'느리지만 압도적 데미지'},
       bow:       {n:'활',     emoji:'🏹', stat:'DEX',   feat:'<b style="color:var(--gold)">선공 회피 15~30%</b>',  tip:'보스 반격 회피 가능 — 토벌전 최고'},
-      spear:     {n:'창',     emoji:'🔱', stat:'STR/DEX',feat:'관통 (DEF 35% 무시)',          tip:'고방어 적에게 효과적'},
-      mace:      {n:'메이스', emoji:'🔨', stat:'STR',   feat:'관통 25% + 1H',                 tip:'한손 사용하면서 방어 무시'},
+      spear:     {n:'창',     emoji:'🔱', stat:'STR/DEX',feat:'<b style="color:var(--gold)">방어 무시 20%</b>',   tip:'고방어 적에게 효과적'},
+      mace:      {n:'메이스', emoji:'🔨', stat:'STR',   feat:'<b style="color:var(--gold)">방어 무시 25%</b> + DEF 디버프', tip:'한손 사용하면서 방어 무시'},
       staff:     {n:'지팡이', emoji:'🪄', stat:'INT',   feat:'<b style="color:var(--purple)">MATK 사용</b> + HP 보너스', tip:'마법 빌드 — INT 위주로 키움'},
-      dualgun:   {n:'듀얼건', emoji:'🔫', stat:'INT/DEX',feat:'<b style="color:var(--purple)">MATK 최고</b> + 스킬 +15%', tip:'마법 데미지 최강 + 2H'},
+      dualgun:   {n:'듀얼건', emoji:'🔫', stat:'INT/DEX',feat:'<b style="color:var(--purple)">MATK 최고</b> + SPD 보너스', tip:'마법 데미지 최강 + 2H'},
     };
     const rows=Object.entries(W_DESC).map(([id,d])=>{
       const wb=WBASES.find(b=>b.id===id);
@@ -7882,6 +7902,16 @@ async function resolvePhase(){
     if(battle._startBuffSpd>0)blogAdd(`<span class="l-skill" style="color:var(--blue)">⚡ 전쟁의 깃발! ${battle._startBuffTurns||3}턴 SPD +${battle._startBuffSpd}</span>`);
   }
   if(battle._invulnTurns>0)battle._invulnTurns--;
+  // ★ v3.x — 매 턴 시작 시 활성 세트 procs 발동 시도 (요새 5피스 = 5% 확률 1턴 무적)
+  try{
+    const setProcs=getActiveSetProcs(char?.equipment||{});
+    for(const p of setProcs){
+      if(p.type==='invuln_chance'&&Math.random()<(p.rate||0)){
+        battle._invulnTurns=Math.max(battle._invulnTurns||0,p.turns||1);
+        blogAdd&&blogAdd(`<span class="l-skill" style="color:var(--gold)">🛡 ${p.setName} 세트 효과 발동! ${p.turns||1}턴 무적!</span>`);
+      }
+    }
+  }catch(e){console.error('[setProcs turn fail]',e);}
   if(battle.totalTurns>(battle._startBuffTurns||0))battle._startBuffSpd=0;
   if(battle._leaderFallbackTimer){clearTimeout(battle._leaderFallbackTimer);battle._leaderFallbackTimer=null;}
   battle.phase=2;
@@ -7973,7 +8003,7 @@ async function resolvePhase(){
         blogAdd(`<span class="l-warn">🔒 ${p.name}: 포션 봉인 — 회복 불가!</span>`);
         p.actionChosen='attack'; // 봉인 시 공격으로 전환
       }else if(p.potions>0){
-        p.potions--;const potMult=s._potionMult||1.0;const heal=Math.round(p.maxHp*0.4*potMult);p.hp=Math.min(p.hp+heal,p.maxHp);
+        p.potions--;const potMult=(s._potionMult||1.0)+(s._potionBonus||0);const heal=Math.round(p.maxHp*0.4*potMult);p.hp=Math.min(p.hp+heal,p.maxHp);
         p.healing=true;
         p.aggro=Math.max(0,(p.aggro||0)*0.3);
         SFX.play('heal');
@@ -7995,8 +8025,14 @@ async function resolvePhase(){
       // ★ 대도끼: 치명타 데미지 +10%, 대검: +5%
       const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
       if(isCrit)dmg=Math.round(dmg*(s.critDmg/100)*critDmgBonus);
-      // ★ 창: 방어 무시 8%
-      if(wt.isSpear&&!isCrit)dmg=Math.round(dmg*1.08);
+      // ★ v3.x — 창/메이스: WBASES dr 기반 실제 방어 무시 (창 35%, 메이스 25%)
+      const _wb=WBASES.find(b=>b.id===wt.wid);
+      const wDefIgnore=_wb?.dr||0;
+      if(wDefIgnore>0&&!isCrit)dmg=Math.round(dmg*(1+wDefIgnore));
+      // ★ v3.x — 도끼: 비치명 데미지 +5% (한손 ATK 무기 보강)
+      if(wt.isAxe&&!isCrit)dmg=Math.round(dmg*1.05);
+      // ★ v3.x — 한손검: 방패 장착 시 받는 데미지 추가 -10% (균형형 컨셉)
+      // (이 부분은 데미지 받을 때 처리 — 여기선 적용 안 함)
       // ★ 밸런스로 몬스터 회피 상쇄 / 불멸의 탑 — noDodge: 회피 완전 무효
       const monNoDodge=battle.mode==='immortaltower'&&(target._itMonBase?._noDodge||target._noDodge);
       // ★ 속성 효과: 냉기 — 적 회피 감소
@@ -8112,6 +8148,10 @@ async function resolvePhase(){
 
     let dmg=Math.max(1,Math.round(m.atk*100/(100+(tgt.stats?tgt.stats.def:calcStats(tgt.charData||char).def))));
     if(isNaN(dmg))dmg=Math.max(1,Math.round(m.atk*0.5));
+    // ★ v3.x — 한손검 + 방패 장착 시 받는 데미지 -15% (균형형 컨셉, 1H 약체 보강)
+    const _tgtEq=tgt.charData?.equipment||(tgt===battle.players[0]?char.equipment:null)||{};
+    const _tgtWt=getWeaponTraits(_tgtEq);
+    if(_tgtWt.isSword&&_tgtEq.offhand)dmg=Math.round(dmg*0.85);
     if(tgt.defending)dmg=Math.round(dmg*0.5);
     if(tgt._shield){dmg=Math.round(dmg*0.5);tgt._shield=false;} // ★ 신성 방벽
     // ★ 불멸의 탑 — 피해 감소 버프 (_dmgReduce)
@@ -8368,6 +8408,10 @@ function trySkillProc(p,s,target,allM){
       else SFX.play('skill_physical');
       const fx=sk.fx(s.atk,s); // ★ s(전체 스탯) 전달 — STR/INT/DEX 활용
       if(fx.dmg)fx.dmg=Math.min(Math.round(fx.dmg),99999);
+      // ★ v3.x — 비전 학자 4pc: 모든 스킬 피해 +25%
+      if(fx.dmg>0&&(s._skillDmgBonus||0)>0){
+        fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
+      }
       // ★ 속성 효과: 스킬 타입과 무기 속성이 일치하면 보너스
       const skAttr=fx.type;
       if(skAttr&&fx.dmg>0&&ATTR_EFFECT[skAttr]){
@@ -11859,6 +11903,9 @@ window.enterSubjBattle=function(){
       let bDmg=Math.max(1,Math.round(boss.atk*bAtkMult*100/(100+s.def)));
       const bVariance=Math.round(bDmg*0.2);bDmg=Math.max(1,bDmg+rand(-bVariance,bVariance));
       if(boss._guardTurn){bDmg=Math.round(bDmg*0.4);boss._guardTurn=false;}
+      // ★ v3.x — 한손검 + 방패 장착 시 받는 데미지 -15%
+      const _wtSubj=getWeaponTraits(char.equipment||{});
+      if(_wtSubj.isSword&&char.equipment?.offhand)bDmg=Math.round(bDmg*0.85);
       if(defending)bDmg=Math.round(bDmg*0.5);
       // ★ 속성 상성: 보스 vs 플레이어 무기
       const _sbAttr=getWeaponAttr(char.equipment||{});
@@ -11924,7 +11971,10 @@ window.enterSubjBattle=function(){
       const isCrit=Math.random()*100<(s.crit+critBonus);
       const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
       if(isCrit)dmg=Math.round(dmg*(s.critDmg/100)*critDmgBonus);
-      if(wt.isSpear&&!isCrit)dmg=Math.round(dmg*1.08);
+      // ★ v3.x — 창/메이스: WBASES dr 기반 방어 무시
+      const _wbSubj=WBASES.find(b=>b.id===wt.wid);
+      const wDefIgnoreSubj=_wbSubj?.dr||0;
+      if(wDefIgnoreSubj>0&&!isCrit)dmg=Math.round(dmg*(1+wDefIgnoreSubj));
       // ★ 속성 상성: 플레이어 무기 vs 보스
       const _sAttr=getWeaponAttr(char.equipment||{});
       const _sAttrMult=calcAttrMult(_sAttr,boss._attr);
@@ -11996,7 +12046,7 @@ window.enterSubjBattle=function(){
       slog(`<span class="l-sys">🛡 ${char.name} 방어 자세 (피해 50% 감소)</span>`);
     }else if(action==='heal'){
       if(myPotions<=0){toast('포션 없음!');phase=1;renderSubjBattle();return;}
-      myPotions--;const heal=Math.round(s.maxHp*0.5);myHp=Math.min(myHp+heal,s.maxHp);
+      myPotions--;const heal=Math.round(s.maxHp*0.5*(1+(s._potionBonus||0)));myHp=Math.min(myHp+heal,s.maxHp);
       slog(`<span class="l-heal">💊 포션 사용! +${heal}HP (${myHp}/${s.maxHp})</span>`);
     }
     // Boss counter-attack
@@ -12343,7 +12393,10 @@ window.enterChampBattle=async function(){
       const isCrit=Math.random()*100<(s.crit+critBonus);
       const critDmgBonus=wt.isGreataxe?1.10:wt.isGreatsword?1.05:1.0;
       if(isCrit)dmg=Math.round(dmg*(s.critDmg/100)*critDmgBonus);
-      if(wt.isSpear&&!isCrit)dmg=Math.round(dmg*1.08);
+      // ★ v3.x — 창/메이스: WBASES dr 기반 방어 무시
+      const _wbCh=WBASES.find(b=>b.id===wt.wid);
+      const wDefIgnoreCh=_wbCh?.dr||0;
+      if(wDefIgnoreCh>0&&!isCrit)dmg=Math.round(dmg*(1+wDefIgnoreCh));
       // ★ 속성 상성: 도전자 무기 vs 챔프 무기
       const _cMyAttr=getWeaponAttr(char.equipment||{});
       const _cChampAttr=champ?.equipment?.weapon?.attr||champ?.equipment?.weapon?.prefix?.attr||null;
@@ -12414,7 +12467,7 @@ window.enterChampBattle=async function(){
       clog(`<span class="l-sys">🛡 ${char.name} 방어 자세</span>`);
     }else if(action==='heal'){
       if(myPotions<=0){toast('포션 없음!');phase=1;renderChampBattle();return;}
-      myPotions--;const heal=Math.round(s.maxHp*0.4);myHp=Math.min(myHp+heal,s.maxHp);
+      myPotions--;const heal=Math.round(s.maxHp*0.4*(1+(s._potionBonus||0)));myHp=Math.min(myHp+heal,s.maxHp);
       clog(`<span class="l-heal">💊 포션! +${heal}HP</span>`);
     }
     // Check champ death
@@ -12466,6 +12519,9 @@ window.enterChampBattle=async function(){
       cDmg=Math.max(1,Math.round(cs.atk*100/(100+s.def)));
     }
     const cv=Math.round(cDmg*0.15);cDmg=Math.max(1,cDmg+rand(-cv,cv));
+    // ★ v3.x — 한손검 + 방패 장착 시 받는 데미지 -15%
+    const _wtCh=getWeaponTraits(char.equipment||{});
+    if(_wtCh.isSword&&char.equipment?.offhand)cDmg=Math.round(cDmg*0.85);
     if(defending)cDmg=Math.round(cDmg*0.5);
     // ★ 번개 감전: 챔프 반격 30% 약화
     if(window._champStunned){cDmg=Math.round(cDmg*0.7);window._champStunned=false;clog(`<span class="l-skill" style="color:#ffe040">⚡ 감전 효과! 반격 약화 (-30%)</span>`);}
