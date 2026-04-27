@@ -2800,27 +2800,45 @@ async function selChar(id){
     if(it&&migrateEnchantName(it))equipMigrated=true;
     migrateForgeWard(); // ★ forgeWard 분리 마이그레이션
   }
-  // ★ 도감 키 정리 — Firebase 금지 문자 + 접두/접미 변형 통합 (장비 루프 밖에서 1회)
-  if(char._codex){
-    const oldKeys=Object.keys(char._codex);
+  // ★ v3.x — 도감 마이그레이션: 1회만 실행, 마스터 베스티어리 기반
+  if(char._codex&&!char._codexMigV3){
     const newCodex={};
-    let codexChanged=false;
-    for(const ok of oldKeys){
+    let migrated=0, dropped=0, merged=0;
+    for(const ok of Object.keys(char._codex)){
       const entry=char._codex[ok];if(!entry)continue;
-      const baseName=entry.isBoss?(entry.name||ok):(typeof _codexBaseName==='function'?_codexBaseName(entry.name||ok):entry.name||ok);
-      const newKey=baseName.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
-      if(!newKey)continue;
-      if(ok!==newKey)codexChanged=true;
-      if(!newCodex[newKey]){
-        newCodex[newKey]={...entry,name:baseName};
+      // 마스터 키로 재매핑 (변형 prefix/suffix 제거 + 매칭 시도)
+      const mk=(typeof _resolveMasterKey==='function')
+        ?_resolveMasterKey(entry.name||ok,!!entry.isBoss)
+        :null;
+      if(!mk){
+        // 마스터에 없는 도감 항목 — 더미 데이터로 간주, 제거
+        dropped++; continue;
+      }
+      const master=MASTER_BESTIARY[mk];
+      if(!newCodex[mk]){
+        newCodex[mk]={
+          name:master.name,
+          kills:entry.kills||0,
+          area:master.area,
+          attr:entry.attr||master.attr||null,
+          isBoss:!!master.isBoss,
+          firstKill:entry.firstKill||Date.now(),
+        };
+        migrated++;
       }else{
-        newCodex[newKey].kills=(newCodex[newKey].kills||0)+(entry.kills||0);
-        if(entry.isBoss)newCodex[newKey].isBoss=true;
+        // 동일 마스터 키로 매핑된 여러 엔트리 — 합산
+        newCodex[mk].kills+=(entry.kills||0);
+        if(entry.firstKill&&(!newCodex[mk].firstKill||entry.firstKill<newCodex[mk].firstKill)){
+          newCodex[mk].firstKill=entry.firstKill;
+        }
+        merged++;
       }
     }
-    if(codexChanged){
-      char._codex=newCodex;
-      equipMigrated=true;
+    char._codex=newCodex;
+    char._codexMigV3=true;
+    equipMigrated=true;
+    if(dropped>0||merged>0){
+      console.log(`[codex migration] migrated=${migrated} merged=${merged} dropped=${dropped}`);
     }
   }
   if(!char.str){char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;}
@@ -3600,42 +3618,171 @@ function renderPresets(){
 }
 
 // ════════════════════════════════════════════
-// ★ 몬스터 도감 시스템
+// ★ 몬스터 도감 시스템 (v3.x — 마스터 베스티어리 기반)
 // ════════════════════════════════════════════
-// ★ 몬스터 이름에서 접두/접미 변형 제거 → 기본 이름만 도감에 등록 (항목 폭발 방지)
+// 모든 몬스터의 정답 리스트. 들어오는 이름이 이 목록에 매칭되어야 도감에 등록됨.
+// MASTER_BESTIARY[key] = {name, area, isBoss, attr, tier, hint}
+// key는 표준화된 식별자 (공백 → _, 특수문자 제거).
+// area: cave/darkforest/desert/fortress/dragon/immortaltower/timeattack/subjugation/memorial
+// tier: 1(쉬움)~6(매우어려움) — 컬렉션 진행률 기준
+// ════════════════════════════════════════════
+const _MK=(name,area,tier,attr,isBoss,hint)=>({name,area,tier,attr,isBoss:!!isBoss,hint:hint||null});
+const MASTER_BESTIARY=(()=>{
+  const out={};
+  // 일반 몬스터 (영역별)
+  const areaMons={
+    cave:{tier:1,list:['고블린 전사','동굴 박쥐','바위 두더지','함정 거미','굴 뱀','광부 좀비','동굴 슬라임','야간 도둑','동굴 거북','독 유충']},
+    darkforest:{tier:2,list:['숲의 망령','독 거미','늑대인간','어둠 드루이드','독버섯 정령','흡혈 박쥐','저주받은 나무','어둠 엘프','숲 마녀','독 뱀왕']},
+    desert:{tier:3,list:['모래 전갈','사막 미라','독사','뼈 도마뱀','모래 골렘','사막 악마','열사 정령','선인장 인간','모래폭풍 원소','오아시스 수호자']},
+    fortress:{tier:4,list:['요새 기사','석상 골렘','마법 포탑','망령 근위대','저주 검사','철갑 오우거','어둠 감시병','요새 마법사','죽음 의 기사','지옥 수문장']},
+    dragon:{tier:5,list:['용의 하수인','화염 비룡','얼음 와이번','뇌전 드레이크','드래곤 유충','용의 수호자','마그마 드래곤','고대 비룡','심연 드래곤','용군주 친위대']},
+  };
+  for(const[area,info]of Object.entries(areaMons)){
+    for(const n of info.list){
+      const k=n.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+      out[k]=_MK(n,area,info.tier,null,false,`${area} 영역에서 출현`);
+    }
+  }
+  // 던전 보스 (BOSSN)
+  const bossList=['균열의 수호자 그락','숲의 오염자 실바노스','사막의 유물 잔카르','벨린의 왕 카르도스','잠식된 용왕 아쉬라스'];
+  const bossAreas=['cave','darkforest','desert','fortress','dragon'];
+  bossList.forEach((n,i)=>{
+    const k=n.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+    out[k]=_MK(n,bossAreas[i],bossAreas[i]==='dragon'?6:bossAreas[i]==='fortress'?5:bossAreas[i]==='desert'?4:bossAreas[i]==='darkforest'?3:2,null,true,`${bossAreas[i]} 5층 보스`);
+  });
+  // 불멸의 탑 보스 (10/20/.../100)
+  const itBosses={10:'탑의 파수꾼 그라켄',20:'오염된 전령 실린',30:'사막의 심판자 카잔',40:'요새의 군주 발린',50:'심연의 중간 관문 제크론',60:'불꽃의 망령 이그나르',70:'영원의 감시자 카이라',80:'심연의 군주 발로르',90:'불멸의 현신 루시엔',100:'불멸의 탑 수호신 아비살'};
+  for(const[fl,n]of Object.entries(itBosses)){
+    const k=n.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+    out[k]=_MK(n,'immortaltower',6,null,true,`불멸의 탑 ${fl}층 보스`);
+  }
+  // 타임어택 보스 (속성별 6종)
+  const taBosses=[
+    ['화염의 수호자','fire'],['빙결의 감시자','ice'],['뇌전의 심판관','lightning'],
+    ['암흑의 집행자','dark'],['성스러운 파수꾼','holy'],['독의 지배자','poison'],
+  ];
+  for(const[n,attr]of taBosses){
+    const k=n.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+    out[k]=_MK(n,'timeattack',5,attr,true,'주간 타임어택 보스');
+  }
+  // 토벌전 보스 (3종 — 아비도스/라바돈/루)
+  const subjBosses=[['심연의 군주 아비도스','dark'],['불꽃의 군주 라바돈','fire'],['절망의 군주 루','dark']];
+  for(const[n,attr]of subjBosses){
+    const k=n.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+    out[k]=_MK(n,'subjugation',6,attr,true,'주간 토벌전 보스');
+  }
+  // 위령제 보스
+  out['위령제_라바돈_재림']=_MK('위령제 라바돈 재림','memorial',6,'fire',true,'위령제 한정 보스');
+  return out;
+})();
+// 영역 메타 정보 (UI / 보상용)
+const AREA_META={
+  cave:        {n:'⛏ 동굴',           tier:1, color:'#a8835a'},
+  darkforest:  {n:'🌿 어둠숲',         tier:2, color:'#5aa884'},
+  desert:      {n:'🏜 사막',           tier:3, color:'#d4a35a'},
+  fortress:    {n:'🏰 요새',           tier:4, color:'#7a8aa8'},
+  dragon:      {n:'🐉 용의둥지',       tier:5, color:'#c84040'},
+  immortaltower:{n:'🗼 불멸의 탑',     tier:6, color:'#ff2244'},
+  timeattack:  {n:'🏆 타임어택',       tier:5, color:'#f0c040'},
+  subjugation: {n:'⚔ 토벌전',          tier:6, color:'#a040ff'},
+  memorial:    {n:'🌸 위령제',         tier:6, color:'#ff80b0'},
+};
+// 영역별 컬렉션 보상 (100% 달성 시 1회 지급)
+const AREA_COLLECTION_REWARDS={
+  cave:        {gold:5000000,    item:null,                  shards:0,  scrolls:1},
+  darkforest:  {gold:15000000,   item:null,                  shards:0,  scrolls:2},
+  desert:      {gold:50000000,   item:null,                  shards:0,  scrolls:3},
+  fortress:    {gold:150000000,  item:null,                  shards:5,  scrolls:5},
+  dragon:      {gold:500000000,  item:null,                  shards:15, scrolls:8},
+  immortaltower:{gold:1000000000,item:null,                  shards:30, scrolls:15},
+  timeattack:  {gold:300000000,  item:null,                  shards:10, scrolls:6},
+  subjugation: {gold:800000000,  item:null,                  shards:20, scrolls:10},
+  memorial:    {gold:200000000,  item:null,                  shards:5,  scrolls:5},
+};
+
+// ★ 몬스터 이름 → MASTER_BESTIARY 키 변환 (변형 prefix/suffix 제거)
 const _CODEX_STRIP_PRE=['\\[숨겨진\\]','\\[전설의\\]','\\[악몽의\\]','\\[심연의\\]','\\[오염된\\]','\\[각성한\\]','\\[불멸의\\]','분노한','굶주린','저주받은','야생의','돌연변이','타락한','노련한','광폭화한','강철','독이 오른'];
-const _CODEX_STRIP_SUF=['대장','광전사','수호자','지배자','학살자','고대의','저주받은'];
+const _CODEX_STRIP_SUF=['대장','광전사','지배자','학살자','고대의','저주받은']; // ★ '수호자' 제거 — '용의 수호자' 등 기본 이름 보존
 const _CODEX_STRIP_RE=new RegExp(`^(${_CODEX_STRIP_PRE.join('|')})\\s*|\\s*(${_CODEX_STRIP_SUF.join('|')})$`,'g');
 function _codexBaseName(name){return name.replace(_CODEX_STRIP_RE,'').trim();}
+// ★ 몬스터 이름을 MASTER_BESTIARY 키로 매핑 (없으면 null)
+function _resolveMasterKey(rawName,isBoss){
+  if(!rawName)return null;
+  // 1. 보스는 변형 처리 안 함
+  const candidate=isBoss?rawName.trim():_codexBaseName(rawName);
+  if(!candidate)return null;
+  // 2. 표준화
+  const k=candidate.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+  // 3. MASTER_BESTIARY에 있는지 확인
+  if(MASTER_BESTIARY[k])return k;
+  // 4. 원본 이름으로도 시도 (변형 안 된 케이스)
+  const k2=rawName.trim().replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
+  if(MASTER_BESTIARY[k2])return k2;
+  return null; // 매칭 실패 — 도감 등록 안 함
+}
 
 function trackMonsterKill(monsterName,area,attr,isBoss){
   if(!char._codex)char._codex={};
-  const baseName=isBoss?monsterName:_codexBaseName(monsterName); // ★ 보스는 원본 이름 유지
-  // ★ Firebase 키 금지 문자 제거: . # $ / [ ]
-  const key=baseName.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
-  if(!key)return; // 빈 키 방지
+  // ★ v3.x — MASTER_BESTIARY 매칭 (없는 몬스터는 도감 등록 거부)
+  const key=_resolveMasterKey(monsterName,isBoss);
+  if(!key)return;
+  const master=MASTER_BESTIARY[key];
   if(!char._codex[key]){
-    char._codex[key]={name:baseName,kills:0,area:area||'unknown',attr:attr||null,isBoss:!!isBoss,firstKill:Date.now()};
+    char._codex[key]={name:master.name,kills:0,area:master.area,attr:attr||master.attr,isBoss:master.isBoss,firstKill:Date.now()};
   }
   char._codex[key].kills++;
-  // ★ 속성 업데이트 (같은 몬스터라도 속성이 다를 수 있음 — 마지막 처치 기준)
-  if(attr)char._codex[key].attr=attr;
-  // ★ 첫 처치 보상
+  if(attr)char._codex[key].attr=attr; // 마지막 처치 속성 갱신
   if(char._codex[key].kills===1){
     char.gold+=100;
-    blogAdd(`<span class="l-exp" style="color:var(--gold)">📖 도감 등록: ${baseName} (+100G)</span>`);
+    blogAdd&&blogAdd(`<span class="l-exp" style="color:var(--gold)">📖 도감 등록: ${master.name} (+100G)</span>`);
+    // ★ 영역 컬렉션 100% 체크 (등록 직후)
+    setTimeout(()=>checkCollectionReward(master.area).catch(()=>{}),100);
   }
 }
+
+// ★ 영역별 컬렉션 보상 지급 (100% 달성 시 1회만)
+async function checkCollectionReward(area){
+  if(!area||!AREA_COLLECTION_REWARDS[area])return;
+  const claimed=char._codexCollectionClaimed||{};
+  if(claimed[area])return; // 이미 수령
+  // 해당 영역 마스터 몬스터 수
+  const areaMons=Object.keys(MASTER_BESTIARY).filter(k=>MASTER_BESTIARY[k].area===area);
+  if(!areaMons.length)return;
+  // 발견된 수
+  const found=areaMons.filter(k=>(char._codex||{})[k]).length;
+  if(found<areaMons.length)return; // 100% 미달
+  // 보상 지급
+  const r=AREA_COLLECTION_REWARDS[area];
+  if(!char._codexCollectionClaimed)char._codexCollectionClaimed={};
+  char._codexCollectionClaimed[area]=Date.now();
+  if(r.gold){
+    const dr=distributeGold(char,r.gold);
+    char.gold=dr.gold; char._bankGold=dr.bank; char._pendingGold=dr.pending;
+  }
+  // 인챈트 스크롤 보상
+  for(let i=0;i<(r.scrolls||0);i++){
+    try{
+      const isPre=Math.random()<0.5;
+      const tier=area==='immortaltower'||area==='subjugation'?3:area==='dragon'||area==='fortress'?2:1;
+      const pool=isPre?PRE.filter(e=>getEnchantTier(e.n)===tier):SUF.filter(e=>getEnchantTier(e.n)===tier);
+      const enchData=pool.length?pool[Math.floor(Math.random()*pool.length)]:(isPre?PRE[0]:SUF[0]);
+      const scroll=genEnchantScrollItem(enchData,isPre,tier,tier);
+      scroll._gotAt=Date.now(); scroll.tradeable=true;
+      await addItem(scroll);
+    }catch(e){console.warn('[collection scroll fail]',e);}
+  }
+  await saveChar();
+  toast(`🏆 ${AREA_META[area]?.n||area} 도감 100% 컬렉션! 보상 지급!`,8000);
+  blogAdd&&blogAdd(`<span class="l-set" style="color:var(--gold)">🏆 ${AREA_META[area]?.n||area} 컬렉션 완성! ${r.gold.toLocaleString()}G + 스크롤 ${r.scrolls}개</span>`);
+}
+window.checkCollectionReward=checkCollectionReward;
+
 function getCodexCompletion(){
   const codex=char._codex||{};
-  const total=Object.keys(codex).length;
-  // 전체 몬스터 수 (기본 이름 기준 — 변형 제외)
-  const baseMons=Object.values(MNAMES).flat().length; // 50
-  const itMons=[...new Set(Object.values(IT_MNAMES||{}).flat())].length;
-  const bosses=(typeof BOSSN!=='undefined'?BOSSN.length:5)+(typeof SUBJ_BOSSES!=='undefined'?SUBJ_BOSSES.length:3)
-    +Object.keys(IT_BOSSES||{}).length+TA_BOSSES.length;
-  const allMonsters=baseMons+itMons+bosses;
-  return{discovered:total,total:Math.max(allMonsters,total),pct:Math.min(100,Math.round(total/Math.max(1,allMonsters)*100))};
+  const allKeys=Object.keys(MASTER_BESTIARY);
+  const totalAll=allKeys.length;
+  const found=allKeys.filter(k=>codex[k]).length;
+  return{discovered:found,total:totalAll,pct:Math.min(100,Math.round(found/Math.max(1,totalAll)*100))};
 }
 function getCodexBonus(){
   const{pct}=getCodexCompletion();
@@ -3645,42 +3792,79 @@ function getCodexBonus(){
 function renderCodex(){
   const rb=document.getElementById('rankBody');if(!rb)return;
   const codex=char._codex||{};
-  const entries=Object.values(codex).sort((a,b)=>(b.kills||0)-(a.kills||0));
   const comp=getCodexCompletion();
   const bonus=getCodexBonus();
-  const areas={cave:'⛏ 동굴',darkforest:'🌿 숲',desert:'🏜 사막',fortress:'🏰 요새',dragon:'🐉 용의둥지',immortaltower:'🗼 불멸의 탑',timeattack:'🏆 타임어택',subjugation:'⚔ 토벌전',unknown:'❓ 기타'};
+  const claimed=char._codexCollectionClaimed||{};
+
+  // 영역별 그룹화 — 마스터 베스티어리 기준
+  const groups={};
+  for(const[k,m]of Object.entries(MASTER_BESTIARY)){
+    if(!groups[m.area])groups[m.area]={tier:AREA_META[m.area]?.tier||9,mons:[]};
+    groups[m.area].mons.push({key:k,master:m,entry:codex[k]||null});
+  }
+  // 영역 정렬: tier 오름차순
+  const sortedAreas=Object.entries(groups).sort((a,b)=>(a[1].tier||9)-(b[1].tier||9));
+
+  // 약점 속성 (ATTR_ADVANTAGE 역참조)
+  const weakOf=(attr)=>attr?Object.entries(ATTR_ADVANTAGE).find(([,v])=>v===attr)?.[0]:null;
+
   rb.innerHTML=`
     <div style="background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <span style="font-size:12px;font-weight:700;color:var(--gold)">📖 몬스터 도감</span>
-        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--green)">${comp.discovered}종 발견 (${comp.pct}%)</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--green)">${comp.discovered}/${comp.total} (${comp.pct}%)</span>
       </div>
       <div style="width:100%;height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden;margin-bottom:6px">
         <div style="width:${comp.pct}%;height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:3px;transition:width .5s"></div>
       </div>
-      <div style="font-size:9px;color:var(--tx3)">도감 보너스: ATK +${Math.round((bonus.atkMult-1)*100)}% · DEF +${Math.round((bonus.defMult-1)*100)}% (10% 달성마다 +1%)</div>
+      <div style="font-size:9px;color:var(--tx3)">도감 보너스: ATK +${Math.round((bonus.atkMult-1)*100)}% · DEF +${Math.round((bonus.defMult-1)*100)}% (10% 달성마다 +1%) · 영역 100% 시 추가 보상</div>
     </div>
-    ${!entries.length?`<div style="color:var(--tx3);font-size:11px;padding:20px;text-align:center">아직 처치한 몬스터가 없습니다.<br>던전에서 몬스터를 처치하면 자동 등록됩니다.</div>`:`
-    <div style="display:flex;flex-direction:column;gap:4px">
-      ${entries.map(e=>{
-        const areaName=areas[e.area]||areas.unknown;
-        const attrBadge=e.attr&&ATTR_N[e.attr]?`<span style="font-size:8px;background:${ATTR_C[e.attr]}22;color:${ATTR_C[e.attr]};border:1px solid ${ATTR_C[e.attr]}44;padding:0 5px;border-radius:8px">${ATTR_N[e.attr]}</span>`:'';
-        const weakAttr=e.attr?Object.entries(ATTR_ADVANTAGE).find(([,v])=>v===e.attr)?.[0]:null;
-        return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;display:flex;align-items:center;gap:8px">
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
-              <span style="font-size:11px;font-weight:700;color:${e.isBoss?'var(--red)':'var(--tx)'}">${e.isBoss?'👹 ':''}${e.name}</span>
-              ${attrBadge}
-            </div>
-            <div style="font-size:9px;color:var(--tx3)">${areaName}${weakAttr?` · 약점: <span style="color:${ATTR_C[weakAttr]}">${ATTR_N[weakAttr]}</span>`:''}</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green);font-weight:700">${e.kills}회</div>
-            <div style="font-size:8px;color:var(--tx3)">처치</div>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>`}`;
+    ${sortedAreas.map(([area,g])=>{
+      const meta=AREA_META[area]||{n:area,color:'#888',tier:9};
+      const found=g.mons.filter(x=>x.entry).length;
+      const total=g.mons.length;
+      const pct=Math.round(found/Math.max(1,total)*100);
+      const r=AREA_COLLECTION_REWARDS[area];
+      const isClaimed=!!claimed[area];
+      const isComplete=found>=total;
+      const rewardLine=r?`<div style="font-size:9px;color:var(--tx3);margin-top:3px">컬렉션 보상: ${r.gold?r.gold.toLocaleString()+'G':''}${r.scrolls?` · 인챈트 스크롤 ${r.scrolls}개`:''}${isClaimed?' <span style="color:var(--green)">✓ 수령</span>':isComplete?' <span style="color:var(--gold)">⭐ 수령가능 (다음 처치 시 자동)</span>':''}</div>`:'';
+      // 발견된 것 우선, 미발견은 뒤로
+      const sorted=[...g.mons].sort((a,b)=>{
+        if(!!a.entry===!!b.entry)return (b.entry?.kills||0)-(a.entry?.kills||0);
+        return a.entry?-1:1;
+      });
+      return`<div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid ${meta.color}55">
+          <span style="font-size:11px;font-weight:700;color:${meta.color}">${meta.n} <span style="color:var(--tx3);font-size:9px">T${meta.tier}</span></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:${pct>=100?'var(--gold)':'var(--tx2)'}">${found}/${total} (${pct}%)</span>
+        </div>
+        ${rewardLine}
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px;margin-top:6px">
+          ${sorted.map(({key,master,entry})=>{
+            if(!entry){
+              // 미발견 — ? placeholder
+              return`<div style="background:var(--sf2);border:1px dashed var(--bd);border-radius:6px;padding:6px 8px;opacity:.45">
+                <div style="font-size:11px;font-weight:700;color:var(--tx3)">${master.isBoss?'👹 ':''}???</div>
+                <div style="font-size:8px;color:var(--tx3);margin-top:1px">${master.hint||'미발견'}</div>
+              </div>`;
+            }
+            const attrBadge=entry.attr&&ATTR_N[entry.attr]?`<span style="font-size:8px;background:${ATTR_C[entry.attr]}22;color:${ATTR_C[entry.attr]};border:1px solid ${ATTR_C[entry.attr]}44;padding:0 4px;border-radius:6px">${ATTR_N[entry.attr]}</span>`:'';
+            const wk=weakOf(entry.attr);
+            return`<div style="background:var(--sf2);border:1px solid ${master.isBoss?'rgba(255,68,68,.4)':'var(--bd)'};border-radius:6px;padding:6px 8px">
+              <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;flex-wrap:wrap">
+                <span style="font-size:10px;font-weight:700;color:${master.isBoss?'var(--red)':'var(--tx)'}">${master.isBoss?'👹 ':''}${entry.name}</span>
+                ${attrBadge}
+              </div>
+              <div style="font-size:8px;color:var(--tx3);display:flex;justify-content:space-between">
+                <span>${wk?'약점: <span style="color:'+ATTR_C[wk]+'">'+ATTR_N[wk]+'</span>':' '}</span>
+                <span style="color:var(--green)">${entry.kills}회</span>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+  `;
 }
 
 // ═══ ITEM GENERATION ═══
