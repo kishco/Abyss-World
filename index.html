@@ -1541,8 +1541,8 @@ const SKILLS={
   // ─── 불멸 전용 스킬 (ATK계) ───
   immortal_abyss_slash:{name:'심연 참격',icon:'🔱',desc:'320% ATK + 방어 완전 무시',base:0.05,type:'physical',
     fx:(a,s)=>({dmg:a*3.2*(1+(s?.str||5)*0.006),ignoreDef:true,msg:'🔱 심연 참격!'})},
-  immortal_storm_chain:{name:'폭풍 연격',icon:'⚡',desc:'4연타 90% ATK',base:0.05,type:'physical',
-    fx:(a,s)=>({dmg:a*0.9*(1+(s?.str||5)*0.005),hits:4,msg:'⚡ 폭풍 연격!'})},
+  immortal_storm_chain:{name:'폭풍 연격',icon:'⚡',desc:'4연타 50% ATK',base:0.05,type:'physical',
+    fx:(a,s)=>({dmg:a*0.5*(1+(s?.str||5)*0.005),hits:4,msg:'⚡ 폭풍 연격!'})},
   immortal_reaper:{name:'사신의 낫',icon:'💀',desc:'250% ATK + HP 30% 미만 시 추가 200%',base:0.04,type:'physical',
     fx:(a,s)=>{const base=a*2.5*(1+(s?.str||5)*0.005);return{dmg:base,msg:'💀 사신의 낫!'}}},
   immortal_void_execute:{name:'공허 처형',icon:'🕳',desc:'200% + 방어 무시 + DEF -50% 2턴',base:0.04,type:'physical',
@@ -1554,8 +1554,8 @@ const SKILLS={
     fx:(a,s)=>({dmg:(s?.matk||a)*4.0*(1+(s?.int||3)*0.010),ignoreDef:true,msg:'🔮 공허 붕괴!'})},
   immortal_soul_harvest:{name:'영혼 수확',icon:'💜',desc:'220% MATK + HP 10% 흡수',base:0.05,type:'magic',
     fx:(a,s)=>({dmg:(s?.matk||a)*2.2*(1+(s?.int||3)*0.010),heal:0.10,msg:'💜 영혼 수확!'})},
-  immortal_arcane_storm:{name:'비전 폭풍',icon:'✨',desc:'3연타 130% MATK',base:0.05,type:'magic',
-    fx:(a,s)=>({dmg:(s?.matk||a)*1.3*(1+(s?.int||3)*0.010),hits:3,msg:'✨ 비전 폭풍!'})},
+  immortal_arcane_storm:{name:'비전 폭풍',icon:'✨',desc:'3연타 70% MATK',base:0.05,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*0.7*(1+(s?.int||3)*0.010),hits:3,msg:'✨ 비전 폭풍!'})},
 };
 
 // Enchants — 솔로 전용 (물리9/마법9 PRE, 물리9/마법8 SUF 밸런스)
@@ -8515,9 +8515,10 @@ function trySkillProc(p,s,target,allM){
         let dmg=fx.dmg;
         if(fx.ignoreDef)dmg=fx.dmg;
         else dmg=Math.max(1,fx.dmg-(target.def||0)*0.5);
+        // ★ v3.x — 다중 타격 스킬 수정 (hits=4면 각 타격 dmg, 총 dmg×4 적용)
         const hits=fx.hits||1;
         let totalDmg=0;
-        for(let h=0;h<hits;h++){const hd=Math.round(dmg/hits);target.hp=Math.max(0,target.hp-hd);totalDmg+=hd;}
+        for(let h=0;h<hits;h++){target.hp=Math.max(0,target.hp-dmg);totalDmg+=dmg;}
         if(fx.debuff==='spd'&&target.status==='alive'){
           target._spdDebuff=(target._spdDebuff||0)+1;
           const origAtk=target._origAtk||target.atk;
@@ -8550,7 +8551,8 @@ function trySkillProc(p,s,target,allM){
           target._dot=(target._dot||0)+fx.dot;
           blogAdd(`<span class="l-skill">☠ ${target.name}에게 독 부여! (${fx.dot}턴)</span>`);
         }
-        blogAdd(`<span class="l-skill">⚡ ${p.name}: ${fx.msg} <strong>${totalDmg}</strong></span>`);
+        const hitsTxt=hits>1?` (${hits}연타 × ${dmg})`:'';
+        blogAdd(`<span class="l-skill">⚡ ${p.name}: ${fx.msg} <strong>${totalDmg}</strong>${hitsTxt}</span>`);
         if(target.hp<=0&&target.status==='alive'){target.status='dead';blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
       }else{
         // buff — berserk, mana_surge, shield, evasion 등
@@ -12112,6 +12114,25 @@ window.enterSubjBattle=function(){
                 slog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name} <strong>+${skDmg}</strong></span>`);
               }else if(fx&&fx.msg){
                 slog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name}</span>`);
+              }
+              subjSkillFired=true;
+              break outer;
+            }catch(e){}
+          }
+        }
+        // ★ v3.x — 불멸 전용 스킬 (인챈트 스킬 미발동 시 시도)
+        if(!subjSkillFired&&sl._immortalSk&&SKILLS[sl._immortalSk]){
+          const isk=SKILLS[sl._immortalSk];
+          const iproc=Math.min(isk.base*1.8*(1+(s.int||3)*0.005)*subjSkillBonusMult, SUBJ_MAX_PROC);
+          if(Math.random()<iproc&&isk.fx){
+            try{
+              const fx=isk.fx(s.atk,s);
+              if(fx&&fx.dmg>0){
+                const skDmg=Math.min(Math.round(fx.dmg),99999);
+                totalDmgDealt+=skDmg;
+                slog(`<span class="l-skill" style="color:#FF2244">🔱 ${isk.name} <strong>+${skDmg}</strong></span>`);
+              }else if(fx&&fx.msg){
+                slog(`<span class="l-skill" style="color:#FF2244">🔱 ${isk.name}</span>`);
               }
               subjSkillFired=true;
               break outer;
