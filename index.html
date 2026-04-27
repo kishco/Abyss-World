@@ -4907,11 +4907,12 @@ window.townSec=function(id){
 function getSellPrice(it){
   // ★ 인챈트 스크롤은 등급 무관 100골드
   if(it.isEnchantScroll||it.isProtectScroll||it.isExtractScroll||it.isScroll)return 100;
-  const BASE={normal:20,uncommon:70,rare:200,epic:550,legendary:1400,set:2500};
-  const base=BASE[it.grade]||20;
+  // ★ v3.0 핫픽스 — 판매가 대폭 상향 (현재 골드 시세 반영)
+  const BASE={normal:200,uncommon:800,rare:2500,epic:8000,legendary:25000,set:60000};
+  const base=BASE[it.grade]||200;
   const lv=it.reqLv||1;
-  const lvMult=1+(lv-1)*0.05;
-  const enhBonus=1+((it.enhance||0)*0.15);
+  const lvMult=1+(lv-1)*0.07;        // 5% → 7%/레벨
+  const enhBonus=1+((it.enhance||0)*0.20); // 15% → 20%/강화
   return Math.round(base*lvMult*enhBonus);
 }
 
