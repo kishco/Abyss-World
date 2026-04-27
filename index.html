@@ -3491,7 +3491,7 @@ window.unequip=async function(sl){
   // ★ v3.x — 화면 즉시 갱신 후 저장
   toast(it.name+' 해제');
   renderChar();renderEq();renderSetPanel();
-  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  renderInv(); // ★ 인벤 탭 활성 여부 무관 — 항상 갱신 (탭 전환 시 stale 방지)
   try{
     await saveChar();await saveInv();
   }catch(e){
@@ -3523,16 +3523,15 @@ async function equipItem(it){
   // ★ v3.0 핫픽스 — 착용해도 잠금 유지 (잠금 = 판매/경매 차단 의미, 장착과 무관)
   toast(it.name+(it._locked?' 장착! (🔒 잠금 유지)':' 장착!'));
   char.equipment[sl]=it;delete inv[it.id];
-  // ★ v3.x 핫픽스 — 화면 즉시 갱신 (저장 실패해도 UI 업데이트 보장)
+  // ★ v3.x — 화면 즉시 갱신 (저장 실패해도 UI 보장)
   closeIM();
   renderChar();renderEq();renderSetPanel();
-  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  renderInv(); // ★ 항상 갱신 — 탭 전환 시 stale 방지
   // 저장은 비동기로 분리 (렌더 블로킹 방지)
   try{
     await saveChar();await saveInv();
   }catch(e){
     console.error('[equipItem save FAILED]',e);
-    // 저장 실패해도 사용자에게는 토스트만 (이미 표시된 장착 토스트 위에 표시됨)
   }
 }
 
@@ -5114,7 +5113,7 @@ window.equipItemSlot=async(itemId,slot)=>{
   toast(`${it.name} → 장신구${slot.slice(-1)} 장착!${it._locked?' (🔒 잠금 유지)':''}`);
   closeIM();
   renderChar();renderEq();renderSetPanel();
-  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  renderInv(); // ★ 항상 갱신
   try{
     await saveChar();await saveInv();
   }catch(e){
@@ -5335,7 +5334,7 @@ window.sellItem=async id=>{
   toast(`💰 ${it.name} 판매! +${price}G`);
   updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
-  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  renderInv();
   try{await saveChar();await saveInv();}catch(e){console.error('[sellItem save FAILED]',e);}
 };
 
@@ -5351,7 +5350,7 @@ window.sellAllGear=async()=>{
   toast(`💰 장비 ${toSell.length}개 전체 판매! +${total.toLocaleString()}G`);
   updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
-  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  renderInv();
   try{await saveChar();await saveInv();}catch(e){console.error('[sellAllGear save FAILED]',e);}
 };
 window.sellByGrade=async grade=>{
@@ -5366,7 +5365,7 @@ window.sellByGrade=async grade=>{
   toast(`💰 ${toSell.length}개 일괄판매! +${total.toLocaleString()}G`);
   updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
-  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  renderInv();
   try{await saveChar();await saveInv();}catch(e){console.error('[sellByGrade save FAILED]',e);}
 };
 
@@ -5381,7 +5380,7 @@ window.sellAllEnchants=async function(){
   toast(`💰 인챈트 스크롤 ${toSell.length}개 판매! +${total.toLocaleString()}G`);
   updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
-  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  renderInv();
   try{await saveChar();await saveInv();}catch(e){console.error('[sellAllEnchants save FAILED]',e);}
 };
 // ★ 인챈트 스크롤 등급별 판매
@@ -5406,7 +5405,7 @@ window.toggleItemLock=async function(itemId){
   toast(it._locked?`🔒 ${it.name} 잠금`:`🔓 ${it.name} 잠금 해제`);
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
   // 인벤 탭도 열려있으면 갱신
-  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  renderInv();
 };
 
 // 장비 잠금 토글 (인벤/경매 화면용)
@@ -5415,7 +5414,7 @@ window.toggleEquipLock=async function(itemId){
   it._locked=!it._locked;
   await saveInv();
   toast(it._locked?`🔒 ${it.name} 잠금`:`🔓 ${it.name} 잠금 해제`);
-  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  renderInv();
   closeIM();
 };
 
@@ -6062,7 +6061,7 @@ window.doForge=async sl=>{
       toast('⚠️ 강화 결과 저장 검증 실패',5000);
     }
     updateTop();renderChar();
-    if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+    renderInv();
     toast(`🔨 강화 성공! +${it.enhance}`,'3000');
     blogAdd&&blogAdd(`<span class="l-exp">🔨 ${it.name} +${it.enhance} 강화 성공!</span>`);
     trackBounty('enhance',1);if(char)char._anyForge=true;
@@ -6150,7 +6149,7 @@ window.doForgeInv=async function(itemId){
       toast('⚠️ 강화 결과 저장 검증 실패',5000);
     }
     updateTop();renderChar();
-    if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+    renderInv();
     toast(`🔨 강화 성공! +${it.enhance}`,3000);
     blogAdd&&blogAdd(`<span class="l-exp">🔨 ${it.name} +${it.enhance} 강화 성공!</span>`);
     trackBounty('enhance',1);if(char)char._anyForge=true;
@@ -6162,7 +6161,7 @@ window.doForgeInv=async function(itemId){
     if((char._forgeWard||0)>0){
       char._forgeWard--;
       await saveChar();await saveInv();updateTop();renderChar();
-      if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+      renderInv();
       toast(`🛡 파괴방지 발동! ${it.name} 보호됨! (+${enh} 유지) [남은 보호: ${char._forgeWard}회]`,4000);
       blogAdd&&blogAdd(`<span class="l-heal">🛡 파괴방지가 ${it.name}을(를) 지켰습니다! (+${enh} 유지, 남은 보호: ${char._forgeWard}회)</span>`);
       const sb2=document.getElementById('secbody');if(sb2)renderForge(sb2);
@@ -6172,14 +6171,14 @@ window.doForgeInv=async function(itemId){
     if(protectScroll){
       delete inv[protectScroll.id];
       await saveChar();await saveInv();updateTop();renderChar();
-      if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+      renderInv();
       toast(`🛡 파괴 방지 스크롤 발동! ${it.name} 보호됨! (+${enh} 유지)`,4000);
       const sb2=document.getElementById('secbody');if(sb2)renderForge(sb2);
       return;
     }
     delete inv[itemId];
     await saveChar();await saveInv();updateTop();renderChar();
-    if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+    renderInv();
     toast(`💥 강화 실패 — ${it.name} 파괴됨!`,4000);
     blogAdd&&blogAdd(`<span class="l-dead">💥 ${it.name} 강화 실패로 파괴!</span>`);
     const sb=document.getElementById('secbody');if(sb)renderForge(sb);
@@ -6513,7 +6512,7 @@ async function renderAuction(sb){
     trackBounty('auction_reg',1);
     if(it.grade==='legendary'||it.grade==='set')trackBounty('auction_reg_lg',1);
     renderAuctionTab('mine');
-    if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+    renderInv();
     try{
       await set(ref(db,`auction/${lid}`),listing);
       invalidateCache('auction');
@@ -6529,7 +6528,7 @@ async function renderAuction(sb){
     // ★ v3.x — 즉시 갱신 후 저장 분리
     toast(`✅ ${v.item.name} 등록 취소 · 인벤 반환`);
     renderAuctionTab('mine');
-    if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+    renderInv();
     try{
       await saveInv();
       await set(ref(db,`auction/${lid}/status`),'cancelled');
@@ -6572,7 +6571,7 @@ async function renderAuction(sb){
     toast(`✅ ${v.item.name} 구매 완료! -${v.price.toLocaleString()}G`,3000);
     updateTop();
     renderAuctionTab('browse');
-    if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+    renderInv();
     trackBounty('auction_buy',1);
     try{
       await saveInv();
@@ -10144,6 +10143,9 @@ document.querySelectorAll('.nbtn').forEach(b=>{
     }
     if(tab==='admin'){loadAdmin();document.querySelector('.main')?.classList.add('admin-open');}
     else document.querySelector('.main')?.classList.remove('admin-open');
+    // ★ v3.x — 탭 전환 시 강제 갱신 (저장 race / 캐시 stale 방지)
+    if(tab==='inventory')renderInv();
+    if(tab==='character'){renderChar();renderEq();renderSetPanel();renderPresets&&renderPresets();}
     if(tab==='ranking')loadRanking();
     if(tab==='settings')renderSettings();
     if(tab==='dungeon'){
@@ -10188,6 +10190,9 @@ window.navTo=function(tab){
   }
   if(tab==='ranking')loadRanking();
   if(tab==='settings')renderSettings();
+  // ★ v3.x — 탭 전환 시 강제 갱신
+  if(tab==='inventory')renderInv();
+  if(tab==='character'){renderChar();renderEq();renderSetPanel();renderPresets&&renderPresets();}
   if(tab==='subjugation'){renderSubjugation();}
   if(tab==='champ'){renderChamp();}
   if(tab==='immortaltower'){
