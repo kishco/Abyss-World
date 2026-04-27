@@ -8570,21 +8570,7 @@ function trySkillProc(p,s,target,allM){
       if(skType==='magic')SFX.play('skill_magic');
       else if(skType==='special')SFX.play('skill_special');
       else SFX.play('skill_physical');
-      // ★ v3.x — s.atk이 비정상으로 작으면 char에서 직접 재계산 (caching 버그 보호)
-      let atkForFx=s.atk;
-      if(atkForFx<200){
-        const _freshStats=calcStats(p.charData||char);
-        if(_freshStats.atk>atkForFx*2){
-          console.warn('[skill atk fix]',{cached:s.atk,fresh:_freshStats.atk});
-          atkForFx=_freshStats.atk;
-          s={...s,atk:_freshStats.atk}; // s 복사본으로 fx 호출
-        }
-      }
-      const fx=sk.fx(atkForFx,s); // ★ s(전체 스탯) 전달 — STR/INT/DEX 활용
-      // ★ DEBUG: 데미지 이상 시 로그 (atk가 너무 작거나 dmg가 비정상이면 콘솔 출력)
-      if(fx?.dmg!=null&&fx.dmg<atkForFx*0.1){
-        console.warn('[skill dmg suspicious]',{skillId:sk.id,sAtk:atkForFx,sStr:s.str,fxDmg:fx.dmg,hits:fx.hits});
-      }
+      const fx=sk.fx(s.atk,s); // ★ s(전체 스탯) 전달 — STR/INT/DEX 활용
       if(fx.dmg)fx.dmg=Math.min(Math.round(fx.dmg),99999);
       // ★ v3.x — 비전 학자 4pc: 모든 스킬 피해 +25%
       if(fx.dmg>0&&(s._skillDmgBonus||0)>0){
