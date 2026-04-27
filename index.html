@@ -268,7 +268,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .mode-card{background:var(--sf2);border:2px solid var(--bd2);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:.2s;}
 .mode-card:hover{transform:translateY(-3px);}
 .mode-card.solo:hover,.mode-card.solo.sel{border-color:var(--blue);}
-.mode-card.party:hover,.mode-card.party.sel{border-color:var(--gold);}
 .mode-icon{font-size:32px;margin-bottom:8px;}
 .mode-name{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--tx);margin-bottom:4px;}
 .mode-desc{font-size:11px;color:var(--tx3);line-height:1.5;}
@@ -374,7 +373,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div id="loginScr">
   <div class="lwrap">
     <div class="llogo">⚔ ABYSS WORLD</div>
-    <div class="lsub">DARK FANTASY RPG v2.7</div>
+    <div class="lsub">DARK FANTASY RPG v2.8</div>
     <div style="text-align:center;margin-bottom:18px;margin-top:2px">
       <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener"
         style="display:inline-flex;align-items:center;gap:6px;background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.4);color:#7289da;padding:5px 14px;border-radius:20px;font-size:11px;text-decoration:none;font-family:'IBM Plex Mono',monospace;transition:.2s"
@@ -670,6 +669,20 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="pane" id="pane-town">
       <div class="ptitle">마을</div>
       <div class="tgrid" id="townmenu">
+        <!-- ★ v3.0 — 거점 카드 (최우선 표시) -->
+        <div class="tcard" onclick="openStronghold()"
+          style="border-color:rgba(240,192,64,.5);background:linear-gradient(135deg,rgba(240,192,64,.1),rgba(176,96,255,.05))">
+          <div class="tcicon">🏯</div>
+          <div class="tcname" style="color:var(--gold)">거점</div>
+          <div class="tcdesc">나만의 공간 · 가구 배치</div>
+        </div>
+        <!-- ★ v3.0 — 위령제 이벤트 카드 (이벤트 기간만 표시) -->
+        <div class="tcard" id="memorialCard" onclick="openMemorial()" style="display:none;
+          border-color:rgba(80,120,255,.5);background:linear-gradient(135deg,rgba(80,120,255,.1),rgba(140,80,200,.05))">
+          <div class="tcicon">🏮</div>
+          <div class="tcname" style="color:#80a0ff">위령제</div>
+          <div class="tcdesc" id="memorialCardDesc">출석 보상 · 보스 토벌</div>
+        </div>
         <div class="tcard" onclick="townSec('shop')"><div class="tcicon">⚔️</div><div class="tcname">무기/방어구 상점</div><div class="tcdesc">기본 장비 구매</div></div>
         <div class="tcard" onclick="townSec('sell')"><div class="tcicon">💰</div><div class="tcname">아이템 판매</div><div class="tcdesc">장비 판매·일괄판매</div></div>
         <div class="tcard" onclick="townSec('bounty')" id="bountyCard"><div class="tcicon">📋</div><div class="tcname">현상금 게시판</div><div class="tcdesc" id="bountyDesc">일일·주간 미션</div></div>
@@ -677,7 +690,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="tcard" onclick="townSec('forge')"><div class="tcicon">🔨</div><div class="tcname">대장간</div><div class="tcdesc">장비 강화 (+1~+9)</div></div>
         <div class="tcard" onclick="townSec('reroll')"><div class="tcicon">🔮</div><div class="tcname">능력치 재조정</div><div class="tcdesc">재조정 주문서 사용</div></div>
         <div class="tcard" onclick="townSec('auction')"><div class="tcicon">🏛️</div><div class="tcname">경매장</div><div class="tcdesc">유저 간 장비 거래</div></div>
-        <div class="tcard" onclick="townSec('warehouse')"><div class="tcicon">🏦</div><div class="tcname">창고</div><div class="tcdesc">최대 200개 보관</div></div>
+        <div class="tcard" onclick="townSec('warehouse')"><div class="tcicon">🏦</div><div class="tcname">창고</div><div class="tcdesc">아이템·골드 보관</div></div>
+        <div class="tcard" onclick="townSec('furnitureshop')"><div class="tcicon">🪑</div><div class="tcname">가구 상점</div><div class="tcdesc">기본 가구 구매</div></div>
         <!-- ★ 추천 이벤트 카드 -->
         <div class="tcard" id="townReferralCard"
           style="border-color:rgba(176,96,255,.5);background:linear-gradient(135deg,rgba(176,96,255,.1),rgba(74,143,255,.07))"
@@ -688,6 +702,23 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         </div>
       </div>
       <div id="townsec" style="display:none"></div>
+    </div>
+
+    <!-- ★ v3.0 — STRONGHOLD (거점) -->
+    <div class="pane" id="pane-stronghold">
+      <div class="ptitle" style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:'Cinzel',serif;color:var(--gold)">🏯 거점</span>
+        <span id="strongholdAmbiance" style="font-size:11px;color:var(--tx3);font-style:italic;margin-left:auto"></span>
+      </div>
+      <div id="strongholdMain"></div>
+    </div>
+
+    <!-- ★ v3.0 — MEMORIAL (위령제) -->
+    <div class="pane" id="pane-memorial">
+      <div class="ptitle" style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:'Cinzel',serif;color:#80a0ff">🏮 잃어버린 영혼들의 축제</span>
+      </div>
+      <div id="memorialMain"></div>
     </div>
 
     <!-- DUNGEON -->
@@ -774,7 +805,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <!-- ★ 자동판매 설정 -->
         <div class="card2" style="border-color:rgba(240,192,64,.25)">
           <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:4px">💰 자동판매 필터</div>
-          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.6">설정한 등급 <b style="color:var(--tx)">미만</b>의 장비/스크롤은 던전 드랍 시 자동으로 판매됩니다.<br>※ 유일·불멸·잠금·프리셋 아이템은 자동판매 대상에서 제외</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.6">설정한 등급 <b style="color:var(--tx)">미만</b>의 장비/스크롤은 던전 드랍 시 자동으로 판매됩니다.<br>※ 유일·불멸·잠금·프리셋·가구·도면·재료 아이템은 자동판매 대상에서 제외</div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
             <span style="font-size:11px;color:var(--tx2)">장비 자동판매</span>
             <select id="autoSellGrade" onchange="settingAutoSell()" style="flex:1;padding:6px 8px;background:var(--bg);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:11px;outline:none">
@@ -1826,6 +1857,199 @@ const SETS={
   ]},
 };
 
+// ═══════════════════════════════════════════════════
+// ★ v3.0 — 거점(STRONGHOLD) 시스템
+// ═══════════════════════════════════════════════════
+// 거점 그리드 단계 — gridSize, 확장 비용, 활성 패시브 슬롯 수
+const STRONGHOLD_TIERS=[
+  {tier:1, gridSize:6,  cost:0,            passiveSlots:2, name:'폐허'},
+  {tier:2, gridSize:8,  cost:500000000,    passiveSlots:3, name:'정돈된 방'},
+  {tier:3, gridSize:10, cost:2000000000,   passiveSlots:4, name:'영주의 홀'},
+  {tier:4, gridSize:12, cost:8000000000,   passiveSlots:4, name:'심연의 성'},
+];
+
+// 단계별 분위기 텍스트 (거점 진입 시 표시)
+const STRONGHOLD_AMBIANCE=[
+  '낡은 돌벽 사이로 차가운 바람이 스며든다.',
+  '벽돌이 단단히 다져졌고, 작은 가구들이 자리를 잡았다.',
+  '이제 이곳은 작은 영주의 홀이라 부를 만하다.',
+  '심연의 한가운데, 그대만의 성이 우뚝 섰다.',
+];
+
+// ★ 가구 패시브 효과 정의
+// trigger: 'passive'(상시), 'on_battle_start', 'on_first_hit', 'on_death', 'on_forge', 'on_boss_kill'
+// stats: 합산형 보너스 (atkPct, defPct, hp, spd 등)
+// proc: 트리거형 효과 (확률 / 효과)
+const FURNITURE_PASSIVES={
+  forge_will:      {n:'강화 의지',     trigger:'on_forge',       proc:{type:'refund',rate:0.05}, desc:'강화 시도 시 5% 확률로 비용 환급'},
+  scholar_wisdom:  {n:'현자의 지혜',   trigger:'passive',        stats:{expBonus:8},             desc:'EXP 획득 +8%'},
+  gold_touch:      {n:'황금의 손길',   trigger:'passive',        stats:{goldBonus:10},           desc:'던전 골드 획득 +10%'},
+  first_dodge:     {n:'그림자 회피',   trigger:'on_first_hit',   proc:{type:'dodge_once'},       desc:'전투 첫 피격 시 1회 회피'},
+  revive_chance:   {n:'시간의 잔영',   trigger:'on_death',       proc:{type:'revive',rate:0.05}, desc:'사망 시 5% 확률로 HP 1로 부활'},
+  ambition_throne: {n:'야망',          trigger:'passive',        stats:{atkPct:20,defPct:-10},   desc:'ATK +20% / DEF -10%'},
+  guardian_armor:  {n:'수호자의 결의', trigger:'passive',        stats:{defPct:25,spdPct:-15},   desc:'DEF +25% / SPD -15%'},
+  soul_harvest:    {n:'영혼 수확',     trigger:'on_boss_kill',   proc:{type:'scroll_drop',rate:0.10}, desc:'보스 처치 시 10% 확률 인챈트 스크롤 추가 드랍'},
+  war_banner:      {n:'전쟁의 깃발',   trigger:'on_battle_start',proc:{type:'spd_buff',value:50,turns:3},desc:'전투 시작 첫 3턴 SPD +50%'},
+  blessing_altar:  {n:'축복의 제단',   trigger:'on_battle_start',proc:{type:'invuln',turns:1},   desc:'전투 시작 1턴 무적'},
+};
+
+// ★ 가구 마스터 테이블 (1차 출시 29종)
+// cat: deco / inv_slot / wh_slot / passive / crafter / trophy
+// size: [w,h] 그리드 점유 면적
+// emoji: 텍스트 RPG 시각 표현 (이모지)
+// grade: 등급 (색상 시스템 호환)
+// from: 획득 경로 ['shop','drop','craft','event','synth']
+// tradeable: 거래 가능 여부
+// passive: 패시브 효과 키 (FURNITURE_PASSIVES)
+// slots: 슬롯 확장 가구의 추가량
+// targetType: 슬롯 가구 — 'inv' or 'wh'
+// stack: 동일 가구 누적 배치 한도 (default 1)
+const FURNITURE={
+  // ── 시각 장식 (12종) ──
+  basic_chair:    {n:'낡은 의자',     emoji:'🪑',cat:'deco',size:[1,1],grade:'normal',  from:['shop','drop'],tradeable:true,cost:50000},
+  ornate_chair:   {n:'장식 의자',     emoji:'🪑',cat:'deco',size:[1,1],grade:'rare',    from:['drop','synth'],tradeable:true,baseSell:300000},
+  basic_table:    {n:'낡은 탁자',     emoji:'🪟',cat:'deco',size:[2,1],grade:'normal',  from:['shop','drop'],tradeable:true,cost:80000},
+  ornate_table:   {n:'장식 탁자',     emoji:'🍽️',cat:'deco',size:[2,1],grade:'rare',    from:['drop','synth'],tradeable:true,baseSell:400000},
+  carpet_red:     {n:'붉은 카펫',     emoji:'🟥',cat:'deco',size:[2,2],grade:'uncommon',from:['shop','drop'],tradeable:true,cost:200000},
+  torch_stand:    {n:'횃불 받침',     emoji:'🕯️',cat:'deco',size:[1,1],grade:'normal',  from:['shop','drop'],tradeable:true,cost:30000},
+  bookshelf:      {n:'책장',          emoji:'📚',cat:'deco',size:[1,2],grade:'uncommon',from:['shop','drop'],tradeable:true,cost:150000},
+  painting:       {n:'어둠의 초상화', emoji:'🖼️',cat:'deco',size:[2,1],grade:'rare',    from:['drop','synth'],tradeable:true,baseSell:350000},
+  banner_dark:    {n:'어둠의 휘장',   emoji:'🏴',cat:'deco',size:[1,2],grade:'uncommon',from:['drop'],       tradeable:true,baseSell:250000},
+  candelabra:     {n:'촛대',          emoji:'🕯️',cat:'deco',size:[1,1],grade:'uncommon',from:['shop','drop'],tradeable:true,cost:100000},
+  plant_dark:     {n:'심연의 식물',   emoji:'🪴',cat:'deco',size:[1,1],grade:'uncommon',from:['drop'],       tradeable:true,baseSell:180000},
+  rug_skull:      {n:'해골 양탄자',   emoji:'💀',cat:'deco',size:[2,2],grade:'rare',    from:['drop','synth'],tradeable:true,baseSell:500000},
+
+  // ── 인벤 슬롯 확장 (4종, 거래 불가) ──
+  storage_small:  {n:'작은 보관함',   emoji:'📦',cat:'inv_slot',size:[1,2],grade:'normal',   from:['shop'],     tradeable:false,cost:5000000,    targetType:'inv',slots:20, stack:5},
+  storage_med:    {n:'큰 보관함',     emoji:'📦',cat:'inv_slot',size:[2,2],grade:'rare',     from:['shop','craft'],tradeable:false,cost:30000000,  targetType:'inv',slots:50, stack:5},
+  storage_large:  {n:'차원 보관함',   emoji:'🗳️',cat:'inv_slot',size:[2,2],grade:'epic',     from:['craft'],    tradeable:false,cost:200000000, targetType:'inv',slots:100,stack:3},
+  storage_abyss:  {n:'심연의 금고',   emoji:'🗄️',cat:'inv_slot',size:[2,3],grade:'legendary',from:['craft'],    tradeable:false,cost:1500000000,targetType:'inv',slots:250,stack:1},
+
+  // ── 창고 슬롯 확장 (3종, 거래 불가) ──
+  vault_small:    {n:'작은 창고',     emoji:'🏦',cat:'wh_slot',size:[2,2],grade:'normal',    from:['shop'],     tradeable:false,cost:8000000,   targetType:'wh',slots:50, stack:5},
+  vault_huge:     {n:'거대 창고',     emoji:'🏛️',cat:'wh_slot',size:[2,3],grade:'epic',      from:['craft'],    tradeable:false,cost:300000000, targetType:'wh',slots:150,stack:5},
+  vault_infinite: {n:'무한 보관소',   emoji:'🌌',cat:'wh_slot',size:[3,3],grade:'legendary', from:['craft'],    tradeable:false,cost:2500000000,targetType:'wh',slots:400,stack:2},
+
+  // ── 패시브 가구 (legendary 5종, 거래 불가) ──
+  forge_brazier:  {n:'단조의 화로',   emoji:'🔥',cat:'passive',size:[1,1],grade:'legendary',from:['boss_drop','craft'],tradeable:false,passive:'forge_will'},
+  library:        {n:'지혜의 도서관', emoji:'📖',cat:'passive',size:[2,2],grade:'legendary',from:['event','craft'],     tradeable:false,passive:'scholar_wisdom'},
+  treasure_pile:  {n:'황금의 손길',   emoji:'💰',cat:'passive',size:[1,1],grade:'legendary',from:['drop','craft'],     tradeable:false,passive:'gold_touch'},
+  shadow_mirror:  {n:'그림자 거울',   emoji:'🪞',cat:'passive',size:[1,1],grade:'legendary',from:['immortal_tower'],   tradeable:false,passive:'first_dodge'},
+  hourglass:      {n:'시간의 모래시계',emoji:'⌛',cat:'passive',size:[1,1],grade:'legendary',from:['drop','craft'],     tradeable:false,passive:'revive_chance'},
+
+  // ── 패시브 가구 (set 3종, 거래 불가) ──
+  ambition_throne:{n:'야망의 옥좌',   emoji:'👑',cat:'passive',size:[2,2],grade:'set',      from:['craft','event'],    tradeable:false,passive:'ambition_throne'},
+  guardian_armor: {n:'수호자의 갑옷', emoji:'🛡️',cat:'passive',size:[1,2],grade:'set',      from:['craft','event'],    tradeable:false,passive:'guardian_armor'},
+  soul_altar:     {n:'영혼석 제단',   emoji:'🔮',cat:'passive',size:[2,2],grade:'set',      from:['craft','boss_drop'],tradeable:false,passive:'soul_harvest'},
+
+  // ── 합성대 / 제작대 (2종, 거래 불가) ──
+  forge_synth:    {n:'장비 합성대',   emoji:'⚒️',cat:'crafter',size:[2,2],grade:'epic',     from:['craft'],            tradeable:false,cost:50000000, crafterType:'gear'},
+  furniture_workshop:{n:'가구 제작대',emoji:'🪚',cat:'crafter',size:[2,2],grade:'epic',     from:['craft'],            tradeable:false,cost:50000000, crafterType:'furniture'},
+  enchant_synth:  {n:'인챈트 합성대', emoji:'📜',cat:'crafter',size:[1,2],grade:'legendary',from:['craft'],            tradeable:false,cost:100000000,crafterType:'enchant'},
+
+  // ── ★ v3.0 — 어린이날 위령제 한정 가구 (이벤트 종료 후 거래 불가 유지) ──
+  memorial_lantern:{n:'잃어버린 영혼의 등불',emoji:'🏮',cat:'passive',size:[1,1],grade:'set',from:['event'],tradeable:false,passive:'war_banner',_eventOnly:'memorial2026'},
+  memorial_throne: {n:'어린 왕의 옥좌',     emoji:'👶',cat:'passive',size:[2,2],grade:'set',from:['event'],tradeable:false,passive:'blessing_altar',_eventOnly:'memorial2026'},
+  memorial_echo:   {n:'심연의 잔영',       emoji:'👻',cat:'passive',size:[1,1],grade:'legendary',from:['event'],tradeable:false,passive:'first_dodge',_eventOnly:'memorial2026'},
+  memorial_bell:   {n:'추모의 작은 종',    emoji:'🔔',cat:'deco',size:[1,1],grade:'rare',from:['event'],tradeable:false,_eventOnly:'memorial2026'},
+  memorial_wreath: {n:'흰 꽃 화환',        emoji:'💮',cat:'deco',size:[1,1],grade:'rare',from:['event'],tradeable:false,_eventOnly:'memorial2026'},
+  memorial_stone:  {n:'추모비',            emoji:'🪦',cat:'deco',size:[1,2],grade:'epic',from:['event'],tradeable:false,_eventOnly:'memorial2026'},
+};
+
+// ★ 가구 카테고리별 한국어 라벨
+const FURN_CAT_KR={deco:'장식',inv_slot:'인벤 확장',wh_slot:'창고 확장',passive:'패시브',crafter:'제작대',trophy:'트로피'};
+
+// ═══════════════════════════════════════════════════
+// ★ v3.0 — 어린이날 위령제 이벤트 (2026)
+// ═══════════════════════════════════════════════════
+const MEMORIAL_EVENT={
+  id:'memorial2026',
+  startTs:new Date('2026-04-27T00:00:00+09:00').getTime(), // KST 시작
+  endTs:  new Date('2026-05-05T23:59:59+09:00').getTime(), // 어린이날 마감
+  bossDay:new Date('2026-05-05T00:00:00+09:00').getTime(), // 보스 등장 5/5
+  duration:9, // 9일 출석
+  // 던전 가호 (이벤트 기간 상시)
+  expBoost:0.5,    // EXP +50%
+  goldBoost:0.3,   // 골드 +30%
+  dropBoost:0.2,   // 드랍률 +20%
+  // 9일 출석 보상
+  rewards:[
+    {day:1, gold:1000000, items:[{type:'enchant_scroll',count:1}], desc:'1일차 — 1,000,000G + 인챈트 스크롤'},
+    {day:2, gold:500000,  items:[],                                desc:'2일차 — 500,000G'},
+    {day:3, gold:0,       items:[{type:'protect_scroll',count:2},{type:'extract_scroll',count:1}], desc:'3일차 — 파괴방지 스크롤 ×2 + 추출 스크롤'},
+    {day:4, gold:1000000, items:[],                                desc:'4일차 — 1,000,000G'},
+    {day:5, gold:0,       items:[{type:'reroll_scroll',count:1}],  desc:'5일차 — 재조정 주문서'},
+    {day:6, gold:1500000, items:[{type:'enchant_scroll',count:1}], desc:'6일차 — 1,500,000G + 인챈트 스크롤'},
+    {day:7, gold:5000000, items:[{type:'enchant_scroll',count:1}], desc:'7일차 — 5,000,000G + 인챈트 스크롤'},
+    {day:8, gold:2000000, items:[{type:'protect_scroll',count:1}], desc:'8일차 — 2,000,000G + 파괴방지 스크롤'},
+    {day:9, gold:0,       items:[{type:'furniture',baseId:'memorial_lantern'}], desc:'9일차 (어린이날) — 잃어버린 영혼의 등불 (Set 가구)'},
+  ],
+  // 추모의 빛 챌린지
+  challenge:{
+    targetDungeons:50,   // 던전 50회 클리어
+    reward:{type:'furniture',baseId:'memorial_echo'} // 심연의 잔영
+  }
+};
+
+function isMemorialActive(){
+  const now=Date.now();
+  return now>=MEMORIAL_EVENT.startTs&&now<=MEMORIAL_EVENT.endTs;
+}
+function isMemorialBossDay(){
+  const now=Date.now();
+  return now>=MEMORIAL_EVENT.bossDay&&now<=MEMORIAL_EVENT.endTs;
+}
+
+// 위령제 보스 — 라바돈 강화판 (5/5 한정)
+const MEMORIAL_BOSS={
+  id:'memorial_lavadon',
+  name:'잃어버린 아이들의 망령',
+  icon:'👹',
+  color:'#80a0ff',
+  _attr:'dark',
+  _eventOnly:true,
+  hp:80000000, atk:5800, def:1100, dodge:8,
+  desc:'심연에 잡혀간 어린 영혼들이 라바돈의 본체에 휘감긴 모습. 슬픔과 분노로 폭발하는 차원의 화염.',
+  skillDesc:'영혼 화염 · 잃어버린 비명 · 망령의 강림',
+  skills:[
+    {id:'soul_flame', n:'영혼 화염', prob:0.25,
+     fx:(b,s,myHp,maxHp,slog)=>{
+       const d=Math.max(1,Math.round(b.atk*1.4*(100/(100+(s.def||0)))));
+       slog(`<span class="l-skill">🔥 ${b.name}의 영혼 화염! -${d}</span>`);
+       return{dmg:d,dot:3};
+     }},
+    {id:'lost_scream', n:'잃어버린 비명', prob:0.18,
+     fx:(b,s,myHp,maxHp,slog)=>{
+       const d=Math.max(1,Math.round(b.atk*1.0*(100/(100+(s.def||0)))));
+       slog(`<span class="l-skill">😱 ${b.name}의 잃어버린 비명! -${d} (방어 무시 일부)</span>`);
+       return{dmg:d,ignoreDef:0.3};
+     }},
+    {id:'wraith_descend', n:'망령의 강림', prob:0.12,
+     fx:(b,s,myHp,maxHp,slog)=>{
+       b._atkBuff=(b._atkBuff||0)+0.40;
+       slog(`<span class="l-warn">👻 ${b.name}의 망령 강림! ATK ${Math.round(b._atkBuff*100)}% 상승</span>`);
+       return{dmg:0};
+     }},
+    {id:'child_curse', n:'아이의 저주', prob:0.10,
+     fx:(b,s,myHp,maxHp,slog)=>{
+       const d=Math.max(1,Math.round(b.atk*0.6*(100/(100+(s.def||0)))));
+       slog(`<span class="l-skill">💀 ${b.name}의 아이의 저주! -${d} (지속 피해)</span>`);
+       return{dmg:d,dot:5};
+     }},
+  ]
+};
+
+// 거점 단계 도달 가능 여부 체크
+function getStrongholdTier(){
+  return char?.house?.tier||1;
+}
+function getStrongholdGridSize(){
+  return STRONGHOLD_TIERS[getStrongholdTier()-1]?.gridSize||6;
+}
+function getStrongholdPassiveSlots(){
+  return STRONGHOLD_TIERS[getStrongholdTier()-1]?.passiveSlots||2;
+}
+
 // Dungeons
 const DTIERS=[
   {tier:1,n:'버려진 동굴',icon:'⛏',minLv:1,floors:5,recLv:5,areas:['cave'],_attr:'poison',
@@ -2232,6 +2456,17 @@ function calcStats(c){
   const sb=calcSetB(eq);
   atk+=sb.atk||0;def+=sb.def||0;spd+=sb.spd||0;hp+=sb.hp||0;crit+=sb.crit||0;critDmg+=sb.critDmg||0;
   dodge+=sb.dodge||0; // ★ 세트 보너스 회피 적용
+  // ★ v3.0 — 거점 활성 패시브 가구 스탯 합산 (도감 % 보너스 직전, 세트와 동일 단계)
+  if(c===char&&typeof getActivePassiveStats==='function'){
+    const ps=getActivePassiveStats();
+    atk+=ps.atk||0; def+=ps.def||0; hp+=ps.hp||0; spd+=ps.spd||0;
+    crit+=ps.crit||0; critDmg+=ps.critDmg||0;
+    goldBonus+=ps.goldBonus||0; skillBonus+=ps.skillBonus||0;
+    // 퍼센트 보너스 (atkPct, defPct, spdPct)는 가구 패시브 고유 — 도감 mult 직전 적용
+    if(ps.atkPct)atk*=(1+ps.atkPct/100);
+    if(ps.defPct)def*=(1+ps.defPct/100);
+    if(ps.spdPct)spd*=(1+ps.spdPct/100);
+  }
   // ★ 도감 보너스: 10% 달성마다 ATK/DEF +1%
   const _cb=getCodexBonus();
   atk*=_cb.atkMult;def*=_cb.defMult;
@@ -2325,6 +2560,34 @@ function reclaimPending(c){
   return changes;
 }
 
+// ★ v3.0 — 통합 결제 게이트웨이
+// 인벤(소지금) → 은행 순서로 자동 차감. 부족 시 false 반환.
+// 모든 결제 함수가 char.gold 직접 차감 대신 이 헬퍼를 통과해야 함.
+// "직접 출금" 1억G 잠금은 유지 — 이 헬퍼는 결제 시에만 우회.
+async function payGold(amount){
+  amount=Math.floor(amount||0);
+  if(amount<=0)return true;
+  const total=(char.gold||0)+(char._bankGold||0);
+  if(total<amount)return false;
+  let rem=amount;
+  const fromGold=Math.min(char.gold||0,rem);
+  char.gold=(char.gold||0)-fromGold;
+  rem-=fromGold;
+  if(rem>0)char._bankGold=(char._bankGold||0)-rem;
+  await saveChar();
+  return true;
+}
+// ★ 결제 가능 여부 사전 체크 (실제 차감 없이)
+function canPay(amount){
+  return ((char?.gold||0)+(char?._bankGold||0))>=Math.floor(amount||0);
+}
+// ★ 결제 출처 미리보기 (1억G 이상 결제 시 UI 표시용)
+function payPreview(amount){
+  const inv=Math.min(char?.gold||0,amount);
+  const bank=amount-inv;
+  return {inv,bank};
+}
+
 async function saveChar(){
   if(!db||!charId)return;
   // ★ 저장 전 수치 검증
@@ -2371,8 +2634,18 @@ async function saveInv(){
 async function addItem(item){
   const maxSlots=char?.invSlots||100;
   const isMiscScroll=item.isScroll||item.isProtectScroll||item.isExtractScroll;
-  const cnt=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length;
-  if(!isMiscScroll&&cnt>=maxSlots){
+  const isFurniture=item.isFurniture;
+  // ★ v3.0 — 가구는 별도 슬롯, 일반 인벤 카운트에서 제외
+  const cnt=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length;
+  if(!isMiscScroll&&!isFurniture&&cnt>=maxSlots){
+    // ★ 위령제 한정 가구 등 _eventOnly 또는 set 등급은 임시보관함으로 자동 이동 (영구 손실 방지)
+    if(item._eventOnly||item.grade==='set'||item.grade==='legendary'){
+      char._tempStorage=char._tempStorage||{};
+      char._tempStorage[item.id]={...item,_expireAt:Date.now()+7*86400000};
+      await saveChar();
+      toast(`⚠️ 인벤 가득 — ${item.name} 임시보관함으로 이동 (7일 유예)`,5000);
+      return true;
+    }
     toast(`⚠️ 인벤토리가 가득 찼습니다! (최대 ${maxSlots}개) 창고에 맡기거나 아이템을 정리해 주세요.`,4000);
     return false;
   }
@@ -2460,6 +2733,54 @@ async function selChar(id){
   }
   if(!char.str){char.str=5;char.dex=5;char.int=3;char.vit=5;char.luk=2;}
   if(char.extraPotions===undefined)char.extraPotions=0;
+  // ★ v3.0 — 인벤/창고 슬롯 변수 보장 (마이그레이션 안전망)
+  if(char.invSlots===undefined||char.invSlots===null)char.invSlots=100;
+  if(char.whSlots===undefined||char.whSlots===null)char.whSlots=200;
+  // ★ v3.0 — 거점(house) 데이터 스키마 마이그레이션
+  if(!char.house||typeof char.house!=='object'){
+    char.house={
+      tier:1,                  // 거점 단계 (1~4)
+      placedItems:[],          // [{itemId, x, y, w, h}]
+      activePassives:[],       // 활성 패시브 가구 itemId 배열 (최대 4개)
+      _v:1
+    };
+  }
+  // ★ v3.0 — 재료 인벤 (가구 재료 별도 보관)
+  if(!char._materials||typeof char._materials!=='object'){
+    char._materials={wood:0,steel:0,magicCrystal:0,abyssShard:0,blueprint:0};
+  }
+  // ★ v3.0 — 임시보관함 스키마 (가구 해제 시 7일 유예)
+  if(!char._tempStorage||typeof char._tempStorage!=='object'){
+    char._tempStorage={};
+  }
+  // ★ v3.0 — 위령제 이벤트 진행 상태
+  if(!char._memorialEvent||typeof char._memorialEvent!=='object'){
+    char._memorialEvent={
+      checkinDays:[],     // 출석한 일자 인덱스 (0~8)
+      lastCheckinDate:'', // 'YYYY-MM-DD' 마지막 출석 날짜
+      claimedRewards:[],  // 수령한 일차
+      bossKilled:false,   // 위령제 보스 처치 여부
+      throneClaimed:false,// 어린 왕의 옥좌 수령 여부
+      dungeonCount:0,     // 추모의 빛 챌린지 카운트
+      challengeClaimed:false,
+    };
+  }
+  // ★ v3.0 — 신규 환영 패키지 (진짜 신규 캐릭터만 1회 지급)
+  // 조건: 레벨 1 + EXP 0 + 골드 1000G 이하(초기 시작 골드) + 강화/인챈트 미경험
+  if(!char._newbieWelcomeClaimed){
+    const isReallyNew=(char.level||1)<=1
+                   &&(char.exp||0)===0
+                   &&(char.gold||0)<=10000
+                   &&!char._anyForge && !char._anyEnchant;
+    if(isReallyNew){
+      char._newbieWelcomeClaimed=true;
+      setTimeout(()=>grantNewbieWelcome().catch(e=>console.error('newbie welcome error',e)),1500);
+    }else{
+      // 기존 유저 — 신규 패키지 영구 차단 (재진입 방지)
+      char._newbieWelcomeClaimed=true;
+      char._newbieWelcomeGranted=true;
+    }
+  }
   const is=await get(ref(db,`inv/${id}`));inv=is.val()||{};
   const ws=await get(ref(db,`warehouse/${id}`));warehouse=ws.val()||{};
   // ★ 인벤 마이그레이션
@@ -2472,6 +2793,9 @@ async function selChar(id){
       else invStatsDirty=true;
     }
     if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))invMigrated=true;else{it._smv=1;invStatsDirty=true;}}
+    // ★ v2.8 — 유일 무기 balance + set 거래 마이그레이션 (인벤 초기 로드)
+    if(it&&autoMigrateSetWeaponBalance(it))invMigrated=true;
+    if(it&&autoMigrateSetTradeable(it))invMigrated=true;
     if(it&&migrateItemLv(it,false))invMigrated=true;
     if(it&&migrateEnchantName(it))invMigrated=true;
   }
@@ -2484,6 +2808,9 @@ async function selChar(id){
       else whStatsDirty=true;
     }
     if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))whMigrated=true;else{it._smv=1;whStatsDirty=true;}}
+    // ★ v2.8 — 유일 무기 balance + set 거래 마이그레이션 (창고)
+    if(it&&autoMigrateSetWeaponBalance(it))whMigrated=true;
+    if(it&&autoMigrateSetTradeable(it))whMigrated=true;
     if(it&&migrateEnchantName(it))whMigrated=true;
   }
   // ★ 스탯 변화 OR 플래그만 변화 모두 저장 (플래그 미저장 시 매 로그인 재체크 방지)
@@ -2520,8 +2847,10 @@ async function selChar(id){
         if(!it._v||it._v<2){migrateItem(it);dirty=true;}
         if(!it._esv||it._esv<ENCHANT_STAT_VER){if(autoMigrateEnchantStats(it))dirty=true;else it._esv=ENCHANT_STAT_VER;}
         if(!it._smv||it._smv<1){if(autoMigrateStaffMatk(it))dirty=true;else it._smv=1;}
-        // ★ 유일(set) 무기 balance 마이그레이션 — WBASES에 없는 baseId라 일반 마이그가 못 잡음
+        // ★ v2.8 — 유일 무기 balance 마이그레이션 (WBASES에 없는 set baseId 처리)
         if(autoMigrateSetWeaponBalance(it))dirty=true;
+        // ★ v2.8 — 유일(set) 거래 가능 마이그레이션 (드랍 set만, 합성/점검선물 제외)
+        if(autoMigrateSetTradeable(it))dirty=true;
         // ★ balance 마이그레이션 — 무기인데 balance 없으면 baseId 기준으로 부여
         if(it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
           const wb=WBASES.find(b=>b.id===it.baseId);
@@ -2548,8 +2877,10 @@ async function selChar(id){
       if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
       if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){if(autoMigrateEnchantStats(it))needSave=true;else it._esv=ENCHANT_STAT_VER;}
       if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))needSave=true;else it._smv=1;}
-      // ★ 유일(set) 무기 balance 마이그레이션 (인벤)
+      // ★ v2.8 — 유일 무기 balance 마이그레이션 (인벤)
       if(it&&autoMigrateSetWeaponBalance(it))needSave=true;
+      // ★ v2.8 — 유일(set) 거래 가능 마이그레이션 (인벤)
+      if(it&&autoMigrateSetTradeable(it))needSave=true;
       // ★ 인벤 무기 balance 마이그레이션
       if(it&&it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
         const wb=WBASES.find(b=>b.id===it.baseId);
@@ -3690,8 +4021,9 @@ function autoMigrateStaffMatk(it){
   return true;
 }
 
-// ★ 유일(set) 무기 밸런스 마이그레이션 — 기존에 드랍된 유일 무기는 balance 스탯이 없어
-//   강화를 해도 밸런스가 안 붙는 버그가 있었음. SETS 정의에서 base balance를 끌어와 부여.
+// ★ v2.8 — 유일(set) 무기 밸런스 마이그레이션
+// 기존 드랍 유일 무기에 balance 스탯이 없어 강화해도 안 붙던 버그 대응.
+// SETS의 무기 조각 base balance를 끌어와 강화 단계만큼 스케일 적용.
 function autoMigrateSetWeaponBalance(it){
   if(!it||it.grade!=='set'||it.slot!=='weapon')return false;
   if(!it.stats||it.stats.balance!==undefined)return false;
@@ -3699,13 +4031,20 @@ function autoMigrateSetWeaponBalance(it){
   const sd=SETS[it.setId];if(!sd)return false;
   const pd=sd.pcs?.[it.baseId];if(!pd)return false;
   const bal=pd.stats?.balance;if(bal===undefined)return false;
-  // 이미 강화된 무기라면 강화 단계만큼 스케일 적용 (다른 스탯과 동일 공식)
   const enh=it.enhance||0;
   const enhMult=1+Math.pow(enh,1.3)*0.06;
   it.stats.balance=Math.min(99,Math.round(bal*enhMult));
-  // _baseStats가 이미 캡처돼 있다면 base 값을 기록 — 향후 강화 시 정상 스케일
   if(it._baseStats)it._baseStats.balance=bal;
   return true;
+}
+
+// ★ v2.8 — 유일(set) 거래 가능 마이그레이션
+// 던전 드랍 set이 거래불가로 마킹된 상태였던 것을 거래가능으로 전환.
+// 점검 선물(tradeable 필드 자체가 undefined) / 합성 결과(_crafted) / 경매 등록 항목은 영향 없음.
+function autoMigrateSetTradeable(it){
+  if(!it||it.grade!=='set'||it._crafted)return false;
+  if(it.tradeable===false){it.tradeable=true; return true;}
+  return false;
 }
 
 // ═══ INVENTORY ═══
@@ -3725,7 +4064,7 @@ function renderInv(){
   const items=Object.values(inv);
   // ★ 기타 주문서(파괴방지/추출/재조정)는 인벤 수량에서 제외
   const miscScrolls=items.filter(i=>i.isScroll||i.isProtectScroll||i.isExtractScroll);
-  const countableItems=items.filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll);
+  const countableItems=items.filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture);
   const maxSlots=char?.invSlots||100;
   const cnt=countableItems.length;
   document.getElementById('invcnt').textContent=`${cnt}/${maxSlots}개`;
@@ -4077,7 +4416,7 @@ function openIM(it){
       const finalGAdj=(eq.grade==='set'||eq._itUniqueName)?'':gAdj;
       eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+finalGAdj+basePart;
       await saveEqFn();await saveInv();
-      trackBounty('enchant',1);
+      trackBounty('enchant',1);if(char)char._anyEnchant=true;
 
       // 결과 스탯 행 (실제 확정값)
       const oldB=oldEnch?.b||{};
@@ -4430,7 +4769,7 @@ window.useEnchantScroll=async(scrollId,slotKey,type)=>{
   }
   delete inv[scrollId];
   await saveChar();await saveInv();closeIM();updateTop();renderChar();
-  trackBounty('enchant',1);
+  trackBounty('enchant',1);if(char)char._anyEnchant=true;
 };
 
 async function useRerollScroll(scrollId){
@@ -4998,8 +5337,10 @@ function renderShop(sb){
   }).join('')}</div>`;
 }
 window.buyShop=async i=>{
-  const si=SHOP_ITEMS[i];if(char.gold<si.price){toast('골드 부족');return;}
-  char.gold-=si.price;await addItem(genShopItem(si));await saveChar();toast(si.n+' 구매!');updateTop();
+  const si=SHOP_ITEMS[i];
+  if(!canPay(si.price)){toast('골드 부족');return;}
+  if(!await payGold(si.price)){toast('결제 실패');return;}
+  await addItem(genShopItem(si));toast(si.n+' 구매!');updateTop();
   trackBounty('shop_buy',1);
 };
 // ═══ 암시장 시스템 ═══
@@ -5133,18 +5474,21 @@ async function renderBlackMarket(sb){
 window.bmBuy=async(i)=>{
   if(!await isBMActive()){toast('암시장이 닫혔습니다!');return;}
   const item=BM_ITEMS[i];
-  if(char.gold<item.price){toast('골드 부족');return;}
-  if(!confirm(`${item.name}을 ${item.price.toLocaleString()}G에 구매하시겠습니까?`))return;
-  char.gold-=item.price;
+  if(!canPay(item.price)){toast('골드 부족');return;}
+  // ★ reroll 사전 검증 — 결제 전에 재배분 가능 여부 확인 (환불 처리 불필요)
   if(item.id==='bm_reroll'){
     const BASE={str:5,dex:5,int:3,vit:5,luk:2};
     const totalPts=(char.str-BASE.str)+(char.dex-BASE.dex)+(char.int-BASE.int)+(char.vit-BASE.vit)+(char.luk-BASE.luk);
-    if(totalPts<=0){toast('재배분할 포인트가 없습니다 (기본값 이하)');char.gold+=item.price;return;}
-    // 기본값으로 리셋 후 랜덤 배분
+    if(totalPts<=0){toast('재배분할 포인트가 없습니다 (기본값 이하)');return;}
+  }
+  if(!confirm(`${item.name}을 ${item.price.toLocaleString()}G에 구매하시겠습니까?`))return;
+  if(!await payGold(item.price)){toast('결제 실패');return;}
+  if(item.id==='bm_reroll'){
+    const BASE={str:5,dex:5,int:3,vit:5,luk:2};
+    const totalPts=(char.str-BASE.str)+(char.dex-BASE.dex)+(char.int-BASE.int)+(char.vit-BASE.vit)+(char.luk-BASE.luk);
     char.str=BASE.str;char.dex=BASE.dex;char.int=BASE.int;char.vit=BASE.vit;char.luk=BASE.luk;
     const keys=STATS_DEF.map(s=>s.k);
-    for(let i=0;i<totalPts;i++){const k=pick(keys);char[k]=(char[k]||BASE[k]||1)+1;}
-    // _pendingStatPts 제거 (더 이상 사용 안 함)
+    for(let j=0;j<totalPts;j++){const k=pick(keys);char[k]=(char[k]||BASE[k]||1)+1;}
     delete char._pendingStatPts;
     toast(`🔮 능력치 재분배 완료! STR:${char.str} DEX:${char.dex} INT:${char.int} VIT:${char.vit} LUK:${char.luk}`,5000);renderChar();
   }else if(item.id==='bm_protect'){
@@ -5292,8 +5636,8 @@ window.doForge=async sl=>{
   const enh=it.enhance||0;
   if(enh>=9){toast('최대 강화 +9');return;}
   const cost=getForgeCost(it);
-  if(char.gold<cost){toast(`골드 부족! 필요: ${cost.toLocaleString()}G`);return;}
-  char.gold-=cost;
+  if(!canPay(cost)){toast(`골드 부족! 필요: ${cost.toLocaleString()}G`);return;}
+  if(!await payGold(cost)){toast('결제 실패');return;}
 
   const table=FORGE_TABLE[enh];
   const roll=Math.random()*100;
@@ -5310,7 +5654,7 @@ window.doForge=async sl=>{
     }
     toast(`🔨 강화 성공! +${it.enhance}`,'3000');
     blogAdd&&blogAdd(`<span class="l-exp">🔨 ${it.name} +${it.enhance} 강화 성공!</span>`);
-    trackBounty('enhance',1);
+    trackBounty('enhance',1);if(char)char._anyForge=true;
     if(it.enhance>=3)trackBounty('enhance3',1);
   }else if(roll<table.succ+table.destroy){
     // ★ 파괴 방지 — forgeWard 먼저 소모, 없으면 인벤 스크롤 자동 발동
@@ -5353,8 +5697,8 @@ window.doForgeInv=async function(itemId){
   const enh=it.enhance||0;
   if(enh>=9){toast('최대 강화 +9');return;}
   const cost=getForgeCost(it);
-  if(char.gold<cost){toast(`골드 부족! 필요: ${cost.toLocaleString()}G`);return;}
-  char.gold-=cost;
+  if(!canPay(cost)){toast(`골드 부족! 필요: ${cost.toLocaleString()}G`);return;}
+  if(!await payGold(cost)){toast('결제 실패');return;}
   const table=FORGE_TABLE[Math.min(enh,8)];
   const roll=Math.random()*100;
   if(roll<table.succ){
@@ -5366,7 +5710,7 @@ window.doForgeInv=async function(itemId){
     }
     toast(`🔨 강화 성공! +${it.enhance}`,3000);
     blogAdd&&blogAdd(`<span class="l-exp">🔨 ${it.name} +${it.enhance} 강화 성공!</span>`);
-    trackBounty('enhance',1);
+    trackBounty('enhance',1);if(char)char._anyForge=true;
     if(it.enhance>=3)trackBounty('enhance3',1);
   }else if(roll<table.succ+table.destroy){
     // ★ forgeWard 먼저
@@ -5686,7 +6030,13 @@ async function renderAuction(sb){
     const priceEl=document.getElementById('ap_'+itemId);
     const price=parseInt(priceEl?.value||0);
     if(price<1){toast('가격을 입력하세요');return;}
-    if(price>99999999){toast('최대 9,999만G까지 등록 가능');return;}
+    // ★ v3.0 — 가격 상한 99억G (은행 상한과 동일선상)
+    if(price>9999999999){toast('최대 99억G까지 등록 가능');return;}
+    // ★ v3.0 — 1억G 이상 등록 시 미스클릭 방지 확인 다이얼로그
+    if(price>=100000000){
+      const sellerNet=Math.floor(price*0.95);
+      if(!confirm(`${it.name}을(를) ${price.toLocaleString()}G에 등록합니다.\n수수료 5% 차감 후 판매자 수령액: ${sellerNet.toLocaleString()}G\n계속하시겠습니까?`))return;
+    }
     const existingAll=await cachedGet('auction')||{};
     const myActive=Object.values(existingAll).filter(v=>v&&v.sellerCharId===charId&&v.status==='active');
     if(myActive.length>=10){toast('경매 등록은 최대 10개까지');return;}
@@ -5694,6 +6044,7 @@ async function renderAuction(sb){
       sellerCharId:charId,sellerName:char.name,
       price,status:'active',
       registeredAt:Date.now(),
+      feeRate:0.05, // ★ v3.0 — 수수료 5% (등록 시점 고정. 기존 항목은 0)
       item:{...it}
     };
     const lid=push(ref(db,'auction')).key;
@@ -5723,26 +6074,32 @@ async function renderAuction(sb){
     const sn=await get(ref(db,`auction/${lid}`));const v=sn.val();
     if(!v||v.status!=='active'){toast('이미 거래 완료된 항목');renderAuctionTab('browse');return;}
     if(v.sellerCharId===charId){toast('본인 아이템은 구매 불가');return;}
-    if(char.gold<v.price){toast('골드 부족');return;}
-    if(!confirm(`${v.item.name}을(를) ${v.price.toLocaleString()}G에 구매하시겠습니까?`))return;
-    // 골드 차감 + 판매자에게 지급
-    char.gold-=v.price;
-    await saveChar();
-    // 판매자 골드 지급 (본인 캐릭터면 제외) — ★ 소지금→은행→대기금 순서로 분배
+    // ★ v3.0 — 통합 결제 적용 (인벤 + 은행)
+    if(!canPay(v.price)){toast('골드 부족 (소지금 + 은행 합산)');return;}
+    // ★ 1억G 이상 결제 시 차감 출처 사전 표시
+    let confirmMsg=`${v.item.name}을(를) ${v.price.toLocaleString()}G에 구매하시겠습니까?`;
+    if(v.price>=100000000){
+      const pv=payPreview(v.price);
+      confirmMsg+=`\n└ 소지금 ${pv.inv.toLocaleString()}G + 은행 ${pv.bank.toLocaleString()}G 차감`;
+    }
+    if(!confirm(confirmMsg))return;
+    if(!await payGold(v.price)){toast('결제 실패');return;}
+    // 판매자 골드 지급 — ★ v3.0 수수료 적용 (feeRate 0이면 기존 항목 호환)
     if(v.sellerCharId && v.sellerCharId!==charId){
+      const feeRate=v.feeRate||0;
+      const sellerNet=Math.floor(v.price*(1-feeRate));
       const selSn=await get(ref(db,`chars/${v.sellerCharId}`));const sel=selSn.val();
       if(sel){
-        const r=distributeGold(sel,v.price);
+        const r=distributeGold(sel,sellerNet);
         await update(ref(db,`chars/${v.sellerCharId}`),{gold:r.gold,_bankGold:r.bank,_pendingGold:r.pending});
       }
     }
     // 구매한 아이템은 재판매 불가
     const bought={...v.item,tradeable:false};
-    autoMigrateEnchantStats(bought); // ★ 경매장 구매 시 즉시 인챈트 스탯 마이그레이션
-    autoMigrateStaffMatk(bought);    // ★ 지팡이 MATK 마이그레이션
+    autoMigrateEnchantStats(bought);
+    autoMigrateStaffMatk(bought);
     inv[bought.id]=bought;
     await saveInv();
-    // 경매 상태 완료 처리
     await update(ref(db,`auction/${lid}`),{status:'sold',buyerCharId:charId,buyerName:char.name,soldAt:Date.now()});
     invalidateCache('auction');
     updateTop();
@@ -6088,7 +6445,7 @@ window.startDungeon=async function(tierIdx,mode,diffKey){
   if(diffKey!=='normal'&&score<reqScore){
     toast(`⚠️ 전투력 부족! 현재: ${score} / 필요: ${reqScore}`);return;
   }
-  if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length>=(char?.invSlots||100)){toast("⚠️ 인벤토리가 가득 찼습니다! 먼저 정리해 주세요.");return;}
+  if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length>=(char?.invSlots||100)){toast("⚠️ 인벤토리가 가득 찼습니다! 먼저 정리해 주세요.");return;}
   startBattle(tierIdx,'solo',diffKey,[{id:charId,name:char.name,charData:char,stats:s,hp:s.maxHp,maxHp:s.maxHp,potions:(char.potions||5)+(char.extraPotions||0)}]);
 };
 
@@ -6099,21 +6456,14 @@ window.launchPartyBattle=()=>{};
 
 // ═══ BATTLE ENGINE ═══
 let battle=null;
-// 파티 관련 변수 (v2.0에서 파티 제거됨, 코드 호환용)
-let myPartyId=null;
-let _lootBidUnsub=null;
-let _partyActionUnsub=null,_partyStateUnsub=null,_exitConfirmUnsub=null,_lobbyUnsub=null;
 function startBattle(tierIdx,mode,diffKey,players){
-  // ★ 이전 배틀 리스너 전부 정리
-  if(_lootBidUnsub){_lootBidUnsub();_lootBidUnsub=null;}
   const t=DTIERS[tierIdx];const d=DIFF[diffKey];
-  const soloMult=1.0; // 솔로 전용 — 파티 패널티 제거, DIFF 수치로 직접 조정
   battle={
     tierIdx,tier:t,mode,diffKey,diff:d,
     players:players.map(p=>({...p,status:'alive',buffs:{},aggro:0,actionChosen:null,defending:false})),
     floor:0,floors:t.floors,
     phase:0,
-    soloMult,
+    soloMult:1.0, // 솔로 전용 — 항상 1.0 (곱셈 연산 호환용)
     log:[],
     done:false,timer:null,timerVal:0,
     fleeVotes:new Set(),
@@ -7128,17 +7478,69 @@ async function lootPhase(){
       droppedItems.push(si);
       blogAdd(`<span class="l-set" style="font-weight:700;color:var(--st)">✨✨ 전설의 유일 장비 드랍! — ${si.name} [${si.setName}] ✨✨</span>`);
     }
+    // ★ v3.0 — 가구 재료 드랍 (티어별 차등, 위령제 가호 적용)
+    const memBoost_=getMemorialBoosts();
+    const matChance=(0.18+battle.tierIdx*0.04)*memBoost_.drop;
+    if(Math.random()<matChance){
+      let mat='wood', count=rand(1,3);
+      if(battle.tierIdx>=4){mat=Math.random()<0.3?'magicCrystal':'steel'; count=rand(1,2);}
+      else if(battle.tierIdx>=2){mat='steel'; count=rand(1,2);}
+      char._materials=char._materials||{wood:0,steel:0,magicCrystal:0,abyssShard:0,blueprint:0};
+      char._materials[mat]=Math.min(99999,(char._materials[mat]||0)+count);
+      const matNames={wood:'🪵 목재',steel:'⚙️ 강철',magicCrystal:'💎 마법 결정',abyssShard:'🩸 심연의 파편',blueprint:'📜 가구 도면'};
+      blogAdd(`<span class="l-item" style="color:#88aacc">${matNames[mat]} ×${count} 획득</span>`);
+    }
+    // ★ v3.0 — 가구 도면 드랍 (낮은 확률)
+    if(Math.random()<0.005+battle.tierIdx*0.002){
+      char._materials=char._materials||{wood:0,steel:0,magicCrystal:0,abyssShard:0,blueprint:0};
+      char._materials.blueprint=Math.min(99999,(char._materials.blueprint||0)+1);
+      blogAdd(`<span class="l-set">📜 가구 도면 드랍!</span>`);
+    }
+    // ★ v3.0 — 가구 자체 드랍 (1~3% 확률, 등급 풀 차등)
+    if(Math.random()<(0.01+battle.tierIdx*0.005)*memBoost_.drop){
+      // 가구 풀 — from에 'drop' 포함 + 이벤트 가구 제외 + 티어별 등급 가중
+      const tierGradeWeight=battle.tierIdx<=1?{normal:60,uncommon:30,rare:10}:
+                            battle.tierIdx<=2?{normal:30,uncommon:40,rare:25,epic:5}:
+                            battle.tierIdx<=3?{uncommon:30,rare:40,epic:25,legendary:5}:
+                                              {rare:30,epic:40,legendary:25,set:5};
+      const gradeKeys2=Object.keys(tierGradeWeight);
+      const weights2=gradeKeys2.map(k=>tierGradeWeight[k]);
+      const total2=weights2.reduce((a,b)=>a+b,0);
+      let r2=Math.random()*total2; let chosenG2='normal';
+      for(let i=0;i<weights2.length;i++){r2-=weights2[i];if(r2<=0){chosenG2=gradeKeys2[i];break;}}
+      const fPool=Object.entries(FURNITURE).filter(([id,f])=>
+        f.from?.includes('drop')&&!f._eventOnly&&f.grade===chosenG2&&f.tradeable!==false
+      );
+      if(fPool.length){
+        const [fId]=fPool[Math.floor(Math.random()*fPool.length)];
+        const fItem=genFurnitureItem(fId);
+        if(fItem){
+          fItem.tradeable=true;
+          fItem._gotAt=Date.now();
+          droppedItems.push(fItem);
+          blogAdd(`<span class="l-set" style="color:var(--purple)">🪑 가구 드랍: ${fItem.name}</span>`);
+        }
+      }
+    }
   }
   // ★ 방장 골드·경험치
   // goldBonus: 장비 인챈트 골드 보너스 반영
   const cs=calcStats(char);
-  const goldMult=1+(cs.goldBonus||0)/100;
+  let goldMult=1+(cs.goldBonus||0)/100;
+  let expFinal=totalExp;
+  // ★ v3.0 — 위령제 이벤트 가호 (EXP +50%, 골드 +30%)
+  const memBoosts=getMemorialBoosts();
+  goldMult*=memBoosts.gold;
+  expFinal=Math.round(expFinal*memBoosts.exp);
   const finalGold=Math.round(totalGold*goldMult);
   char.gold+=finalGold;
   trackBounty('gold_earn',finalGold); // ★ 현상금 골드 획득 트래킹
-  const lvUp=gainExp(totalExp);
-  blogAdd(`<span class="l-exp">📊 EXP +${totalExp} | 💰 +${finalGold.toLocaleString()}G${goldMult>1?` <span style="color:var(--gold);font-size:9px">(골드보너스 +${Math.round((goldMult-1)*100)}%)</span>`:''}</span>`);
+  const lvUp=gainExp(expFinal);
+  const boostMsg=memBoosts.exp>1?` <span style="color:#80a0ff;font-size:9px">[위령제 가호]</span>`:'';
+  blogAdd(`<span class="l-exp">📊 EXP +${expFinal} | 💰 +${finalGold.toLocaleString()}G${goldMult>1?` <span style="color:var(--gold);font-size:9px">(보너스 +${Math.round((goldMult-1)*100)}%)</span>`:''}${boostMsg}</span>`);
   if(!lvUp)saveChar();updateTop();
+  // ★ v3.0 — 추모의 빛 챌린지 카운트 (이벤트 기간만)
+  if(typeof trackMemorialChallenge==='function')trackMemorialChallenge();
 
   // 솔로: 드랍 아이템 바로 인벤에 (자동판매 필터 적용)
   for(const it of droppedItems){
@@ -7276,10 +7678,11 @@ async function dungeonClear(){
       if(drop.prefix&&drop.suffix){const pre=drop.prefix,suf=drop.suffix;drop.name=(pre.n?' '+pre.n:'')+' '+(suf.n?' '+suf.n:'')+' '+drop.name.replace(pre.n||'','').replace(suf.n||'','').trim();}
     }
     if(drop){
-      drop.tradeable=(dropGrade!=='set');
+      // ★ v2.8: 던전 드랍 set 거래 가능화. 합성 결과(_crafted)만 거래 불가 처리는 v3.0에서 도입.
+      drop.tradeable=true;
       if(tryAutoSell(drop)){
         // 자동판매됨
-      }else if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length<(char.invSlots||100)){
+      }else if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length<(char.invSlots||100)){
         await addItem(drop);await saveInv();
         blogAdd(`<span class="l-set">🎁 드랍: <span class="g-${drop.grade}">${drop.name}</span></span>`);
       }else{
@@ -7503,7 +7906,7 @@ window.reEnterDungeon=function(tierIdx,mode,diffKey){
   const s=calcStats(char);
   const d=DIFF[diffKey];
   if(!d){toast('난이도 정보 없음');return;}
-  if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length>=(char?.invSlots||100)){toast("⚠️ 인벤토리가 가득 찼습니다! 먼저 정리해 주세요.");return;}
+  if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length>=(char?.invSlots||100)){toast("⚠️ 인벤토리가 가득 찼습니다! 먼저 정리해 주세요.");return;}
   startBattle(tierIdx,mode,diffKey,[{id:charId,name:char.name,charData:char,stats:s,hp:s.maxHp,maxHp:s.maxHp,potions:5+(char.extraPotions||0)}]);
 };
 
@@ -7672,7 +8075,7 @@ async function cleanExpiredAuctions(){
 let cwMode='world',cwActive=false;
 let _cwSysMsgCount=0; // ★ 시스템 탭 미읽음 카운트
 // ★ 채팅 리스너 중복 방지: 각 채널별 unsubscribe 함수 보관
-const cwUnsub={world:null,party:null,whisper:null,system:null};
+const cwUnsub={world:null,whisper:null,system:null};
 
 function startChat(){
   if(cwActive)return; // ★ 이미 초기화된 경우 중복 등록 방지
@@ -8185,7 +8588,7 @@ function getITMonsterName(floor){
 // ★ 불멸의 탑 전투 — 기존 던전 엔진 완전 재활용
 window.startITBattle=async function(floorNum){
   if(char.level<99){toast('⚠️ Lv.99 전용 콘텐츠입니다');return;}
-  if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length>=(char?.invSlots||100)){
+  if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length>=(char?.invSlots||100)){
     toast('⚠️ 인벤토리가 가득 찼습니다!');return;
   }
 
@@ -9336,9 +9739,14 @@ window.settingAutoSellScroll=async function(){
 const GRADE_RANK={normal:0,uncommon:1,rare:2,epic:3,legendary:4,set:5,immortal:6};
 function tryAutoSell(item){
   if(!item)return false;
-  // 보호 대상 제외
+  // 보호 대상 제외 — 유일/불멸 등급
   if(item.grade==='set'||item.grade==='immortal')return false;
+  // 잠금 / 프리셋 등록 아이템 제외
   if(item._locked||isInPreset(item.id))return false;
+  // ★ v3.0 — 가구 / 도면 / 재료 / 합성 결과는 자동판매 절대 제외
+  if(item.isFurniture||item.isBlueprint||item.isMaterial||item._crafted)return false;
+  if(item.cat==='deco'||item.cat==='inv_slot'||item.cat==='wh_slot'||
+     item.cat==='passive'||item.cat==='crafter'||item.cat==='trophy')return false;
   // 장비 자동판매
   if(!item.isEnchantScroll&&!item.isScroll&&char._autoSellGrade){
     const threshold=GRADE_RANK[char._autoSellGrade]||0;
@@ -9347,7 +9755,7 @@ function tryAutoSell(item){
       const price=getSellPrice(item);
       char.gold+=price;
       blogAdd(`<span class="l-sys" style="color:var(--tx3)">💰 자동판매: ${item.name} (+${price}G)</span>`);
-      return true; // 판매됨 — 인벤에 추가하지 않음
+      return true;
     }
   }
   // 스크롤 자동판매
@@ -9653,8 +10061,8 @@ async function renderWarehouse(sb){
 
   sb.innerHTML=`
     <div style="display:flex;gap:6px;margin-bottom:8px">
-      <button id="whtab-deposit" class="btn btn-blue btn-sm" style="flex:1" onclick="whTab('deposit')">🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length}/100</span></button>
-      <button id="whtab-withdraw" class="btn btn-ghost btn-sm" style="flex:1" onclick="whTab('withdraw')">🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${wCnt}/200</span></button>
+      <button id="whtab-deposit" class="btn btn-blue btn-sm" style="flex:1" onclick="whTab('deposit')">🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length}/${char?.invSlots||100}</span></button>
+      <button id="whtab-withdraw" class="btn btn-ghost btn-sm" style="flex:1" onclick="whTab('withdraw')">🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${wCnt}/${char?.whSlots||200}</span></button>
       <button id="whtab-bank" class="btn btn-ghost btn-sm" style="flex:1" onclick="whTab('bank')">💰 은행</button>
     </div>
     <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
@@ -9791,14 +10199,16 @@ async function renderWarehouse(sb){
 
 window.whDeposit=async function(id){
   const it=inv[id];if(!it)return;
-  if(Object.keys(warehouse).length>=200){toast('⚠️ 창고가 가득 찼습니다! (최대 200개)');return;}
+  const whMax=char?.whSlots||200;
+  if(Object.keys(warehouse).length>=whMax){toast(`⚠️ 창고가 가득 찼습니다! (최대 ${whMax}개)`);return;}
   warehouse[id]=it;delete inv[id];
   await saveWarehouse();await saveInv();updateTop();
   toast(`🏦 ${it.name} → 창고에 보관`);
   // ★ 탭 버튼 숫자 즉시 갱신
   const d=document.getElementById('whtab-deposit');const w=document.getElementById('whtab-withdraw');
-  if(d)d.innerHTML=`🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length}/100</span>`;
-  if(w)w.innerHTML=`🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${Object.keys(warehouse).length}/200</span>`;
+  const invMax=char?.invSlots||100;
+  if(d)d.innerHTML=`🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length}/${invMax}</span>`;
+  if(w)w.innerHTML=`🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${Object.keys(warehouse).length}/${whMax}</span>`;
   if(window.whTab)window.whTab('deposit');
   else{const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);}
   renderInv();
@@ -9807,15 +10217,16 @@ window.whDeposit=async function(id){
 window.whWithdraw=async function(id){
   const it=warehouse[id];if(!it)return;
   const isMiscScroll=it.isScroll||it.isProtectScroll||it.isExtractScroll;
-  const cntable=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length;
-  if(!isMiscScroll&&cntable>=(char?.invSlots||100)){toast(`⚠️ 인벤토리가 가득 찼습니다! (최대 ${char?.invSlots||100}개)`);return;}
+  const invMax=char?.invSlots||100;
+  const whMax=char?.whSlots||200;
+  const cntable=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length;
+  if(!isMiscScroll&&cntable>=invMax){toast(`⚠️ 인벤토리가 가득 찼습니다! (최대 ${invMax}개)`);return;}
   inv[id]=it;delete warehouse[id];
   await saveInv();await saveWarehouse();updateTop();
   toast(`🎒 ${it.name} → 인벤토리로 이동`);
-  // ★ 탭 버튼 숫자 즉시 갱신
   const d=document.getElementById('whtab-deposit');const w=document.getElementById('whtab-withdraw');
-  if(d)d.innerHTML=`🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll).length}/100</span>`;
-  if(w)w.innerHTML=`🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${Object.keys(warehouse).length}/200</span>`;
+  if(d)d.innerHTML=`🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length}/${invMax}</span>`;
+  if(w)w.innerHTML=`🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${Object.keys(warehouse).length}/${whMax}</span>`;
   if(window.whTab)window.whTab('withdraw');
   else{const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);}
   renderInv();
@@ -11174,17 +11585,25 @@ window.adminSetLevel=async function(cid){
   loadAdmin();
 };
 
-// ═══ 비밀상점(히든상인) 구매 후 아이템 제거 버그 수정 ═══
-// (이미 수정됨 — buyFromMerchant에서 splice 대신 null 처리 재확인)
+// ═══ 비밀상점(히든상인) 구매 ═══
 window.buyFromMerchant=async(idx)=>{
   const x=battle._merchantItems?.[idx];if(!x)return;
-  if(char.gold<x.price){toast('골드 부족');return;}
-  char.gold-=x.price;
+  if(!canPay(x.price)){toast('골드 부족');return;}
+  // ★ 인벤 풀 사전 체크 (결제 후 환불 회피)
+  const cntable=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length;
+  if(!x.it.isScroll&&!x.it.isFurniture&&cntable>=(char?.invSlots||100)){toast('⚠️ 인벤토리가 가득 찼습니다');return;}
+  if(!await payGold(x.price)){toast('결제 실패');return;}
   const added=await addItem(x.it);
-  if(!added)return; // inventory full
-  await saveChar();updateTop();
+  if(!added){
+    // ★ addItem 실패 시 환불 (안전망 — 통합결제 역연산)
+    const r=distributeGold(char,x.price);
+    char.gold=r.gold; char._bankGold=r.bank; char._pendingGold=r.pending;
+    await saveChar();
+    toast('인벤 가득 — 결제 환불');
+    return;
+  }
+  updateTop();
   toast(`🧙 ${x.it.name} 구매!`);
-  // ★ 구매 후 해당 항목만 null로 마킹하고 DOM에서 제거
   battle._merchantItems[idx]=null;
   const cards=document.querySelectorAll('#hiddenMerchant .merchant-card');
   if(cards[idx])cards[idx].remove();
@@ -11240,6 +11659,1262 @@ window.adminClearNotice=async function(){
 };
 console.log('%c⚠️ ABYSS WORLD 보안 경고', 'color:#ff4444;font-size:20px;font-weight:900');
 console.log('%c이 콘솔을 통한 임의 조작은 계정 정지 사유입니다.\n게임 데이터 위변조는 서버에서 감지됩니다.', 'color:#ff9900;font-size:13px');
+
+// ═══════════════════════════════════════════════════
+// ★ v3.0 — 거점(STRONGHOLD) 시스템 모듈
+// ═══════════════════════════════════════════════════
+// 가구 인벤은 inv 객체에 그대로 저장 (it.isFurniture=true).
+// 가구 배치 정보는 char.house.placedItems 배열에 [{itemId, x, y, w, h}] 형태로 저장.
+// 활성 패시브 가구는 char.house.activePassives 배열에 itemId만 저장.
+
+// 거점 진입
+window.openStronghold=function(){
+  document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-stronghold'));
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('on'));
+  renderStronghold();
+};
+
+// 가구 인스턴스 생성 (인벤에 추가용)
+function genFurnitureItem(furnId){
+  const f=FURNITURE[furnId];if(!f)return null;
+  return{
+    id:gId(),
+    name:f.n,
+    baseId:furnId,
+    isFurniture:true,
+    cat:f.cat,
+    emoji:f.emoji,
+    size:f.size,
+    grade:f.grade,
+    gradeName:GRADES[f.grade]?.name||f.grade,
+    gradeColor:GRADES[f.grade]?.color,
+    targetType:f.targetType||null,
+    slots:f.slots||0,
+    passive:f.passive||null,
+    crafterType:f.crafterType||null,
+    tradeable:f.tradeable!==false,
+    enhance:0,
+    _v:2
+  };
+}
+
+// 거점 활성 패시브 가구의 합산 효과 (calcStats에서 호출)
+function getActivePassiveStats(){
+  const result={atkPct:0,defPct:0,spdPct:0,hp:0,atk:0,def:0,spd:0,goldBonus:0,expBonus:0,skillBonus:0,critDmg:0,crit:0};
+  if(!char?.house?.activePassives)return result;
+  for(const itemId of char.house.activePassives){
+    const it=inv[itemId];
+    if(!it||!it.passive)continue;
+    const p=FURNITURE_PASSIVES[it.passive];
+    if(!p||!p.stats||p.trigger!=='passive')continue;
+    for(const k of Object.keys(p.stats)){
+      result[k]=(result[k]||0)+p.stats[k];
+    }
+  }
+  return result;
+}
+
+// 슬롯 확장 가구 누적 합산
+function getStrongholdInvSlots(){
+  let sum=100;
+  if(!char?.house?.placedItems)return sum;
+  for(const p of char.house.placedItems){
+    const it=inv[p.itemId];
+    if(it&&it.targetType==='inv')sum+=it.slots||0;
+  }
+  return sum;
+}
+function getStrongholdWhSlots(){
+  let sum=200;
+  if(!char?.house?.placedItems)return sum;
+  for(const p of char.house.placedItems){
+    const it=inv[p.itemId];
+    if(it&&it.targetType==='wh')sum+=it.slots||0;
+  }
+  return sum;
+}
+
+// 슬롯 확장 가구 변경 시 char.invSlots/whSlots 재계산 + 임시보관함 처리
+async function recalcSlotsAndOverflow(){
+  const newInvSlots=getStrongholdInvSlots();
+  const newWhSlots=getStrongholdWhSlots();
+  const oldInvSlots=char.invSlots||100;
+  const oldWhSlots=char.whSlots||200;
+  // 인벤 슬롯이 줄어든 경우 → 초과분 임시보관함 이동
+  if(newInvSlots<oldInvSlots){
+    const cntable=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture);
+    if(cntable.length>newInvSlots){
+      const overflow=cntable.length-newInvSlots;
+      // 최근 획득 우선 (gotAt 내림차순), 잠금/프리셋 제외
+      const sorted=cntable
+        .filter(it=>!it._locked&&!isInPreset(it.id))
+        .sort((a,b)=>(b._gotAt||b.registeredAt||0)-(a._gotAt||a.registeredAt||0));
+      const toMove=sorted.slice(0,overflow);
+      const expireAt=Date.now()+7*86400000;
+      for(const it of toMove){
+        char._tempStorage[it.id]={...it,_expireAt:expireAt};
+        delete inv[it.id];
+      }
+      if(toMove.length>0)toast(`⚠️ 인벤 초과 ${toMove.length}개 → 임시보관함 (7일 유예)`,5000);
+    }
+  }
+  char.invSlots=newInvSlots;
+  char.whSlots=newWhSlots;
+  await saveChar();await saveInv();
+}
+
+// 거점 메인 렌더
+function renderStronghold(){
+  const main=document.getElementById('strongholdMain');if(!main)return;
+  const tier=getStrongholdTier();
+  const gridSize=getStrongholdGridSize();
+  const passiveSlots=getStrongholdPassiveSlots();
+  const tierInfo=STRONGHOLD_TIERS[tier-1];
+  const ambiance=document.getElementById('strongholdAmbiance');
+  if(ambiance)ambiance.textContent='"'+STRONGHOLD_AMBIANCE[tier-1]+'"';
+
+  // 거점 배경 단계별 색조
+  const bgGrad=tier===1?'radial-gradient(ellipse at center,#0a0a0a,#050505)':
+               tier===2?'radial-gradient(ellipse at center,#15151f,#0a0a15)':
+               tier===3?'radial-gradient(ellipse at center,#1f152a,#150a20)':
+                        'radial-gradient(ellipse at 30% 30%,rgba(240,192,64,.06),transparent 60%),radial-gradient(ellipse at center,#2a1f3a,#1a0f25)';
+
+  const placed=char?.house?.placedItems||[];
+  const activePassives=char?.house?.activePassives||[];
+  const furnInv=Object.values(inv).filter(i=>i.isFurniture);
+  const placedIds=new Set(placed.map(p=>p.itemId));
+  const unplacedFurn=furnInv.filter(i=>!placedIds.has(i.id));
+
+  // 그리드 셀 매핑 — 어떤 가구가 어디에 있는지
+  const cellMap={};
+  for(const p of placed){
+    const it=inv[p.itemId];if(!it)continue;
+    const w=p.w||it.size?.[0]||1;
+    const h=p.h||it.size?.[1]||1;
+    for(let dx=0;dx<w;dx++)for(let dy=0;dy<h;dy++){
+      cellMap[`${p.x+dx},${p.y+dy}`]={item:it,placement:p,isOrigin:dx===0&&dy===0,w,h};
+    }
+  }
+
+  // 그리드 렌더 (텍스트 RPG 시각: 이모지 + CSS Grid)
+  let gridHtml=`<div class="sh-grid" style="
+    display:grid;
+    grid-template-columns:repeat(${gridSize},1fr);
+    gap:2px;
+    background:${bgGrad};
+    border:1px solid var(--bd2);
+    border-radius:10px;
+    padding:8px;
+    margin-bottom:14px;
+    aspect-ratio:1/1;
+    max-width:600px;
+  ">`;
+  for(let y=0;y<gridSize;y++){
+    for(let x=0;x<gridSize;x++){
+      const k=`${x},${y}`;
+      const c=cellMap[k];
+      if(c&&c.isOrigin){
+        const isActive=activePassives.includes(c.placement.itemId);
+        const grade=c.item.grade||'normal';
+        gridHtml+=`<div class="sh-cell sh-furn gb-${grade}${isActive?' sh-active':''}" 
+          style="grid-column:span ${c.w};grid-row:span ${c.h};
+                 display:flex;align-items:center;justify-content:center;
+                 background:var(--sf2);border-radius:5px;cursor:pointer;
+                 font-size:${c.w>1||c.h>1?'24px':'18px'};
+                 transition:.2s"
+          title="${c.item.name}"
+          onclick="strongholdSelectPlaced('${c.placement.itemId}')">${c.item.emoji||'📦'}</div>`;
+      }else if(c){
+        // 큰 가구의 비-원점 셀 (skip)
+      }else{
+        gridHtml+=`<div class="sh-cell sh-empty" 
+          style="background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.05);
+                 border-radius:3px;aspect-ratio:1/1;cursor:pointer;min-height:24px"
+          onclick="strongholdSelectEmpty(${x},${y})"></div>`;
+      }
+    }
+  }
+  gridHtml+='</div>';
+
+  // 활성 패시브 표시
+  const activeBlock=activePassives.length||passiveSlots>0?`
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">
+        ✨ 활성 패시브 ${activePassives.length}/${passiveSlots}
+      </div>
+      ${activePassives.length?activePassives.map(itemId=>{
+        const it=inv[itemId];if(!it)return '';
+        const p=FURNITURE_PASSIVES[it.passive];if(!p)return '';
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px;background:var(--sf2);border-radius:5px;margin-bottom:4px">
+          <span style="font-size:18px">${it.emoji||'✨'}</span>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:var(--gold)">${p.n}</div>
+            <div style="font-size:10px;color:var(--tx2)">${p.desc}</div>
+          </div>
+          <button class="btn btn-ghost btn-xs" onclick="strongholdToggleActive('${itemId}')">해제</button>
+        </div>`;
+      }).join(''):'<div style="font-size:11px;color:var(--tx3);padding:4px 0">활성 패시브 없음 — 패시브 가구를 배치하고 활성화하세요</div>'}
+    </div>`:'';
+
+  // 가구 인벤 (배치되지 않은 것만)
+  const furnInvBlock=`
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:.7px">🪑 가구 인벤 (${unplacedFurn.length})</div>
+      </div>
+      ${unplacedFurn.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px">
+        ${unplacedFurn.map(it=>{
+          const passDesc=it.passive?FURNITURE_PASSIVES[it.passive]?.desc:'';
+          const slotDesc=it.slots?(it.targetType==='inv'?`인벤 +${it.slots}`:`창고 +${it.slots}`):'';
+          return `<div class="card2 gb-${it.grade}" style="padding:7px;cursor:pointer" onclick="strongholdPlaceMode('${it.id}')">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+              <span style="font-size:16px">${it.emoji||'📦'}</span>
+              <span style="font-size:10.5px;font-weight:700" class="g-${it.grade}">${it.name}</span>
+            </div>
+            <div style="font-size:9px;color:var(--tx3)">${FURN_CAT_KR[it.cat]||it.cat} · ${it.size?.[0]||1}×${it.size?.[1]||1}</div>
+            ${slotDesc?`<div style="font-size:9px;color:var(--blue)">${slotDesc}</div>`:''}
+            ${passDesc?`<div style="font-size:9px;color:var(--gold);line-height:1.3;margin-top:2px">${passDesc}</div>`:''}
+          </div>`;
+        }).join('')}
+      </div>`:'<div style="font-size:11px;color:var(--tx3);padding:4px 0">보유 가구 없음 — 마을 가구 상점 또는 던전 드랍에서 획득하세요</div>'}
+    </div>`;
+
+  // 거점 확장 버튼
+  const nextTier=tier<4?STRONGHOLD_TIERS[tier]:null;
+  const expandBlock=nextTier?`
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px">⬆ 거점 확장</div>
+      <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">현재 ${tierInfo.name} (${gridSize}×${gridSize}) → ${nextTier.name} (${nextTier.gridSize}×${nextTier.gridSize})</div>
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">활성 패시브 슬롯: ${passiveSlots} → ${nextTier.passiveSlots}</div>
+      <button class="btn btn-purple btn-sm" style="width:100%" onclick="strongholdExpand()">
+        💎 확장 (${nextTier.cost.toLocaleString()}G)
+      </button>
+    </div>`:`
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--gold);text-align:center">★ 최대 단계 도달 (${tierInfo.name})</div>
+    </div>`;
+
+  // ★ v3.0 — 재료 인벤 (별도 표시)
+  const mats=char._materials||{};
+  const matNames={wood:'🪵 목재',steel:'⚙️ 강철',magicCrystal:'💎 마법 결정',abyssShard:'🩸 심연의 파편',blueprint:'📜 도면'};
+  const materialsBlock=`
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px">
+      <div style="font-size:10px;color:#88aacc;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">🔨 재료 인벤</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:5px">
+        ${Object.entries(matNames).map(([k,n])=>`
+          <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;padding:5px 8px;font-size:11px">
+            <span style="color:var(--tx2)">${n}</span>
+            <span style="float:right;font-family:'IBM Plex Mono',monospace;color:${mats[k]>0?'var(--green)':'var(--tx3)'}">×${(mats[k]||0).toLocaleString()}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  // ★ 합성대 진입 (가구 배치 시 자동 활성화)
+  const hasGearCrafter=hasCrafterPlaced('gear');
+  const hasFurnCrafter=hasCrafterPlaced('furniture');
+  const hasEnchCrafter=hasCrafterPlaced('enchant');
+  const crafterBlock=(hasGearCrafter||hasFurnCrafter||hasEnchCrafter)?`
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">⚒️ 합성대 (배치 활성화)</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${hasGearCrafter?`<button class="btn btn-purple btn-sm" onclick="openGearSynth()">⚒ 장비 합성</button>`:''}
+        ${hasFurnCrafter?`<button class="btn btn-purple btn-sm" onclick="openFurnSynth()">🪑 가구 합성</button>`:''}
+        ${hasEnchCrafter?`<button class="btn btn-purple btn-sm" onclick="openEnchSynth()">📜 인챈트 합성</button>`:''}
+      </div>
+    </div>`:'';
+
+  main.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr;gap:12px">
+      ${activeBlock}
+      ${gridHtml}
+      ${crafterBlock}
+      ${expandBlock}
+      ${materialsBlock}
+      ${furnInvBlock}
+    </div>
+    <div id="shPlaceMode" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+                                  background:var(--sf);border:2px solid var(--gold);border-radius:8px;
+                                  padding:10px 14px;z-index:200;box-shadow:0 0 20px rgba(240,192,64,.4)">
+      <span id="shPlaceModeLabel" style="font-size:11px;color:var(--gold);margin-right:8px"></span>
+      <button class="btn btn-ghost btn-xs" onclick="strongholdCancelPlace()">취소</button>
+    </div>
+  `;
+}
+
+// 가구 배치 모드 진입 (가구 인벤에서 클릭)
+let _shPlaceItemId=null;
+window.strongholdPlaceMode=function(itemId){
+  _shPlaceItemId=itemId;
+  const it=inv[itemId];if(!it){toast('아이템 없음');return;}
+  const mode=document.getElementById('shPlaceMode');
+  const label=document.getElementById('shPlaceModeLabel');
+  if(mode&&label){
+    label.textContent=`${it.emoji||'📦'} ${it.name} 배치 — 빈 칸을 클릭하세요 (크기 ${it.size?.[0]||1}×${it.size?.[1]||1})`;
+    mode.style.display='block';
+  }
+};
+window.strongholdCancelPlace=function(){
+  _shPlaceItemId=null;
+  const mode=document.getElementById('shPlaceMode');if(mode)mode.style.display='none';
+};
+
+// 빈 칸 클릭 (배치 시도)
+window.strongholdSelectEmpty=async function(x,y){
+  if(!_shPlaceItemId)return;
+  const it=inv[_shPlaceItemId];if(!it){strongholdCancelPlace();return;}
+  const w=it.size?.[0]||1, h=it.size?.[1]||1;
+  const gridSize=getStrongholdGridSize();
+  // 그리드 범위 체크
+  if(x+w>gridSize||y+h>gridSize){toast('가구가 그리드 밖으로 나갑니다');return;}
+  // 점유 충돌 체크
+  const placed=char.house.placedItems||[];
+  for(const p of placed){
+    const pIt=inv[p.itemId];if(!pIt)continue;
+    const pw=p.w||pIt.size?.[0]||1, ph=p.h||pIt.size?.[1]||1;
+    const overlap=!(x+w<=p.x||p.x+pw<=x||y+h<=p.y||p.y+ph<=y);
+    if(overlap){toast('이 위치에는 이미 다른 가구가 있습니다');return;}
+  }
+  // 동일 가구 stack 체크
+  const f=FURNITURE[it.baseId];
+  if(f?.stack){
+    const sameCount=placed.filter(p=>{const pIt=inv[p.itemId];return pIt&&pIt.baseId===it.baseId;}).length;
+    if(sameCount>=f.stack){toast(`${it.name}은(는) 최대 ${f.stack}개까지만 배치 가능`);return;}
+  }
+  // 배치 확정
+  char.house.placedItems=[...placed,{itemId:_shPlaceItemId,x,y,w,h}];
+  await saveChar();
+  // 슬롯 확장 가구라면 invSlots/whSlots 재계산
+  if(it.targetType)await recalcSlotsAndOverflow();
+  toast(`✅ ${it.name} 배치 완료`);
+  strongholdCancelPlace();
+  renderStronghold();
+};
+
+// 배치된 가구 클릭 (해제 / 패시브 활성화 메뉴)
+window.strongholdSelectPlaced=async function(itemId){
+  const it=inv[itemId];if(!it)return;
+  const isPassive=it.cat==='passive';
+  const isActive=(char.house.activePassives||[]).includes(itemId);
+  const passDesc=it.passive?FURNITURE_PASSIVES[it.passive]?.desc:'';
+  // ★ v3.0 — 모달 UI로 교체 (confirm → 깔끔한 액션 메뉴)
+  let modal=document.getElementById('furnActionModal');
+  if(modal)modal.remove();
+  modal=document.createElement('div');
+  modal.id='furnActionModal';
+  modal.style.cssText=`position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;
+                       display:flex;align-items:center;justify-content:center;padding:20px`;
+  const slotsLabel=getStrongholdPassiveSlots();
+  const curActive=(char.house.activePassives||[]).length;
+  const slotFull=!isActive&&isPassive&&curActive>=slotsLabel;
+  modal.innerHTML=`
+    <div style="background:var(--sf);border:2px solid var(--gold);border-radius:10px;
+                padding:18px;max-width:380px;width:100%;
+                box-shadow:0 0 30px rgba(240,192,64,.25)" onclick="event.stopPropagation()">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:36px;margin-bottom:6px">${it.emoji||'📦'}</div>
+        <div class="g-${it.grade}" style="font-family:'Cinzel',serif;font-size:14px;font-weight:700">${it.name}</div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:3px">${FURN_CAT_KR[it.cat]||it.cat} · ${it.size?.[0]||1}×${it.size?.[1]||1}</div>
+      </div>
+      ${passDesc?`<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:6px;padding:8px 10px;margin-bottom:10px">
+        <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">✨ 패시브</div>
+        <div style="font-size:11px;color:var(--tx2);line-height:1.5">${passDesc}</div>
+      </div>`:''}
+      ${it.slots?`<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:6px;padding:8px 10px;margin-bottom:10px">
+        <div style="font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">📦 슬롯 확장</div>
+        <div style="font-size:11px;color:var(--tx2)">${it.targetType==='inv'?'인벤토리':'창고'} +${it.slots}칸</div>
+      </div>`:''}
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${isPassive?(isActive?
+          `<button class="btn btn-purple btn-sm" onclick="furnActionToggle('${itemId}',false)">⚪ 패시브 해제</button>`:
+          slotFull?
+          `<button class="btn btn-ghost btn-sm" disabled style="opacity:.5">🔒 활성 슬롯 가득 참 (${curActive}/${slotsLabel})</button>`:
+          `<button class="btn btn-gold btn-sm" onclick="furnActionToggle('${itemId}',true)">✨ 패시브 활성화 (${curActive}/${slotsLabel})</button>`
+        ):''}
+        <button class="btn btn-red btn-sm" onclick="furnActionRemove('${itemId}')">📦 인벤으로 회수</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeFurnActionModal()">닫기</button>
+      </div>
+    </div>`;
+  modal.onclick=function(e){if(e.target===modal)closeFurnActionModal();};
+  document.body.appendChild(modal);
+};
+
+window.closeFurnActionModal=function(){const m=document.getElementById('furnActionModal');if(m)m.remove();};
+
+window.furnActionToggle=async function(itemId,activate){
+  if(activate){
+    const slots=getStrongholdPassiveSlots();
+    if((char.house.activePassives||[]).length>=slots){
+      toast(`활성 패시브 슬롯이 가득 참 (${slots}/${slots})`);return;
+    }
+    char.house.activePassives=[...(char.house.activePassives||[]),itemId];
+    toast('✨ 패시브 활성화');
+  }else{
+    char.house.activePassives=(char.house.activePassives||[]).filter(id=>id!==itemId);
+    toast('⚪ 패시브 해제');
+  }
+  await saveChar();
+  closeFurnActionModal();
+  renderStronghold();
+};
+
+window.furnActionRemove=async function(itemId){
+  const it=inv[itemId];if(!it)return;
+  // 슬롯 확장 가구의 경우 사전 경고 모달
+  if(it.targetType&&it.slots){
+    const cur=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length;
+    const newMax=(char.invSlots||100)-(it.targetType==='inv'?it.slots:0);
+    if(it.targetType==='inv'&&cur>newMax){
+      const overflow=cur-newMax;
+      if(!confirm(`⚠️ ${it.name} 해제 시 인벤 슬롯이 ${it.slots}개 감소합니다.\n초과 아이템 ${overflow}개가 임시보관함으로 이동합니다 (7일 유예).\n계속하시겠습니까?`)){
+        return;
+      }
+    }
+  }
+  closeFurnActionModal();
+  await strongholdRemoveFurniture(itemId);
+};
+
+// 활성 패시브 슬롯에서 제거 (해제 버튼)
+window.strongholdToggleActive=async function(itemId){
+  char.house.activePassives=(char.house.activePassives||[]).filter(id=>id!==itemId);
+  await saveChar();
+  renderStronghold();
+};
+
+// 가구 회수 (배치 해제)
+async function strongholdRemoveFurniture(itemId){
+  const it=inv[itemId];if(!it)return;
+  // 슬롯 확장 가구의 경우 사전 경고
+  if(it.targetType&&it.slots){
+    const cur=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length;
+    const newMax=(char.invSlots||100)-(it.targetType==='inv'?it.slots:0);
+    if(it.targetType==='inv'&&cur>newMax){
+      const overflow=cur-newMax;
+      if(!confirm(`${it.name} 해제 시 인벤 슬롯이 ${it.slots}개 감소합니다.\n초과 아이템 ${overflow}개가 임시보관함으로 이동합니다 (7일 유예).\n계속하시겠습니까?`))return;
+    }
+  }
+  char.house.placedItems=(char.house.placedItems||[]).filter(p=>p.itemId!==itemId);
+  char.house.activePassives=(char.house.activePassives||[]).filter(id=>id!==itemId);
+  await saveChar();
+  if(it.targetType)await recalcSlotsAndOverflow();
+  toast(`📦 ${it.name} 회수 완료`);
+  renderStronghold();
+}
+
+// 거점 확장
+window.strongholdExpand=async function(){
+  const tier=getStrongholdTier();
+  if(tier>=4){toast('이미 최대 단계입니다');return;}
+  const next=STRONGHOLD_TIERS[tier];
+  if(!canPay(next.cost)){toast(`골드 부족 (필요: ${next.cost.toLocaleString()}G)`);return;}
+  let confirmMsg=`거점을 ${next.name}(${next.gridSize}×${next.gridSize})로 확장합니다.\n비용: ${next.cost.toLocaleString()}G`;
+  if(next.cost>=100000000){
+    const pv=payPreview(next.cost);
+    confirmMsg+=`\n└ 소지금 ${pv.inv.toLocaleString()}G + 은행 ${pv.bank.toLocaleString()}G 차감`;
+  }
+  confirmMsg+='\n계속하시겠습니까?';
+  if(!confirm(confirmMsg))return;
+  if(!await payGold(next.cost)){toast('결제 실패');return;}
+  char.house.tier=next.tier;
+  await saveChar();
+  toast(`🏯 거점이 ${next.name}(으)로 확장되었습니다!`,4000);
+  renderStronghold();
+};
+
+// 가구 상점 (단순 임시 — 단계 C에서 본격 구현)
+window.townSec_furnitureshop=function(){
+  const sb=document.getElementById('secbody');if(!sb)return;
+  const shopList=Object.entries(FURNITURE).filter(([id,f])=>f.from?.includes('shop'));
+  sb.innerHTML=`
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:10px">기본 가구를 골드로 구매할 수 있습니다. 던전 드랍 / 합성으로 더 다양한 가구를 획득하세요.</div>
+    <div class="shopgrid">
+      ${shopList.map(([id,f])=>{
+        const passDesc=f.passive?FURNITURE_PASSIVES[f.passive]?.desc:'';
+        const slotDesc=f.slots?(f.targetType==='inv'?`인벤 +${f.slots}`:`창고 +${f.slots}`):'';
+        return `<div class="shopitem gb-${f.grade}">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+            <span style="font-size:18px">${f.emoji}</span>
+            <span style="font-size:11px;font-weight:700" class="g-${f.grade}">${f.n}</span>
+          </div>
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">${FURN_CAT_KR[f.cat]} · ${f.size[0]}×${f.size[1]}</div>
+          ${slotDesc?`<div style="font-size:9.5px;color:var(--blue);margin-bottom:2px">${slotDesc}</div>`:''}
+          ${passDesc?`<div style="font-size:9px;color:var(--gold);line-height:1.3;margin-bottom:4px">${passDesc}</div>`:''}
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+            <span style="font-size:11px;color:var(--gold)">💰${(f.cost||0).toLocaleString()}</span>
+            <button class="btn btn-gold btn-xs" onclick="buyFurniture('${id}')">구매</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+};
+
+window.buyFurniture=async function(furnId){
+  const f=FURNITURE[furnId];if(!f||!f.cost){toast('이 가구는 구매할 수 없습니다');return;}
+  if(!canPay(f.cost)){toast(`골드 부족 (필요: ${f.cost.toLocaleString()}G)`);return;}
+  // 인벤 가득 체크 (가구는 일반 인벤 슬롯 점유 안함 — isFurniture로 분리)
+  if(!await payGold(f.cost)){toast('결제 실패');return;}
+  const fItem=genFurnitureItem(furnId);
+  fItem._gotAt=Date.now();
+  inv[fItem.id]=fItem;
+  await saveInv();updateTop();
+  toast(`🪑 ${f.n} 구매 완료! 거점에 배치하세요`);
+};
+
+// townSec 분기 확장 (가구 상점)
+const _origTownSec=window.townSec;
+window.townSec=function(id){
+  if(id==='furnitureshop'){
+    const ts=document.getElementById('townsec');
+    const sec=document.getElementById('townsec');
+    if(sec){
+      sec.style.display='block';
+      sec.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <button class="btn btn-ghost btn-sm" onclick="closeTownSec()">← 마을로</button>
+        <div class="ptitle" style="margin:0">🪑 가구 상점</div>
+      </div><div id="secbody"></div>`;
+      window.townSec_furnitureshop();
+      document.getElementById('townmenu').style.display='none';
+    }
+    return;
+  }
+  if(_origTownSec)return _origTownSec(id);
+};
+
+// ═══════════════════════════════════════════════════
+// ★ v3.0 — 신규 환영 패키지 (레어 등급 1무기 + 2방어구 + 500만G)
+// ═══════════════════════════════════════════════════
+async function grantNewbieWelcome(){
+  if(!char||!charId)return;
+  if(char._newbieWelcomeGranted)return; // 중복 방지 (실제 지급 마킹)
+  try{
+    // 레어 등급 무기 1
+    const wPool=WBASES.filter(b=>b.slot==='weapon');
+    const w=genItem(wPool,'rare',Math.max(1,char.level||1),false,0);
+    w.tradeable=false; w._gotAt=Date.now();
+    await addItem(w);
+    // 레어 등급 방어구 2 (head + chest 우선)
+    const aPool=ABASES?ABASES.filter(b=>['head','chest','legs','boots','offhand'].includes(b.slot)):[];
+    if(aPool.length){
+      for(let i=0;i<2;i++){
+        const a=genItem(aPool,'rare',Math.max(1,char.level||1),false,0);
+        a.tradeable=false; a._gotAt=Date.now();
+        await addItem(a);
+      }
+    }
+    // 500만G 지급
+    const r=distributeGold(char,5000000);
+    char.gold=r.gold; char._bankGold=r.bank; char._pendingGold=r.pending;
+    char._newbieWelcomeGranted=true;
+    await saveChar();await saveInv();
+    setTimeout(()=>{
+      toast('🎁 신규 환영 패키지 지급! 레어 무기 1종 + 방어구 2종 + 5,000,000G',6000);
+      blogAdd&&blogAdd('<span class="l-skill">🎁 신규 환영 패키지가 인벤토리로 지급되었습니다!</span>');
+    },2000);
+  }catch(e){
+    console.error('newbie welcome error',e);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// ★ v3.0 — 어린이날 위령제 이벤트 모듈
+// ═══════════════════════════════════════════════════
+
+// 오늘이 이벤트 N일차인지 계산 (1~9)
+function getMemorialDay(){
+  if(!isMemorialActive())return 0;
+  const now=Date.now();
+  const startDate=new Date(MEMORIAL_EVENT.startTs);
+  const today=new Date();
+  const startDay=Math.floor(MEMORIAL_EVENT.startTs/86400000);
+  const todayDay=Math.floor(now/86400000);
+  return Math.min(MEMORIAL_EVENT.duration, todayDay-startDay+1);
+}
+
+// 오늘 출석 가능한지 확인
+function canCheckinMemorial(){
+  if(!isMemorialActive())return false;
+  const today=new Date().toISOString().slice(0,10); // YYYY-MM-DD
+  return char?._memorialEvent?.lastCheckinDate!==today;
+}
+
+// 위령제 출석 보상 수령
+window.checkinMemorial=async function(){
+  if(!isMemorialActive()){toast('이벤트 기간이 아닙니다');return;}
+  const today=new Date().toISOString().slice(0,10);
+  if(char._memorialEvent.lastCheckinDate===today){toast('오늘은 이미 출석했습니다');return;}
+  const day=getMemorialDay();
+  if(day<1||day>9){toast('출석 가능 일자가 아닙니다');return;}
+  const reward=MEMORIAL_EVENT.rewards[day-1];
+  if(!reward){toast('보상 데이터 오류');return;}
+  // 출석 기록
+  char._memorialEvent.checkinDays=[...new Set([...(char._memorialEvent.checkinDays||[]),day])];
+  char._memorialEvent.lastCheckinDate=today;
+  char._memorialEvent.claimedRewards=[...new Set([...(char._memorialEvent.claimedRewards||[]),day])];
+  // 골드 지급
+  if(reward.gold>0){
+    const r=distributeGold(char,reward.gold);
+    char.gold=r.gold; char._bankGold=r.bank; char._pendingGold=r.pending;
+  }
+  // 아이템 지급
+  let itemMsgs=[];
+  for(const item of reward.items||[]){
+    if(item.type==='enchant_scroll'){
+      for(let i=0;i<(item.count||1);i++){
+        const sc=genTieredEnchantScroll&&genTieredEnchantScroll(2,'normal');
+        if(sc){sc.tradeable=true; sc._gotAt=Date.now(); await addItem(sc);}
+      }
+      itemMsgs.push(`인챈트 스크롤 ×${item.count||1}`);
+    }else if(item.type==='protect_scroll'){
+      for(let i=0;i<(item.count||1);i++){
+        const si={id:gId(),name:'파괴 방지 스크롤',icon:'🛡',isProtectScroll:true,grade:'rare',gradeName:'레어',gradeColor:'#0070dd',slot:'scroll',stats:{},_v:2,_gotAt:Date.now()};
+        await addItem(si);
+      }
+      itemMsgs.push(`파괴방지 스크롤 ×${item.count||1}`);
+    }else if(item.type==='extract_scroll'){
+      for(let i=0;i<(item.count||1);i++){
+        const si={id:gId(),name:'인챈트 추출 스크롤',icon:'💎',isExtractScroll:true,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',slot:'scroll',stats:{},_v:2,_gotAt:Date.now()};
+        await addItem(si);
+      }
+      itemMsgs.push(`추출 스크롤 ×${item.count||1}`);
+    }else if(item.type==='reroll_scroll'){
+      const si={id:gId(),name:'능력치 재조정 주문서',icon:'🔮',isScroll:true,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',slot:'scroll',stats:{},_v:2,_gotAt:Date.now()};
+      await addItem(si);
+      itemMsgs.push('재조정 주문서');
+    }else if(item.type==='furniture'&&item.baseId){
+      const fItem=genFurnitureItem(item.baseId);
+      if(fItem){fItem._gotAt=Date.now(); await addItem(fItem); itemMsgs.push(fItem.name);}
+    }
+  }
+  await saveChar();await saveInv();updateTop();
+  let msg=`🎏 ${day}일차 출석 보상 수령!`;
+  if(reward.gold>0)msg+=` +${reward.gold.toLocaleString()}G`;
+  if(itemMsgs.length)msg+=` / ${itemMsgs.join(', ')}`;
+  toast(msg,5000);
+  blogAdd&&blogAdd(`<span class="l-skill">🎏 위령제 ${day}일차 출석: ${reward.desc}</span>`);
+  if(window.renderMemorial)window.renderMemorial();
+};
+
+// 위령제 보스 도전 (5/5 한정) — 토벌전 엔진 재활용, 1회 한정 솔로 처치
+window.startMemorialBoss=async function(){
+  if(!isMemorialBossDay()){toast('보스는 5월 5일 당일에만 출현합니다');return;}
+  if(char._memorialEvent.bossKilled){toast('이미 위령제 보스를 처치하셨습니다');return;}
+  if(battle&&!battle.done){toast('⚔️ 다른 전투 진행 중에는 도전할 수 없습니다');return;}
+  if(!confirm(`${MEMORIAL_BOSS.name} 토벌에 도전하시겠습니까?\n\n${MEMORIAL_BOSS.desc}\n\n처치 시 어린 왕의 옥좌 도면 확정 드랍.\n실패 시 재도전 가능 (1회 처치 시 종료).`))return;
+
+  // 보스 클론 — 원본 오염 방지
+  const boss={...MEMORIAL_BOSS,skills:(MEMORIAL_BOSS.skills||[]).map(sk=>({...sk}))};
+  const sm=document.getElementById('memorialMain');
+  const memPane=document.getElementById('pane-memorial');
+  // 별도 전투 컨테이너 (위령제 pane 안에 동적 생성)
+  let mb=document.getElementById('memorialBattle');
+  if(!mb){
+    mb=document.createElement('div');
+    mb.id='memorialBattle';
+    memPane.appendChild(mb);
+  }
+  if(sm)sm.style.display='none';
+  mb.style.display='block';
+
+  const s=calcStats(char);
+  // ★ 거점 활성 패시브 — 전투 시작 트리거
+  const startBuffs={spd:0, invuln:0};
+  for(const itemId of (char.house?.activePassives||[])){
+    const it=inv[itemId];if(!it||!it.passive)continue;
+    const p=FURNITURE_PASSIVES[it.passive];
+    if(!p||p.trigger!=='on_battle_start')continue;
+    if(p.proc?.type==='spd_buff')startBuffs.spd+=p.proc.value||0;
+    if(p.proc?.type==='invuln')startBuffs.invuln=Math.max(startBuffs.invuln,p.proc.turns||0);
+  }
+  let myHp=s.maxHp, myPotions=5+(char.extraPotions||0);
+  let bossHp=boss.hp;
+  let totalDmgDealt=0, phase=1, done=false, turn=0;
+  let firstHitDodgeUsed=false; // 그림자 거울 1회 회피
+  let invulnTurns=startBuffs.invuln;
+  const startSpdBuff=startBuffs.spd;
+
+  // 거점 first_dodge 패시브 보유 여부
+  let hasFirstDodge=false;
+  for(const itemId of (char.house?.activePassives||[])){
+    const it=inv[itemId];if(!it)continue;
+    if(it.passive==='first_dodge')hasFirstDodge=true;
+  }
+
+  let logs=[];
+  function mlog(html){
+    logs.push(html);
+    const el=document.getElementById('mbLog');
+    if(el){const d=document.createElement('div');d.innerHTML=html;el.appendChild(d);if(el.scrollHeight-el.scrollTop-el.clientHeight<80)el.scrollTop=el.scrollHeight;}
+  }
+
+  function renderMb(){
+    const myHpPct=Math.max(0,Math.min(100,Math.round(myHp/s.maxHp*100)));
+    const bossHpPct=Math.max(0,Math.min(100,Math.round(bossHp/boss.hp*100)));
+    mb.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <button class="btn btn-ghost btn-sm" onclick="exitMemorialBattle()" ${done?'':'disabled'}>← 나가기</button>
+        <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:${boss.color}">
+          ${boss.icon} ${boss.name}
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(255,34,68,.06),rgba(80,80,255,.04));
+                  border:1px solid ${boss.color}44;border-radius:8px;padding:10px 12px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-bottom:3px">
+          <span>보스 HP</span>
+          <span style="font-family:'IBM Plex Mono',monospace;color:${boss.color}">${bossHp.toLocaleString()} / ${boss.hp.toLocaleString()}</span>
+        </div>
+        <div style="width:100%;height:9px;background:rgba(0,0,0,.5);border-radius:4px;overflow:hidden;margin-bottom:6px">
+          <div style="width:${bossHpPct}%;height:100%;background:linear-gradient(90deg,#400,${boss.color});border-radius:4px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:9.5px;color:var(--tx3)">⚔ 누적 피해: <b style="color:var(--red)">${totalDmgDealt.toLocaleString()}</b></div>
+      </div>
+      <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px">
+          <span style="font-family:'Cinzel',serif;font-weight:700;color:var(--tx)">${char.name}${invulnTurns>0?' <span style="color:var(--gold)">[무적]</span>':''}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tx2)">${myHp}/${s.maxHp} 💊${myPotions}</span>
+        </div>
+        <div style="width:100%;height:7px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden">
+          <div style="width:${myHpPct}%;height:100%;background:linear-gradient(90deg,#802020,var(--red));border-radius:3px;transition:width .3s"></div>
+        </div>
+      </div>
+      <div id="mbLog" style="max-height:240px;overflow-y:auto;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:9px;margin-bottom:10px;font-size:11px;line-height:1.6"></div>
+      ${done?'':`<div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-red btn-sm" style="flex:2" onclick="mbAttack()">⚔ 공격</button>
+        <button class="btn btn-blue btn-sm" style="flex:1" onclick="mbDefend()">🛡 방어</button>
+        <button class="btn btn-green btn-sm" style="flex:1" onclick="mbHeal()" ${myPotions<=0?'disabled':''}>💊 포션</button>
+      </div>`}
+    `;
+    // 누적 로그 복원
+    const logEl=document.getElementById('mbLog');
+    if(logEl)logs.forEach(h=>{const d=document.createElement('div');d.innerHTML=h;logEl.appendChild(d);});
+  }
+
+  function mbBossTurn(defending){
+    if(done)return;
+    if(invulnTurns>0){
+      invulnTurns--;
+      mlog(`<span class="l-skill" style="color:var(--gold)">✨ 무적 효과로 보스의 공격을 무효화! (남은 ${invulnTurns}턴)</span>`);
+      return;
+    }
+    // 보스 스킬 시도
+    let skillUsed=null;
+    for(const sk of boss.skills){
+      if(Math.random()<sk.prob){skillUsed=sk;break;}
+    }
+    let dmg=0;
+    if(skillUsed){
+      const r=skillUsed.fx(boss,s,myHp,s.maxHp,mlog);
+      dmg=r.dmg||0;
+      if(r.ignoreDef)dmg=Math.round(dmg*1.3); // 단순 처리
+    }else{
+      const baseAtk=boss.atk*(1+(boss._atkBuff||0));
+      dmg=Math.max(1,Math.round(baseAtk*(100/(100+s.def))));
+      mlog(`<span class="l-dmg">💥 ${boss.name}의 공격! -${dmg}</span>`);
+    }
+    if(defending)dmg=Math.round(dmg*0.5);
+    // ★ 그림자 거울 1회 회피
+    if(hasFirstDodge&&!firstHitDodgeUsed&&dmg>0){
+      firstHitDodgeUsed=true;
+      mlog(`<span class="l-skill" style="color:var(--purple)">🪞 그림자 거울 발동! 첫 피격 회피</span>`);
+      return;
+    }
+    myHp-=dmg;
+    if(myHp<=0){
+      myHp=0;
+      mlog(`<span class="l-dead">💀 ${char.name} 쓰러짐!</span>`);
+      mbDefeat();
+    }
+  }
+
+  window.mbAttack=async function(){
+    if(done)return;
+    turn++;
+    // 플레이어 공격 — equipScore 기반 단순 산식
+    const wt=getWeaponTraits(char.equipment||{});
+    const baseDmg=wt.isStaff||wt.isDualgun?s.matk:s.atk;
+    let dmg=Math.max(1,Math.round(baseDmg*(100/(100+boss.def))*1.5));
+    // 첫 3턴 SPD 버프 → 추가 공격 확률
+    const extraHit=startSpdBuff>0&&turn<=3&&Math.random()<startSpdBuff/200; // 50→25%
+    // 크리티컬
+    if(Math.random()*100<s.crit){dmg=Math.round(dmg*(1.5+(s.critDmg||0)/100));mlog(`<span class="l-skill">⚡ 크리티컬!</span>`);}
+    bossHp-=dmg; totalDmgDealt+=dmg;
+    mlog(`<span class="l-attack">🗡 ${char.name}의 공격! -${dmg.toLocaleString()}</span>`);
+    if(extraHit){
+      const dmg2=Math.max(1,Math.round(baseDmg*(100/(100+boss.def))*0.8));
+      bossHp-=dmg2; totalDmgDealt+=dmg2;
+      mlog(`<span class="l-attack" style="color:#80a0ff">⚔ 추가 공격! -${dmg2.toLocaleString()}</span>`);
+    }
+    if(bossHp<=0){bossHp=0;mbVictory();return;}
+    mbBossTurn(false);
+    renderMb();
+  };
+  window.mbDefend=async function(){
+    if(done)return;
+    turn++;
+    mlog(`<span class="l-skill">🛡 방어 자세! 다음 피해 50% 감소</span>`);
+    mbBossTurn(true);
+    renderMb();
+  };
+  window.mbHeal=async function(){
+    if(done)return;
+    if(myPotions<=0)return;
+    myPotions--; turn++;
+    const heal=Math.round(s.maxHp*0.4);
+    myHp=Math.min(s.maxHp,myHp+heal);
+    mlog(`<span class="l-heal">💊 포션 사용! +${heal} 회복</span>`);
+    mbBossTurn(false);
+    renderMb();
+  };
+
+  async function mbVictory(){
+    done=true;
+    mlog(`<span class="l-set" style="color:var(--st);font-weight:700">✨ 위령제 보스 처치! ${MEMORIAL_BOSS.name}이(가) 평온을 찾았습니다.</span>`);
+    char._memorialEvent.bossKilled=true;
+    char._memorialEvent.throneClaimed=true;
+    // 어린 왕의 옥좌 가구 지급
+    const fItem=genFurnitureItem('memorial_throne');
+    if(fItem){fItem._gotAt=Date.now(); await addItem(fItem);}
+    // 추가 보상: 1천만G + 인챈트 스크롤 ×2
+    const r=distributeGold(char,10000000);
+    char.gold=r.gold; char._bankGold=r.bank; char._pendingGold=r.pending;
+    for(let i=0;i<2;i++){
+      const sc=genTieredEnchantScroll&&genTieredEnchantScroll(4,'vhard');
+      if(sc){sc.tradeable=false; sc._gotAt=Date.now(); await addItem(sc);}
+    }
+    await saveChar();await saveInv();updateTop();
+    mlog(`<span class="l-exp">🎁 어린 왕의 옥좌 (Set 가구) + 10,000,000G + 인챈트 스크롤 ×2 (tier4)</span>`);
+    blogAdd&&blogAdd(`<span class="l-set">🏆 위령제 보스 처치! 어린 왕의 옥좌 획득.</span>`);
+    renderMb();
+  }
+  function mbDefeat(){
+    done=true;
+    mlog(`<span class="l-dead">패배... 다시 도전 가능합니다.</span>`);
+    renderMb();
+  }
+  window.exitMemorialBattle=function(){
+    if(!done){toast('전투 중에는 나갈 수 없습니다');return;}
+    if(mb)mb.style.display='none';
+    if(sm)sm.style.display='block';
+    renderMemorial();
+  };
+
+  renderMb();
+  if(invulnTurns>0)mlog(`<span class="l-skill" style="color:var(--gold)">✨ 축복의 제단 발동! ${invulnTurns}턴 무적 부여</span>`);
+  if(startSpdBuff>0)mlog(`<span class="l-skill" style="color:#80a0ff">⚡ 전쟁의 깃발 발동! 첫 3턴 SPD +${startSpdBuff}%</span>`);
+};
+
+// 추모의 빛 챌린지 진행 (던전 클리어 시 호출)
+window.trackMemorialChallenge=async function(){
+  if(!isMemorialActive())return;
+  if(char._memorialEvent.challengeClaimed)return;
+  char._memorialEvent.dungeonCount=(char._memorialEvent.dungeonCount||0)+1;
+  if(char._memorialEvent.dungeonCount>=MEMORIAL_EVENT.challenge.targetDungeons){
+    if(!char._memorialEvent.challengeClaimed){
+      const fItem=genFurnitureItem(MEMORIAL_EVENT.challenge.reward.baseId);
+      if(fItem){
+        fItem._gotAt=Date.now();
+        await addItem(fItem);
+        char._memorialEvent.challengeClaimed=true;
+        toast(`🏆 추모의 빛 챌린지 완료! ${fItem.name} 획득`,6000);
+        blogAdd&&blogAdd(`<span class="l-set">🏆 추모의 빛 챌린지 완료 — ${fItem.name}</span>`);
+      }
+    }
+  }
+  await saveChar();await saveInv();
+};
+
+// 위령제 던전 가호 (배수 반환) — 던전 보상 계산 시 곱함
+function getMemorialBoosts(){
+  if(!isMemorialActive())return {exp:1.0,gold:1.0,drop:1.0};
+  return {
+    exp:1.0+MEMORIAL_EVENT.expBoost,
+    gold:1.0+MEMORIAL_EVENT.goldBoost,
+    drop:1.0+MEMORIAL_EVENT.dropBoost
+  };
+}
+
+// 위령제 메인 UI 렌더 (마을 → 위령제 카드에서 진입)
+window.openMemorial=function(){
+  document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-memorial'));
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('on'));
+  renderMemorial();
+};
+
+window.renderMemorial=function(){
+  const main=document.getElementById('memorialMain');if(!main)return;
+  if(!isMemorialActive()){
+    main.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--tx3)">위령제 이벤트가 종료되었습니다.</div>`;
+    return;
+  }
+  const day=getMemorialDay();
+  const ev=char._memorialEvent||{};
+  const claimed=new Set(ev.claimedRewards||[]);
+  const today=new Date().toISOString().slice(0,10);
+  const todayClaimed=ev.lastCheckinDate===today;
+  const challengeProgress=ev.dungeonCount||0;
+  const challengeTarget=MEMORIAL_EVENT.challenge.targetDungeons;
+
+  // 남은 시간
+  const now=Date.now();
+  const remain=MEMORIAL_EVENT.endTs-now;
+  const remainDays=Math.floor(remain/86400000);
+  const remainHours=Math.floor((remain%86400000)/3600000);
+
+  let html=`
+    <div style="background:linear-gradient(135deg,rgba(80,120,255,.08),rgba(140,80,200,.05));
+                border:1px solid rgba(80,120,255,.3);border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="font-size:13px;color:#80a0ff;font-style:italic;margin-bottom:8px">"심연에 사라진 아이들을 기리며, 그 영혼에 빛을 바친다."</div>
+      <div style="font-size:11px;color:var(--tx2)">이벤트 기간: 4월 27일 ~ 5월 5일 (어린이날) · 남은 시간: ${remainDays}일 ${remainHours}시간</div>
+      <div style="font-size:11px;color:var(--green);margin-top:6px">던전 가호: EXP +50% · 골드 +30% · 드랍률 +20%</div>
+    </div>`;
+
+  // 출석 보상 그리드
+  html+=`<div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px">
+    <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">🎏 9일 출석 보상</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px">`;
+  for(let d=1;d<=9;d++){
+    const r=MEMORIAL_EVENT.rewards[d-1];
+    const isClaimed=claimed.has(d);
+    const isToday=d===day&&!todayClaimed;
+    const isPast=d<day;
+    const isFuture=d>day;
+    const bgColor=isClaimed?'rgba(68,212,136,.1)':isToday?'rgba(240,192,64,.15)':isPast?'rgba(255,80,80,.05)':'rgba(255,255,255,.02)';
+    const borderColor=isClaimed?'var(--green)':isToday?'var(--gold)':'var(--bd2)';
+    html+=`<div style="background:${bgColor};border:1px solid ${borderColor};border-radius:6px;padding:8px;text-align:center;
+                       ${d===9?'box-shadow:0 0 12px rgba(255,34,68,.2)':''}">
+      <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">${d}일차${d===9?' (어린이날)':''}</div>
+      <div style="font-size:10px;color:var(--tx);line-height:1.4;min-height:32px">${r.desc.replace(/^\d+일차[^—]*—\s*/,'')}</div>
+      ${isClaimed?'<div style="font-size:10px;color:var(--green);margin-top:4px">✓ 수령 완료</div>':
+        isToday?`<button class="btn btn-gold btn-xs" style="margin-top:4px;width:100%" onclick="checkinMemorial()">출석</button>`:
+        isPast?'<div style="font-size:9px;color:var(--red);margin-top:4px">미수령</div>':
+        '<div style="font-size:9px;color:var(--tx3);margin-top:4px">대기 중</div>'}
+    </div>`;
+  }
+  html+='</div></div>';
+
+  // 추모의 빛 챌린지
+  const challengePct=Math.min(100,Math.round(challengeProgress/challengeTarget*100));
+  const challengeDone=ev.challengeClaimed;
+  html+=`<div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px">
+    <div style="font-size:11px;color:#80a0ff;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">✨ 추모의 빛 챌린지</div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">이벤트 기간 누적 던전 ${challengeTarget}회 클리어</div>
+    <div style="background:rgba(0,0,0,.3);border-radius:5px;height:14px;overflow:hidden;margin-bottom:6px">
+      <div style="background:linear-gradient(90deg,#80a0ff,#b060ff);height:100%;width:${challengePct}%;transition:width .3s"></div>
+    </div>
+    <div style="font-size:10px;color:var(--tx3);text-align:center">${challengeProgress} / ${challengeTarget} ${challengeDone?'<span style="color:var(--green)">✓ 보상 수령 완료 (심연의 잔영)</span>':''}</div>
+  </div>`;
+
+  // 위령제 보스 (5/5만)
+  if(isMemorialBossDay()){
+    const bossKilled=ev.bossKilled;
+    html+=`<div style="background:linear-gradient(135deg,rgba(255,34,68,.08),rgba(80,80,255,.05));
+                      border:2px solid rgba(255,34,68,.4);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:14px;color:#FF2244;font-weight:700;margin-bottom:6px">👹 ${MEMORIAL_BOSS.name}</div>
+      <div style="font-size:11px;color:var(--tx2);font-style:italic;margin-bottom:8px">${MEMORIAL_BOSS.desc}</div>
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">스킬: ${MEMORIAL_BOSS.skillDesc}</div>
+      ${bossKilled?
+        '<div style="font-size:11px;color:var(--green);text-align:center;padding:8px">✓ 토벌 완료 — 어린 왕의 옥좌 도면 획득</div>':
+        '<button class="btn btn-red" style="width:100%" onclick="startMemorialBoss()">⚔ 위령제 보스 토벌 (1회 한정)</button>'}
+    </div>`;
+  }else{
+    const daysToBoss=Math.ceil((MEMORIAL_EVENT.bossDay-now)/86400000);
+    html+=`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px;text-align:center">
+      <div style="font-size:11px;color:var(--tx3)">위령제 보스 등장까지 ${Math.max(0,daysToBoss)}일 남음</div>
+    </div>`;
+  }
+
+  main.innerHTML=html;
+};
+
+// ═══════════════════════════════════════════════════
+// ★ v3.0 — 합성대 시스템 (인챈트 / 가구 / 장비 — 핵심만)
+// ═══════════════════════════════════════════════════
+// 합성대 가구가 거점에 배치되어 있어야 활성화. 거점 안에서 진입.
+
+// 인챈트 합성: 동일 tier 3개 + 골드 → 다음 tier 1개
+const ENCH_SYNTH_COSTS={1:2000000,2:10000000,3:50000000,4:200000000,5:800000000};
+
+window.synthesizeEnchant=async function(tier){
+  if(!hasCrafterPlaced('enchant')){toast('인챈트 합성대가 거점에 배치되어 있지 않습니다');return;}
+  const cost=ENCH_SYNTH_COSTS[tier]||0;
+  const sources=Object.values(inv).filter(i=>i.isEnchantScroll&&(i.enchantTier||2)===tier&&!i._locked);
+  if(sources.length<3){toast(`tier ${tier} 인챈트 스크롤 3개가 필요합니다 (보유 ${sources.length})`);return;}
+  if(!canPay(cost)){toast(`골드 부족 (필요: ${cost.toLocaleString()}G)`);return;}
+  if(!confirm(`tier ${tier} 인챈트 3개를 ${cost.toLocaleString()}G 비용으로 합성합니다.\n결과: tier ${Math.min(5,tier+1)} 인챈트 (랜덤)`))return;
+  if(!await payGold(cost)){toast('결제 실패');return;}
+  // 재료 3개 소비
+  for(let i=0;i<3;i++){delete inv[sources[i].id];}
+  // 결과 생성
+  const newTier=Math.min(5,tier+1);
+  const isPrefix=Math.random()<0.5;
+  const pool=isPrefix?PRE.filter(e=>getEnchantTier(e.n)===newTier):SUF.filter(e=>getEnchantTier(e.n)===newTier);
+  const fallbackPool=isPrefix?PRE:SUF;
+  const enchData=pool.length?pool[Math.floor(Math.random()*pool.length)]:fallbackPool[Math.floor(Math.random()*fallbackPool.length)];
+  const result=genEnchantScrollItem(enchData,isPrefix,newTier,newTier);
+  result.tradeable=false; result._gotAt=Date.now();
+  await addItem(result);
+  await saveInv();updateTop();
+  toast(`✨ 합성 성공! ${result.name}`,5000);refreshSynthModalIfOpen();
+};
+
+// 가구 합성: 동일 등급 N개 + 골드 → 상위 등급 1개
+const FURN_SYNTH_DATA={
+  normal:    {count:5, cost:3000000,    nextGrade:'uncommon'},
+  uncommon:  {count:5, cost:15000000,   nextGrade:'rare'},
+  rare:      {count:5, cost:80000000,   nextGrade:'epic'},
+  epic:      {count:5, cost:400000000,  nextGrade:'legendary'},
+  legendary: {count:3, cost:2000000000, nextGrade:'set'},
+};
+
+window.synthesizeFurniture=async function(grade){
+  if(!hasCrafterPlaced('furniture')){toast('가구 제작대가 거점에 배치되어 있지 않습니다');return;}
+  const conf=FURN_SYNTH_DATA[grade];if(!conf){toast('합성 불가 등급');return;}
+  const sources=Object.values(inv).filter(i=>i.isFurniture&&i.grade===grade&&!i._locked);
+  if(sources.length<conf.count){toast(`${grade} 가구 ${conf.count}개 필요 (보유 ${sources.length})`);return;}
+  if(!canPay(conf.cost)){toast(`골드 부족 (필요: ${conf.cost.toLocaleString()}G)`);return;}
+  // ★ 결제 전 결과 풀 사전 검증 (재료 / 골드 손실 방지)
+  const pool=Object.entries(FURNITURE).filter(([id,f])=>f.grade===conf.nextGrade&&!f._eventOnly&&f.from?.includes('craft'));
+  if(!pool.length){toast(`결과 풀이 비어있습니다 (${conf.nextGrade} 등급 craft 가구 부재)`);return;}
+  if(!confirm(`${grade} 가구 ${conf.count}개를 ${conf.cost.toLocaleString()}G에 합성합니다.\n결과: ${conf.nextGrade} 등급 가구 (랜덤)`))return;
+  if(!await payGold(conf.cost)){toast('결제 실패');return;}
+  // 재료 소비
+  for(let i=0;i<conf.count;i++){delete inv[sources[i].id];}
+  const [resId]=pool[Math.floor(Math.random()*pool.length)];
+  const result=genFurnitureItem(resId);
+  if(!result){
+    // ★ 결과 생성 실패 시 환불 (안전망)
+    const r=distributeGold(char,conf.cost);
+    char.gold=r.gold; char._bankGold=r.bank; char._pendingGold=r.pending;
+    await saveChar();await saveInv();
+    toast('합성 결과 생성 실패 — 결제 환불');return;
+  }
+  result._gotAt=Date.now();
+  await addItem(result);
+  await saveInv();updateTop();
+  toast(`🪑 합성 성공! ${result.name}`,5000);refreshSynthModalIfOpen();
+};
+
+function hasCrafterPlaced(crafterType){
+  const placed=char?.house?.placedItems||[];
+  for(const p of placed){
+    const it=inv[p.itemId];
+    if(it&&it.crafterType===crafterType)return true;
+  }
+  return false;
+}
+
+// ★ v3.0 — 합성 UI 모달 헬퍼
+let _lastSynthType=null;
+function openSynthModal(title, html){
+  let modal=document.getElementById('synthModal');
+  if(modal)modal.remove();
+  modal=document.createElement('div');
+  modal.id='synthModal';
+  modal.style.cssText=`position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;
+                       display:flex;align-items:center;justify-content:center;padding:20px`;
+  modal.innerHTML=`
+    <div style="background:var(--sf);border:2px solid var(--purple);border-radius:10px;
+                padding:20px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;
+                box-shadow:0 0 30px rgba(176,96,255,.3)" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="font-family:'Cinzel',serif;font-size:15px;color:var(--purple)">${title}</div>
+        <button class="btn btn-ghost btn-xs" onclick="closeSynthModal()">✕ 닫기</button>
+      </div>
+      ${html}
+    </div>`;
+  modal.onclick=function(e){if(e.target===modal)closeSynthModal();};
+  document.body.appendChild(modal);
+}
+window.closeSynthModal=function(){
+  const m=document.getElementById('synthModal');if(m)m.remove();
+  _lastSynthType=null;
+};
+// ★ v3.0 — 합성 후 모달 자동 갱신
+function refreshSynthModalIfOpen(){
+  if(!document.getElementById('synthModal')||!_lastSynthType)return;
+  if(_lastSynthType==='gear')window.openGearSynth();
+  else if(_lastSynthType==='furniture')window.openFurnSynth();
+  else if(_lastSynthType==='enchant')window.openEnchSynth();
+}
+
+window.openGearSynth=function(){
+  _lastSynthType='gear';
+  const html=Object.entries(GEAR_SYNTH_DATA).map(([grade,conf])=>{
+    const sources=Object.values(inv).filter(i=>
+      !i.isFurniture&&!i.isScroll&&!i.isEnchantScroll&&!i.isProtectScroll&&!i.isExtractScroll&&
+      i.grade===grade&&!i._locked&&!isInPreset(i.id)
+    );
+    const enough=sources.length>=conf.count;
+    const canpay=canPay(conf.cost);
+    const ready=enough&&canpay;
+    return `<div class="card2 gb-${grade}" style="padding:9px;margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span class="g-${grade}" style="font-size:12px;font-weight:700">${grade.toUpperCase()} ×${conf.count}</span>
+        <span style="font-size:10px;color:var(--gold)">→ ${conf.nextGrade.toUpperCase()}</span>
+      </div>
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:5px">
+        보유 ${sources.length}/${conf.count} · 비용 ${conf.cost.toLocaleString()}G
+        ${grade==='legendary'?' <span style="color:var(--red)">⚠ 결과 거래 불가</span>':''}
+      </div>
+      <button class="btn btn-purple btn-xs" style="width:100%" onclick="synthesizeGear('${grade}')" ${ready?'':'disabled'}>
+        ${!enough?'재료 부족':!canpay?'골드 부족':'합성'}
+      </button>
+    </div>`;
+  }).join('');
+  openSynthModal('⚒️ 장비 합성',html);
+};
+
+window.openFurnSynth=function(){
+  _lastSynthType='furniture';
+  const html=Object.entries(FURN_SYNTH_DATA).map(([grade,conf])=>{
+    const sources=Object.values(inv).filter(i=>i.isFurniture&&i.grade===grade&&!i._locked);
+    const enough=sources.length>=conf.count;
+    const canpay=canPay(conf.cost);
+    const ready=enough&&canpay;
+    return `<div class="card2 gb-${grade}" style="padding:9px;margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span class="g-${grade}" style="font-size:12px;font-weight:700">${grade.toUpperCase()} ×${conf.count}</span>
+        <span style="font-size:10px;color:var(--gold)">→ ${conf.nextGrade.toUpperCase()}</span>
+      </div>
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:5px">
+        보유 ${sources.length}/${conf.count} · 비용 ${conf.cost.toLocaleString()}G
+      </div>
+      <button class="btn btn-purple btn-xs" style="width:100%" onclick="synthesizeFurniture('${grade}')" ${ready?'':'disabled'}>
+        ${!enough?'재료 부족':!canpay?'골드 부족':'합성'}
+      </button>
+    </div>`;
+  }).join('');
+  openSynthModal('🪑 가구 합성',html);
+};
+
+window.openEnchSynth=function(){
+  _lastSynthType='enchant';
+  const html=[1,2,3,4].map(tier=>{
+    const cost=ENCH_SYNTH_COSTS[tier]||0;
+    const sources=Object.values(inv).filter(i=>i.isEnchantScroll&&(i.enchantTier||2)===tier&&!i._locked);
+    const enough=sources.length>=3;
+    const canpay=canPay(cost);
+    const ready=enough&&canpay;
+    const tierName=ENCHANT_TIERS[tier]?.name||`tier ${tier}`;
+    const nextName=ENCHANT_TIERS[tier+1]?.name||`tier ${tier+1}`;
+    return `<div class="card2" style="padding:9px;margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:12px;font-weight:700;color:${ENCHANT_TIERS[tier]?.color||'var(--tx)'}">${tierName} ×3</span>
+        <span style="font-size:10px;color:var(--gold)">→ ${nextName}</span>
+      </div>
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:5px">
+        보유 ${sources.length}/3 · 비용 ${cost.toLocaleString()}G
+      </div>
+      <button class="btn btn-purple btn-xs" style="width:100%" onclick="synthesizeEnchant(${tier})" ${ready?'':'disabled'}>
+        ${!enough?'재료 부족':!canpay?'골드 부족':'합성'}
+      </button>
+    </div>`;
+  }).join('');
+  openSynthModal('📜 인챈트 합성',html);
+};
+
+// ★ v3.0 — 장비 합성 (동일 등급 ×5 + 골드 → 다음 등급 1개)
+const GEAR_SYNTH_DATA={
+  normal:    {count:5, cost:5000000,    nextGrade:'uncommon'},
+  uncommon:  {count:5, cost:20000000,   nextGrade:'rare'},
+  rare:      {count:5, cost:100000000,  nextGrade:'epic'},
+  epic:      {count:5, cost:500000000,  nextGrade:'legendary'},
+  legendary: {count:5, cost:3000000000, nextGrade:'set'},  // 유일 합성 30억G
+};
+
+window.synthesizeGear=async function(grade){
+  if(!hasCrafterPlaced('gear')){toast('장비 합성대가 거점에 배치되어 있지 않습니다');return;}
+  const conf=GEAR_SYNTH_DATA[grade];if(!conf){toast('합성 불가 등급');return;}
+  // 가구/스크롤/장신구는 제외, 잠금/프리셋 등록 제외
+  const sources=Object.values(inv).filter(i=>
+    !i.isFurniture&&!i.isScroll&&!i.isEnchantScroll&&!i.isProtectScroll&&!i.isExtractScroll&&
+    i.grade===grade&&!i._locked&&!isInPreset(i.id)
+  );
+  if(sources.length<conf.count){toast(`${grade} 등급 장비 ${conf.count}개 필요 (보유 ${sources.length})`);return;}
+  if(!canPay(conf.cost)){toast(`골드 부족 (필요: ${conf.cost.toLocaleString()}G)`);return;}
+  let confirmMsg=`${grade} 등급 장비 ${conf.count}개를 ${conf.cost.toLocaleString()}G에 합성합니다.\n결과: ${conf.nextGrade} 등급 장비 (랜덤, 거래 불가)`;
+  if(grade==='legendary'){
+    confirmMsg+=`\n\n⚠️ 유일(Set) 합성은 무작위 부위 + 거래 불가입니다.\n원하는 부위 확정 획득은 불가능합니다.`;
+  }
+  if(conf.cost>=100000000){
+    const pv=payPreview(conf.cost);
+    confirmMsg+=`\n└ 소지금 ${pv.inv.toLocaleString()}G + 은행 ${pv.bank.toLocaleString()}G 차감`;
+  }
+  if(!confirm(confirmMsg))return;
+  if(!await payGold(conf.cost)){toast('결제 실패');return;}
+  // 재료 5개 소비 (가장 낮은 가치 우선 — 강화 낮은 순, 인챈트 적은 순)
+  const sortedSources=[...sources].sort((a,b)=>{
+    const ae=(a.enhance||0)+(a.prefix?1:0)+(a.suffix?1:0);
+    const be=(b.enhance||0)+(b.prefix?1:0)+(b.suffix?1:0);
+    return ae-be;
+  });
+  for(let i=0;i<conf.count;i++){delete inv[sortedSources[i].id];}
+  // 결과 생성
+  let result;
+  if(conf.nextGrade==='set'){
+    result=genSetItem(Math.max(90,char.level||1));
+  }else{
+    // 무기 + 방어구 풀에서 랜덤 (장신구는 별도 처리 가능)
+    const wPool=WBASES.filter(b=>b.slot==='weapon');
+    const aPool=ABASES?ABASES.filter(b=>['head','chest','legs','boots','offhand','accessory','neck'].includes(b.slot)):[];
+    const allPool=[...wPool,...aPool];
+    result=genItem(allPool,conf.nextGrade,Math.max(1,char.level||1),false,0);
+  }
+  if(!result){toast('합성 결과 생성 실패');return;}
+  result.tradeable=false;
+  result._crafted=true;
+  result._gotAt=Date.now();
+  await addItem(result);
+  await saveInv();updateTop();
+  toast(`⚒️ 합성 성공! ${result.name}`,5000);refreshSynthModalIfOpen();
+  blogAdd&&blogAdd(`<span class="l-set">⚒️ 장비 합성 완료: ${result.name}</span>`);
+};
+
+// ═══════════════════════════════════════════════════
+// ★ v3.0 — 임시보관함 만료 처리
+// ═══════════════════════════════════════════════════
+async function processTempStorageExpiry(){
+  if(!char?._tempStorage)return;
+  const now=Date.now();
+  const remain={};
+  let removed=0, expiringSoon=0;
+  for(const[itemId,it]of Object.entries(char._tempStorage)){
+    if(!it||!it._expireAt){remain[itemId]=it; continue;}
+    if(it._expireAt<=now){removed++; continue;} // 만료 → 삭제
+    if(it._expireAt-now<86400000)expiringSoon++; // 24시간 미만
+    remain[itemId]=it;
+  }
+  if(removed>0){
+    char._tempStorage=remain;
+    await saveChar();
+    toast(`⚠️ 임시보관함 ${removed}개 만료 삭제`,5000);
+  }
+  if(expiringSoon>0){
+    toast(`⏰ 임시보관함 ${expiringSoon}개가 24시간 내 사라집니다`,5000);
+  }
+}
+
+// 게임 진입 시 1회 + 1시간마다 자동 체크
+setTimeout(processTempStorageExpiry,5000);
+setInterval(processTempStorageExpiry,3600000);
+
+// ★ v3.0 — 위령제 카드 표시 (이벤트 기간만)
+function refreshMemorialCard(){
+  const card=document.getElementById('memorialCard');
+  if(!card)return;
+  if(isMemorialActive()){
+    card.style.display='';
+    const desc=document.getElementById('memorialCardDesc');
+    if(desc){
+      const day=getMemorialDay();
+      const todayClaimed=char?._memorialEvent?.lastCheckinDate===new Date().toISOString().slice(0,10);
+      desc.textContent=day>0?`${day}일차 ${todayClaimed?'(출석 완료)':'(출석 가능!)'}`:'출석 보상 · 보스 토벌';
+    }
+  }else{
+    card.style.display='none';
+  }
+}
+setTimeout(refreshMemorialCard,2000);
+setInterval(refreshMemorialCard,60000); // 1분마다 갱신
 
 // LV SOON indicator
 setInterval(()=>{
