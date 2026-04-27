@@ -4155,10 +4155,11 @@ function renderInv(){
       ${it.isScroll?`<div style="font-size:8.5px;color:var(--lg);margin-bottom:2px">📜 주문서</div>`:''}
       ${it.isEnchantScroll?`<div style="font-size:8.5px;color:var(--purple);margin-bottom:2px">✨ 인챈트 스크롤</div>`:''}
       ${it.isSubjBox?`<div style="font-size:8.5px;color:var(--gold);margin-bottom:2px">📦 토벌전 보상 상자</div>`:''}
-      ${it.tradeable===true&&(!it.isScroll||it.isEnchantScroll)?`<div style="font-size:8px;color:var(--blue);background:rgba(74,143,255,.12);border:1px solid rgba(74,143,255,.25);border-radius:3px;padding:1px 4px;display:inline-block;margin-bottom:2px">🏛 거래가능</div>`:''}
-      <div class="icname g-${it.grade}">${it._locked?'🔒 ':''}${itName(it)}</div>
+      ${it.isFurniture?`<div style="font-size:8.5px;color:var(--gold);margin-bottom:2px">🏯 거점 가구</div>`:''}
+      ${it.tradeable===true&&!it.isFurniture&&(!it.isScroll||it.isEnchantScroll)?`<div style="font-size:8px;color:var(--blue);background:rgba(74,143,255,.12);border:1px solid rgba(74,143,255,.25);border-radius:3px;padding:1px 4px;display:inline-block;margin-bottom:2px">🏛 거래가능</div>`:''}
+      <div class="icname g-${it.grade}">${it._locked?'🔒 ':''}${it.isFurniture?(it.emoji||'📦')+' '+it.name:itName(it)}</div>
       <div style="display:flex;align-items:center;gap:2px;margin-bottom:1px">
-        <span class="ictype" style="font-size:9px">${it.isSubjBox?'토벌전 보상':`${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${it.hand?' · '+it.hand:''}`}</span>
+        <span class="ictype" style="font-size:9px">${it.isSubjBox?'토벌전 보상':it.isFurniture?`${FURN_CAT_KR[it.cat]||it.cat} · ${it.size?.[0]||1}×${it.size?.[1]||1}`:`${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot||''}${it.hand?' · '+it.hand:''}`}</span>
       </div>
       ${it.reqLv?`<div style="font-size:9px;${lvLock?'color:var(--red)':'color:var(--tx3)'}">Lv.${it.reqLv} 필요${lvLock?' 🔒':''}</div>`:''}
       ${ss?`<div class="icstat">${ss}</div>`:''}
@@ -4171,6 +4172,58 @@ function renderInv(){
 
 function openIM(it){
   if(!it)return;
+  // ★ v3.0 — 가구 아이템: 일반 장비 모달 우회, 거점 안내 모달 표시
+  if(it.isFurniture){
+    const passDesc=it.passive?FURNITURE_PASSIVES[it.passive]?.desc:'';
+    const slotDesc=it.slots?(it.targetType==='inv'?`인벤 +${it.slots}칸`:`창고 +${it.slots}칸`):'';
+    const grade=it.grade||'normal';
+    const gradeName=it.gradeName||GRADES[grade]?.name||grade;
+    const placedItems=char?.house?.placedItems||[];
+    const isPlaced=placedItems.some(p=>p.itemId===it.id);
+    document.getElementById('imtitle').innerHTML=`<span class="g-${grade}">${it.emoji||'📦'} ${it.name}</span>`;
+    document.getElementById('imbody').innerHTML=`
+      <div style="padding:6px 0">
+        <div style="text-align:center;font-size:48px;margin-bottom:10px">${it.emoji||'📦'}</div>
+        <div style="text-align:center;margin-bottom:12px">
+          <span class="g-${grade}" style="font-size:11px;font-weight:700">${gradeName}</span>
+          <span style="font-size:10px;color:var(--tx3);margin-left:8px">${FURN_CAT_KR[it.cat]||it.cat} · ${it.size?.[0]||1}×${it.size?.[1]||1}</span>
+        </div>
+        ${slotDesc?`<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:6px;padding:8px 10px;margin-bottom:8px">
+          <div style="font-size:10px;color:var(--blue);margin-bottom:2px">📦 슬롯 확장</div>
+          <div style="font-size:11px;color:var(--tx2)">${slotDesc}</div>
+        </div>`:''}
+        ${passDesc?`<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:6px;padding:8px 10px;margin-bottom:8px">
+          <div style="font-size:10px;color:var(--gold);margin-bottom:2px">✨ 패시브 효과</div>
+          <div style="font-size:11px;color:var(--tx2);line-height:1.5">${passDesc}</div>
+        </div>`:''}
+        ${it.crafterType?`<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:6px;padding:8px 10px;margin-bottom:8px">
+          <div style="font-size:10px;color:var(--purple);margin-bottom:2px">⚒️ 합성대</div>
+          <div style="font-size:11px;color:var(--tx2)">거점에 배치 시 ${it.crafterType==='gear'?'장비 합성':it.crafterType==='furniture'?'가구 합성':'인챈트 합성'} 활성화</div>
+        </div>`:''}
+        <div style="font-size:10.5px;color:var(--tx3);text-align:center;margin:10px 0;line-height:1.6">
+          ${isPlaced?'✅ 거점에 배치됨 — 거점에서 회수 가능':'🏯 거점에서 빈 칸을 클릭하여 배치하세요'}
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-gold" style="flex:2" onclick="document.getElementById('imodal').classList.remove('open');openStronghold()">🏯 거점으로 이동</button>
+          <button class="btn btn-ghost btn-sm" onclick="_furnLockToggle('${it.id}')">${it._locked?'🔓':'🔒'}</button>
+          ${!isPlaced&&it.tradeable?`<button class="btn btn-blue btn-sm" id="auctionBtn">🏛 경매</button>`:''}
+        </div>
+      </div>`;
+    // 잠금 토글
+    window._furnLockToggle=async function(furnId){
+      const f=inv[furnId];if(!f)return;
+      f._locked=!f._locked;
+      await saveInv();toast(f._locked?'🔒 잠금':'🔓 잠금 해제');
+      openIM(inv[furnId]);
+    };
+    // 경매 등록 (거래 가능 가구만)
+    if(!isPlaced&&it.tradeable){
+      const ab=document.getElementById('auctionBtn');
+      if(ab)ab.onclick=()=>{document.getElementById('imodal').classList.remove('open');openAuctionRegister&&openAuctionRegister(it.id);};
+    }
+    document.getElementById('imodal').classList.add('open');
+    return;
+  }
   // ★ 레이드 상자 처리
   if(it.isSubjBox){
     document.getElementById('imtitle').innerHTML=`<span class="g-epic">📦 토벌전 보상 상자</span>`;
