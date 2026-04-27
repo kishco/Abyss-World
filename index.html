@@ -2635,6 +2635,16 @@ function distributeGold(c, amount){
   if(overflowed)pending+=rem;
   return {gold,bank,pending,overflowed};
 }
+// ★ v3.x — 골드 획득 헬퍼: 소지금 1억 초과 자동 은행/대기금 분배
+// char.gold += amount 직접 더하면 1억 초과 시 표시/이관 버그 발생 → 이 헬퍼 통과 필수
+function gainGold(amount){
+  if(!char||amount<=0)return;
+  const r=distributeGold(char,amount);
+  char.gold=r.gold;
+  char._bankGold=r.bank;
+  char._pendingGold=r.pending;
+}
+window.gainGold=gainGold;
 // pending→bank, bank→gold 자동 회수 (여유 공간에 채움, 반환은 변경 필드만)
 function reclaimPending(c){
   const changes={};
@@ -2969,6 +2979,30 @@ async function selChar(id){
   }
   const is=await get(ref(db,`inv/${id}`));inv=is.val()||{};
   const ws=await get(ref(db,`warehouse/${id}`));warehouse=ws.val()||{};
+  // ★ v3.x — 파괴 방지 스크롤 자동 변환 마이그레이션 (1회만)
+  // 기존 인벤/창고에 카드로 남아있던 isProtectScroll → _forgeWard 스택으로 흡수
+  if(!char._protectMigV1){
+    let convertedCount=0;
+    for(const itemId of Object.keys(inv)){
+      const it=inv[itemId];
+      if(it&&it.isProtectScroll){delete inv[itemId];convertedCount++;}
+    }
+    for(const itemId of Object.keys(warehouse)){
+      const it=warehouse[itemId];
+      if(it&&it.isProtectScroll){delete warehouse[itemId];convertedCount++;}
+    }
+    if(convertedCount>0){
+      char._forgeWard=(char._forgeWard||0)+convertedCount;
+      console.log(`[protect migration] ${convertedCount} scrolls → _forgeWard (total: ${char._forgeWard})`);
+      // 즉시 저장 (Firebase에 영속화)
+      try{
+        await set(ref(db,`inv/${id}`),inv);
+        await set(ref(db,`warehouse/${id}`),warehouse);
+      }catch(e){console.error('[protect mig save fail]',e);}
+    }
+    char._protectMigV1=true;
+    equipMigrated=true;
+  }
   // ★ 인벤 마이그레이션
   let invMigrated=false;
   let invStatsDirty=false;
@@ -3814,7 +3848,7 @@ function trackMonsterKill(monsterName,area,attr,isBoss){
   char._codex[key].kills++;
   if(attr)char._codex[key].attr=attr; // 마지막 처치 속성 갱신
   if(char._codex[key].kills===1){
-    char.gold+=100;
+    gainGold(100);
     blogAdd&&blogAdd(`<span class="l-exp" style="color:var(--gold)">📖 도감 등록: ${master.name} (+100G)</span>`);
     // ★ 영역 컬렉션 100% 체크 (등록 직후)
     setTimeout(()=>checkCollectionReward(master.area).catch(()=>{}),100);
@@ -4863,6 +4897,8 @@ function renderInv(){
   const tf=document.getElementById('invType').value,gf=document.getElementById('invGrade').value;
   const sortMode=document.getElementById('invSort')?.value||'newest';
   let fil=items.filter(i=>{
+    // ★ v3.x — 가구는 인벤에서 숨김 (거점에서 관리 — 인벤 청결 유지)
+    if(i.isFurniture)return false;
     const to=!tf||(tf==='weapon'&&i.slot==='weapon')||(tf==='armor'&&['head','chest','legs','boots','offhand'].includes(i.slot))||(tf==='accessory'&&(i.slot==='accessory'||i.slot==='neck'))||(tf==='set'&&i.grade==='set')||(tf==='scroll'&&(i.isScroll||i.isEnchantScroll||i.isProtectScroll||i.isExtractScroll));
     return to&&(!gf||i.grade===gf);
   });
@@ -5027,7 +5063,7 @@ function openIM(it){
       const sc=inv[scrollItemId];if(!sc)return;
       if(sc._locked){toast('🔒 잠금된 스크롤은 판매할 수 없습니다');return;}
       if(!confirm(`${sc.name}\n100G에 판매하시겠습니까?`))return;
-      delete inv[scrollItemId];char.gold+=100;
+      delete inv[scrollItemId];gainGold(100);
       await saveChar();await saveInv();closeIM();renderInv();updateTop();toast(`💰 ${sc.name} 판매! +100G`);
     };
     window._enchScrollDisc=async function(){
@@ -5364,7 +5400,7 @@ function openIM(it){
     const eb=document.getElementById('imbody');
     const ebd=document.createElement('div');ebd.style.cssText='display:flex;gap:6px;margin-top:12px';
     ebd.innerHTML=`<button class="btn btn-gold btn-sm" style="flex:1">💰 판매 (100G)</button><button class="btn btn-red btn-sm">버리기</button>`;
-    ebd.children[0].onclick=async()=>{if(!confirm(`${it.name}\n100G에 판매?`))return;delete inv[it.id];char.gold+=100;await saveChar();await saveInv();closeIM();renderInv();updateTop();toast(`💰 +100G`);};
+    ebd.children[0].onclick=async()=>{if(!confirm(`${it.name}\n100G에 판매?`))return;delete inv[it.id];gainGold(100);await saveChar();await saveInv();closeIM();renderInv();updateTop();toast(`💰 +100G`);};
     ebd.children[1].onclick=async()=>{if(!confirm('버리시겠습니까?'))return;delete inv[it.id];await saveInv();closeIM();renderInv();toast('버림');};
     eb.appendChild(ebd);
     document.getElementById('imodal').classList.add('open');return;
@@ -5376,7 +5412,7 @@ function openIM(it){
       <div style="font-size:11px;color:var(--tx3);margin-bottom:12px">현재 스탯: STR${char.str} DEX${char.dex} INT${char.int} VIT${char.vit} LUK${char.luk}</div>
       <button class="btn btn-purple" id="useScrollBtn" style="width:100%;margin-bottom:8px">✨ 주문서 사용</button>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-gold btn-sm" style="flex:1" onclick="(async()=>{if(!confirm('100G에 판매?'))return;delete inv['${it.id}'];char.gold+=100;await saveChar();await saveInv();closeIM();renderInv();updateTop();toast('💰 +100G');})()">💰 판매 (100G)</button>
+        <button class="btn btn-gold btn-sm" style="flex:1" onclick="(async()=>{if(!confirm('100G에 판매?'))return;delete inv['${it.id}'];gainGold(100);await saveChar();await saveInv();closeIM();renderInv();updateTop();toast('💰 +100G');})()">💰 판매 (100G)</button>
         <button class="btn btn-red btn-sm" onclick="(async()=>{if(!confirm('버리시겠습니까?'))return;delete inv['${it.id}'];await saveInv();closeIM();renderInv();toast('버림');})()">버리기</button>
       </div>`;
     document.getElementById('useScrollBtn').onclick=()=>useRerollScroll(it.id);
@@ -5576,7 +5612,7 @@ function openIM(it){
     const sellBtn=document.createElement('button');
     sellBtn.className='btn btn-ghost btn-sm';sellBtn.style.cssText='margin-top:6px;width:100%';
     sellBtn.textContent='💰 판매 (100G)';
-    sellBtn.onclick=async()=>{if(!confirm('100G에 판매?'))return;delete inv[it.id];char.gold+=100;await saveChar();await saveInv();closeIM();renderInv();updateTop();toast('💰 +100G');};
+    sellBtn.onclick=async()=>{if(!confirm('100G에 판매?'))return;delete inv[it.id];gainGold(100);await saveChar();await saveInv();closeIM();renderInv();updateTop();toast('💰 +100G');};
     document.getElementById('imbody').appendChild(sellBtn);
   }
   document.getElementById('imodal').classList.add('open');
@@ -5822,7 +5858,7 @@ window.sellItem=async id=>{
   if(isEquipped){toast('장착 중인 장비는 판매할 수 없습니다');return;}
   const price=getSellPrice(it);
   // ★ 메모리 변경 + 즉시 렌더, 저장은 비동기 분리
-  char.gold+=price;delete inv[id];
+  gainGold(price);delete inv[id];
   toast(`💰 ${it.name} 판매! +${price}G`);
   updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
@@ -5838,7 +5874,7 @@ window.sellAllGear=async()=>{
   const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
   if(!confirm(`장비 전체 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·장착·프리셋·가구 제외)`))return;
   for(const it of toSell)delete inv[it.id];
-  char.gold+=total;
+  gainGold(total);
   toast(`💰 장비 ${toSell.length}개 전체 판매! +${total.toLocaleString()}G`);
   updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
@@ -5853,7 +5889,7 @@ window.sellByGrade=async grade=>{
   const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
   if(!confirm(`${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·가구 제외)`))return;
   for(const it of toSell)delete inv[it.id];
-  char.gold+=total;
+  gainGold(total);
   toast(`💰 ${toSell.length}개 일괄판매! +${total.toLocaleString()}G`);
   updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
@@ -5868,7 +5904,7 @@ window.sellAllEnchants=async function(){
   const total=toSell.length*100;
   if(!confirm(`인챈트 스크롤 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금 스크롤 제외)`))return;
   for(const it of toSell)delete inv[it.id];
-  char.gold+=total;
+  gainGold(total);
   toast(`💰 인챈트 스크롤 ${toSell.length}개 판매! +${total.toLocaleString()}G`);
   updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
@@ -5883,7 +5919,7 @@ window.sellEnchantsByTier=async function(tier){
   const total=toSell.length*100;
   if(!confirm(`[${et?.name||tier}등급] 인챈트 스크롤 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금 스크롤 제외)`))return;
   for(const it of toSell)delete inv[it.id];
-  char.gold+=total;
+  gainGold(total);
   await saveChar();await saveInv();updateTop();
   toast(`💰 [${et?.name}] 스크롤 ${toSell.length}개 판매! +${total.toLocaleString()}G`);
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
@@ -6230,8 +6266,8 @@ const BM_ITEMS=[
   {id:'bm_protect',    name:'파괴 방지 스크롤',     icon:'🛡', desc:'강화 실패 시 장비 파괴를 1번 막아줍니다 (자동 발동)', price:80000},
   {id:'bm_extract',    name:'인챈트 추출 스크롤',   icon:'💎', desc:'장비의 인챈트를 스크롤로 추출합니다',                price:120000},
   {id:'bm_deathward',  name:'죽음 방지 부적',       icon:'🧿', desc:'매우 어려움 사망 시 아이템 손실 1회 방지',           price:150000},
-  {id:'bm_invexp',     name:'인벤 확장권',          icon:'🎒', desc:'인벤토리 슬롯 +10 (영구)',                          price:500000},
-  {id:'bm_whexp',      name:'창고 확장권',          icon:'🏦', desc:'창고 슬롯 +20 (영구)',                              price:800000},
+  {id:'bm_invexp',     name:'인벤 확장권',          icon:'🎒', desc:'인벤토리 슬롯 +10 (영구, 최대 200슬롯, 가격 점진 증가)',                          price:500000},
+  {id:'bm_whexp',      name:'창고 확장권',          icon:'🏦', desc:'창고 슬롯 +20 (영구, 최대 500슬롯, 가격 점진 증가)',                              price:800000},
   {id:'bm_forgeguard', name:'강화 보장권',          icon:'⚒', desc:'다음 강화 1회 100% 성공 (실패/파괴 차단)',           price:2000000},
   {id:'bm_goldboost',  name:'골드 부스터',          icon:'💰', desc:'1시간 골드 획득 +50%',                              price:300000},
   {id:'bm_expboost',   name:'경험치 부스터',        icon:'📚', desc:'1시간 EXP 획득 +50%',                               price:300000},
@@ -6251,6 +6287,25 @@ function getBMDailyPool(){
     [arr[i],arr[j]]=[arr[j],arr[i]];
   }
   return arr.slice(0,6).map(idx=>BM_ITEMS[idx]);
+}
+// ★ v3.x — 영구 확장권 동적 가격 + cap 체크
+const BM_INVEXP_MAX=10;   // 인벤 최대 10회 (100 + 10×10 = 200슬롯)
+const BM_WHEXP_MAX=15;    // 창고 최대 15회 (200 + 20×15 = 500슬롯)
+function getBMDynamicPrice(itemId){
+  if(itemId==='bm_invexp'){
+    const c=char?._invExpPurchases||0;
+    return Math.floor(500000*Math.pow(1.3,c));
+  }
+  if(itemId==='bm_whexp'){
+    const c=char?._whExpPurchases||0;
+    return Math.floor(800000*Math.pow(1.3,c));
+  }
+  return null;
+}
+function getBMRemainingCount(itemId){
+  if(itemId==='bm_invexp')return Math.max(0,BM_INVEXP_MAX-(char?._invExpPurchases||0));
+  if(itemId==='bm_whexp')return Math.max(0,BM_WHEXP_MAX-(char?._whExpPurchases||0));
+  return null;
 }
 
 // ★ 암시장 글로벌 스케줄 (Firebase 기반 — 모든 유저 동일한 시간)
@@ -6364,15 +6419,22 @@ async function renderBlackMarket(sb){
       ${todayItems.map((item)=>{
         // BM_ITEMS 전체 풀에서 원본 인덱스 찾기 (bmBuy 호출용)
         const realIdx=BM_ITEMS.findIndex(b=>b.id===item.id);
-        return `<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:12px">
+        // ★ v3.x — 영구 확장권 동적 가격 + 진척도
+        const dynPrice=getBMDynamicPrice(item.id);
+        const remaining=getBMRemainingCount(item.id);
+        const finalPrice=dynPrice!==null?dynPrice:item.price;
+        const isMaxed=remaining===0;
+        const progressLine=remaining!==null?`<div style="font-size:9px;color:${isMaxed?'var(--red)':'var(--tx3)'};margin-top:2px">${isMaxed?'⛔ 최대 보유 슬롯 도달':`구매 가능 ${remaining}회 남음 · 다음 구매 시 가격 30% 증가`}</div>`:'';
+        return `<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:12px;${isMaxed?'opacity:.5':''}">
           <div style="font-size:28px;flex-shrink:0">${item.icon}</div>
           <div style="flex:1;min-width:0">
             <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--tx);margin-bottom:3px">${item.name}</div>
             <div style="font-size:10px;color:var(--tx3)">${item.desc}</div>
+            ${progressLine}
           </div>
           <div style="text-align:right;flex-shrink:0">
-            <div style="font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:12px;font-weight:700;margin-bottom:5px">💰${item.price.toLocaleString()}</div>
-            <button class="btn btn-red btn-xs" onclick="bmBuy(${realIdx})">구매</button>
+            <div style="font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:12px;font-weight:700;margin-bottom:5px">💰${finalPrice.toLocaleString()}</div>
+            <button class="btn btn-red btn-xs" onclick="bmBuy(${realIdx})" ${isMaxed?'disabled':''}>${isMaxed?'최대':'구매'}</button>
           </div>
         </div>`;
       }).join('')}
@@ -6389,8 +6451,20 @@ window.bmBuy=async(i)=>{
     const totalPts=(char.str-BASE.str)+(char.dex-BASE.dex)+(char.int-BASE.int)+(char.vit-BASE.vit)+(char.luk-BASE.luk);
     if(totalPts<=0){toast('재배분할 포인트가 없습니다 (기본값 이하)');return;}
   }
-  if(!confirm(`${item.name}을 ${item.price.toLocaleString()}G에 구매하시겠습니까?`))return;
-  if(!await payGold(item.price)){toast('결제 실패');return;}
+  // ★ v3.x — 영구 확장권 cap 체크 + 동적 가격
+  let actualPrice=item.price;
+  if(item.id==='bm_invexp'){
+    const remaining=getBMRemainingCount('bm_invexp');
+    if(remaining<=0){toast('⛔ 인벤 슬롯이 최대치(200)에 도달했습니다');return;}
+    actualPrice=getBMDynamicPrice('bm_invexp');
+  }else if(item.id==='bm_whexp'){
+    const remaining=getBMRemainingCount('bm_whexp');
+    if(remaining<=0){toast('⛔ 창고 슬롯이 최대치(500)에 도달했습니다');return;}
+    actualPrice=getBMDynamicPrice('bm_whexp');
+  }
+  if(!canPay(actualPrice)){toast('골드 부족');return;}
+  if(!confirm(`${item.name}을 ${actualPrice.toLocaleString()}G에 구매하시겠습니까?`))return;
+  if(!await payGold(actualPrice)){toast('결제 실패');return;}
   if(item.id==='bm_reroll'){
     const BASE={str:5,dex:5,int:3,vit:5,luk:2};
     const totalPts=(char.str-BASE.str)+(char.dex-BASE.dex)+(char.int-BASE.int)+(char.vit-BASE.vit)+(char.luk-BASE.luk);
@@ -6410,13 +6484,17 @@ window.bmBuy=async(i)=>{
     char._deathWard=(char._deathWard||0)+1;
     toast(`🧿 죽음 방지 부적 장착! (현재 ${char._deathWard}회 보유)`,4000);
   }else if(item.id==='bm_invexp'){
-    // ★ v3.x — 인벤 슬롯 +10 (영구)
+    // ★ v3.x — 인벤 슬롯 +10 (영구, 카운터 증가)
     char.invSlots=(char.invSlots||100)+10;
-    toast(`🎒 인벤토리 +10 슬롯! (현재 ${char.invSlots}슬롯)`,4000);
+    char._invExpPurchases=(char._invExpPurchases||0)+1;
+    const remain=getBMRemainingCount('bm_invexp');
+    toast(`🎒 인벤토리 +10 슬롯! (현재 ${char.invSlots}슬롯, 남은 구매 ${remain}회)`,4000);
   }else if(item.id==='bm_whexp'){
-    // ★ v3.x — 창고 슬롯 +20 (영구)
+    // ★ v3.x — 창고 슬롯 +20 (영구, 카운터 증가)
     char.whSlots=(char.whSlots||200)+20;
-    toast(`🏦 창고 +20 슬롯! (현재 ${char.whSlots}슬롯)`,4000);
+    char._whExpPurchases=(char._whExpPurchases||0)+1;
+    const remain=getBMRemainingCount('bm_whexp');
+    toast(`🏦 창고 +20 슬롯! (현재 ${char.whSlots}슬롯, 남은 구매 ${remain}회)`,4000);
   }else if(item.id==='bm_forgeguard'){
     // ★ v3.x — 강화 보장권 (다음 강화 1회 100% 성공)
     char._forgeGuarantee=(char._forgeGuarantee||0)+1;
@@ -7391,7 +7469,7 @@ async function handleTAClear(){
   _taBannerCache.ts=0; // ★ 캐시 무효화
   let rewardGold=5000;
   if(isNewBest&&prevBest>0){rewardGold+=10000;blogAdd(`<span class="l-exp" style="color:var(--gold)">🏆 최고 기록 갱신! ${prevBest}턴 → ${turns}턴</span>`);}
-  char.gold+=rewardGold;
+  gainGold(rewardGold);
   // ★ 스크롤 2개 (고급 티어)
   for(let i=0;i<2;i++){const sc=genTieredEnchantScroll(4,'hard');await addItem(sc);blogAdd(`<span class="l-set">📜 ${sc.name} 획득!</span>`);}
   blogAdd(`<span class="l-exp">💰 +${rewardGold.toLocaleString()}G</span>`);
@@ -7740,7 +7818,7 @@ function evFullHeal(){
 function evGoldRoom(){
   const myP=battle.players.find(p=>p.id===charId);if(!myP)return;
   const gold=Math.round((100+battle.tier.recLv*35)*battle.diff.goldMult*(1+char.luk*0.005)); // ★ 골드의 방 보상 상향
-  char.gold+=gold;saveChar();updateTop();
+  gainGold(gold);saveChar();updateTop();
   blogAdd(`<span class="l-exp">💰 금화가 가득! +${gold.toLocaleString()}G 획득!</span>`);
   setTimeout(()=>startActionPhase(),350);
 }
@@ -8643,7 +8721,7 @@ async function lootPhase(){
   goldMult*=memBoosts.gold;
   expFinal=Math.round(expFinal*memBoosts.exp);
   const finalGold=Math.round(totalGold*goldMult);
-  char.gold+=finalGold;
+  gainGold(finalGold);
   trackBounty('gold_earn',finalGold); // ★ 현상금 골드 획득 트래킹
   const lvUp=gainExp(expFinal);
   const boostMsg=memBoosts.exp>1?` <span style="color:#80a0ff;font-size:9px">[위령제 가호]</span>`:'';
@@ -10883,7 +10961,7 @@ function tryAutoSell(item){
     const itemRank=GRADE_RANK[item.grade]||0;
     if(itemRank<threshold){
       const price=getSellPrice(item);
-      char.gold+=price;
+      gainGold(price);
       blogAdd(`<span class="l-sys" style="color:var(--tx3)">💰 자동판매: ${item.name} (+${price}G)</span>`);
       return true;
     }
@@ -10892,7 +10970,7 @@ function tryAutoSell(item){
   if(item.isEnchantScroll&&char._autoSellScrollTier){
     const scrollTier=item.enchantTier||2;
     if(scrollTier<char._autoSellScrollTier){
-      char.gold+=100;
+      gainGold(100);
       blogAdd(`<span class="l-sys" style="color:var(--tx3)">💰 자동판매: ${item.name} (+100G)</span>`);
       return true;
     }
@@ -11671,7 +11749,7 @@ window.openSubjBox=async function(boxId){
   delete inv[boxId];
   // 골드 보상: 캐릭터 레벨 × 500~1500
   const goldAmt=rand(char.level*500, char.level*1500);
-  char.gold+=goldAmt;
+  gainGold(goldAmt);
   // 인챈트 스크롤: 레벨에 따라 티어 결정
   const scrollTier=char.level>=80?4:char.level>=60?3:char.level>=40?2:1;
   const isPrefix=Math.random()<0.5;
@@ -12085,7 +12163,7 @@ window.enterSubjBattle=function(){
     trackBounty('subj_dmg',dmg);
     // ★ 토벌전 참전 보상: 데미지 비례 골드 + 첫 일일 참전 스크롤
     const subjGold=Math.round(Math.min(dmg*0.5, 15000)); // 데미지의 50%, 상한 15,000G
-    char.gold+=subjGold;
+    gainGold(subjGold);
     slog(`<span class="l-exp">💰 토벌 보상: +${subjGold.toLocaleString()}G (데미지 비례)</span>`);
     // 첫 일일 참전 보너스: 인챈트 스크롤 1개
     const todayKey=getTodayKey();
@@ -12497,7 +12575,7 @@ window.enterChampBattle=async function(){
       await push(ref(db,'chat/system'),{author:'SYSTEM',text:`🥊 ${char.name}이(가) ${champ.name}을(를) 꺾고 새 챔프가 되었습니다!`,ts:Date.now(),isAdmin:true});
       // ★ 챔프 등극 보상
       const champRewardGold=10000;
-      char.gold+=champRewardGold;
+      gainGold(champRewardGold);
       clog(`<span class="l-exp">💰 챔프 등극 보상: +${champRewardGold.toLocaleString()}G</span>`);
       for(let i=0;i<2;i++){const sc=genTieredEnchantScroll(4,'vhard');await addItem(sc);clog(`<span class="l-set">📜 ${sc.name} 획득!</span>`);}
       await saveChar();await saveInv();updateTop();
