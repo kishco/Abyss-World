@@ -3488,9 +3488,15 @@ window.unequip=async function(sl){
   const it=char.equipment[sl];if(!it)return;
   char.equipment[sl]=null;
   inv[it.id]=it;
-  await saveChar();await saveInv();
-  renderChar();renderEq();renderSetPanel();
+  // ★ v3.x — 화면 즉시 갱신 후 저장
   toast(it.name+' 해제');
+  renderChar();renderEq();renderSetPanel();
+  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  try{
+    await saveChar();await saveInv();
+  }catch(e){
+    console.error('[unequip save FAILED]',e);
+  }
 };
 async function equipItem(it){
   // ★ 레벨 제한 체크
@@ -3517,8 +3523,17 @@ async function equipItem(it){
   // ★ v3.0 핫픽스 — 착용해도 잠금 유지 (잠금 = 판매/경매 차단 의미, 장착과 무관)
   toast(it.name+(it._locked?' 장착! (🔒 잠금 유지)':' 장착!'));
   char.equipment[sl]=it;delete inv[it.id];
-  await saveChar();await saveInv();closeIM();
+  // ★ v3.x 핫픽스 — 화면 즉시 갱신 (저장 실패해도 UI 업데이트 보장)
+  closeIM();
   renderChar();renderEq();renderSetPanel();
+  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  // 저장은 비동기로 분리 (렌더 블로킹 방지)
+  try{
+    await saveChar();await saveInv();
+  }catch(e){
+    console.error('[equipItem save FAILED]',e);
+    // 저장 실패해도 사용자에게는 토스트만 (이미 표시된 장착 토스트 위에 표시됨)
+  }
 }
 
 // ════════════════════════════════════════════
@@ -5095,8 +5110,16 @@ window.equipItemSlot=async(itemId,slot)=>{
   const prev=char.equipment[slot];if(prev)inv[prev.id]=prev;
   // ★ v3.0 핫픽스 — 착용해도 잠금 유지
   char.equipment[slot]=it;delete inv[it.id];
-  await saveChar();await saveInv();closeIM();
+  // ★ v3.x — 화면 즉시 갱신 (저장 실패해도 UI 보장)
   toast(`${it.name} → 장신구${slot.slice(-1)} 장착!${it._locked?' (🔒 잠금 유지)':''}`);
+  closeIM();
+  renderChar();renderEq();renderSetPanel();
+  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  try{
+    await saveChar();await saveInv();
+  }catch(e){
+    console.error('[equipItemSlot save FAILED]',e);
+  }
 };
 function closeIM(){document.getElementById('imodal').classList.remove('open');}
 window.closeIM=closeIM;
@@ -13247,11 +13270,16 @@ window.renderMemorial=function(){
   const remainDays=Math.floor(remain/86400000);
   const remainHours=Math.floor((remain%86400000)/3600000);
 
+  // ★ 동적 날짜 표기 (endTs 기준, KST 강제)
+  const _kstFmt=(t)=>{
+    const d=new Date(t+9*3600000); // UTC + 9h
+    return `${d.getUTCMonth()+1}월 ${d.getUTCDate()}일`;
+  };
   let html=`
     <div style="background:linear-gradient(135deg,rgba(80,120,255,.08),rgba(140,80,200,.05));
                 border:1px solid rgba(80,120,255,.3);border-radius:10px;padding:16px;margin-bottom:14px">
       <div style="font-size:13px;color:#80a0ff;font-style:italic;margin-bottom:8px">"심연에 사라진 아이들을 기리며, 그 영혼에 빛을 바친다."</div>
-      <div style="font-size:11px;color:var(--tx2)">이벤트 기간: 4월 27일 ~ 5월 5일 (어린이날) · 남은 시간: ${remainDays}일 ${remainHours}시간</div>
+      <div style="font-size:11px;color:var(--tx2)">이벤트 기간: ${_kstFmt(MEMORIAL_EVENT.startTs)} ~ ${_kstFmt(MEMORIAL_EVENT.endTs)} · 보스 등장: ${_kstFmt(MEMORIAL_EVENT.bossDay)} (어린이날) · 남은 시간: ${remainDays}일 ${remainHours}시간</div>
       <div style="font-size:11px;color:var(--green);margin-top:6px">던전 가호: EXP +50% · 골드 +30% · 드랍률 +20%</div>
     </div>`;
 
