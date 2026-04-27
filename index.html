@@ -1857,7 +1857,7 @@ const SETS={
   arcane_scholar:{name:'비전 학자',col:'#cc88ff',pcs:{
     as_hat:    {n:'학자 모자',         slot:'head',  stats:{matk:92, hp:180}},
     as_robe:   {n:'학자 로브',         slot:'chest', stats:{matk:122,hp:220}},
-    as_staff:  {n:'학자 지팡이',       slot:'weapon',hand:'2H',stats:{matk:265,hp:160,balance:68}},
+    as_staff:  {n:'학자 지팡이',       slot:'weapon',hand:'1H',stats:{matk:265,hp:160,balance:68}},
     as_amulet: {n:'학자 부적',         slot:'accessory',stats:{matk:85,hp:160}},
   },bonuses:[
     {cnt:2,desc:'MATK+60 INT 효율+20%',b:{matk:60,_intBonus:0.20}},
@@ -3027,6 +3027,45 @@ async function selChar(id){
     char._protectMigV1=true;
     equipMigrated=true;
   }
+  // ★ v3.x — hand 필드 마이그레이션 (학자 지팡이 2H→1H 등 base 변경 반영)
+  if(!char._handMigV1){
+    const allBases=[...WBASES,...ABASES,...ACCBASES];
+    let handFixed=0;
+    const fixHand=(it)=>{
+      if(!it||!it.baseId)return false;
+      const base=allBases.find(b=>b.id===it.baseId);
+      if(!base||!base.hand)return false;
+      if(it.hand!==base.hand){it.hand=base.hand;return true;}
+      return false;
+    };
+    // 인벤
+    for(const it of Object.values(inv))if(fixHand(it))handFixed++;
+    // 창고
+    for(const it of Object.values(warehouse))if(fixHand(it))handFixed++;
+    // 장착 중 장비
+    for(const it of Object.values(char.equipment||{}))if(fixHand(it))handFixed++;
+    // 프리셋
+    for(const p of (char._presets||[])){
+      for(const it of Object.values(p.equipment||{}))if(fixHand(it))handFixed++;
+    }
+    if(handFixed>0){
+      console.log(`[hand migration] ${handFixed} items hand fixed`);
+      try{
+        await set(ref(db,`inv/${id}`),inv);
+        await set(ref(db,`warehouse/${id}`),warehouse);
+      }catch(e){console.error('[hand mig save fail]',e);}
+    }
+    char._handMigV1=true;
+    equipMigrated=true;
+  }
+  // ★ v3.x — 도감 컬렉션 보상 자동 회수 (이미 100% 달성한 영역 보상 누락 방지)
+  // 보상 시스템 출시 전에 100% 달성한 사용자도 보상 받을 수 있도록 진입 시 체크
+  setTimeout(()=>{
+    if(typeof checkCollectionReward!=='function')return;
+    Object.keys(AREA_META).forEach(area=>{
+      checkCollectionReward(area).catch(e=>console.warn('[auto collection check]',area,e));
+    });
+  },2000); // 다른 마이그레이션 완료 후 2초 뒤
   // ★ 인벤 마이그레이션
   let invMigrated=false;
   let invStatsDirty=false;
@@ -4707,6 +4746,8 @@ function migrateItem(it){
   const allBases=[...WBASES,...ABASES,...ACCBASES];
   const base=allBases.find(b=>b.id===it.baseId);
   if(!base){it._v=2;return it;}
+  // ★ v3.x — hand 필드 base 기준 강제 갱신 (학자 지팡이 2H→1H 같은 변경 반영)
+  if(base.hand)it.hand=base.hand;
   const lv=it.reqLv||it.reqLv||1; // ★ _lv3 마이그레이션 후엔 reqLv 사용
   const grade=it.grade||'normal';
   const newMult=GRADES[grade]?.mult||1;
@@ -14266,8 +14307,25 @@ function matsShortageMsg(mats){
 window.synthesizeFurniture=async function(grade){
   if(!hasCrafterPlaced('furniture')){toast('가구 제작대가 거점에 배치되어 있지 않습니다');return;}
   const conf=FURN_SYNTH_DATA[grade];if(!conf){toast('합성 불가 등급');return;}
-  const sources=Object.values(inv).filter(i=>i.isFurniture&&i.grade===grade&&!i._locked);
-  if(sources.length<conf.count){toast(`${grade} 가구 ${conf.count}개 필요 (보유 ${sources.length})`);return;}
+  // ★ v3.x — 보호 강화: 잠금 + 거점 배치 + 이벤트 한정 + 프리셋 모두 제외
+  const placedItems=char?.house?.placedItems||[];
+  const placedIds=new Set(placedItems.map(p=>p.itemId));
+  const sources=Object.values(inv).filter(i=>
+    i.isFurniture &&
+    i.grade===grade &&
+    !i._locked &&                  // 잠금 제외
+    !placedIds.has(i.id) &&         // 거점 배치 제외
+    !i._eventOnly &&                // 이벤트 한정 제외 (위령제 가구 등)
+    !isInPreset(i.id)               // 프리셋 제외
+  );
+  if(sources.length<conf.count){
+    // 보호된 가구 개수 정보 함께 표시
+    const allSameGrade=Object.values(inv).filter(i=>i.isFurniture&&i.grade===grade);
+    const protectedCnt=allSameGrade.length-sources.length;
+    let msg=`${grade} 가구 ${conf.count}개 필요 (사용 가능 ${sources.length})`;
+    if(protectedCnt>0)msg+=`\n(보호 중인 가구 ${protectedCnt}개 — 잠금/배치/이벤트한정 가구는 재료로 사용 안 됨)`;
+    toast(msg,5000);return;
+  }
   if(!canPay(conf.cost)){toast(`골드 부족 (필요: ${conf.cost.toLocaleString()}G)`);return;}
   // ★ 재료 검증
   if(!canAffordMaterials(conf.mats)){toast(`재료 부족: ${matsShortageMsg(conf.mats)}`,6000);return;}
@@ -14367,8 +14425,17 @@ window.openGearSynth=function(){
 
 window.openFurnSynth=function(){
   _lastSynthType='furniture';
+  const placedItems=char?.house?.placedItems||[];
+  const placedIds=new Set(placedItems.map(p=>p.itemId));
   const html=Object.entries(FURN_SYNTH_DATA).map(([grade,conf])=>{
-    const sources=Object.values(inv).filter(i=>i.isFurniture&&i.grade===grade&&!i._locked);
+    // ★ v3.x — 사용 가능 = 잠금/배치/이벤트한정/프리셋 모두 제외 (실제 합성 사용 풀과 동일)
+    const sources=Object.values(inv).filter(i=>
+      i.isFurniture&&i.grade===grade&&
+      !i._locked&&
+      !placedIds.has(i.id)&&
+      !i._eventOnly&&
+      !isInPreset(i.id)
+    );
     const enough=sources.length>=conf.count;
     const canpay=canPay(conf.cost);
     const matsOk=canAffordMaterials(conf.mats);
@@ -14385,7 +14452,7 @@ window.openFurnSynth=function(){
         <span style="font-size:10px;color:var(--gold)">→ ${conf.nextGrade.toUpperCase()}</span>
       </div>
       <div style="font-size:10px;color:var(--tx3);margin-bottom:3px">
-        보유 ${sources.length}/${conf.count} · 비용 ${conf.cost.toLocaleString()}G
+        사용 가능 ${sources.length}/${conf.count} · 비용 ${conf.cost.toLocaleString()}G
       </div>
       ${matStr?`<div style="font-size:9px;margin-bottom:5px">${matStr}</div>`:''}
       <button class="btn btn-purple btn-xs" style="width:100%" onclick="synthesizeFurniture('${grade}')" ${ready?'':'disabled'}>
@@ -14393,7 +14460,12 @@ window.openFurnSynth=function(){
       </button>
     </div>`;
   }).join('');
-  openSynthModal('🪑 가구 합성',html);
+  // ★ 보호 규칙 안내
+  const guard=`<div style="background:rgba(64,160,255,.06);border:1px solid rgba(64,160,255,.25);border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:10px;line-height:1.6;color:var(--tx2)">
+    🛡 <b>재료 사용 제외 규칙</b><br>
+    <span style="color:var(--tx3);font-size:9px">잠금 가구 · 거점 배치 가구 · 이벤트 한정 가구 · 프리셋 등록 가구</span>
+  </div>`;
+  openSynthModal('🪑 가구 합성',guard+html);
 };
 
 window.openEnchSynth=function(){
