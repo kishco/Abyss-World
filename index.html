@@ -1967,9 +1967,10 @@ const FURNITURE={
   soul_altar:     {n:'영혼석 제단',   emoji:'🔮',cat:'passive',size:[2,2],grade:'set',      from:['craft','boss_drop'],tradeable:false,passive:'soul_harvest'},
 
   // ── 합성대 / 제작대 (2종, 거래 불가) ──
-  forge_synth:    {n:'장비 합성대',   emoji:'⚒️',cat:'crafter',size:[2,2],grade:'epic',     from:['craft'],            tradeable:false,cost:50000000, crafterType:'gear'},
-  furniture_workshop:{n:'가구 제작대',emoji:'🪚',cat:'crafter',size:[2,2],grade:'epic',     from:['craft'],            tradeable:false,cost:50000000, crafterType:'furniture'},
-  enchant_synth:  {n:'인챈트 합성대', emoji:'📜',cat:'crafter',size:[1,2],grade:'legendary',from:['craft'],            tradeable:false,cost:100000000,crafterType:'enchant'},
+  // ── 합성대 / 제작대 (3종, 거래 불가, 가구 상점 판매) ──
+  forge_synth:    {n:'장비 합성대',   emoji:'⚒️',cat:'crafter',size:[2,2],grade:'epic',     from:['shop','craft'], tradeable:false,cost:50000000, crafterType:'gear'},
+  furniture_workshop:{n:'가구 제작대',emoji:'🪚',cat:'crafter',size:[2,2],grade:'epic',     from:['shop','craft'], tradeable:false,cost:50000000, crafterType:'furniture'},
+  enchant_synth:  {n:'인챈트 합성대', emoji:'📜',cat:'crafter',size:[1,2],grade:'legendary',from:['shop','craft'], tradeable:false,cost:100000000,crafterType:'enchant'},
 
   // ── ★ v3.0 — 어린이날 위령제 한정 가구 (이벤트 종료 후 거래 불가 유지) ──
   memorial_lantern:{n:'잃어버린 영혼의 등불',emoji:'🏮',cat:'passive',size:[1,1],grade:'set',from:['event'],tradeable:false,passive:'war_banner',_eventOnly:'memorial2026'},
@@ -4917,7 +4918,8 @@ function getSellPrice(it){
 function renderSell(sb){
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
   // 기타 주문서(파괴방지/추출/재조정)는 판매 화면에서 제외 — 별도 기능에서만 사용
-  const miscScrollTypes=it=>it.isScroll||it.isProtectScroll||it.isExtractScroll||it.isSubjBox;
+  // ★ 핫픽스 — 가구도 판매 화면에서 제외 (거점 시스템에서만 다룸)
+  const miscScrollTypes=it=>it.isScroll||it.isProtectScroll||it.isExtractScroll||it.isSubjBox||it.isFurniture;
   const items=Object.values(inv).filter(i=>!miscScrollTypes(i));
   const enchants=items.filter(i=>i.isEnchantScroll);
   const gear=items.filter(i=>!i.isEnchantScroll);
@@ -4960,7 +4962,7 @@ function renderSell(sb){
     </div>
   </div>`;
 
-  const allSellableGear=Object.values(inv).filter(it=>!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id)&&it.slot&&!['scroll'].includes(it.slot));
+  const allSellableGear=Object.values(inv).filter(it=>!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it.isFurniture&&!it._locked&&!equippedIds.has(it.id)&&it.slot&&!['scroll'].includes(it.slot));
   const allGearTotal=allSellableGear.reduce((s,it)=>s+getSellPrice(it),0);
   const allGearBulkBtn=allSellableGear.length?`<div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.08);padding-top:7px;margin-top:3px">
     <span style="font-size:10px;color:var(--tx3)">전체 ${allSellableGear.length}개 (잠금 제외)</span>
@@ -5042,6 +5044,8 @@ function renderSell(sb){
 
 window.sellItem=async id=>{
   const it=inv[id];if(!it)return;
+  // ★ 핫픽스 — 가구는 거점 시스템에서만 처리 (판매 차단)
+  if(it.isFurniture){toast('🏯 가구는 거점에서 회수 후 처리해야 합니다');return;}
   if(it._locked){toast('🔒 잠금된 아이템은 판매할 수 없습니다');return;}
   const presetName=isInPreset(id);
   if(presetName){toast(`⚡ 프리셋 [${presetName}]에 등록된 아이템입니다`,4000);return;}
@@ -5056,10 +5060,11 @@ window.sellItem=async id=>{
 
 window.sellAllGear=async()=>{
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
-  const toSell=Object.values(inv).filter(it=>!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id)&&!isInPreset(it.id)&&it.slot&&it.slot!=='scroll');
+  // ★ 핫픽스 — 가구 명시 제외 (거점 시스템 분리)
+  const toSell=Object.values(inv).filter(it=>!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it.isFurniture&&!it._locked&&!equippedIds.has(it.id)&&!isInPreset(it.id)&&it.slot&&it.slot!=='scroll');
   if(!toSell.length){toast('판매할 장비 없음');return;}
   const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
-  if(!confirm(`장비 전체 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·장착·프리셋 아이템 제외)`))return;
+  if(!confirm(`장비 전체 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·장착·프리셋·가구 제외)`))return;
   for(const it of toSell)delete inv[it.id];
   char.gold+=total;
   await saveChar();await saveInv();updateTop();
@@ -5068,10 +5073,11 @@ window.sellAllGear=async()=>{
 };
 window.sellByGrade=async grade=>{
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
-  const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it._locked&&!equippedIds.has(it.id)&&!isInPreset(it.id));
+  // ★ 핫픽스 — 가구 명시 제외 (거점 시스템 분리)
+  const toSell=Object.values(inv).filter(it=>it.grade===grade&&!it.isScroll&&!it.isEnchantScroll&&!it.isProtectScroll&&!it.isExtractScroll&&!it.isSubjBox&&!it.isFurniture&&!it._locked&&!equippedIds.has(it.id)&&!isInPreset(it.id));
   if(!toSell.length){toast('판매할 아이템 없음');return;}
   const total=toSell.reduce((s,it)=>s+getSellPrice(it),0);
-  if(!confirm(`${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금 아이템 제외)`))return;
+  if(!confirm(`${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·가구 제외)`))return;
   for(const it of toSell)delete inv[it.id];
   char.gold+=total;
   await saveChar();await saveInv();updateTop();
@@ -12808,14 +12814,46 @@ window.synthesizeEnchant=async function(tier){
   toast(`✨ 합성 성공! ${result.name}`,5000);refreshSynthModalIfOpen();
 };
 
-// 가구 합성: 동일 등급 N개 + 골드 → 상위 등급 1개
+// 가구 합성: 동일 등급 N개 + 골드 + 재료 → 상위 등급 1개
 const FURN_SYNTH_DATA={
-  normal:    {count:5, cost:3000000,    nextGrade:'uncommon'},
-  uncommon:  {count:5, cost:15000000,   nextGrade:'rare'},
-  rare:      {count:5, cost:80000000,   nextGrade:'epic'},
-  epic:      {count:5, cost:400000000,  nextGrade:'legendary'},
-  legendary: {count:3, cost:2000000000, nextGrade:'set'},
+  normal:    {count:5, cost:3000000,    nextGrade:'uncommon', mats:{wood:5}},
+  uncommon:  {count:5, cost:15000000,   nextGrade:'rare',     mats:{wood:10,steel:3}},
+  rare:      {count:5, cost:80000000,   nextGrade:'epic',     mats:{steel:10,magicCrystal:2}},
+  epic:      {count:5, cost:400000000,  nextGrade:'legendary',mats:{steel:15,magicCrystal:8,blueprint:1}},
+  legendary: {count:3, cost:2000000000, nextGrade:'set',      mats:{magicCrystal:20,abyssShard:5,blueprint:3}},
 };
+
+// ★ 재료 한국어 라벨 (UI용)
+const MAT_LABEL={wood:'🪵 목재',steel:'⚙️ 강철',magicCrystal:'💎 마법 결정',abyssShard:'🩸 심연의 파편',blueprint:'📜 도면'};
+
+// ★ 재료 보유량 검증
+function canAffordMaterials(mats){
+  if(!mats)return true;
+  const have=char._materials||{};
+  for(const[k,v]of Object.entries(mats)){
+    if((have[k]||0)<v)return false;
+  }
+  return true;
+}
+// ★ 재료 소비
+function consumeMaterials(mats){
+  if(!mats)return;
+  if(!char._materials)char._materials={wood:0,steel:0,magicCrystal:0,abyssShard:0,blueprint:0};
+  for(const[k,v]of Object.entries(mats)){
+    char._materials[k]=Math.max(0,(char._materials[k]||0)-v);
+  }
+}
+// ★ 재료 부족 메시지
+function matsShortageMsg(mats){
+  if(!mats)return '';
+  const have=char._materials||{};
+  const lack=[];
+  for(const[k,v]of Object.entries(mats)){
+    const got=have[k]||0;
+    if(got<v)lack.push(`${MAT_LABEL[k]||k} ${got}/${v}`);
+  }
+  return lack.join(', ');
+}
 
 window.synthesizeFurniture=async function(grade){
   if(!hasCrafterPlaced('furniture')){toast('가구 제작대가 거점에 배치되어 있지 않습니다');return;}
@@ -12823,12 +12861,16 @@ window.synthesizeFurniture=async function(grade){
   const sources=Object.values(inv).filter(i=>i.isFurniture&&i.grade===grade&&!i._locked);
   if(sources.length<conf.count){toast(`${grade} 가구 ${conf.count}개 필요 (보유 ${sources.length})`);return;}
   if(!canPay(conf.cost)){toast(`골드 부족 (필요: ${conf.cost.toLocaleString()}G)`);return;}
+  // ★ 재료 검증
+  if(!canAffordMaterials(conf.mats)){toast(`재료 부족: ${matsShortageMsg(conf.mats)}`,6000);return;}
   // ★ 결제 전 결과 풀 사전 검증 (재료 / 골드 손실 방지)
   const pool=Object.entries(FURNITURE).filter(([id,f])=>f.grade===conf.nextGrade&&!f._eventOnly&&f.from?.includes('craft'));
   if(!pool.length){toast(`결과 풀이 비어있습니다 (${conf.nextGrade} 등급 craft 가구 부재)`);return;}
-  if(!confirm(`${grade} 가구 ${conf.count}개를 ${conf.cost.toLocaleString()}G에 합성합니다.\n결과: ${conf.nextGrade} 등급 가구 (랜덤)`))return;
+  const matStr=Object.entries(conf.mats||{}).map(([k,v])=>`${MAT_LABEL[k]||k} ×${v}`).join(', ');
+  if(!confirm(`${grade} 가구 ${conf.count}개 + ${conf.cost.toLocaleString()}G + ${matStr}\n결과: ${conf.nextGrade} 등급 가구 (랜덤)`))return;
   if(!await payGold(conf.cost)){toast('결제 실패');return;}
   // 재료 소비
+  consumeMaterials(conf.mats);
   for(let i=0;i<conf.count;i++){delete inv[sources[i].id];}
   const [resId]=pool[Math.floor(Math.random()*pool.length)];
   const result=genFurnitureItem(resId);
@@ -12921,17 +12963,25 @@ window.openFurnSynth=function(){
     const sources=Object.values(inv).filter(i=>i.isFurniture&&i.grade===grade&&!i._locked);
     const enough=sources.length>=conf.count;
     const canpay=canPay(conf.cost);
-    const ready=enough&&canpay;
+    const matsOk=canAffordMaterials(conf.mats);
+    const ready=enough&&canpay&&matsOk;
+    const have=char._materials||{};
+    const matStr=Object.entries(conf.mats||{}).map(([k,v])=>{
+      const got=have[k]||0;
+      const ok=got>=v;
+      return `<span style="color:${ok?'var(--green)':'var(--red)'}">${MAT_LABEL[k]||k} ${got}/${v}</span>`;
+    }).join(' · ');
     return `<div class="card2 gb-${grade}" style="padding:9px;margin-bottom:6px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <span class="g-${grade}" style="font-size:12px;font-weight:700">${grade.toUpperCase()} ×${conf.count}</span>
         <span style="font-size:10px;color:var(--gold)">→ ${conf.nextGrade.toUpperCase()}</span>
       </div>
-      <div style="font-size:10px;color:var(--tx3);margin-bottom:5px">
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:3px">
         보유 ${sources.length}/${conf.count} · 비용 ${conf.cost.toLocaleString()}G
       </div>
+      ${matStr?`<div style="font-size:9px;margin-bottom:5px">${matStr}</div>`:''}
       <button class="btn btn-purple btn-xs" style="width:100%" onclick="synthesizeFurniture('${grade}')" ${ready?'':'disabled'}>
-        ${!enough?'재료 부족':!canpay?'골드 부족':'합성'}
+        ${!enough?'가구 부족':!canpay?'골드 부족':!matsOk?'재료 부족':'합성'}
       </button>
     </div>`;
   }).join('');
