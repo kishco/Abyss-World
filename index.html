@@ -225,6 +225,27 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .fdot.boss{border-color:var(--red);}
 .clog{background:rgba(0,0,0,.45);border:1px solid var(--bd);border-radius:7px;padding:8px;max-height:320px;overflow-y:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.9;}
 .l-dmg{color:#ff6060;}.l-heal{color:var(--green);}.l-item{color:var(--lg);}.l-set{color:#00ffcc;}.l-exp{color:var(--blue);}.l-sys{color:var(--tx3);}.l-crit{color:#ff9900;font-weight:600;}.l-skill{color:var(--purple);}.l-warn{color:#ff9900;font-weight:700;}.l-dead{color:var(--red);font-weight:700;}.l-revive{color:var(--green);font-weight:700;}
+/* ★ v3.x — 불멸 스킬 로그: 빨간 일렁임 효과 */
+.l-immortal{
+  color:#ff2244;
+  font-weight:700;
+  background:linear-gradient(90deg,#ff2244 0%,#ff6080 25%,#ffaa44 50%,#ff6080 75%,#ff2244 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:immortal-flame 1.6s linear infinite;
+  text-shadow:0 0 8px rgba(255,34,68,.5),0 0 16px rgba(255,160,68,.3);
+  filter:drop-shadow(0 0 2px rgba(255,80,80,.6));
+}
+.l-immortal strong{
+  -webkit-text-fill-color:#ffdd44;
+  text-shadow:0 0 6px rgba(255,200,68,.8);
+}
+@keyframes immortal-flame{
+  0%{background-position:0% 50%;}
+  100%{background-position:200% 50%;}
+}
 .ebox{background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:9px;margin-bottom:8px;}
 .ename-el{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--red);}
 .ename-el.hidden{color:#ff60ff;}.ename-el.boss{color:var(--lg);}
@@ -1541,8 +1562,8 @@ const SKILLS={
   // ─── 불멸 전용 스킬 (ATK계) ───
   immortal_abyss_slash:{name:'심연 참격',icon:'🔱',desc:'320% ATK + 방어 완전 무시',base:0.05,type:'physical',
     fx:(a,s)=>({dmg:a*3.2*(1+(s?.str||5)*0.006),ignoreDef:true,msg:'🔱 심연 참격!'})},
-  immortal_storm_chain:{name:'폭풍 연격',icon:'⚡',desc:'4연타 50% ATK',base:0.05,type:'physical',
-    fx:(a,s)=>({dmg:a*0.5*(1+(s?.str||5)*0.005),hits:4,msg:'⚡ 폭풍 연격!'})},
+  immortal_storm_chain:{name:'폭풍 연격',icon:'⚡',desc:'4연타 65% ATK',base:0.05,type:'physical',
+    fx:(a,s)=>({dmg:a*0.65*(1+(s?.str||5)*0.005),hits:4,msg:'⚡ 폭풍 연격!'})},
   immortal_reaper:{name:'사신의 낫',icon:'💀',desc:'250% ATK + HP 30% 미만 시 추가 200%',base:0.04,type:'physical',
     fx:(a,s)=>{const base=a*2.5*(1+(s?.str||5)*0.005);return{dmg:base,msg:'💀 사신의 낫!'}}},
   immortal_void_execute:{name:'공허 처형',icon:'🕳',desc:'200% + 방어 무시 + DEF -50% 2턴',base:0.04,type:'physical',
@@ -1554,8 +1575,8 @@ const SKILLS={
     fx:(a,s)=>({dmg:(s?.matk||a)*4.0*(1+(s?.int||3)*0.010),ignoreDef:true,msg:'🔮 공허 붕괴!'})},
   immortal_soul_harvest:{name:'영혼 수확',icon:'💜',desc:'220% MATK + HP 10% 흡수',base:0.05,type:'magic',
     fx:(a,s)=>({dmg:(s?.matk||a)*2.2*(1+(s?.int||3)*0.010),heal:0.10,msg:'💜 영혼 수확!'})},
-  immortal_arcane_storm:{name:'비전 폭풍',icon:'✨',desc:'3연타 70% MATK',base:0.05,type:'magic',
-    fx:(a,s)=>({dmg:(s?.matk||a)*0.7*(1+(s?.int||3)*0.010),hits:3,msg:'✨ 비전 폭풍!'})},
+  immortal_arcane_storm:{name:'비전 폭풍',icon:'✨',desc:'3연타 85% MATK',base:0.05,type:'magic',
+    fx:(a,s)=>({dmg:(s?.matk||a)*0.85*(1+(s?.int||3)*0.010),hits:3,msg:'✨ 비전 폭풍!'})},
 };
 
 // Enchants — 솔로 전용 (물리9/마법9 PRE, 물리9/마법8 SUF 밸런스)
@@ -8549,7 +8570,21 @@ function trySkillProc(p,s,target,allM){
       if(skType==='magic')SFX.play('skill_magic');
       else if(skType==='special')SFX.play('skill_special');
       else SFX.play('skill_physical');
-      const fx=sk.fx(s.atk,s); // ★ s(전체 스탯) 전달 — STR/INT/DEX 활용
+      // ★ v3.x — s.atk이 비정상으로 작으면 char에서 직접 재계산 (caching 버그 보호)
+      let atkForFx=s.atk;
+      if(atkForFx<200){
+        const _freshStats=calcStats(p.charData||char);
+        if(_freshStats.atk>atkForFx*2){
+          console.warn('[skill atk fix]',{cached:s.atk,fresh:_freshStats.atk});
+          atkForFx=_freshStats.atk;
+          s={...s,atk:_freshStats.atk}; // s 복사본으로 fx 호출
+        }
+      }
+      const fx=sk.fx(atkForFx,s); // ★ s(전체 스탯) 전달 — STR/INT/DEX 활용
+      // ★ DEBUG: 데미지 이상 시 로그 (atk가 너무 작거나 dmg가 비정상이면 콘솔 출력)
+      if(fx?.dmg!=null&&fx.dmg<atkForFx*0.1){
+        console.warn('[skill dmg suspicious]',{skillId:sk.id,sAtk:atkForFx,sStr:s.str,fxDmg:fx.dmg,hits:fx.hits});
+      }
       if(fx.dmg)fx.dmg=Math.min(Math.round(fx.dmg),99999);
       // ★ v3.x — 비전 학자 4pc: 모든 스킬 피해 +25%
       if(fx.dmg>0&&(s._skillDmgBonus||0)>0){
@@ -8617,7 +8652,11 @@ function trySkillProc(p,s,target,allM){
           blogAdd(`<span class="l-skill">☠ ${target.name}에게 독 부여! (${fx.dot}턴)</span>`);
         }
         const hitsTxt=hits>1?` (${hits}연타 × ${dmg})`:'';
-        blogAdd(`<span class="l-skill">⚡ ${p.name}: ${fx.msg} <strong>${totalDmg}</strong>${hitsTxt}</span>`);
+        // ★ v3.x — 불멸 스킬은 빨간 일렁임 효과 (l-immortal 클래스)
+        const _isImmortal=sk?.id&&sk.id.startsWith('immortal_');
+        const _logClass=_isImmortal?'l-immortal':'l-skill';
+        const _logIcon=_isImmortal?'🔱':'⚡';
+        blogAdd(`<span class="${_logClass}">${_logIcon} ${p.name}: ${fx.msg} <strong>${totalDmg}</strong>${hitsTxt}</span>`);
         if(target.hp<=0&&target.status==='alive'){target.status='dead';blogAdd(`<span class="l-dead">💀 ${target.name} 처치!</span>`);}
       }else{
         // buff — berserk, mana_surge, shield, evasion 등
@@ -12214,9 +12253,9 @@ window.enterSubjBattle=async function(){
                 for(let h=0;h<hits;h++)skDmg+=Math.min(Math.round(fx.dmg),99999);
                 totalDmgDealt+=skDmg;
                 const hitsTxt=hits>1?` (${hits}연타)`:'';
-                slog(`<span class="l-skill" style="color:#FF2244">🔱 ${isk.name} <strong>+${skDmg}</strong>${hitsTxt}</span>`);
+                slog(`<span class="l-immortal">🔱 ${isk.name} <strong>+${skDmg}</strong>${hitsTxt}</span>`);
               }else if(fx&&fx.msg){
-                slog(`<span class="l-skill" style="color:#FF2244">🔱 ${isk.name}</span>`);
+                slog(`<span class="l-immortal">🔱 ${isk.name}</span>`);
               }
               subjSkillFired=true;
               break outer;
@@ -12660,7 +12699,7 @@ window.enterChampBattle=async function(){
                     for(let h=0;h<hits;h++)sd+=Math.min(Math.round(fx.dmg),99999);
                     champHp=Math.max(0,champHp-sd);
                     const hitsTxt=hits>1?` (${hits}연타)`:'';
-                    clog(`<span class="l-skill" style="color:#FF2244">🔱 ${sk.name} <strong>${sd}</strong>${hitsTxt}</span>`);
+                    clog(`<span class="l-immortal">🔱 ${sk.name} <strong>${sd}</strong>${hitsTxt}</span>`);
                   }
                 }catch(e){}
                 skProced=true;
