@@ -11841,7 +11841,8 @@ function renderStronghold(){
   let gridHtml=`<div class="sh-grid" style="
     display:grid;
     grid-template-columns:repeat(${gridSize},1fr);
-    gap:2px;
+    grid-template-rows:repeat(${gridSize},1fr);
+    gap:3px;
     background:${bgGrad};
     border:1px solid var(--bd2);
     border-radius:10px;
@@ -11849,6 +11850,7 @@ function renderStronghold(){
     margin-bottom:14px;
     aspect-ratio:1/1;
     max-width:600px;
+    width:100%;
   ">`;
   for(let y=0;y<gridSize;y++){
     for(let x=0;x<gridSize;x++){
@@ -12005,34 +12007,43 @@ window.strongholdCancelPlace=function(){
 
 // 빈 칸 클릭 (배치 시도)
 window.strongholdSelectEmpty=async function(x,y){
-  if(!_shPlaceItemId)return;
-  const it=inv[_shPlaceItemId];if(!it){strongholdCancelPlace();return;}
-  const w=it.size?.[0]||1, h=it.size?.[1]||1;
-  const gridSize=getStrongholdGridSize();
-  // 그리드 범위 체크
-  if(x+w>gridSize||y+h>gridSize){toast('가구가 그리드 밖으로 나갑니다');return;}
-  // 점유 충돌 체크
-  const placed=char.house.placedItems||[];
-  for(const p of placed){
-    const pIt=inv[p.itemId];if(!pIt)continue;
-    const pw=p.w||pIt.size?.[0]||1, ph=p.h||pIt.size?.[1]||1;
-    const overlap=!(x+w<=p.x||p.x+pw<=x||y+h<=p.y||p.y+ph<=y);
-    if(overlap){toast('이 위치에는 이미 다른 가구가 있습니다');return;}
+  try{
+    if(!_shPlaceItemId){
+      // 배치 모드 아님 — 무시 (정상)
+      return;
+    }
+    const it=inv[_shPlaceItemId];if(!it){strongholdCancelPlace();return;}
+    const w=it.size?.[0]||1, h=it.size?.[1]||1;
+    const gridSize=getStrongholdGridSize();
+    // 그리드 범위 체크
+    if(x+w>gridSize||y+h>gridSize){toast(`가구가 그리드 밖으로 나갑니다 (${x},${y} + ${w}×${h} > ${gridSize})`);return;}
+    // 점유 충돌 체크
+    const placed=char.house?.placedItems||[];
+    for(const p of placed){
+      const pIt=inv[p.itemId];if(!pIt)continue;
+      const pw=p.w||pIt.size?.[0]||1, ph=p.h||pIt.size?.[1]||1;
+      const overlap=!(x+w<=p.x||p.x+pw<=x||y+h<=p.y||p.y+ph<=y);
+      if(overlap){toast('이 위치에는 이미 다른 가구가 있습니다');return;}
+    }
+    // 동일 가구 stack 체크
+    const f=FURNITURE[it.baseId];
+    if(f?.stack){
+      const sameCount=placed.filter(p=>{const pIt=inv[p.itemId];return pIt&&pIt.baseId===it.baseId;}).length;
+      if(sameCount>=f.stack){toast(`${it.name}은(는) 최대 ${f.stack}개까지만 배치 가능`);return;}
+    }
+    // 배치 확정
+    if(!char.house)char.house={tier:1,placedItems:[],activePassives:[],_v:1};
+    char.house.placedItems=[...placed,{itemId:_shPlaceItemId,x,y,w,h}];
+    await saveChar();
+    // 슬롯 확장 가구라면 invSlots/whSlots 재계산
+    if(it.targetType)await recalcSlotsAndOverflow();
+    toast(`✅ ${it.name} 배치 완료 (${x+1},${y+1})`);
+    strongholdCancelPlace();
+    renderStronghold();
+  }catch(e){
+    console.error('[strongholdSelectEmpty error]',e);
+    toast('⚠️ 가구 배치 오류: '+(e?.message||'알 수 없는 오류'),6000);
   }
-  // 동일 가구 stack 체크
-  const f=FURNITURE[it.baseId];
-  if(f?.stack){
-    const sameCount=placed.filter(p=>{const pIt=inv[p.itemId];return pIt&&pIt.baseId===it.baseId;}).length;
-    if(sameCount>=f.stack){toast(`${it.name}은(는) 최대 ${f.stack}개까지만 배치 가능`);return;}
-  }
-  // 배치 확정
-  char.house.placedItems=[...placed,{itemId:_shPlaceItemId,x,y,w,h}];
-  await saveChar();
-  // 슬롯 확장 가구라면 invSlots/whSlots 재계산
-  if(it.targetType)await recalcSlotsAndOverflow();
-  toast(`✅ ${it.name} 배치 완료`);
-  strongholdCancelPlace();
-  renderStronghold();
 };
 
 // 배치된 가구 클릭 (해제 / 패시브 활성화 메뉴)
@@ -12289,13 +12300,18 @@ function canCheckinMemorial(){
 
 // 위령제 출석 보상 수령
 window.checkinMemorial=async function(){
-  if(!isMemorialActive()){toast('이벤트 기간이 아닙니다');return;}
-  const today=getKstDateStr();
-  if(char._memorialEvent.lastCheckinDate===today){toast('오늘은 이미 출석했습니다');return;}
-  const day=getMemorialDay();
-  if(day<1||day>MEMORIAL_EVENT.duration){toast('출석 가능 일자가 아닙니다');return;}
-  const reward=MEMORIAL_EVENT.rewards[day-1];
-  if(!reward){toast('보상 데이터 오류');return;}
+  try{
+    if(!char||!char._memorialEvent){
+      toast('⚠️ 캐릭터 데이터 미로드 — 잠시 후 다시 시도');
+      return;
+    }
+    if(!isMemorialActive()){toast('이벤트 기간이 아닙니다');return;}
+    const today=getKstDateStr();
+    if(char._memorialEvent.lastCheckinDate===today){toast('오늘은 이미 출석했습니다');return;}
+    const day=getMemorialDay();
+    if(day<1||day>MEMORIAL_EVENT.duration){toast(`출석 가능 일자가 아닙니다 (현재 day=${day})`);return;}
+    const reward=MEMORIAL_EVENT.rewards[day-1];
+    if(!reward){toast('보상 데이터 오류');return;}
   // 출석 기록
   char._memorialEvent.checkinDays=[...new Set([...(char._memorialEvent.checkinDays||[]),day])];
   char._memorialEvent.lastCheckinDate=today;
@@ -12342,6 +12358,10 @@ window.checkinMemorial=async function(){
   toast(msg,5000);
   blogAdd&&blogAdd(`<span class="l-skill">🎏 위령제 ${day}일차 출석: ${reward.desc}</span>`);
   if(window.renderMemorial)window.renderMemorial();
+  }catch(e){
+    console.error('[checkinMemorial error]',e);
+    toast('⚠️ 출석 처리 오류: '+(e?.message||'알 수 없는 오류'),6000);
+  }
 };
 
 // 위령제 보스 도전 (5/5 한정) — 토벌전 엔진 재활용, 1회 한정 솔로 처치
