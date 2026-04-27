@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ABYSS WORLD 2.7 - 다크 판타지 RPG</title>
+<title>ABYSS WORLD 3.0 - 다크 판타지 RPG</title>
 
 <!-- SEO 기본 -->
 <meta name="description" content="ABYSS WORLD는 브라우저에서 바로 즐기는 다크 판타지 텍스트 RPG입니다. 던전 탐험, 장비 수집, 토벌전, 챔프전을 무료로 즐겨보세요.">
@@ -14,16 +14,16 @@
 
 <!-- Open Graph (카카오톡·디스코드·SNS 링크 공유 미리보기) -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="ABYSS WORLD 2.6 — 다크 판타지 RPG">
-<meta property="og:description" content="설치 없이 브라우저에서 바로! 5개 던전, 토벌전, 챔프전, 유일 아이템, 99레벨 육성. 무료 온라인 텍스트 RPG.">
+<meta property="og:title" content="ABYSS WORLD 3.0 — 거점 시스템 & 위령제 이벤트">
+<meta property="og:description" content="🏯 거점 시스템 + 합성 + 가구 배치! 던전·토벌전·챔프전·유일 아이템. 위령제 이벤트(4/27~5/5) 진행 중. 무료 텍스트 RPG.">
 <meta property="og:url" content="https://kishco.github.io/Abyss-World/">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:site_name" content="ABYSS WORLD">
 
 <!-- Twitter 카드 -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ABYSS WORLD 2.6 — 다크 판타지 RPG">
-<meta name="twitter:description" content="설치 없이 브라우저에서 바로! 5개 던전, 토벌전, 챔프전. 무료 온라인 텍스트 RPG.">
+<meta name="twitter:title" content="ABYSS WORLD 3.0 — 거점 시스템 & 위령제 이벤트">
+<meta name="twitter:description" content="🏯 거점 시스템 + 합성 + 위령제 이벤트(4/27~5/5). 무료 텍스트 RPG.">
 
 <!-- 구글 검색엔진에 크롤링 허용 -->
 <meta name="googlebot" content="index, follow">
@@ -373,7 +373,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div id="loginScr">
   <div class="lwrap">
     <div class="llogo">⚔ ABYSS WORLD</div>
-    <div class="lsub">DARK FANTASY RPG v2.8</div>
+    <div class="lsub">DARK FANTASY RPG v3.0</div>
     <div style="text-align:center;margin-bottom:18px;margin-top:2px">
       <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener"
         style="display:inline-flex;align-items:center;gap:6px;background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.4);color:#7289da;padding:5px 14px;border-radius:20px;font-size:11px;text-decoration:none;font-family:'IBM Plex Mono',monospace;transition:.2s"
@@ -444,7 +444,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="bossKillBanner" style="display:none;font-size:9px;color:var(--gold);font-family:'IBM Plex Mono',monospace;animation:pulse 1s infinite"></span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-left:auto;margin-right:4px;background:rgba(74,143,255,.1);border:1px solid rgba(74,143,255,.25);padding:1px 6px;border-radius:5px">v2.7</span>
+  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);margin-left:auto;margin-right:4px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);padding:1px 6px;border-radius:5px">v3.0</span>
   <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener" class="v2badge"
     style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.35);color:#7289da;padding:2px 7px;border-radius:5px;font-size:9px;text-decoration:none;margin-right:6px;white-space:nowrap;font-family:'IBM Plex Mono',monospace"
     title="디스코드 커뮤니티">
@@ -461,44 +461,68 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
 </div>
 
-<!-- 업데이트 팝업 v2.7 -->
+<!-- 업데이트 팝업 v3.0 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
-  <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:520px;width:90%;max-height:88vh;overflow-y:auto">
+  <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:540px;width:90%;max-height:88vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
-      <span style="font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;background:rgba(68,212,136,.1);border:1px solid rgba(68,212,136,.3);padding:3px 10px;border-radius:5px;font-weight:700">v2.7 — 은행 시스템 & 불멸의 탑 강화</span>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--gold);font-family:'IBM Plex Mono',monospace;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);padding:3px 10px;border-radius:5px;font-weight:700">v3.0 — 거점 시스템 & 위령제 이벤트</span>
     </div>
 
-    <!-- 은행 시스템 -->
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🏦 은행 시스템 신설</div>
+    <!-- 거점 시스템 -->
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🏯 거점 시스템 신설</div>
     <div style="background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      <b style="color:var(--tx)">창고에 은행 탭이 추가됩니다.</b><br>
-      💰 은행 보관 한도: <b style="color:var(--gold)">100억G</b> (소지금 한도: 1억G)<br>
-      💳 입금: 소지금 → 은행으로 자유롭게 이동<br>
-      💵 출금: 은행 → 소지금 (소지금 1억 한도 초과 불가)<br>
-      <span style="font-size:10px;color:var(--tx3)">→ 마을 → 창고 → 💰 은행 탭에서 이용 가능합니다.</span>
+      <b style="color:var(--tx)">마을 한 켠에 자신만의 공간이 생깁니다.</b><br>
+      📐 4단계 그리드: 6×6 → 8×8 → 10×10 → 12×12 (확장 5억G/20억G/80억G)<br>
+      ✨ 활성 패시브 슬롯: 2 → 3 → 4 (단계별 확장)<br>
+      📦 인벤 100→<b style="color:var(--lg)">최대 1,000칸</b> · 창고 200→<b style="color:var(--lg)">최대 2,000칸</b> (가구 누적 확장)<br>
+      <span style="font-size:10px;color:var(--tx3)">→ 마을 → 🏯 거점 카드에서 진입</span>
     </div>
 
-    <!-- 불멸의 탑 강화 -->
-    <div style="font-size:11px;color:#FF2244;font-weight:700;margin-bottom:6px">🗼 불멸의 탑 고층 보상 대폭 강화</div>
-    <div style="background:rgba(255,34,68,.05);border:1px solid rgba(255,34,68,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      <b style="color:var(--tx)">고층일수록 확실한 보상을 받습니다.</b><br>
-      <span style="color:var(--tx3)">🔱 징수 지급량 차등화:</span> 1~20층 1개 → 21~50층 2개 → 51~80층 3개 → 81~99층 4개 → 100층 5개<br>
-      <span style="color:var(--tx3)">📦 최소 등급 보장:</span> 51층+ <b style="color:var(--ep)">에픽 확정</b> · 81층+ <b style="color:var(--lg)">레전더리 확정</b><br>
-      <span style="color:var(--tx3)">✨ 유일 확률:</span> 81~99층 2% · 100층 <b style="color:var(--st)">5%</b><br>
-      <span style="color:var(--tx3)">💰 고층 보너스 골드:</span> 51층부터 층당 추가 골드 지급<br>
-      <span style="color:var(--tx3)">📜 스크롤 드랍률:</span> 51층+ 35% · 81층+ 55%
+    <!-- 합성 시스템 -->
+    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">⚒️ 합성 시스템 (장비/가구/인챈트)</div>
+    <div style="background:rgba(176,96,255,.05);border:1px solid rgba(176,96,255,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      <b style="color:var(--tx)">합성대 가구를 거점에 배치하면 합성이 활성화됩니다.</b><br>
+      <span style="color:var(--tx3)">🗡 장비 합성:</span> 동급 ×5 + 골드 → 상위 등급 (Legendary ×5 → <b style="color:var(--st)">Set 1개 30억G</b>)<br>
+      <span style="color:var(--tx3)">🪑 가구 합성:</span> 동급 ×N + 골드 → 상위 등급 가구<br>
+      <span style="color:var(--tx3)">📜 인챈트 합성:</span> 동tier ×3 + 골드 → 상위 tier<br>
+      <span style="font-size:10px;color:#FF8888">※ 합성 결과 거래 불가 / 던전 드랍 유일은 거래 가능 풀림</span>
     </div>
 
-    <!-- 버그 수정 -->
-    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">🔧 버그 수정 & 밸런스</div>
+    <!-- 경매 / 결제 -->
+    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:6px">🏛 경매장 대개편</div>
+    <div style="background:rgba(74,143,255,.05);border:1px solid rgba(74,143,255,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      <b style="color:var(--tx)">가격 상한 9,999만G → <span style="color:var(--gold)">99억G</span></b> (10000% 상향)<br>
+      <span style="color:var(--tx3)">💰 거래 수수료:</span> 5% 도입 (판매자 차감)<br>
+      <span style="color:var(--tx3)">💳 통합 결제:</span> 소지금 + 은행 자동 인출 (1억G+ 결제 시 차감 출처 표시)<br>
+      <span style="color:var(--tx3)">🔓 유일 장비:</span> 던전 드랍 set 모두 거래 가능 풀림 (자동 마이그레이션)
+    </div>
+
+    <!-- 위령제 이벤트 -->
+    <div style="font-size:11px;color:#80a0ff;font-weight:700;margin-bottom:6px">🏮 어린이날 위령제 이벤트 (4/27 ~ 5/10)</div>
+    <div style="background:linear-gradient(135deg,rgba(80,120,255,.06),rgba(140,80,200,.04));border:1px solid rgba(80,120,255,.3);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      <b style="color:#80a0ff">"심연에 사라진 아이들을 기리며, 그 영혼에 빛을 바친다."</b><br>
+      🎏 14일 출석 보상 (1일차 100만G + 인챈트 → 9일차 <b style="color:var(--st)">잃어버린 영혼의 등불</b> → 14일차 500만G + 인챈트 ×2)<br>
+      ⚡ 던전 가호 상시: <b>EXP +50% · 골드 +30% · 드랍률 +20%</b><br>
+      👹 5/5 위령제 보스 (라바돈 강화판) → <b style="color:var(--st)">어린 왕의 옥좌</b> 확정<br>
+      ✨ 추모의 빛 챌린지: 던전 50회 → <b style="color:var(--lg)">심연의 잔영</b><br>
+      <span style="font-size:10px;color:var(--tx3)">→ 마을 → 🏮 위령제 카드 (이벤트 기간만 표시)</span>
+    </div>
+
+    <!-- 신규 환영 -->
+    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">🎁 신규 유저 환영 패키지</div>
+    <div style="background:rgba(68,212,136,.05);border:1px solid rgba(68,212,136,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      <b style="color:var(--rare)">레어 등급 무기 1종 + 방어구 2종</b> + <b style="color:var(--gold)">5,000,000G</b><br>
+      <span style="font-size:10px;color:var(--tx3)">신규 캐릭터 첫 접속 시 자동 인벤 지급 (1회 한정)</span>
+    </div>
+
+    <!-- 기타 -->
+    <div style="font-size:11px;color:var(--tx2);font-weight:700;margin-bottom:6px">🔧 기타 변경</div>
     <div style="font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
-      <b style="color:var(--gold)">💀 크리티컬 피해 스탯 신설</b> — 인챈트로 크뎀(%) 직접 강화 가능<br>
-      <span style="font-size:10px;color:var(--tx3);padding-left:8px">접두 3종 (치명적인·급소노리는·파괴자의) + 접미 3종 (급소·치명타·멸살)</span><br>
-      <span style="font-size:10px;color:var(--tx3);padding-left:8px">기존 세트 보너스(크림슨·분노) 크뎀 수치 실적용 수정</span><br>
-      <b style="color:var(--tx3)">던전 클리어 보상</b> — 보스 클리어 보너스 장비에 자동판매 필터 미적용 수정<br>
-      <b style="color:var(--tx3)">랭킹 오류</b> — 타임어택 기록이 던전 클리어 랭킹에 혼입되는 현상 수정<br>
-      <b style="color:var(--tx3)">랭킹 기록</b> — 매우어려움 솔로 모드에서만 정확히 기록되도록 보강
+      <span style="color:var(--tx3)">• 임시보관함 7일 유예 — 가구 해제로 인벤 초과 시 안전망</span><br>
+      <span style="color:var(--tx3)">• 자동판매 가드 강화 — 가구·도면·재료·합성결과 영구 제외</span><br>
+      <span style="color:var(--tx3)">• 유령 코드 정리 (파티 시스템 잔재 제거)</span><br>
+      <span style="color:var(--tx3)">• 유일 무기 밸런스 스탯 버그 수정</span>
     </div>
 
     <div style="display:flex;gap:8px">
@@ -553,13 +577,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <button class="nbtn" data-tab="admin" id="adminNav" style="display:none"><div class="ni">🛡</div><div class="nl">관리자</div></button>
   </nav>
   <main class="main">
-    <!-- ★ v2.7 업데이트 상단 배너 -->
-    <div id="referralBanner" style="margin:10px 10px 0;background:linear-gradient(135deg,rgba(240,192,64,.15),rgba(255,34,68,.12));border:1px solid rgba(240,192,64,.4);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;position:relative">
-      <span style="font-size:22px;flex-shrink:0">🏦</span>
+    <!-- ★ v3.0 업데이트 상단 배너 -->
+    <div id="referralBanner" style="margin:10px 10px 0;background:linear-gradient(135deg,rgba(240,192,64,.15),rgba(176,96,255,.12));border:1px solid rgba(240,192,64,.4);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;position:relative">
+      <span style="font-size:22px;flex-shrink:0">🏯</span>
       <div style="flex:1;min-width:0">
-        <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:2px">v2.7 업데이트 — 은행 시스템 & 불멸의 탑 강화</div>
-        <div style="font-size:10px;color:var(--tx2)"><b style="color:var(--gold)">💰 은행</b> 창고에서 최대 100억G 보관 · <b style="color:#FF2244">🗼 불멸의 탑</b> 고층 보상 대폭 강화 · <b style="color:var(--purple)">💀 크뎀</b> 인챈트 신설</div>
-        <div style="font-size:9px;color:var(--tx3);margin-top:2px">🔧 던전 클리어 보상 자동판매 적용 · 랭킹 오류 수정</div>
+        <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:2px">v3.0 업데이트 — 거점 시스템 & 위령제 이벤트</div>
+        <div style="font-size:10px;color:var(--tx2)"><b style="color:var(--gold)">🏯 거점</b> 가구 배치·패시브 · <b style="color:var(--purple)">⚒️ 합성</b> 장비/가구/인챈트 · <b style="color:var(--blue)">🏛 경매 99억G</b> · <b style="color:#80a0ff">🏮 위령제 4/27~5/5</b></div>
+        <div style="font-size:9px;color:var(--tx3);margin-top:2px">🎁 신규 환영 패키지 (레어 무기/방어구 + 500만G) · 던전 가호 EXP+50% 골드+30% 드랍+20%</div>
       </div>
       <div style="flex-shrink:0">
         <button onclick="document.getElementById('referralBanner').style.display='none'" style="background:none;border:none;color:var(--tx3);font-size:11px;cursor:pointer;padding:0">✕</button>
@@ -1965,24 +1989,30 @@ const FURN_CAT_KR={deco:'장식',inv_slot:'인벤 확장',wh_slot:'창고 확장
 const MEMORIAL_EVENT={
   id:'memorial2026',
   startTs:new Date('2026-04-27T00:00:00+09:00').getTime(), // KST 시작
-  endTs:  new Date('2026-05-05T23:59:59+09:00').getTime(), // 어린이날 마감
-  bossDay:new Date('2026-05-05T00:00:00+09:00').getTime(), // 보스 등장 5/5
-  duration:9, // 9일 출석
+  endTs:  new Date('2026-05-10T23:59:59+09:00').getTime(), // ★ 핫픽스 — 5/10 23:59 KST 종료 (5일 연장)
+  bossDay:new Date('2026-05-05T00:00:00+09:00').getTime(), // 보스 등장 5/5 (어린이날 그대로)
+  duration:14, // ★ 14일 출석 (1~9 본보상 + 10~14 보너스)
   // 던전 가호 (이벤트 기간 상시)
   expBoost:0.5,    // EXP +50%
   goldBoost:0.3,   // 골드 +30%
   dropBoost:0.2,   // 드랍률 +20%
-  // 9일 출석 보상
+  // 14일 출석 보상
   rewards:[
-    {day:1, gold:1000000, items:[{type:'enchant_scroll',count:1}], desc:'1일차 — 1,000,000G + 인챈트 스크롤'},
-    {day:2, gold:500000,  items:[],                                desc:'2일차 — 500,000G'},
-    {day:3, gold:0,       items:[{type:'protect_scroll',count:2},{type:'extract_scroll',count:1}], desc:'3일차 — 파괴방지 스크롤 ×2 + 추출 스크롤'},
-    {day:4, gold:1000000, items:[],                                desc:'4일차 — 1,000,000G'},
-    {day:5, gold:0,       items:[{type:'reroll_scroll',count:1}],  desc:'5일차 — 재조정 주문서'},
-    {day:6, gold:1500000, items:[{type:'enchant_scroll',count:1}], desc:'6일차 — 1,500,000G + 인챈트 스크롤'},
-    {day:7, gold:5000000, items:[{type:'enchant_scroll',count:1}], desc:'7일차 — 5,000,000G + 인챈트 스크롤'},
-    {day:8, gold:2000000, items:[{type:'protect_scroll',count:1}], desc:'8일차 — 2,000,000G + 파괴방지 스크롤'},
-    {day:9, gold:0,       items:[{type:'furniture',baseId:'memorial_lantern'}], desc:'9일차 (어린이날) — 잃어버린 영혼의 등불 (Set 가구)'},
+    {day:1, gold:1000000, items:[{type:'enchant_scroll',count:1}], desc:'1일차 (4/27) — 1,000,000G + 인챈트 스크롤'},
+    {day:2, gold:500000,  items:[],                                desc:'2일차 (4/28) — 500,000G'},
+    {day:3, gold:0,       items:[{type:'protect_scroll',count:2},{type:'extract_scroll',count:1}], desc:'3일차 (4/29) — 파괴방지 ×2 + 추출 스크롤'},
+    {day:4, gold:1000000, items:[],                                desc:'4일차 (4/30) — 1,000,000G'},
+    {day:5, gold:0,       items:[{type:'reroll_scroll',count:1}],  desc:'5일차 (5/1) — 재조정 주문서'},
+    {day:6, gold:1500000, items:[{type:'enchant_scroll',count:1}], desc:'6일차 (5/2) — 1,500,000G + 인챈트'},
+    {day:7, gold:5000000, items:[{type:'enchant_scroll',count:1}], desc:'7일차 (5/3) — 5,000,000G + 인챈트'},
+    {day:8, gold:2000000, items:[{type:'protect_scroll',count:1}], desc:'8일차 (5/4) — 2,000,000G + 파괴방지'},
+    {day:9, gold:0,       items:[{type:'furniture',baseId:'memorial_lantern'}], desc:'9일차 (5/5 어린이날) — 잃어버린 영혼의 등불 (Set)'},
+    // ★ 핫픽스 — 보너스 출석 5일 (5/6 ~ 5/10)
+    {day:10,gold:2000000, items:[{type:'enchant_scroll',count:1}], desc:'10일차 (5/6) — 2,000,000G + 인챈트'},
+    {day:11,gold:1000000, items:[],                                desc:'11일차 (5/7) — 1,000,000G'},
+    {day:12,gold:2000000, items:[{type:'protect_scroll',count:1}], desc:'12일차 (5/8) — 2,000,000G + 파괴방지'},
+    {day:13,gold:1000000, items:[{type:'enchant_scroll',count:1}], desc:'13일차 (5/9) — 1,000,000G + 인챈트'},
+    {day:14,gold:5000000, items:[{type:'enchant_scroll',count:2}], desc:'14일차 (5/10 종료) — 5,000,000G + 인챈트 ×2'},
   ],
   // 추모의 빛 챌린지
   challenge:{
@@ -2248,7 +2278,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v2.7';
+  const key='abyssworld_update_v3.0';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -2259,7 +2289,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v2.7',expire);
+    localStorage.setItem('abyssworld_update_v3.0',expire);
   }
 };
 
@@ -2766,20 +2796,31 @@ async function selChar(id){
     };
   }
   // ★ v3.0 — 신규 환영 패키지 (진짜 신규 캐릭터만 1회 지급)
-  // 조건: 레벨 1 + EXP 0 + 골드 1000G 이하(초기 시작 골드) + 강화/인챈트 미경험
+  // 강화된 판별: 레벨/EXP/골드/은행/장비/기록 모두 깨끗해야 진짜 신규
   if(!char._newbieWelcomeClaimed){
+    const eqEmpty=!char.equipment||Object.keys(char.equipment).length===0
+                ||Object.values(char.equipment||{}).every(v=>!v);
     const isReallyNew=(char.level||1)<=1
                    &&(char.exp||0)===0
                    &&(char.gold||0)<=10000
-                   &&!char._anyForge && !char._anyEnchant;
+                   &&(char._bankGold||0)===0
+                   &&(char._pendingGold||0)===0
+                   &&!char._anyForge && !char._anyEnchant
+                   &&!char._bestDungeonClear
+                   &&!char._bestSubjDmg
+                   &&!char._bestImmortal
+                   &&!char._bestChampWin
+                   &&eqEmpty;
+    char._newbieWelcomeClaimed=true; // ★ 어떤 경우든 즉시 마킹 (반복 지급 차단)
     if(isReallyNew){
-      char._newbieWelcomeClaimed=true;
+      // 신규 → 환영 패키지 예약
       setTimeout(()=>grantNewbieWelcome().catch(e=>console.error('newbie welcome error',e)),1500);
     }else{
-      // 기존 유저 — 신규 패키지 영구 차단 (재진입 방지)
-      char._newbieWelcomeClaimed=true;
+      // 기존 유저 → 영구 차단
       char._newbieWelcomeGranted=true;
     }
+    // ★ saveChar를 즉시 호출 (Firebase에 마킹 영속화 — 새로고침 시 재지급 차단)
+    if(db&&charId){set(ref(db,`chars/${charId}/_newbieWelcomeClaimed`),true).catch(()=>{});}
   }
   const is=await get(ref(db,`inv/${id}`));inv=is.val()||{};
   const ws=await get(ref(db,`warehouse/${id}`));warehouse=ws.val()||{};
@@ -11816,8 +11857,9 @@ function renderStronghold(){
       if(c&&c.isOrigin){
         const isActive=activePassives.includes(c.placement.itemId);
         const grade=c.item.grade||'normal';
+        // ★ grid-area: row-start/col-start/row-end/col-end (1-indexed) — 명시적 위치
         gridHtml+=`<div class="sh-cell sh-furn gb-${grade}${isActive?' sh-active':''}" 
-          style="grid-column:span ${c.w};grid-row:span ${c.h};
+          style="grid-area:${y+1}/${x+1}/${y+1+c.h}/${x+1+c.w};
                  display:flex;align-items:center;justify-content:center;
                  background:var(--sf2);border-radius:5px;cursor:pointer;
                  font-size:${c.w>1||c.h>1?'24px':'18px'};
@@ -11825,11 +11867,14 @@ function renderStronghold(){
           title="${c.item.name}"
           onclick="strongholdSelectPlaced('${c.placement.itemId}')">${c.item.emoji||'📦'}</div>`;
       }else if(c){
-        // 큰 가구의 비-원점 셀 (skip)
+        // 큰 가구의 비-원점 셀 — skip (grid-area로 본체가 점유)
       }else{
+        // ★ 빈 셀도 명시적 grid-area로 위치 고정 (auto-flow 방지)
         gridHtml+=`<div class="sh-cell sh-empty" 
-          style="background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.05);
-                 border-radius:3px;aspect-ratio:1/1;cursor:pointer;min-height:24px"
+          style="grid-area:${y+1}/${x+1}/${y+2}/${x+2};
+                 background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.05);
+                 border-radius:3px;cursor:pointer;min-height:28px;min-width:28px;
+                 display:flex;align-items:center;justify-content:center"
           onclick="strongholdSelectEmpty(${x},${y})"></div>`;
       }
     }
@@ -12220,30 +12265,35 @@ async function grantNewbieWelcome(){
 // ═══════════════════════════════════════════════════
 
 // 오늘이 이벤트 N일차인지 계산 (1~9)
-function getMemorialDay(){
-  if(!isMemorialActive())return 0;
-  const now=Date.now();
-  const startDate=new Date(MEMORIAL_EVENT.startTs);
-  const today=new Date();
-  const startDay=Math.floor(MEMORIAL_EVENT.startTs/86400000);
-  const todayDay=Math.floor(now/86400000);
-  return Math.min(MEMORIAL_EVENT.duration, todayDay-startDay+1);
+// ★ 핫픽스 — KST(UTC+9) 기준 날짜 문자열 (YYYY-MM-DD)
+function getKstDateStr(ts){
+  const KST_OFFSET=9*3600000;
+  return new Date((ts||Date.now())+KST_OFFSET).toISOString().slice(0,10);
 }
 
-// 오늘 출석 가능한지 확인
+function getMemorialDay(){
+  if(!isMemorialActive())return 0;
+  // ★ 핫픽스 — KST(UTC+9) 기준 일자 계산
+  // 기존: UTC day index 사용 → 한국시간 자정~9시 접속 시 +1일 오차
+  const KST_OFFSET=9*3600000;
+  const startKstDay=Math.floor((MEMORIAL_EVENT.startTs+KST_OFFSET)/86400000);
+  const todayKstDay=Math.floor((Date.now()+KST_OFFSET)/86400000);
+  return Math.min(MEMORIAL_EVENT.duration, todayKstDay-startKstDay+1);
+}
+
+// 오늘 출석 가능한지 확인 (KST 기준)
 function canCheckinMemorial(){
   if(!isMemorialActive())return false;
-  const today=new Date().toISOString().slice(0,10); // YYYY-MM-DD
-  return char?._memorialEvent?.lastCheckinDate!==today;
+  return char?._memorialEvent?.lastCheckinDate!==getKstDateStr();
 }
 
 // 위령제 출석 보상 수령
 window.checkinMemorial=async function(){
   if(!isMemorialActive()){toast('이벤트 기간이 아닙니다');return;}
-  const today=new Date().toISOString().slice(0,10);
+  const today=getKstDateStr();
   if(char._memorialEvent.lastCheckinDate===today){toast('오늘은 이미 출석했습니다');return;}
   const day=getMemorialDay();
-  if(day<1||day>9){toast('출석 가능 일자가 아닙니다');return;}
+  if(day<1||day>MEMORIAL_EVENT.duration){toast('출석 가능 일자가 아닙니다');return;}
   const reward=MEMORIAL_EVENT.rewards[day-1];
   if(!reward){toast('보상 데이터 오류');return;}
   // 출석 기록
@@ -12548,7 +12598,7 @@ window.renderMemorial=function(){
   const day=getMemorialDay();
   const ev=char._memorialEvent||{};
   const claimed=new Set(ev.claimedRewards||[]);
-  const today=new Date().toISOString().slice(0,10);
+  const today=getKstDateStr();
   const todayClaimed=ev.lastCheckinDate===today;
   const challengeProgress=ev.dungeonCount||0;
   const challengeTarget=MEMORIAL_EVENT.challenge.targetDungeons;
@@ -12567,21 +12617,25 @@ window.renderMemorial=function(){
       <div style="font-size:11px;color:var(--green);margin-top:6px">던전 가호: EXP +50% · 골드 +30% · 드랍률 +20%</div>
     </div>`;
 
-  // 출석 보상 그리드
+  // 출석 보상 그리드 (14일)
   html+=`<div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px">
-    <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">🎏 9일 출석 보상</div>
+    <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">🎏 14일 출석 보상</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px">`;
-  for(let d=1;d<=9;d++){
+  for(let d=1;d<=MEMORIAL_EVENT.duration;d++){
     const r=MEMORIAL_EVENT.rewards[d-1];
+    if(!r)continue;
     const isClaimed=claimed.has(d);
     const isToday=d===day&&!todayClaimed;
     const isPast=d<day;
     const isFuture=d>day;
+    const isClimax=d===9; // 어린이날 보상
+    const isFinale=d===14; // 종료일 보상
     const bgColor=isClaimed?'rgba(68,212,136,.1)':isToday?'rgba(240,192,64,.15)':isPast?'rgba(255,80,80,.05)':'rgba(255,255,255,.02)';
-    const borderColor=isClaimed?'var(--green)':isToday?'var(--gold)':'var(--bd2)';
+    const borderColor=isClaimed?'var(--green)':isToday?'var(--gold)':isClimax?'rgba(255,34,68,.4)':isFinale?'rgba(176,96,255,.4)':'var(--bd2)';
+    const dayLabel=isClimax?' (어린이날)':isFinale?' (종료)':d>9?' (보너스)':'';
     html+=`<div style="background:${bgColor};border:1px solid ${borderColor};border-radius:6px;padding:8px;text-align:center;
-                       ${d===9?'box-shadow:0 0 12px rgba(255,34,68,.2)':''}">
-      <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">${d}일차${d===9?' (어린이날)':''}</div>
+                       ${isClimax?'box-shadow:0 0 12px rgba(255,34,68,.2)':isFinale?'box-shadow:0 0 12px rgba(176,96,255,.2)':''}">
+      <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">${d}일차${dayLabel}</div>
       <div style="font-size:10px;color:var(--tx);line-height:1.4;min-height:32px">${r.desc.replace(/^\d+일차[^—]*—\s*/,'')}</div>
       ${isClaimed?'<div style="font-size:10px;color:var(--green);margin-top:4px">✓ 수령 완료</div>':
         isToday?`<button class="btn btn-gold btn-xs" style="margin-top:4px;width:100%" onclick="checkinMemorial()">출석</button>`:
@@ -12906,7 +12960,7 @@ function refreshMemorialCard(){
     const desc=document.getElementById('memorialCardDesc');
     if(desc){
       const day=getMemorialDay();
-      const todayClaimed=char?._memorialEvent?.lastCheckinDate===new Date().toISOString().slice(0,10);
+      const todayClaimed=char?._memorialEvent?.lastCheckinDate===getKstDateStr();
       desc.textContent=day>0?`${day}일차 ${todayClaimed?'(출석 완료)':'(출석 가능!)'}`:'출석 보상 · 보스 토벌';
     }
   }else{
