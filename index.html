@@ -10293,6 +10293,14 @@ async function renderWarehouse(sb){
 
 window.whDeposit=async function(id){
   const it=inv[id];if(!it)return;
+  // ★ 핫픽스 — 거점에 배치된 가구는 창고로 이동 차단 (디스플레이 깨짐 방지)
+  if(it.isFurniture){
+    const placed=char?.house?.placedItems||[];
+    if(placed.some(p=>p.itemId===id)){
+      toast('⚠️ 거점에 배치된 가구입니다. 거점에서 먼저 회수해야 창고로 보낼 수 있습니다.',5000);
+      return;
+    }
+  }
   const whMax=char?.whSlots||200;
   if(Object.keys(warehouse).length>=whMax){toast(`⚠️ 창고가 가득 찼습니다! (최대 ${whMax}개)`);return;}
   warehouse[id]=it;delete inv[id];
@@ -11792,12 +11800,18 @@ function genFurnitureItem(furnId){
   };
 }
 
+// ★ 핫픽스 — 거점 가구 검색 (inv 우선, warehouse 폴백)
+// 르네 케이스: 거점 배치된 가구를 창고로 옮기면 디스플레이 깨짐 방지용 안전망
+function findFurnitureItem(itemId){
+  return inv[itemId]||warehouse[itemId]||null;
+}
+
 // 거점 활성 패시브 가구의 합산 효과 (calcStats에서 호출)
 function getActivePassiveStats(){
   const result={atkPct:0,defPct:0,spdPct:0,hp:0,atk:0,def:0,spd:0,goldBonus:0,expBonus:0,skillBonus:0,critDmg:0,crit:0};
   if(!char?.house?.activePassives)return result;
   for(const itemId of char.house.activePassives){
-    const it=inv[itemId];
+    const it=findFurnitureItem(itemId);
     if(!it||!it.passive)continue;
     const p=FURNITURE_PASSIVES[it.passive];
     if(!p||!p.stats||p.trigger!=='passive')continue;
@@ -11813,7 +11827,7 @@ function getStrongholdInvSlots(){
   let sum=100;
   if(!char?.house?.placedItems)return sum;
   for(const p of char.house.placedItems){
-    const it=inv[p.itemId];
+    const it=findFurnitureItem(p.itemId);
     if(it&&it.targetType==='inv')sum+=it.slots||0;
   }
   return sum;
@@ -11822,7 +11836,7 @@ function getStrongholdWhSlots(){
   let sum=200;
   if(!char?.house?.placedItems)return sum;
   for(const p of char.house.placedItems){
-    const it=inv[p.itemId];
+    const it=findFurnitureItem(p.itemId);
     if(it&&it.targetType==='wh')sum+=it.slots||0;
   }
   return sum;
@@ -11879,10 +11893,10 @@ function renderStronghold(){
   const placedIds=new Set(placed.map(p=>p.itemId));
   const unplacedFurn=furnInv.filter(i=>!placedIds.has(i.id));
 
-  // 그리드 셀 매핑 — 어떤 가구가 어디에 있는지
+  // 그리드 셀 매핑 — 어떤 가구가 어디에 있는지 (창고에 있어도 표시됨)
   const cellMap={};
   for(const p of placed){
-    const it=inv[p.itemId];if(!it)continue;
+    const it=findFurnitureItem(p.itemId);if(!it)continue;
     const w=p.w||it.size?.[0]||1;
     const h=p.h||it.size?.[1]||1;
     for(let dx=0;dx<w;dx++)for(let dy=0;dy<h;dy++){
@@ -12073,7 +12087,7 @@ window.strongholdSelectEmpty=async function(x,y){
     // 점유 충돌 체크
     const placed=char.house?.placedItems||[];
     for(const p of placed){
-      const pIt=inv[p.itemId];if(!pIt)continue;
+      const pIt=findFurnitureItem(p.itemId);if(!pIt)continue;
       const pw=p.w||pIt.size?.[0]||1, ph=p.h||pIt.size?.[1]||1;
       const overlap=!(x+w<=p.x||p.x+pw<=x||y+h<=p.y||p.y+ph<=y);
       if(overlap){toast('이 위치에는 이미 다른 가구가 있습니다');return;}
@@ -12081,7 +12095,7 @@ window.strongholdSelectEmpty=async function(x,y){
     // 동일 가구 stack 체크
     const f=FURNITURE[it.baseId];
     if(f?.stack){
-      const sameCount=placed.filter(p=>{const pIt=inv[p.itemId];return pIt&&pIt.baseId===it.baseId;}).length;
+      const sameCount=placed.filter(p=>{const pIt=findFurnitureItem(p.itemId);return pIt&&pIt.baseId===it.baseId;}).length;
       if(sameCount>=f.stack){toast(`${it.name}은(는) 최대 ${f.stack}개까지만 배치 가능`);return;}
     }
     // 배치 확정
@@ -12101,7 +12115,7 @@ window.strongholdSelectEmpty=async function(x,y){
 
 // 배치된 가구 클릭 (해제 / 패시브 활성화 메뉴)
 window.strongholdSelectPlaced=async function(itemId){
-  const it=inv[itemId];if(!it)return;
+  const it=findFurnitureItem(itemId);if(!it)return;
   const isPassive=it.cat==='passive';
   const isActive=(char.house.activePassives||[]).includes(itemId);
   const passDesc=it.passive?FURNITURE_PASSIVES[it.passive]?.desc:'';
@@ -12167,7 +12181,7 @@ window.furnActionToggle=async function(itemId,activate){
 };
 
 window.furnActionRemove=async function(itemId){
-  const it=inv[itemId];if(!it)return;
+  const it=findFurnitureItem(itemId);if(!it)return;
   // 슬롯 확장 가구의 경우 사전 경고 모달
   if(it.targetType&&it.slots){
     const cur=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length;
@@ -12192,7 +12206,7 @@ window.strongholdToggleActive=async function(itemId){
 
 // 가구 회수 (배치 해제)
 async function strongholdRemoveFurniture(itemId){
-  const it=inv[itemId];if(!it)return;
+  const it=findFurnitureItem(itemId);if(!it)return;
   // 슬롯 확장 가구의 경우 사전 경고
   if(it.targetType&&it.slots){
     const cur=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length;
@@ -12369,10 +12383,18 @@ window.checkinMemorial=async function(){
   char._memorialEvent.checkinDays=[...new Set([...(char._memorialEvent.checkinDays||[]),day])];
   char._memorialEvent.lastCheckinDate=today;
   char._memorialEvent.claimedRewards=[...new Set([...(char._memorialEvent.claimedRewards||[]),day])];
-  // 골드 지급
+  // 골드 지급 — ★ 핫픽스: 소지금 한도 초과 시 은행/대기금 분배 명시
+  let goldNote='';
   if(reward.gold>0){
+    const beforeGold=char.gold||0, beforeBank=char._bankGold||0, beforePending=char._pendingGold||0;
     const r=distributeGold(char,reward.gold);
     char.gold=r.gold; char._bankGold=r.bank; char._pendingGold=r.pending;
+    const dGold=r.gold-beforeGold, dBank=r.bank-beforeBank, dPending=r.pending-beforePending;
+    const parts=[];
+    if(dGold>0)parts.push(`소지금 +${dGold.toLocaleString()}G`);
+    if(dBank>0)parts.push(`은행 +${dBank.toLocaleString()}G`);
+    if(dPending>0)parts.push(`대기금 +${dPending.toLocaleString()}G`);
+    goldNote=parts.join(' / ');
   }
   // 아이템 지급
   let itemMsgs=[];
@@ -12406,10 +12428,10 @@ window.checkinMemorial=async function(){
   }
   await saveChar();await saveInv();updateTop();
   let msg=`🎏 ${day}일차 출석 보상 수령!`;
-  if(reward.gold>0)msg+=` +${reward.gold.toLocaleString()}G`;
+  if(goldNote)msg+=` ${goldNote}`;
   if(itemMsgs.length)msg+=` / ${itemMsgs.join(', ')}`;
-  toast(msg,5000);
-  blogAdd&&blogAdd(`<span class="l-skill">🎏 위령제 ${day}일차 출석: ${reward.desc}</span>`);
+  toast(msg,6000);
+  blogAdd&&blogAdd(`<span class="l-skill">🎏 위령제 ${day}일차 출석: ${reward.desc}${goldNote?' ['+goldNote+']':''}</span>`);
   if(window.renderMemorial)window.renderMemorial();
   }catch(e){
     console.error('[checkinMemorial error]',e);
@@ -12597,14 +12619,17 @@ window.startMemorialBoss=async function(){
     const fItem=genFurnitureItem('memorial_throne');
     if(fItem){fItem._gotAt=Date.now(); await addItem(fItem);}
     // 추가 보상: 1천만G + 인챈트 스크롤 ×2
+    const beforeG=char.gold||0, beforeB=char._bankGold||0;
     const r=distributeGold(char,10000000);
     char.gold=r.gold; char._bankGold=r.bank; char._pendingGold=r.pending;
+    const dG=r.gold-beforeG, dB=r.bank-beforeB;
     for(let i=0;i<2;i++){
       const sc=genTieredEnchantScroll&&genTieredEnchantScroll(4,'vhard');
       if(sc){sc.tradeable=false; sc._gotAt=Date.now(); await addItem(sc);}
     }
     await saveChar();await saveInv();updateTop();
-    mlog(`<span class="l-exp">🎁 어린 왕의 옥좌 (Set 가구) + 10,000,000G + 인챈트 스크롤 ×2 (tier4)</span>`);
+    const goldDetail=dB>0?`소지금 +${dG.toLocaleString()}G / 은행 +${dB.toLocaleString()}G`:`+${dG.toLocaleString()}G`;
+    mlog(`<span class="l-exp">🎁 어린 왕의 옥좌 (Set 가구) + ${goldDetail} + 인챈트 스크롤 ×2 (tier4)</span>`);
     blogAdd&&blogAdd(`<span class="l-set">🏆 위령제 보스 처치! 어린 왕의 옥좌 획득.</span>`);
     renderMb();
   }
@@ -12823,7 +12848,7 @@ window.synthesizeFurniture=async function(grade){
 function hasCrafterPlaced(crafterType){
   const placed=char?.house?.placedItems||[];
   for(const p of placed){
-    const it=inv[p.itemId];
+    const it=findFurnitureItem(p.itemId);
     if(it&&it.crafterType===crafterType)return true;
   }
   return false;
