@@ -2131,15 +2131,33 @@ const MON_SKILLS={
   ],
   fortress:[
     {id:'m_shield_bash',n:'방패 강타',prob:0.20,fx:(m,tgt)=>{const d=Math.max(1,Math.round(m.atk*1.1*100/(100+(tgt.stats?.def||3))));tgt.hp-=d;tgt._stunned=1;return`<span class="l-skill">🛡 ${m.name}의 방패 강타! -${d} 1턴 마비</span>`}},
-    {id:'m_rally',n:'군단 규합',prob:0.12,fx:(m,mons)=>{let log='';for(const x of mons.filter(x=>x.status==='alive')){x.atk=Math.round(x.atk*1.15);log+=x.name+' ';}return`<span class="l-warn">⚔ ${m.name}의 규합! 전체 ATK +15%: ${log}</span>`}},
+    {id:'m_rally',n:'군단 규합',prob:0.12,fx:(m,mons)=>{
+      // ★ v3.x — 누적 방지 (1전투 1회만)
+      if(m._rallyUsed)return null;
+      m._rallyUsed=true;
+      let log='';for(const x of mons.filter(x=>x.status==='alive')){x.atk=Math.round(x.atk*1.15);log+=x.name+' ';}
+      return`<span class="l-warn">⚔ ${m.name}의 규합! 전체 ATK +15%: ${log}</span>`
+    }},
     {id:'m_execute',n:'처형',prob:0.15,fx:(m,tgt)=>{if(tgt.hp/tgt.maxHp<0.3){const d=Math.round(tgt.maxHp*0.40);tgt.hp-=d;return`<span class="l-skill">💀 ${m.name}의 처형! HP 30% 미만 대상 -${d}</span>`}return null}},
-    {id:'m_fortify',n:'요새화',prob:0.10,fx:(m)=>{m.def=Math.round(m.def*1.3);return`<span class="l-skill">🏰 ${m.name}의 요새화! DEF +30%</span>`}},
+    {id:'m_fortify',n:'요새화',prob:0.10,fx:(m)=>{
+      // ★ v3.x — 누적 방지 (1전투 1회만)
+      if(m._fortifyUsed)return null;
+      m._fortifyUsed=true;
+      m.def=Math.round(m.def*1.3);
+      return`<span class="l-skill">🏰 ${m.name}의 요새화! DEF +30%</span>`
+    }},
   ],
   dragon:[
-    {id:'m_fire_breath',n:'화염 숨결',prob:0.22,fx:(m,tgts)=>{let log='';for(const p of tgts.filter(p=>p.status==='alive')){const d=Math.round(m.atk*0.6);p.hp-=d;p._dot=(p._dot||0)+2;log+=`${p.name}-${d} `;}return`<span class="l-skill">🔥 ${m.name}의 화염 숨결! 전체: ${log}+2턴 화상</span>`}},
+    {id:'m_fire_breath',n:'화염 숨결',prob:0.22,fx:(m,tgts)=>{let log='';for(const p of tgts.filter(p=>p.status==='alive')){const d=Math.round(m.atk*0.5);p.hp-=d;p._dot=(p._dot||0)+2;log+=`${p.name}-${d} `;}return`<span class="l-skill">🔥 ${m.name}의 화염 숨결! 전체: ${log}+2턴 화상</span>`}},
     {id:'m_tail',n:'꼬리 일격',prob:0.18,fx:(m,tgt)=>{const d=Math.max(1,Math.round(m.atk*1.4*100/(100+(tgt.stats?.def||3))));tgt.hp-=d;tgt._stunned=1;return`<span class="l-skill">🐉 ${m.name}의 꼬리 일격! -${d} 마비</span>`}},
     {id:'m_roar',n:'용의 포효',prob:0.15,fx:(m,tgts)=>{for(const p of tgts.filter(p=>p.status==='alive')){p.aggro=0;}return`<span class="l-warn">🔊 ${m.name}의 포효! 모든 플레이어 적개심 초기화</span>`}},
-    {id:'m_scale',n:'용린 강화',prob:0.10,fx:(m)=>{m.def=Math.round(m.def*1.25);m.hp=Math.min(m.hp+Math.round(m.maxHp*0.08),m.maxHp);return`<span class="l-skill">✨ ${m.name}의 용린! DEF↑ HP +8% 회복</span>`}},
+    {id:'m_scale',n:'용린 강화',prob:0.10,fx:(m)=>{
+      // ★ v3.x — DEF 누적 1회 제한 (HP 회복은 매번 가능)
+      const defBuffOnce=!m._scaleUsed;
+      if(defBuffOnce){m._scaleUsed=true;m.def=Math.round(m.def*1.25);}
+      m.hp=Math.min(m.hp+Math.round(m.maxHp*0.08),m.maxHp);
+      return`<span class="l-skill">✨ ${m.name}의 용린! ${defBuffOnce?'DEF↑ ':''}HP +8% 회복</span>`
+    }},
   ],
 };
 const MPFX=[
@@ -7535,9 +7553,10 @@ async function resolvePhase(){
       const hpPct=m.hp/m.maxHp;
       // 격노 (체력 50% 이하)
       if(!m.gimmick.rage50&&hpPct<=0.5){
-        m.gimmick.rage50=true;m.atk=Math.round(m.atk*1.5);
+        // ★ v3.x 핫픽스 — 주간 강화와 곱셈 누적되어 ATK 폭증 → 1.5 → 1.25 완화
+        m.gimmick.rage50=true;m.atk=Math.round(m.atk*1.25);
         SFX.play('boss_rage');
-        blogAdd(`<span class="l-dead">💢 ${m.name}이(가) 격노했습니다! ATK 50% 증가!</span>`);
+        blogAdd(`<span class="l-dead">💢 ${m.name}이(가) 격노했습니다! ATK 25% 증가!</span>`);
       }
       // 차지 어택 (2턴 예고)
       if(!m.gimmick.chargeWarn&&Math.random()<0.2){
@@ -8859,7 +8878,7 @@ const IT_PLAYER_BUFFS=[
 
 const IT_MONSTER_DEBUFFS=[
   {id:'berserk',     name:'광폭화',     icon:'🔴', color:'var(--red)',
-   desc:'몬스터 ATK +20%',        apply:(m)=>({...m,atk:Math.round(m.atk*1.20)})},
+   desc:'몬스터 ATK +15%',        apply:(m)=>({...m,atk:Math.round(m.atk*1.15)})},
   {id:'iron_hide',   name:'철벽',       icon:'🗿', color:'#aaa',
    desc:'몬스터 DEF +30%',        apply:(m)=>({...m,def:Math.round(m.def*1.30)})},
   {id:'regeneration',name:'심연 재생', icon:'💉', color:'var(--green)',
@@ -8867,7 +8886,7 @@ const IT_MONSTER_DEBUFFS=[
   {id:'agile',       name:'기민함',     icon:'💨', color:'var(--blue)',
    desc:'몬스터 회피 +12%',       apply:(m)=>({...m,dodge:Math.min(m.dodge+12,55)})},
   {id:'abyss_rage',  name:'심연의 분노',icon:'💀', color:'#FF2244',
-   desc:'몬스터 ATK +40%, HP -15%',apply:(m)=>({...m,atk:Math.round(m.atk*1.40),hp:Math.round(m.hp*0.85),maxHp:Math.round(m.maxHp*0.85)})},
+   desc:'몬스터 ATK +25%, HP -15%',apply:(m)=>({...m,atk:Math.round(m.atk*1.25),hp:Math.round(m.hp*0.85),maxHp:Math.round(m.maxHp*0.85)})},
   {id:'tough_skin',  name:'강화 외피',  icon:'🦴', color:'var(--gold)',
    desc:'몬스터 DEF +20%, HP +25%', apply:(m)=>({...m,def:Math.round(m.def*1.20),hp:Math.round(m.hp*1.25),maxHp:Math.round(m.maxHp*1.25)})},
   {id:'poison_mist', name:'독 안개',    icon:'☠️', color:'#80ff40',
@@ -8875,7 +8894,7 @@ const IT_MONSTER_DEBUFFS=[
   {id:'curse',       name:'저주',       icon:'💜', color:'var(--purple)',
    desc:'플레이어 치명타 확률 -20%',apply:(m)=>({...m,_cursed:true})},
   {id:'mass_rage',   name:'집단 격노',  icon:'🌋', color:'var(--orange)',
-   desc:'몬스터 ATK +15%, 회피 +8%',apply:(m)=>({...m,atk:Math.round(m.atk*1.15),dodge:Math.min(m.dodge+8,50)})},
+   desc:'몬스터 ATK +10%, 회피 +8%',apply:(m)=>({...m,atk:Math.round(m.atk*1.10),dodge:Math.min(m.dodge+8,50)})},
   {id:'hunter',      name:'사냥의 본능',icon:'🎯', color:'var(--red)',
    desc:'몬스터 공격 미스 없음 (회피 무효)', apply:(m)=>({...m,_noDodge:true})},
 ];
@@ -8901,8 +8920,8 @@ function getITWeekRotation(){
 function getITMonsterMult(floor){
   if(floor<=20)  return {atk:1.4,  hp:1.2,  def:1.2,  dodge:10};
   if(floor<=50)  return {atk:2.2,  hp:2.0,  def:1.8,  dodge:17};
-  if(floor<=80)  return {atk:3.5,  hp:3.2,  def:2.8,  dodge:24};
-               return {atk:5.5,  hp:5.0,  def:4.2,  dodge:32};
+  if(floor<=80)  return {atk:3.0,  hp:3.2,  def:2.8,  dodge:24};  // ★ 3.5 → 3.0
+               return {atk:4.0,  hp:5.0,  def:4.2,  dodge:32};   // ★ 5.5 → 4.0
 }
 
 // ★ 불멸의 탑 — 10층 보스 풀
@@ -8925,7 +8944,7 @@ const IT_BOSSES={
     skills:['m_fire_breath','m_tail','m_shield_bash','m_execute','m_curse']},
   90:  {name:'불멸의 현신 루시엔',     icon:'🌟', atk:2.8, hp:5.0, def:2.5, _attr:'holy',
     skills:['m_roar','m_fire_breath','m_drain','m_rally','m_fortify','m_poison2']},
-  100: {name:'불멸의 탑 수호신 아비살', icon:'🔱', atk:3.2, hp:7.0, def:3.0, _attr:'dark',
+  100: {name:'불멸의 탑 수호신 아비살', icon:'🔱', atk:2.5, hp:7.0, def:3.0, _attr:'dark',
     skills:['m_fire_breath','m_tail','m_execute','m_curse','m_rally','m_fortify','m_roar','m_drain']},
 };
 
