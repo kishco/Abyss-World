@@ -2762,6 +2762,13 @@ async function saveInv(){
   }
 }
 async function addItem(item){
+  // ★ v3.x — 파괴 방지 스크롤 자동 변환 (인벤에 들어오기 전에 _forgeWard로 흡수)
+  if(item&&item.isProtectScroll&&char){
+    char._forgeWard=(char._forgeWard||0)+1;
+    await saveChar();
+    toast(`🛡 파괴 방지 +1 (현재 ${char._forgeWard}회 보호 중 — 강화 시 자동 발동)`,3500);
+    return true;
+  }
   const maxSlots=char?.invSlots||100;
   const isMiscScroll=item.isScroll||item.isProtectScroll||item.isExtractScroll;
   const isFurniture=item.isFurniture;
@@ -5591,8 +5598,16 @@ window.useEnchantScroll=async(scrollId,slotKey,type)=>{
     toast(`✨ ${eq.name}에 접미 [${en.n}] 부여!`);
   }
   delete inv[scrollId];
-  await saveChar();await saveInv();closeIM();updateTop();renderChar();
+  // ★ v3.x — 명시적 재할당 + 화면 즉시 갱신 (저장 실패해도 UI 보장)
+  char.equipment[slotKey]=eq;
+  closeIM();
+  updateTop();renderChar();renderEq();renderSetPanel();
+  renderInv();
   trackBounty('enchant',1);if(char)char._anyEnchant=true;
+  // ★ 렌더 후 인챈트 화면(secbody)이 열려있으면 갱신
+  const sb=document.getElementById('secbody');
+  if(sb&&typeof renderEnchant==='function')renderEnchant(sb);
+  try{await saveChar();await saveInv();}catch(e){console.error('[useEnchantScroll save FAILED]',e);}
 };
 
 async function useRerollScroll(scrollId){
@@ -5607,9 +5622,14 @@ async function useRerollScroll(scrollId){
   const keys=STATS_DEF.map(s=>s.k);
   for(let i=0;i<total;i++){const k=pick(keys);char[k]=(char[k]||BASE[k]||1)+1;}
   delete inv[scrollId];
-  await saveChar();await saveInv();closeIM();
+  // ★ v3.x — 화면 즉시 갱신 (저장 실패해도 UI 보장)
   toast(`✨ 능력치 재조정 완료! STR:${char.str} DEX:${char.dex} INT:${char.int} VIT:${char.vit} LUK:${char.luk}`,4000);
-  renderChar();
+  closeIM();
+  renderChar();renderEq();renderSetPanel();
+  renderInv();
+  const sb=document.getElementById('secbody');
+  if(sb&&typeof renderRerollSec==='function')renderRerollSec(sb);
+  try{await saveChar();await saveInv();}catch(e){console.error('[useRerollScroll save FAILED]',e);}
 }
 
 // ═══ TOWN ═══
@@ -6184,12 +6204,34 @@ window.buyShop=async i=>{
   try{await addItem(genShopItem(si));}catch(e){console.error('[buyShop addItem FAILED]',e);}
 };
 // ═══ 암시장 시스템 ═══
+// ★ v3.x — 11종 풀 (매일 6종 시드 기반 랜덤 노출)
 const BM_ITEMS=[
-  {id:'bm_reroll',  name:'능력치 재분배 스크롤', icon:'🔮', desc:'모든 스탯 포인트를 재분배합니다', price:50000},
-  {id:'bm_protect', name:'파괴 방지 스크롤',      icon:'🛡', desc:'강화 실패 시 장비 파괴를 1번 막아줍니다', price:80000},
-  {id:'bm_extract', name:'인챈트 추출 스크롤',    icon:'💎', desc:'장비의 인챈트를 스크롤로 추출합니다', price:120000},
-  {id:'bm_deathward',name:'죽음 방지 부적',        icon:'🧿', desc:'매우 어려움 사망 시 아이템 손실 1회 방지', price:150000},
+  {id:'bm_reroll',     name:'능력치 재분배 스크롤', icon:'🔮', desc:'모든 스탯 포인트를 재분배합니다',                   price:50000},
+  {id:'bm_protect',    name:'파괴 방지 스크롤',     icon:'🛡', desc:'강화 실패 시 장비 파괴를 1번 막아줍니다 (자동 발동)', price:80000},
+  {id:'bm_extract',    name:'인챈트 추출 스크롤',   icon:'💎', desc:'장비의 인챈트를 스크롤로 추출합니다',                price:120000},
+  {id:'bm_deathward',  name:'죽음 방지 부적',       icon:'🧿', desc:'매우 어려움 사망 시 아이템 손실 1회 방지',           price:150000},
+  {id:'bm_invexp',     name:'인벤 확장권',          icon:'🎒', desc:'인벤토리 슬롯 +10 (영구)',                          price:500000},
+  {id:'bm_whexp',      name:'창고 확장권',          icon:'🏦', desc:'창고 슬롯 +20 (영구)',                              price:800000},
+  {id:'bm_forgeguard', name:'강화 보장권',          icon:'⚒', desc:'다음 강화 1회 100% 성공 (실패/파괴 차단)',           price:2000000},
+  {id:'bm_goldboost',  name:'골드 부스터',          icon:'💰', desc:'1시간 골드 획득 +50%',                              price:300000},
+  {id:'bm_expboost',   name:'경험치 부스터',        icon:'📚', desc:'1시간 EXP 획득 +50%',                               price:300000},
+  {id:'bm_lucky',      name:'행운의 부적',          icon:'🍀', desc:'1시간 드랍률 +30%',                                 price:400000},
+  {id:'bm_nick',       name:'닉네임 변경권',        icon:'🎭', desc:'캐릭터 이름 1회 변경 가능 (쿠폰)',                  price:1500000},
 ];
+// ★ 매일 6종 노출 — 시드 기반 (모든 유저 동일)
+function getBMDailyPool(){
+  const base=new Date();base.setHours(0,0,0,0);
+  const seed=base.getTime();
+  // Fisher-Yates 셔플 (시드 기반)
+  const arr=BM_ITEMS.map((_,i)=>i);
+  for(let i=arr.length-1;i>0;i--){
+    const x=Math.sin(seed+i*7)*10000;
+    const r=x-Math.floor(x);
+    const j=Math.floor(r*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr.slice(0,6).map(idx=>BM_ITEMS[idx]);
+}
 
 // ★ 암시장 글로벌 스케줄 (Firebase 기반 — 모든 유저 동일한 시간)
 let _bmScheduleCache=null;
@@ -6292,13 +6334,17 @@ async function renderBlackMarket(sb){
       <div style="font-size:11px;line-height:1.8">하루 3번 랜덤 시간에 30분간 열립니다.<br>마을 탭에서 암시장 카드가 나타나면 서두르세요.</div>
     </div>`;return;
   }
+  // ★ v3.x — 매일 6종 풀 노출
+  const todayItems=getBMDailyPool();
   sb.innerHTML=`
     <div style="background:rgba(255,30,30,.06);border:1px solid rgba(255,30,30,.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--tx2)">
-      🌑 암시장이 열렸습니다! 가격이 비싸지만 귀한 물건이 있습니다.
+      🌑 오늘의 암시장 — 매일 다른 6종 진귀한 아이템이 노출됩니다.
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      ${BM_ITEMS.map((item,i)=>`
-        <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:12px">
+      ${todayItems.map((item)=>{
+        // BM_ITEMS 전체 풀에서 원본 인덱스 찾기 (bmBuy 호출용)
+        const realIdx=BM_ITEMS.findIndex(b=>b.id===item.id);
+        return `<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:12px">
           <div style="font-size:28px;flex-shrink:0">${item.icon}</div>
           <div style="flex:1;min-width:0">
             <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--tx);margin-bottom:3px">${item.name}</div>
@@ -6306,14 +6352,16 @@ async function renderBlackMarket(sb){
           </div>
           <div style="text-align:right;flex-shrink:0">
             <div style="font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:12px;font-weight:700;margin-bottom:5px">💰${item.price.toLocaleString()}</div>
-            <button class="btn btn-red btn-xs" onclick="bmBuy(${i})">구매</button>
+            <button class="btn btn-red btn-xs" onclick="bmBuy(${realIdx})">구매</button>
           </div>
-        </div>`).join('')}
+        </div>`;
+      }).join('')}
     </div>`;
 }
 window.bmBuy=async(i)=>{
   if(!await isBMActive()){toast('암시장이 닫혔습니다!');return;}
   const item=BM_ITEMS[i];
+  if(!item){toast('아이템 정보 오류');return;}
   if(!canPay(item.price)){toast('골드 부족');return;}
   // ★ reroll 사전 검증 — 결제 전에 재배분 가능 여부 확인 (환불 처리 불필요)
   if(item.id==='bm_reroll'){
@@ -6332,16 +6380,47 @@ window.bmBuy=async(i)=>{
     delete char._pendingStatPts;
     toast(`🔮 능력치 재분배 완료! STR:${char.str} DEX:${char.dex} INT:${char.int} VIT:${char.vit} LUK:${char.luk}`,5000);renderChar();
   }else if(item.id==='bm_protect'){
-    const si={id:gId(),name:'파괴 방지 스크롤',icon:'🛡',isProtectScroll:true,grade:'rare',gradeName:'레어',gradeColor:'#0070dd',slot:'scroll',stats:{},_v:2};
-    await addItem(si);await saveInv();toast('🛡 파괴 방지 스크롤 획득!');
+    // ★ v3.x — 파괴 방지 자동 변환 (인벤에 들어오지 않고 즉시 _forgeWard 스택 +1)
+    char._forgeWard=(char._forgeWard||0)+1;
+    toast(`🛡 파괴 방지 적용! (현재 ${char._forgeWard}회 보호 중 — 강화 시 자동 발동)`,4000);
   }else if(item.id==='bm_extract'){
     const si={id:gId(),name:'인챈트 추출 스크롤',icon:'💎',isExtractScroll:true,grade:'epic',gradeName:'에픽',gradeColor:'#a335ee',slot:'scroll',stats:{},_v:2};
-    await addItem(si);await saveInv();toast('💎 인챈트 추출 스크롤 획득!');
+    await addItem(si);toast('💎 인챈트 추출 스크롤 획득!');
   }else if(item.id==='bm_deathward'){
     char._deathWard=(char._deathWard||0)+1;
-    toast('🧿 죽음 방지 부적 장착! 아이템 손실 1회 방지.',4000);
+    toast(`🧿 죽음 방지 부적 장착! (현재 ${char._deathWard}회 보유)`,4000);
+  }else if(item.id==='bm_invexp'){
+    // ★ v3.x — 인벤 슬롯 +10 (영구)
+    char.invSlots=(char.invSlots||100)+10;
+    toast(`🎒 인벤토리 +10 슬롯! (현재 ${char.invSlots}슬롯)`,4000);
+  }else if(item.id==='bm_whexp'){
+    // ★ v3.x — 창고 슬롯 +20 (영구)
+    char.whSlots=(char.whSlots||200)+20;
+    toast(`🏦 창고 +20 슬롯! (현재 ${char.whSlots}슬롯)`,4000);
+  }else if(item.id==='bm_forgeguard'){
+    // ★ v3.x — 강화 보장권 (다음 강화 1회 100% 성공)
+    char._forgeGuarantee=(char._forgeGuarantee||0)+1;
+    toast(`⚒ 강화 보장권 적용! (다음 강화 ${char._forgeGuarantee}회 100% 성공 보장)`,4000);
+  }else if(item.id==='bm_goldboost'){
+    // ★ v3.x — 1시간 골드 +50%
+    const now=Date.now();
+    char._goldBoosterTs=Math.max(char._goldBoosterTs||0,now)+3600000;
+    toast(`💰 골드 부스터 활성화! (1시간 골드 +50%)`,4000);
+  }else if(item.id==='bm_expboost'){
+    const now=Date.now();
+    char._expBoosterTs=Math.max(char._expBoosterTs||0,now)+3600000;
+    toast(`📚 경험치 부스터 활성화! (1시간 EXP +50%)`,4000);
+  }else if(item.id==='bm_lucky'){
+    const now=Date.now();
+    char._luckyBoosterTs=Math.max(char._luckyBoosterTs||0,now)+3600000;
+    toast(`🍀 행운의 부적 활성화! (1시간 드랍률 +30%)`,4000);
+  }else if(item.id==='bm_nick'){
+    char.nickCoupons=(char.nickCoupons||0)+1;
+    toast(`🎭 닉네임 변경권 획득! (보유 ${char.nickCoupons}장 — 설정 탭에서 사용)`,5000);
   }
   await saveChar();updateTop();
+  // ★ 인벤 변경 가능성 (extract 카드 추가) — 항상 갱신
+  renderInv();
 };
 
 // 암시장 시스템 → renderBlackMarket은 위에서 정의됨 (initBlackMarket 포함)
@@ -6489,7 +6568,14 @@ window.doForge=async sl=>{
   }
 
   const table=FORGE_TABLE[enh];
-  const roll=Math.random()*100;
+  // ★ v3.x — 강화 보장권 적용 (다음 강화 100% 성공)
+  let roll=Math.random()*100;
+  if((char._forgeGuarantee||0)>0){
+    char._forgeGuarantee--;
+    roll=0; // 무조건 성공 (succ 영역 적중)
+    blogAdd&&blogAdd(`<span class="l-heal">⚒ 강화 보장권 발동! 100% 성공 보장 (남은 ${char._forgeGuarantee}회)</span>`);
+    toast(`⚒ 강화 보장권 발동! (남은 ${char._forgeGuarantee}회)`,3500);
+  }
 
   try{
   if(roll<table.succ){
@@ -6581,7 +6667,14 @@ window.doForgeInv=async function(itemId){
     blogAdd&&blogAdd(`<span class="l-heal">🔥 단조의 화로 발동! 강화 비용 환급!</span>`);
   }
   const table=FORGE_TABLE[Math.min(enh,8)];
-  const roll=Math.random()*100;
+  // ★ v3.x — 강화 보장권 적용
+  let roll=Math.random()*100;
+  if((char._forgeGuarantee||0)>0){
+    char._forgeGuarantee--;
+    roll=0;
+    blogAdd&&blogAdd(`<span class="l-heal">⚒ 강화 보장권 발동! 100% 성공 보장 (남은 ${char._forgeGuarantee}회)</span>`);
+    toast(`⚒ 강화 보장권 발동! (남은 ${char._forgeGuarantee}회)`,3500);
+  }
   try{
   if(roll<table.succ){
     it.enhance=enh+1;
@@ -7037,7 +7130,7 @@ async function renderAuction(sb){
   // 실시간 업데이트 — 초기 렌더 완료 후 연결 (즉시 발동 방지)
   _auctionTimer=setTimeout(()=>{
     _auctionTimer=null;
-    _auctionUnsub=onValue(query(ref(db,'auction'),orderByKey(),limitToLast(50)),sn=>{
+    _auctionUnsub=onValue(query(ref(db,'auction'),orderByKey(),limitToLast(25)),sn=>{
       // ★ snapshot 데이터 직접 사용 — 별도 get() 중복 호출 제거
       const currentTab=document.querySelector('#atab-browse.btn-gold')?'browse':
                        document.querySelector('#atab-mine.btn-gold')?'mine':'sell';
@@ -8396,10 +8489,10 @@ async function lootPhase(){
       totalGold+=rand(500,2000);
       continue;
     }
-    const exp=Math.round((30+lv*8)*m.expR*d.expMult*(_globalExpMult||1.0));
-    const gold=Math.round((25+lv*5)*m.goldR*d.goldMult*(1+char.luk*0.005)); // ★ 골드 기본값 상향
+    const exp=Math.round((30+lv*8)*m.expR*d.expMult*(_globalExpMult||1.0)*getActiveExpMult());
+    const gold=Math.round((25+lv*5)*m.goldR*d.goldMult*(1+char.luk*0.005)*getActiveGoldMult()); // ★ 골드 기본값 상향
     totalExp+=exp;totalGold+=gold;
-    const dropR=d.dropMult*(1+char.luk*0.003);
+    const dropR=d.dropMult*(1+char.luk*0.003)*getActiveDropMult();
     const dropRoll=Math.random();
     if(dropRoll<0.35*dropR){
       const pool=[...WBASES,...ABASES,...ACCBASES];
@@ -9067,15 +9160,15 @@ const cwUnsub={world:null,whisper:null,system:null};
 function startChat(){
   if(cwActive)return; // ★ 이미 초기화된 경우 중복 등록 방지
   cwActive=true;
-  // 월드 채팅 리스너 1회만 등록 — 최근 100개만
+  // 월드 채팅 리스너 1회만 등록 — 최근 30개만 (Firebase 트래픽 절감)
   if(cwUnsub.world)cwUnsub.world();
-  cwUnsub.world=onValue(query(ref(db,'chat/world'),orderByKey(),limitToLast(100)),sn=>{
+  cwUnsub.world=onValue(query(ref(db,'chat/world'),orderByKey(),limitToLast(30)),sn=>{
     if(cwMode!=='world')return;
     renderChatMsgs(sn.val()||{},'world');
   });
-  // ★ 시스템 채널 리스너 — 최근 50개만
+  // ★ 시스템 채널 리스너 — 최근 20개만
   if(cwUnsub.system)cwUnsub.system();
-  cwUnsub.system=onValue(query(ref(db,'chat/system'),orderByKey(),limitToLast(50)),sn=>{
+  cwUnsub.system=onValue(query(ref(db,'chat/system'),orderByKey(),limitToLast(20)),sn=>{
     const msgs=sn.val()||{};
     if(cwMode==='system'){
       renderChatMsgs(msgs,'system');
@@ -9173,7 +9266,7 @@ window.cwTab=function(m){
     get(ref(db,'chat/system')).then(sn=>renderChatMsgs(sn.val()||{},'system'));
   }else if(m==='whisper'){
     if(cwUnsub.whisper)cwUnsub.whisper();
-    cwUnsub.whisper=onValue(query(ref(db,`chat/whisper/${charId}`),orderByKey(),limitToLast(50)),sn=>{
+    cwUnsub.whisper=onValue(query(ref(db,`chat/whisper/${charId}`),orderByKey(),limitToLast(20)),sn=>{
       if(cwMode==='whisper')renderChatMsgs(sn.val()||{},'whisper');
     });
   }
@@ -10771,6 +10864,34 @@ async function propagateNickname(oldName,newName,targetCharId){
     await set(ref(db,`subjugation/weeklyRanking/${newName}`),subjSn.val());
     await remove(ref(db,`subjugation/weeklyRanking/${oldName}`));
   }
+  // ★ v3.x — 매우어려움 랭킹 (rankings/vhard/solo_NAME_tierN) 전파
+  // 닉네임이 키 일부에 포함되어 있어서 변경 시 새 키 생성 → 중복 표시 버그 발생
+  try{
+    const vhardSn=await get(ref(db,'rankings/vhard'));
+    const allVhard=vhardSn.val()||{};
+    for(const[oldKey,rec]of Object.entries(allVhard)){
+      // 키 패턴: solo_{name}_tier{N}_{...}
+      // 변경 대상 판별: charName이 oldName과 일치하는 것만
+      if(rec&&rec.charName===oldName){
+        // 새 키 생성 (정확히 같은 변환식 사용)
+        const tierPart=oldKey.match(/_tier(\d+)/)?.[0]||'_tier0';
+        const newKey=`solo_${newName}${tierPart}`.replace(/[^a-zA-Z0-9가-힣_]/g,'_');
+        await set(ref(db,`rankings/vhard/${newKey}`),{...rec,charName:newName,members:newName});
+        await remove(ref(db,`rankings/vhard/${oldKey}`));
+      }
+    }
+  }catch(e){console.error('[propagateNickname vhard fail]',e);}
+  // ★ v3.x — 타임어택 주간 랭킹 (timeAttack/{wk}/{name}) 전파
+  try{
+    const taSn=await get(ref(db,'timeAttack'));
+    const allWeeks=taSn.val()||{};
+    for(const[wk,weekData]of Object.entries(allWeeks)){
+      if(weekData&&weekData[oldName]){
+        await set(ref(db,`timeAttack/${wk}/${newName}`),weekData[oldName]);
+        await remove(ref(db,`timeAttack/${wk}/${oldName}`));
+      }
+    }
+  }catch(e){console.error('[propagateNickname TA fail]',e);}
   // 나머지는 독립적이므로 병렬 처리 유지
   const ops=[];
   const champSn=await get(ref(db,'champ/current'));
@@ -10787,6 +10908,9 @@ async function propagateNickname(oldName,newName,targetCharId){
   }
   if(curUser)ops.push(set(ref(db,`presence/${curUser.uid}`),{charName:newName,lastSeen:Date.now()}));
   if(ops.length)await Promise.all(ops);
+  // ★ 캐시 무효화 (랭킹 즉시 반영)
+  if(typeof _rankCharsCache!=='undefined')_rankCharsCache={data:null,ts:0};
+  if(typeof _taBannerCache!=='undefined')_taBannerCache.ts=0;
 }
 
 window.settingChangeNick=async function(){
@@ -10920,22 +11044,8 @@ window.adminChangeNick=async function(cid,oldName){
   if(dup){toast('⚠️ 이미 사용 중인 닉네임');return;}
   if(!confirm(`"${oldName}" → "${newName}" 닉네임 변경?\n채팅·랭킹·경매장 전체 반영됩니다.`))return;
   await update(ref(db,`chars/${cid}`),{name:newName});
-  // ★ 토벌전 랭킹 순차 처리 (동시 처리 시 중복 노출 방지)
-  const subjSn=await get(ref(db,`subjugation/weeklyRanking/${oldName}`));
-  if(subjSn.exists()){
-    await set(ref(db,`subjugation/weeklyRanking/${newName}`),subjSn.val());
-    await remove(ref(db,`subjugation/weeklyRanking/${oldName}`));
-  }
-  const ops=[];
-  const champSn=await get(ref(db,'champ/current'));
-  const champ=champSn.val();
-  if(champ&&champ.charId===cid)ops.push(update(ref(db,'champ/current'),{name:newName}));
-  const aucSn=await get(ref(db,'auction'));
-  for(const[lid,v]of Object.entries(aucSn.val()||{})){
-    if(v&&v.sellerCharId===cid&&v.sellerName===oldName)
-      ops.push(update(ref(db,`auction/${lid}`),{sellerName:newName}));
-  }
-  if(ops.length)await Promise.all(ops);
+  // ★ v3.x — propagateNickname 호출로 통일 (vhard / TA 랭킹까지 처리)
+  try{await propagateNickname(oldName,newName,cid);}catch(e){console.error('[adminChangeNick propagate fail]',e);}
   toast(`✅ ${oldName} → ${newName} 변경 완료 (전체 반영)`);
   adminOpenUser(cid);
 };
@@ -11416,7 +11526,7 @@ function startSubjugationWatcher(){
     }
   });
   // Watch this week's subjugation ranking for chat title
-  _subjRankUnsub=onValue(query(ref(db,'subjugation/weeklyRanking'),orderByKey(),limitToLast(50)),sn=>{
+  _subjRankUnsub=onValue(query(ref(db,'subjugation/weeklyRanking'),orderByKey(),limitToLast(20)),sn=>{
     const data=sn.val()||{};
     const sorted=Object.entries(data).sort((a,b)=>(b[1].totalDmg||0)-(a[1].totalDmg||0));
     const TITLE_COLORS=['#ffd700','#c0c0c0','#cd7f32'];
@@ -12482,14 +12592,24 @@ window.rankTab=function(mode){
   loadRanking();
 };
 
+// ★ v3.x — 랭킹 캐시 (Firebase 트래픽 절감)
+let _rankCharsCache={data:null,ts:0};
 async function loadRanking(){
   const rb=document.getElementById('rankBody');
   if(!rb)return;
   rb.innerHTML=`<div style="color:var(--tx3);font-size:11px;padding:12px">로딩 중...</div>`;
 
   if(rankMode==='level'||rankMode==='gold'){
-    const cs=await get(ref(db,'chars'));
-    const chars=Object.values(cs.val()||{}).filter(c=>c.owner!==undefined);
+    // ★ 60초 캐시 (다중 사용자 동시 접속 시 chars 풀 페치 폭주 방지)
+    let chars;
+    const now=Date.now();
+    if(_rankCharsCache.data&&now-_rankCharsCache.ts<60000){
+      chars=_rankCharsCache.data;
+    }else{
+      const cs=await get(ref(db,'chars'));
+      chars=Object.values(cs.val()||{}).filter(c=>c.owner!==undefined);
+      _rankCharsCache={data:chars,ts:now};
+    }
     const adminUid=(curUser?.email===ADMIN_EMAIL)?curUser.uid:null;
     const nonAdmin=adminUid?chars.filter(c=>c.owner!==adminUid):chars;
     const sorted=rankMode==='level'
@@ -13742,6 +13862,15 @@ function getMemorialBoosts(){
   };
 }
 
+// ★ v3.x — 암시장 부스터 헬퍼 (만료 시간 기반, 위령제와 별도)
+function _isBoosterActive(ts){return ts&&Date.now()<ts;}
+function getActiveGoldMult(){return _isBoosterActive(char?._goldBoosterTs)?1.5:1.0;}
+function getActiveExpMult(){return _isBoosterActive(char?._expBoosterTs)?1.5:1.0;}
+function getActiveDropMult(){return _isBoosterActive(char?._luckyBoosterTs)?1.3:1.0;}
+window.getActiveGoldMult=getActiveGoldMult;
+window.getActiveExpMult=getActiveExpMult;
+window.getActiveDropMult=getActiveDropMult;
+
 // 위령제 메인 UI 렌더 (마을 → 위령제 카드에서 진입)
 window.openMemorial=function(){
   document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-memorial'));
@@ -13872,8 +14001,11 @@ window.synthesizeEnchant=async function(tier){
   const result=genEnchantScrollItem(enchData,isPrefix,newTier,newTier);
   result.tradeable=false; result._gotAt=Date.now();
   await addItem(result);
-  await saveInv();updateTop();
+  // ★ v3.x — 인벤 갱신 보장
+  renderInv();
+  updateTop();
   toast(`✨ 합성 성공! ${result.name}`,5000);refreshSynthModalIfOpen();
+  try{await saveInv();}catch(e){console.error('[synthesizeEnchant save FAILED]',e);}
 };
 
 // 가구 합성: 동일 등급 N개 + 골드 + 재료 → 상위 등급 1개
