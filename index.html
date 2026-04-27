@@ -1222,7 +1222,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,sendPasswordResetEmail,updatePassword,EmailAuthProvider,reauthenticateWithCredential}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-import{getDatabase,ref,set,push,onValue,get,remove,serverTimestamp,update,onDisconnect,query,limitToLast,orderByKey}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+import{getDatabase,ref,set,push,onValue,get,remove,serverTimestamp,update,onDisconnect,query,limitToLast,orderByKey,orderByChild,equalTo}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 const app=initializeApp({apiKey:"AIzaSyAUkBrBb9UFj-kC45vJ-T3eiFwh8tCT1Hw",authDomain:"game1-ea736.firebaseapp.com",databaseURL:"https://game1-ea736-default-rtdb.firebaseio.com",projectId:"game1-ea736",storageBucket:"game1-ea736.firebasestorage.app",messagingSenderId:"277606211416",appId:"1:277606211416:web:1cf3a4bbb5780ecd708f2d"});
 const auth=getAuth(app),db=getDatabase(app),gp=new GoogleAuthProvider();
@@ -2460,7 +2460,7 @@ function startPresence(){
     }catch(e){/* 네트워크 오류 무시 */}
   };
   update_p();
-  _presenceInterval=setInterval(update_p,30000);
+  _presenceInterval=setInterval(update_p,60000); // ★ v3.x — 30초 → 60초 (트래픽 절감)
   onDisconnect(pRef).remove();
   window.addEventListener('beforeunload',()=>{
     if(_presenceInterval){clearInterval(_presenceInterval);_presenceInterval=null;}
@@ -2821,9 +2821,20 @@ async function addItem(item){
 }
 
 async function loadChars(){
-  const snap=await get(ref(db,'chars'));
-  const all=snap.val()||{};
-  const mine=Object.entries(all).filter(([,c])=>c.owner===curUser.uid).map(([id,c])=>({...c,id}));
+  // ★ v3.x — chars 풀 페치 대신 owner 인덱스만 조회 (대역폭 절감)
+  // Firebase orderByChild + equalTo로 본인 캐릭터만 가져옴
+  let mine=[];
+  try{
+    const snap=await get(query(ref(db,'chars'),orderByChild('owner'),equalTo(curUser.uid)));
+    const all=snap.val()||{};
+    mine=Object.entries(all).map(([id,c])=>({...c,id}));
+  }catch(e){
+    // 폴백: 인덱스 미설정 시 전체 페치 (Firebase 콘솔에서 chars/owner 인덱싱 필요)
+    console.warn('[loadChars] owner index fallback — set ".indexOn":["owner"] in Firebase rules:',e);
+    const snap=await get(ref(db,'chars'));
+    const all=snap.val()||{};
+    mine=Object.entries(all).filter(([,c])=>c.owner===curUser.uid).map(([id,c])=>({...c,id}));
+  }
   // ★ 계정당 캐릭터 1개 제한 — 이미 있으면 바로 입장
   if(mine.length>0){
     selChar(mine[0].id);
@@ -2839,13 +2850,26 @@ document.getElementById('createCharBtn').onclick=async()=>{
   const n=document.getElementById('newCharName').value.trim();
   if(!n){toast('이름 입력');return;}
   if(n.length<2||n.length>12){toast('이름은 2~12자');return;}
-  // ★ 중복 생성 방지 — 이미 캐릭터가 있으면 차단
-  const snap=await get(ref(db,'chars'));
-  const all=snap.val()||{};
-  const mine=Object.entries(all).filter(([,c])=>c.owner===curUser.uid);
+  // ★ v3.x — owner 인덱스로 본인 캐릭터만 조회 (대역폭 절감)
+  let mine=[];
+  try{
+    const snap=await get(query(ref(db,'chars'),orderByChild('owner'),equalTo(curUser.uid)));
+    mine=Object.entries(snap.val()||{});
+  }catch(e){
+    const snap=await get(ref(db,'chars'));
+    const all=snap.val()||{};
+    mine=Object.entries(all).filter(([,c])=>c.owner===curUser.uid);
+  }
   if(mine.length>0){toast('⚠️ 이미 캐릭터가 존재합니다.');selChar(mine[0][0]);return;}
-  // 이름 중복 체크
-  const nameUsed=Object.values(all).some(c=>c.name===n);
+  // 이름 중복 체크 — name 인덱스
+  let nameUsed=false;
+  try{
+    const snap=await get(query(ref(db,'chars'),orderByChild('name'),equalTo(n)));
+    nameUsed=snap.exists();
+  }catch(e){
+    const snap=await get(ref(db,'chars'));
+    nameUsed=Object.values(snap.val()||{}).some(c=>c.name===n);
+  }
   if(nameUsed){toast('⚠️ 이미 사용 중인 이름입니다.');return;}
   const c=mkChar(n);charId=c.id;await set(ref(db,`chars/${charId}`),c);
   const si=genShopItem(SHOP_ITEMS[0]);await set(ref(db,`inv/${charId}/${si.id}`),si);selChar(charId);
@@ -9465,7 +9489,8 @@ let _lastChatTs=0;
 let _whisperCharCache={data:null,ts:0};
 async function _getCharsForWhisper(){
   const now=Date.now();
-  if(_whisperCharCache.data&&now-_whisperCharCache.ts<120000)return _whisperCharCache.data;
+  // ★ v3.x — 캐시 TTL 2분 → 10분 (chars 풀 페치 빈도 감소, 대역폭 절감)
+  if(_whisperCharCache.data&&now-_whisperCharCache.ts<600000)return _whisperCharCache.data;
   const sn=await get(ref(db,'chars'));
   _whisperCharCache={data:sn.val()||{},ts:now};
   return _whisperCharCache.data;
@@ -12109,9 +12134,14 @@ window.enterSubjBattle=function(){
             try{
               const fx=sk.fx(s.atk,s);
               if(fx&&fx.dmg>0){
-                const skDmg=Math.min(Math.round(fx.dmg),99999);
+                // ★ v3.x — 비전 학자 4pc: 모든 스킬 피해 +25%
+                if((s._skillDmgBonus||0)>0)fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
+                const hits=fx.hits||1;
+                let skDmg=0;
+                for(let h=0;h<hits;h++)skDmg+=Math.min(Math.round(fx.dmg),99999);
                 totalDmgDealt+=skDmg;
-                slog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name} <strong>+${skDmg}</strong></span>`);
+                const hitsTxt=hits>1?` (${hits}연타)`:'';
+                slog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name} <strong>+${skDmg}</strong>${hitsTxt}</span>`);
               }else if(fx&&fx.msg){
                 slog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name}</span>`);
               }
@@ -12128,9 +12158,14 @@ window.enterSubjBattle=function(){
             try{
               const fx=isk.fx(s.atk,s);
               if(fx&&fx.dmg>0){
-                const skDmg=Math.min(Math.round(fx.dmg),99999);
+                // ★ v3.x — 비전 학자 4pc 적용
+                if((s._skillDmgBonus||0)>0)fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
+                const hits=fx.hits||1;
+                let skDmg=0;
+                for(let h=0;h<hits;h++)skDmg+=Math.min(Math.round(fx.dmg),99999);
                 totalDmgDealt+=skDmg;
-                slog(`<span class="l-skill" style="color:#FF2244">🔱 ${isk.name} <strong>+${skDmg}</strong></span>`);
+                const hitsTxt=hits>1?` (${hits}연타)`:'';
+                slog(`<span class="l-skill" style="color:#FF2244">🔱 ${isk.name} <strong>+${skDmg}</strong>${hitsTxt}</span>`);
               }else if(fx&&fx.msg){
                 slog(`<span class="l-skill" style="color:#FF2244">🔱 ${isk.name}</span>`);
               }
@@ -12545,7 +12580,19 @@ window.enterChampBattle=async function(){
               const skillM=GRADES[sl.grade]?.skillM||0;if(!skillM)continue;
               const proc=Math.min(sk.base*skillM*(1+(s.int||3)*0.005)*champSBMult,CHAMP_MAX_PROC);
               if(Math.random()<proc){
-                try{const fx=sk.fx(s.atk,s);if(fx?.dmg>0){const sd=Math.min(Math.round(fx.dmg),99999);champHp=Math.max(0,champHp-sd);clog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name} <strong>${sd}</strong></span>`);}}catch(e){}
+                try{
+                  const fx=sk.fx(s.atk,s);
+                  if(fx?.dmg>0){
+                    // ★ v3.x — 비전 학자 4pc + 다중 타격 처리
+                    if((s._skillDmgBonus||0)>0)fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
+                    const hits=fx.hits||1;
+                    let sd=0;
+                    for(let h=0;h<hits;h++)sd+=Math.min(Math.round(fx.dmg),99999);
+                    champHp=Math.max(0,champHp-sd);
+                    const hitsTxt=hits>1?` (${hits}연타)`:'';
+                    clog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name} <strong>${sd}</strong>${hitsTxt}</span>`);
+                  }
+                }catch(e){}
                 skProced=true;break;
               }
             }
@@ -12554,7 +12601,19 @@ window.enterChampBattle=async function(){
               const sk=SKILLS[sl._immortalSk];
               const proc=Math.min(sk.base*1.8*(1+(s.int||3)*0.005)*champSBMult,CHAMP_MAX_PROC);
               if(Math.random()<proc){
-                try{const fx=sk.fx(s.atk,s);if(fx?.dmg>0){const sd=Math.min(Math.round(fx.dmg),99999);champHp=Math.max(0,champHp-sd);clog(`<span class="l-skill">${sk.icon||'⚡'} ${sk.name} <strong>${sd}</strong></span>`);}}catch(e){}
+                try{
+                  const fx=sk.fx(s.atk,s);
+                  if(fx?.dmg>0){
+                    // ★ v3.x — 비전 학자 4pc + 다중 타격 처리
+                    if((s._skillDmgBonus||0)>0)fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
+                    const hits=fx.hits||1;
+                    let sd=0;
+                    for(let h=0;h<hits;h++)sd+=Math.min(Math.round(fx.dmg),99999);
+                    champHp=Math.max(0,champHp-sd);
+                    const hitsTxt=hits>1?` (${hits}연타)`:'';
+                    clog(`<span class="l-skill" style="color:#FF2244">🔱 ${sk.name} <strong>${sd}</strong>${hitsTxt}</span>`);
+                  }
+                }catch(e){}
                 skProced=true;
               }
             }
