@@ -3425,9 +3425,8 @@ async function equipItem(it){
   }
 
   const prev=char.equipment[sl];if(prev)inv[prev.id]=prev;
-  // ★ A안: 착용 시 잠금 자동 해제
-  if(it._locked){it._locked=false;toast(`🔓 ${it.name} 잠금 해제 후 장착!`);}
-  else toast(it.name+' 장착!');
+  // ★ v3.0 핫픽스 — 착용해도 잠금 유지 (잠금 = 판매/경매 차단 의미, 장착과 무관)
+  toast(it.name+(it._locked?' 장착! (🔒 잠금 유지)':' 장착!'));
   char.equipment[sl]=it;delete inv[it.id];
   await saveChar();await saveInv();closeIM();
   renderChar();renderEq();renderSetPanel();
@@ -4839,10 +4838,10 @@ window.equipItemSlot=async(itemId,slot)=>{
   const it=inv[itemId];if(!it)return;
   if(it.reqLv&&char.level<it.reqLv){toast(`⚠️ Lv.${it.reqLv} 이상 필요`);return;}
   const prev=char.equipment[slot];if(prev)inv[prev.id]=prev;
-  if(it._locked){it._locked=false;}
+  // ★ v3.0 핫픽스 — 착용해도 잠금 유지
   char.equipment[slot]=it;delete inv[it.id];
   await saveChar();await saveInv();closeIM();
-  toast(`${it.name} → 장신구${slot.slice(-1)} 장착!`);
+  toast(`${it.name} → 장신구${slot.slice(-1)} 장착!${it._locked?' (🔒 잠금 유지)':''}`);
 };
 function closeIM(){document.getElementById('imodal').classList.remove('open');}
 window.closeIM=closeIM;
