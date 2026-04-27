@@ -4907,12 +4907,11 @@ window.townSec=function(id){
 function getSellPrice(it){
   // ★ 인챈트 스크롤은 등급 무관 100골드
   if(it.isEnchantScroll||it.isProtectScroll||it.isExtractScroll||it.isScroll)return 100;
-  // ★ v3.0 핫픽스 — 판매가 대폭 상향 (현재 골드 시세 반영)
-  const BASE={normal:200,uncommon:800,rare:2500,epic:8000,legendary:25000,set:60000};
-  const base=BASE[it.grade]||200;
+  const BASE={normal:20,uncommon:70,rare:200,epic:550,legendary:1400,set:2500};
+  const base=BASE[it.grade]||20;
   const lv=it.reqLv||1;
-  const lvMult=1+(lv-1)*0.07;        // 5% → 7%/레벨
-  const enhBonus=1+((it.enhance||0)*0.20); // 15% → 20%/강화
+  const lvMult=1+(lv-1)*0.05;
+  const enhBonus=1+((it.enhance||0)*0.15);
   return Math.round(base*lvMult*enhBonus);
 }
 
@@ -5740,6 +5739,15 @@ window.doForge=async sl=>{
   if(!canPay(cost)){toast(`골드 부족! 필요: ${cost.toLocaleString()}G`);return;}
   if(!await payGold(cost)){toast('결제 실패');return;}
 
+  // ★ v3.0 거점 패시브 — 단조의 화로 (5% 비용 환급)
+  const forgeProc=getActivePassiveProc('on_forge');
+  if(forgeProc?.type==='refund'&&Math.random()<(forgeProc.rate||0)){
+    const r=distributeGold(char,cost);
+    char.gold=r.gold; char._bankGold=r.bank; char._pendingGold=r.pending;
+    toast(`🔥 단조의 화로! 강화 비용 ${cost.toLocaleString()}G 환급!`,3500);
+    blogAdd&&blogAdd(`<span class="l-heal">🔥 단조의 화로 발동! 강화 비용 환급!</span>`);
+  }
+
   const table=FORGE_TABLE[enh];
   const roll=Math.random()*100;
 
@@ -5800,6 +5808,14 @@ window.doForgeInv=async function(itemId){
   const cost=getForgeCost(it);
   if(!canPay(cost)){toast(`골드 부족! 필요: ${cost.toLocaleString()}G`);return;}
   if(!await payGold(cost)){toast('결제 실패');return;}
+  // ★ v3.0 거점 패시브 — 단조의 화로 (5% 환급)
+  const _forgeProc=getActivePassiveProc('on_forge');
+  if(_forgeProc?.type==='refund'&&Math.random()<(_forgeProc.rate||0)){
+    const r=distributeGold(char,cost);
+    char.gold=r.gold; char._bankGold=r.bank; char._pendingGold=r.pending;
+    toast(`🔥 단조의 화로! 강화 비용 ${cost.toLocaleString()}G 환급!`,3500);
+    blogAdd&&blogAdd(`<span class="l-heal">🔥 단조의 화로 발동! 강화 비용 환급!</span>`);
+  }
   const table=FORGE_TABLE[Math.min(enh,8)];
   const roll=Math.random()*100;
   if(roll<table.succ){
@@ -6573,7 +6589,26 @@ function startBattle(tierIdx,mode,diffKey,players){
     totalTurns:0, // ★ 총 턴수 카운트
     _phaseStart:null,
     _presence:{},
+    _reviveUsed:false, // ★ v3.0 시간의 모래시계 1전투 1회 부활
+    _firstDodgeAvail:hasActivePassive('first_dodge'), // ★ v3.0 그림자 거울 1회 회피 가용
+    _startBuffSpd:0, // ★ v3.0 전쟁의 깃발 SPD 버프 (3턴)
+    _invulnTurns:0,  // ★ v3.0 축복의 제단 무적 (1턴)
+    _battleStartTurn:0, // ★ 전투 시작 턴 추적 (3턴 버프 만료용)
   };
+  // ★ v3.0 거점 패시브 on_battle_start 적용 (동일 패시브 키 중복 방지)
+  if(char?.house?.activePassives){
+    const _seen=new Set();
+    for(const itemId of char.house.activePassives){
+      const it=findFurnitureItem(itemId);
+      if(!it||!it.passive)continue;
+      if(_seen.has(it.passive))continue;
+      _seen.add(it.passive);
+      const p=FURNITURE_PASSIVES[it.passive];
+      if(!p||p.trigger!=='on_battle_start')continue;
+      if(p.proc?.type==='spd_buff'){battle._startBuffSpd+=p.proc.value||0; battle._startBuffTurns=p.proc.turns||3;}
+      if(p.proc?.type==='invuln')battle._invulnTurns=Math.max(battle._invulnTurns,p.proc.turns||0);
+    }
+  }
   // 솔로 전용 — 파티 모드 제거됨 (v2.0)
   document.getElementById('dungLobby').style.display='none';
   document.getElementById('dungMode').style.display='none';
@@ -6941,6 +6976,13 @@ async function resolvePhase(){
   battle._resolving=true;
   try{
   battle.totalTurns=(battle.totalTurns||0)+1; // ★ 턴수 증가
+  // ★ v3.0 거점 패시브 — 첫 턴 알림 + 무적 / SPD 버프 카운트다운
+  if(battle.totalTurns===1){
+    if(battle._invulnTurns>0)blogAdd(`<span class="l-skill" style="color:var(--gold)">✨ 축복의 제단! ${battle._invulnTurns}턴 무적 발동</span>`);
+    if(battle._startBuffSpd>0)blogAdd(`<span class="l-skill" style="color:var(--blue)">⚡ 전쟁의 깃발! ${battle._startBuffTurns||3}턴 SPD +${battle._startBuffSpd}</span>`);
+  }
+  if(battle._invulnTurns>0)battle._invulnTurns--;
+  if(battle.totalTurns>(battle._startBuffTurns||0))battle._startBuffSpd=0;
   if(battle._leaderFallbackTimer){clearTimeout(battle._leaderFallbackTimer);battle._leaderFallbackTimer=null;}
   battle.phase=2;
   if(battle._phaseStart){
@@ -7180,7 +7222,9 @@ async function resolvePhase(){
       if(dmg<1)dmg=1;
     }
     // ★ 블라인드: 회피율 무력화 (_blind 감소는 루프 밖에서 턴당 1회 처리)
-    const dodge=tgt._blind?0:(tgt.stats?tgt.stats.dodge:calcStats(tgt.charData||char).dodge)||0;
+    let dodge=tgt._blind?0:(tgt.stats?tgt.stats.dodge:calcStats(tgt.charData||char).dodge)||0;
+    // ★ v3.0 거점 패시브 — 전쟁의 깃발 SPD 버프 (회피율 추가)
+    if(battle._startBuffSpd>0&&battle.totalTurns<=(battle._startBuffTurns||3))dodge+=Math.round(battle._startBuffSpd/2);
 
     // ★ 몬스터 스킬 발동 체크 (기본 공격 전 또는 대신)
     const monSkills=(m.skills||[]).filter(sk=>sk.id!=='m_flee_debuff'); // ★ 행동취소 스킬은 선제 처리됨
@@ -7222,6 +7266,13 @@ async function resolvePhase(){
       if(ATTR_EFFECT[m._attr].dmgMult)dmg=Math.round(dmg*ATTR_EFFECT[m._attr].dmgMult);
       if(ATTR_EFFECT[m._attr].defIgnore)dmg=Math.round(dmg*(1+ATTR_EFFECT[m._attr].defIgnore));
     }
+    // ★ v3.0 거점 패시브 — 무적 턴 (축복의 제단)
+    if(checkDungeonInvuln()){
+      blogAdd(`<span class="l-skill" style="color:var(--gold)">✨ 축복의 제단! 무적 (${dmg} 차단)</span>`);
+      continue;
+    }
+    // ★ v3.0 거점 패시브 — 첫 피격 회피 (그림자 거울)
+    if(dmg>0&&tryDungeonFirstDodge())continue;
     tgt.hp=Math.max(0,tgt.hp-dmg);
     tgt.isBoss?SFX.play('monster_boss_hit'):SFX.play('monster_hit');
     blogAdd(`<span class="l-dmg">👹 ${m.name} → ${tgt.name} <strong>-${dmg}</strong>${tgt.defending?' (방어)':''}</span>`);
@@ -7246,6 +7297,19 @@ async function resolvePhase(){
   // Check wipe (all dead)
   const anyAlive=battle.players.some(p=>p.status==='alive');
   if(!anyAlive){
+    // ★ v3.0 거점 패시브 — 시간의 모래시계 (5% 확률 부활, 1전투 1회)
+    if(!battle._reviveUsed){
+      const _rp=getActivePassiveProc('on_death');
+      if(_rp?.type==='revive'&&Math.random()<(_rp.rate||0)){
+        battle._reviveUsed=true;
+        const dead=battle.players.find(p=>p.status==='dead');
+        if(dead){
+          dead.status='alive'; dead.hp=1;
+          blogAdd(`<span class="l-revive">⌛ 시간의 모래시계 발동! HP 1로 부활!</span>`);
+          battle._resolving=false;return;
+        }
+      }
+    }
     blogAdd((battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack'||battle.mode==='timeattack')?'<span class="l-dead">💀 전사했습니다...</span>':'<span class="l-dead">⚠️ 파티 전멸!</span>');
     if(battle.mode==='timeattack')await handleTAFail();
     else if(battle.diff.canWipe){blogAdd('<span class="l-warn">💥 매우어려움 — 장비/아이템 손실 발생!</span>');await maybeLoseItem();}
@@ -7876,6 +7940,20 @@ async function dungeonClear(){
   }else{
     await addItem(bonusItem);
     blogAdd(`<span class="l-set">🎁 보스 클리어 보너스: ${bonusItem.name}</span>`);
+  }
+
+  // ★ v3.0 거점 패시브 — 영혼석 제단 (10% 확률 인챈트 스크롤 추가 드랍)
+  const _bossKillProc=getActivePassiveProc('on_boss_kill');
+  if(_bossKillProc?.type==='scroll_drop'&&Math.random()<(_bossKillProc.rate||0)){
+    const isPrefix=Math.random()<0.5;
+    const tier=2; // 기본 tier2 인챈트
+    const pool=isPrefix?PRE.filter(e=>getEnchantTier(e.n)===tier):SUF.filter(e=>getEnchantTier(e.n)===tier);
+    const fallbackPool=isPrefix?PRE:SUF;
+    const enchData=pool.length?pool[Math.floor(Math.random()*pool.length)]:fallbackPool[Math.floor(Math.random()*fallbackPool.length)];
+    const scroll=genEnchantScrollItem(enchData,isPrefix,tier,tier);
+    scroll.tradeable=true; scroll._gotAt=Date.now();
+    await addItem(scroll);
+    blogAdd(`<span class="l-skill" style="color:var(--purple)">🔮 영혼석 제단! 인챈트 스크롤 추가 드랍! (${scroll.name})</span>`);
   }
 
   // ★ 물약 +1: vhard 최초 1회만 (솔로/파티 각각 별도, 최대 15개 = 기본5 + 최대10)
@@ -10739,6 +10817,27 @@ window.enterSubjBattle=function(){
   let myHp=s.maxHp, myPotions=5+(char.extraPotions||0);
   let bossHpLocal=boss.hp; // local session HP (we only track dmg dealt)
   let totalDmgDealt=0, phase=1, done=false;
+  // ★ v3.0 거점 패시브 (토벌전)
+  let _subjFirstDodgeAvail=hasActivePassive('first_dodge');
+  let _subjFirstDodgeUsed=false;
+  let _subjReviveUsed=false;
+  let _subjStartBuffSpd=0, _subjStartBuffTurns=0, _subjInvulnTurns=0;
+  if(char?.house?.activePassives){
+    const _seenSubj=new Set();
+    for(const itemId of char.house.activePassives){
+      const it=findFurnitureItem(itemId);
+      if(!it||!it.passive)continue;
+      if(_seenSubj.has(it.passive))continue;
+      _seenSubj.add(it.passive);
+      const p=FURNITURE_PASSIVES[it.passive];
+      if(!p||p.trigger!=='on_battle_start')continue;
+      if(p.proc?.type==='spd_buff'){_subjStartBuffSpd+=p.proc.value||0; _subjStartBuffTurns=p.proc.turns||3;}
+      if(p.proc?.type==='invuln')_subjInvulnTurns=Math.max(_subjInvulnTurns,p.proc.turns||0);
+    }
+  }
+  let _subjTurn=0;
+  if(_subjInvulnTurns>0)slog(`<span class="l-skill" style="color:var(--gold)">✨ 축복의 제단! ${_subjInvulnTurns}턴 무적</span>`);
+  if(_subjStartBuffSpd>0)slog(`<span class="l-skill" style="color:var(--blue)">⚡ 전쟁의 깃발! ${_subjStartBuffTurns}턴 SPD +${_subjStartBuffSpd}</span>`);
 
   function slog(html){
     subjLog.push(html);
@@ -10787,6 +10886,9 @@ window.enterSubjBattle=function(){
 
   // ★ 보스 반격 내부 함수 (기절 턴 스킵에서도 재사용)
   async function doSubjBossAttack(defending){
+    // ★ v3.0 — 턴 카운트 + 무적 턴 감소
+    _subjTurn++;
+    if(_subjInvulnTurns>0)_subjInvulnTurns--;
     if(boss._stunTurns&&boss._stunTurns>0){
       boss._stunTurns--;
       slog(`<span class="l-sys">🧊 ${boss.name} 마비! 행동 불가</span>`);
@@ -10839,8 +10941,17 @@ window.enterSubjBattle=function(){
         if(ATTR_EFFECT[boss._attr].dmgMult)bDmg=Math.round(bDmg*ATTR_EFFECT[boss._attr].dmgMult);
         if(ATTR_EFFECT[boss._attr].defIgnore)bDmg=Math.round(bDmg*(1+ATTR_EFFECT[boss._attr].defIgnore));
       }
-      if(Math.random()*100<s.dodge){slog(`<span class="l-sys">✨ 회피!</span>`);}
-      else{myHp=Math.max(0,myHp-bDmg);slog(`<span class="l-dmg">${boss.icon} ${boss.name} → ${char.name} -<b>${bDmg}</b> (${myHp}/${s.maxHp})</span>`);}
+      // ★ v3.0 거점 패시브 — 무적 / 첫 피격 회피 / SPD 버프 회피
+      let _subjDodgeBonus=0;
+      if(_subjStartBuffSpd>0&&_subjTurn<=_subjStartBuffTurns)_subjDodgeBonus=Math.round(_subjStartBuffSpd/2);
+      if(_subjInvulnTurns>0){
+        slog(`<span class="l-skill" style="color:var(--gold)">✨ 축복의 제단! 무적 (${bDmg} 차단)</span>`);
+      }else if(_subjFirstDodgeAvail&&!_subjFirstDodgeUsed&&bDmg>0){
+        _subjFirstDodgeUsed=true;
+        slog(`<span class="l-skill" style="color:var(--purple)">🪞 그림자 거울 발동! 첫 피격 회피</span>`);
+      }else if(Math.random()*100<(s.dodge+_subjDodgeBonus)){
+        slog(`<span class="l-sys">✨ 회피!</span>`);
+      }else{myHp=Math.max(0,myHp-bDmg);slog(`<span class="l-dmg">${boss.icon} ${boss.name} → ${char.name} -<b>${bDmg}</b> (${myHp}/${s.maxHp})</span>`);}
     }
     // 플레이어 DOT
     if(boss._playerDot&&boss._playerDot>0){
@@ -10859,7 +10970,17 @@ window.enterSubjBattle=function(){
       slog(`<span class="l-sys">🧊 ${char.name} 마비! 행동 불가</span>`);
       phase=2;
       await doSubjBossAttack(false);
-      if(myHp<=0){slog(`<span class="l-dead">💀 ${char.name} 쓰러짐! — 이번 전투 종료</span>`);done=true;await submitSubjDmg(totalDmgDealt);renderSubjBattle();return;}
+      if(myHp<=0){
+        // ★ v3.0 거점 패시브 — 시간의 모래시계 (5% 부활)
+        if(!_subjReviveUsed){
+          const _rp=getActivePassiveProc('on_death');
+          if(_rp?.type==='revive'&&Math.random()<(_rp.rate||0)){
+            _subjReviveUsed=true; myHp=1;
+            slog(`<span class="l-skill" style="color:var(--green)">⌛ 시간의 모래시계 발동! HP 1로 부활!</span>`);
+          }
+        }
+        if(myHp<=0){slog(`<span class="l-dead">💀 ${char.name} 쓰러짐! — 이번 전투 종료</span>`);done=true;await submitSubjDmg(totalDmgDealt);renderSubjBattle();return;}
+      }
       phase=1;renderSubjBattle();return;
     }
     phase=2;
@@ -10953,10 +11074,20 @@ window.enterSubjBattle=function(){
     // Boss counter-attack
     await doSubjBossAttack(defending);
     if(myHp<=0){
-      slog(`<span class="l-dead">💀 ${char.name} 쓰러짐! — 이번 전투 종료</span>`);
-      done=true;
-      await submitSubjDmg(totalDmgDealt);
-      renderSubjBattle();return;
+      // ★ v3.0 거점 패시브 — 시간의 모래시계 (5% 부활)
+      if(!_subjReviveUsed){
+        const _rp=getActivePassiveProc('on_death');
+        if(_rp?.type==='revive'&&Math.random()<(_rp.rate||0)){
+          _subjReviveUsed=true; myHp=1;
+          slog(`<span class="l-skill" style="color:var(--green)">⌛ 시간의 모래시계 발동! HP 1로 부활!</span>`);
+        }
+      }
+      if(myHp<=0){
+        slog(`<span class="l-dead">💀 ${char.name} 쓰러짐! — 이번 전투 종료</span>`);
+        done=true;
+        await submitSubjDmg(totalDmgDealt);
+        renderSubjBattle();return;
+      }
     }
     phase=1;
     renderSubjBattle();
@@ -11137,6 +11268,25 @@ window.enterChampBattle=async function(){
   let champHpMult=1.5; // ★ 챔프전 HP 배율 — 전투 지속성
   let champLog=[],champDone=false;
   let phase=1;
+  // ★ v3.0 거점 패시브 (챔프)
+  let _chFirstDodgeAvail=hasActivePassive('first_dodge');
+  let _chFirstDodgeUsed=false;
+  let _chReviveUsed=false;
+  let _chStartBuffSpd=0, _chStartBuffTurns=0, _chInvulnTurns=0;
+  if(char?.house?.activePassives){
+    const _seenCh=new Set();
+    for(const itemId of char.house.activePassives){
+      const it=findFurnitureItem(itemId);
+      if(!it||!it.passive)continue;
+      if(_seenCh.has(it.passive))continue;
+      _seenCh.add(it.passive);
+      const p=FURNITURE_PASSIVES[it.passive];
+      if(!p||p.trigger!=='on_battle_start')continue;
+      if(p.proc?.type==='spd_buff'){_chStartBuffSpd+=p.proc.value||0; _chStartBuffTurns=p.proc.turns||3;}
+      if(p.proc?.type==='invuln')_chInvulnTurns=Math.max(_chInvulnTurns,p.proc.turns||0);
+    }
+  }
+  let _chTurn=0;
 
   // If no champ, just become champ
   if(!champ){
@@ -11248,6 +11398,13 @@ window.enterChampBattle=async function(){
   window.champAction=async function(action){
     if(champDone||phase!==1)return;
     phase=2;
+    // ★ v3.0 — 턴 카운트 + 무적 턴 감소 + 첫 턴 알림
+    _chTurn++;
+    if(_chTurn===1){
+      if(_chInvulnTurns>0)clog(`<span class="l-skill" style="color:var(--gold)">✨ 축복의 제단! ${_chInvulnTurns}턴 무적</span>`);
+      if(_chStartBuffSpd>0)clog(`<span class="l-skill" style="color:var(--blue)">⚡ 전쟁의 깃발! ${_chStartBuffTurns}턴 SPD +${_chStartBuffSpd}</span>`);
+    }
+    if(_chInvulnTurns>0)_chInvulnTurns--;
     let defending=false;
     if(action==='attack'){
       const wt=getWeaponTraits(char.equipment||{});
@@ -11400,6 +11557,13 @@ window.enterChampBattle=async function(){
     if(Math.random()*100<s.dodge){
       clog(`<span class="l-sys">✨ 회피!</span>`);
     }else{
+      // ★ v3.0 거점 패시브 — 무적 / 첫 피격 회피
+      if(_chInvulnTurns>0){
+        clog(`<span class="l-skill" style="color:var(--gold)">✨ 축복의 제단! 무적 (${cDmg} 차단)</span>`);
+      }else if(_chFirstDodgeAvail&&!_chFirstDodgeUsed&&cDmg>0){
+        _chFirstDodgeUsed=true;
+        clog(`<span class="l-skill" style="color:var(--purple)">🪞 그림자 거울 발동! 첫 피격 회피</span>`);
+      }else{
       myHp=Math.max(0,myHp-cDmg);
       if(cCrit)clog(`<span class="l-crit">💥 ${champ.name} 치명타! → ${char.name} -<b>${cDmg}</b></span>`);
       else clog(`<span class="l-dmg">⚔ ${champ.name} → ${char.name} -<b>${cDmg}</b></span>`);
@@ -11444,8 +11608,18 @@ window.enterChampBattle=async function(){
           }
         }
       }
+      } // ★ v3.0 — 거점 패시브 else (myHp 차감 블록) close
     }
     if(myHp<=0){
+      // ★ v3.0 거점 패시브 — 시간의 모래시계 (5% 부활)
+      if(!_chReviveUsed){
+        const _rp=getActivePassiveProc('on_death');
+        if(_rp?.type==='revive'&&Math.random()<(_rp.rate||0)){
+          _chReviveUsed=true; myHp=1;
+          clog(`<span class="l-skill" style="color:var(--green)">⌛ 시간의 모래시계 발동! HP 1로 부활!</span>`);
+        }
+      }
+      if(myHp<=0){
       clog(`<span class="l-dead">💀 ${char.name} 쓰러짐... 챔프 방어 성공!</span>`);
       champDone=true;
       // Increment champ streak
@@ -11459,6 +11633,7 @@ window.enterChampBattle=async function(){
         text:`🛡 ${champ.name}이(가) ${char.name}의 도전을 물리쳤습니다! (${newStreak}연승)`,
         ts:Date.now(),isAdmin:true});
       renderChampBattle();return;
+      } // ★ v3.0 — 부활 후 사망 재확인 close
     }
     phase=1;
     renderChampBattle();
@@ -11817,9 +11992,12 @@ function findFurnitureItem(itemId){
 function getActivePassiveStats(){
   const result={atkPct:0,defPct:0,spdPct:0,hp:0,atk:0,def:0,spd:0,goldBonus:0,expBonus:0,skillBonus:0,critDmg:0,crit:0};
   if(!char?.house?.activePassives)return result;
+  const _seenKeys=new Set(); // ★ v3.0 — 동일 패시브 키 중복 적용 방지
   for(const itemId of char.house.activePassives){
     const it=findFurnitureItem(itemId);
     if(!it||!it.passive)continue;
+    if(_seenKeys.has(it.passive))continue; // 같은 패시브 키는 1회만
+    _seenKeys.add(it.passive);
     const p=FURNITURE_PASSIVES[it.passive];
     if(!p||!p.stats||p.trigger!=='passive')continue;
     for(const k of Object.keys(p.stats)){
@@ -11827,6 +12005,40 @@ function getActivePassiveStats(){
     }
   }
   return result;
+}
+
+// ★ v3.0 핫픽스 — 거점 패시브 트리거 헬퍼
+// 활성화 패시브 중 특정 trigger 타입을 가진 첫 매칭 proc 반환 (없으면 null)
+function getActivePassiveProc(triggerKind){
+  if(!char?.house?.activePassives)return null;
+  for(const itemId of char.house.activePassives){
+    const it=findFurnitureItem(itemId);
+    if(!it||!it.passive)continue;
+    const p=FURNITURE_PASSIVES[it.passive];
+    if(p&&p.trigger===triggerKind&&p.proc)return p.proc;
+  }
+  return null;
+}
+// 활성 패시브 중 특정 패시브 키 보유 여부
+function hasActivePassive(passiveKey){
+  if(!char?.house?.activePassives)return false;
+  for(const itemId of char.house.activePassives){
+    const it=findFurnitureItem(itemId);
+    if(it&&it.passive===passiveKey)return true;
+  }
+  return false;
+}
+// ★ 일반 던전 — 던전 첫 피격 회피 시도 (true 반환 시 회피 처리됨)
+function tryDungeonFirstDodge(){
+  if(!battle||!battle._firstDodgeAvail||battle._firstDodgeUsed)return false;
+  battle._firstDodgeUsed=true;
+  blogAdd&&blogAdd(`<span class="l-skill" style="color:var(--purple)">🪞 그림자 거울 발동! 첫 피격 회피</span>`);
+  return true;
+}
+// ★ 일반 던전 — 무적 턴 체크 (1턴 무적이면 데미지 0)
+function checkDungeonInvuln(){
+  if(!battle||!battle._invulnTurns||battle._invulnTurns<=0)return false;
+  return true; // 호출 측에서 데미지 0 처리
 }
 
 // 슬롯 확장 가구 누적 합산
@@ -12468,10 +12680,13 @@ window.startMemorialBoss=async function(){
   mb.style.display='block';
 
   const s=calcStats(char);
-  // ★ 거점 활성 패시브 — 전투 시작 트리거
+  // ★ 거점 활성 패시브 — 전투 시작 트리거 (동일 패시브 키 중복 방지)
   const startBuffs={spd:0, invuln:0};
+  const _seenMb=new Set();
   for(const itemId of (char.house?.activePassives||[])){
     const it=inv[itemId];if(!it||!it.passive)continue;
+    if(_seenMb.has(it.passive))continue;
+    _seenMb.add(it.passive);
     const p=FURNITURE_PASSIVES[it.passive];
     if(!p||p.trigger!=='on_battle_start')continue;
     if(p.proc?.type==='spd_buff')startBuffs.spd+=p.proc.value||0;
@@ -12483,6 +12698,7 @@ window.startMemorialBoss=async function(){
   let firstHitDodgeUsed=false; // 그림자 거울 1회 회피
   let invulnTurns=startBuffs.invuln;
   const startSpdBuff=startBuffs.spd;
+  let _reviveUsedMb=false; // ★ 시간의 모래시계 1전투 1회
 
   // 거점 first_dodge 패시브 보유 여부
   let hasFirstDodge=false;
@@ -12571,6 +12787,15 @@ window.startMemorialBoss=async function(){
     }
     myHp-=dmg;
     if(myHp<=0){
+      // ★ v3.0 거점 패시브 — 시간의 모래시계 (5% 부활, 1전투 1회)
+      if(!_reviveUsedMb){
+        const _rp=getActivePassiveProc('on_death');
+        if(_rp?.type==='revive'&&Math.random()<(_rp.rate||0)){
+          _reviveUsedMb=true; myHp=1;
+          mlog(`<span class="l-skill" style="color:var(--green)">⌛ 시간의 모래시계 발동! HP 1로 부활!</span>`);
+          return;
+        }
+      }
       myHp=0;
       mlog(`<span class="l-dead">💀 ${char.name} 쓰러짐!</span>`);
       mbDefeat();
