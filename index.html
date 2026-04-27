@@ -11851,7 +11851,7 @@ async function renderSubjugation(){
   const sorted=Object.entries(rankData).sort((a,b)=>(b[1].totalDmg||0)-(a[1].totalDmg||0));
   const myRankEntry=sorted.find(([n])=>n===char.name);
   const myRank=sorted.findIndex(([n])=>n===char.name);
-  const canEnter=char.level>=50;
+  const canEnter=char.level>=50&&currentHp>0; // ★ v3.x — 보스 사망 시 참전 차단
   sm.innerHTML=`
     <div style="background:rgba(0,0,0,.4);border:1px solid ${boss.color}44;border-radius:12px;padding:16px;margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
@@ -11900,7 +11900,9 @@ async function renderSubjugation(){
     <div style="margin-bottom:16px">
       ${canEnter
         ?`<button class="btn btn-red" style="width:100%;padding:12px;font-size:13px;font-weight:700" onclick="enterSubjBattle()">⚔️ 토벌전 참전!</button>`
-        :`<div style="background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:8px;padding:12px;text-align:center;font-size:12px;color:var(--red)">🔒 Lv.50 이상만 참여 가능 (현재 Lv.${char.level})</div>`}
+        :currentHp<=0
+          ?`<div style="background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.3);border-radius:8px;padding:12px;text-align:center;font-size:12px;color:var(--red)">💀 토벌 완료 — 다음 주 월요일에 새 보스가 등장합니다</div>`
+          :`<div style="background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:8px;padding:12px;text-align:center;font-size:12px;color:var(--red)">🔒 Lv.50 이상만 참여 가능 (현재 Lv.${char.level})</div>`}
     </div>
     <!-- Weekly Ranking -->
     <div class="ptitle" style="font-size:12px">이번 주 토벌 랭킹</div>
@@ -11920,9 +11922,15 @@ async function renderSubjugation(){
 }
 window.renderSubjugation=renderSubjugation;
 
-window.enterSubjBattle=function(){
+window.enterSubjBattle=async function(){
   if(char.level<50){toast('⚠️ Lv.50 이상만 참여 가능합니다');return;}
   if(battle&&!battle.done){toast('⚔️ 던전 진행 중에는 참여할 수 없습니다');return;}
+  // ★ v3.x — 보스 사망 체크 (시간차/캐시로 사망한 보스에 참전 시도 차단)
+  try{
+    const hpSn=await get(ref(db,'subjugation/bossHp'));
+    const curHp=hpSn.val()??0;
+    if(curHp<=0){toast('💀 보스가 이미 토벌되었습니다 — 다음 주 월요일에 갱신');renderSubjugation();return;}
+  }catch(e){console.warn('[enterSubj hp check]',e);}
   const bossIdx=getCurSubjBossIdx();
   // ★ 세션 전용 boss 클론 — 스킬 상태(_atkBuff 등)가 SUBJ_BOSSES 원본을 오염시키지 않도록
   const boss={...SUBJ_BOSSES[bossIdx],skills:(SUBJ_BOSSES[bossIdx].skills||[]).map(sk=>({...sk}))};
