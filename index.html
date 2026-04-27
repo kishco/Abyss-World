@@ -5330,10 +5330,13 @@ window.sellItem=async id=>{
   const isEquipped=Object.values(char.equipment||{}).some(e=>e&&e.id===id);
   if(isEquipped){toast('장착 중인 장비는 판매할 수 없습니다');return;}
   const price=getSellPrice(it);
+  // ★ 메모리 변경 + 즉시 렌더, 저장은 비동기 분리
   char.gold+=price;delete inv[id];
-  await saveChar();await saveInv();updateTop();
   toast(`💰 ${it.name} 판매! +${price}G`);
+  updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
+  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  try{await saveChar();await saveInv();}catch(e){console.error('[sellItem save FAILED]',e);}
 };
 
 window.sellAllGear=async()=>{
@@ -5345,9 +5348,11 @@ window.sellAllGear=async()=>{
   if(!confirm(`장비 전체 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·장착·프리셋·가구 제외)`))return;
   for(const it of toSell)delete inv[it.id];
   char.gold+=total;
-  await saveChar();await saveInv();updateTop();
   toast(`💰 장비 ${toSell.length}개 전체 판매! +${total.toLocaleString()}G`);
+  updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
+  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  try{await saveChar();await saveInv();}catch(e){console.error('[sellAllGear save FAILED]',e);}
 };
 window.sellByGrade=async grade=>{
   const equippedIds=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
@@ -5358,9 +5363,11 @@ window.sellByGrade=async grade=>{
   if(!confirm(`${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금·가구 제외)`))return;
   for(const it of toSell)delete inv[it.id];
   char.gold+=total;
-  await saveChar();await saveInv();updateTop();
   toast(`💰 ${toSell.length}개 일괄판매! +${total.toLocaleString()}G`);
+  updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
+  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  try{await saveChar();await saveInv();}catch(e){console.error('[sellByGrade save FAILED]',e);}
 };
 
 // ★ 인챈트 스크롤 일괄판매
@@ -5371,9 +5378,11 @@ window.sellAllEnchants=async function(){
   if(!confirm(`인챈트 스크롤 ${toSell.length}개를 ${total.toLocaleString()}G에 판매?\n(잠금 스크롤 제외)`))return;
   for(const it of toSell)delete inv[it.id];
   char.gold+=total;
-  await saveChar();await saveInv();updateTop();
   toast(`💰 인챈트 스크롤 ${toSell.length}개 판매! +${total.toLocaleString()}G`);
+  updateTop();
   const sb=document.getElementById('secbody');if(sb)renderSell(sb);
+  if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+  try{await saveChar();await saveInv();}catch(e){console.error('[sellAllEnchants save FAILED]',e);}
 };
 // ★ 인챈트 스크롤 등급별 판매
 window.sellEnchantsByTier=async function(tier){
@@ -5718,8 +5727,10 @@ window.buyShop=async i=>{
   const si=SHOP_ITEMS[i];
   if(!canPay(si.price)){toast('골드 부족');return;}
   if(!await payGold(si.price)){toast('결제 실패');return;}
-  await addItem(genShopItem(si));toast(si.n+' 구매!');updateTop();
+  toast(si.n+' 구매!');
+  updateTop();
   trackBounty('shop_buy',1);
+  try{await addItem(genShopItem(si));}catch(e){console.error('[buyShop addItem FAILED]',e);}
 };
 // ═══ 암시장 시스템 ═══
 const BM_ITEMS=[
@@ -6496,14 +6507,18 @@ async function renderAuction(sb){
       item:{...it}
     };
     const lid=push(ref(db,'auction')).key;
-    await set(ref(db,`auction/${lid}`),listing);
-    invalidateCache('auction');
     delete inv[itemId];
-    await saveInv();
+    // ★ v3.x — 즉시 갱신 + 저장 분리
     toast(`🏛️ ${it.name} 경매 등록! (${price.toLocaleString()}G)`);
     trackBounty('auction_reg',1);
     if(it.grade==='legendary'||it.grade==='set')trackBounty('auction_reg_lg',1);
     renderAuctionTab('mine');
+    if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+    try{
+      await set(ref(db,`auction/${lid}`),listing);
+      invalidateCache('auction');
+      await saveInv();
+    }catch(e){console.error('[listAuction save FAILED]',e);}
   };
 
   window.cancelAuction=async function(lid){
@@ -6511,11 +6526,15 @@ async function renderAuction(sb){
     const sn=await get(ref(db,`auction/${lid}`));const v=sn.val();
     if(!v||v.sellerCharId!==charId){toast('취소 권한 없음');return;}
     inv[v.item.id]={...v.item};
-    await saveInv();
-    await set(ref(db,`auction/${lid}/status`),'cancelled');
-    invalidateCache('auction');
+    // ★ v3.x — 즉시 갱신 후 저장 분리
     toast(`✅ ${v.item.name} 등록 취소 · 인벤 반환`);
     renderAuctionTab('mine');
+    if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+    try{
+      await saveInv();
+      await set(ref(db,`auction/${lid}/status`),'cancelled');
+      invalidateCache('auction');
+    }catch(e){console.error('[cancelAuction save FAILED]',e);}
   };
 
   window.buyAuction=async function(lid){
@@ -6536,24 +6555,30 @@ async function renderAuction(sb){
     if(v.sellerCharId && v.sellerCharId!==charId){
       const feeRate=v.feeRate||0;
       const sellerNet=Math.floor(v.price*(1-feeRate));
-      const selSn=await get(ref(db,`chars/${v.sellerCharId}`));const sel=selSn.val();
-      if(sel){
-        const r=distributeGold(sel,sellerNet);
-        await update(ref(db,`chars/${v.sellerCharId}`),{gold:r.gold,_bankGold:r.bank,_pendingGold:r.pending});
-      }
+      try{
+        const selSn=await get(ref(db,`chars/${v.sellerCharId}`));const sel=selSn.val();
+        if(sel){
+          const r=distributeGold(sel,sellerNet);
+          await update(ref(db,`chars/${v.sellerCharId}`),{gold:r.gold,_bankGold:r.bank,_pendingGold:r.pending});
+        }
+      }catch(e){console.error('[buyAuction seller payout failed]',e);}
     }
     // 구매한 아이템은 재판매 불가
     const bought={...v.item,tradeable:false};
     autoMigrateEnchantStats(bought);
     autoMigrateStaffMatk(bought);
     inv[bought.id]=bought;
-    await saveInv();
-    await update(ref(db,`auction/${lid}`),{status:'sold',buyerCharId:charId,buyerName:char.name,soldAt:Date.now()});
-    invalidateCache('auction');
-    updateTop();
+    // ★ v3.x — 즉시 화면 갱신 (저장과 분리)
     toast(`✅ ${v.item.name} 구매 완료! -${v.price.toLocaleString()}G`,3000);
-    trackBounty('auction_buy',1);
+    updateTop();
     renderAuctionTab('browse');
+    if(document.querySelector('.pane#pane-inventory.on'))renderInv();
+    trackBounty('auction_buy',1);
+    try{
+      await saveInv();
+      await update(ref(db,`auction/${lid}`),{status:'sold',buyerCharId:charId,buyerName:char.name,soldAt:Date.now()});
+      invalidateCache('auction');
+    }catch(e){console.error('[buyAuction save FAILED]',e);}
   };
 
   // 초기 로드
@@ -10720,8 +10745,9 @@ window.whDeposit=async function(id){
   const whMax=char?.whSlots||200;
   if(Object.keys(warehouse).length>=whMax){toast(`⚠️ 창고가 가득 찼습니다! (최대 ${whMax}개)`);return;}
   warehouse[id]=it;delete inv[id];
-  await saveWarehouse();await saveInv();updateTop();
+  // ★ v3.x — 즉시 갱신 후 저장 분리
   toast(`🏦 ${it.name} → 창고에 보관`);
+  updateTop();
   // ★ 탭 버튼 숫자 즉시 갱신
   const d=document.getElementById('whtab-deposit');const w=document.getElementById('whtab-withdraw');
   const invMax=char?.invSlots||100;
@@ -10730,6 +10756,7 @@ window.whDeposit=async function(id){
   if(window.whTab)window.whTab('deposit');
   else{const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);}
   renderInv();
+  try{await saveWarehouse();await saveInv();}catch(e){console.error('[whDeposit save FAILED]',e);}
 };
 
 window.whWithdraw=async function(id){
@@ -10740,14 +10767,16 @@ window.whWithdraw=async function(id){
   const cntable=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length;
   if(!isMiscScroll&&cntable>=invMax){toast(`⚠️ 인벤토리가 가득 찼습니다! (최대 ${invMax}개)`);return;}
   inv[id]=it;delete warehouse[id];
-  await saveInv();await saveWarehouse();updateTop();
+  // ★ v3.x — 즉시 갱신 후 저장 분리
   toast(`🎒 ${it.name} → 인벤토리로 이동`);
+  updateTop();
   const d=document.getElementById('whtab-deposit');const w=document.getElementById('whtab-withdraw');
   if(d)d.innerHTML=`🎒 인벤 → 창고 <span style="font-size:10px;opacity:.7">${Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length}/${invMax}</span>`;
   if(w)w.innerHTML=`🏦 창고 → 인벤 <span style="font-size:10px;opacity:.7">${Object.keys(warehouse).length}/${whMax}</span>`;
   if(window.whTab)window.whTab('withdraw');
   else{const sb=document.getElementById('secbody');if(sb)renderWarehouse(sb);}
   renderInv();
+  try{await saveInv();await saveWarehouse();}catch(e){console.error('[whWithdraw save FAILED]',e);}
 };
 
 // ═══ 은행 시스템 ═══
