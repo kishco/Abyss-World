@@ -445,6 +445,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
   <span class="sdot" id="sdot"></span>
   <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);margin-left:auto;margin-right:4px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);padding:1px 6px;border-radius:5px">v3.0</span>
+  <button class="v2badge" onclick="openGuidebook()" title="게임 가이드북" style="cursor:pointer;background:rgba(64,160,255,.12);border:1px solid rgba(64,160,255,.35);color:#80c0ff;padding:2px 8px;border-radius:5px;font-size:11px;margin-right:6px;white-space:nowrap">📖 가이드</button>
   <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener" class="v2badge"
     style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.35);color:#7289da;padding:2px 7px;border-radius:5px;font-size:9px;text-decoration:none;margin-right:6px;white-space:nowrap;font-family:'IBM Plex Mono',monospace"
     title="디스코드 커뮤니티">
@@ -592,7 +593,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <!-- CHARACTER -->
     <div class="pane on" id="pane-character">
-      <div class="ptitle">캐릭터</div>
+      <div class="ptitle" style="display:flex;align-items:center;justify-content:space-between">
+        <span>캐릭터</span>
+        <button onclick="openGuidebook()" style="background:linear-gradient(135deg,rgba(64,160,255,.15),rgba(120,80,255,.1));border:1px solid rgba(64,160,255,.4);color:#80c0ff;padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-weight:700">📖 가이드북</button>
+      </div>
       <!-- 온보딩 2단계: 다음 목표 힌트 -->
       <div id="goalHintBar" style="display:none;background:rgba(74,143,255,.07);border:1px solid rgba(74,143,255,.2);border-radius:8px;padding:8px 13px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
         <span id="goalHintIcon" style="font-size:20px"></span>
@@ -1193,6 +1197,22 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="modal">
     <div class="mhdr"><span class="mtitle">🎉 레벨 업!</span><button class="mclose" onclick="closeLvModal()">✕</button></div>
     <div class="mbody" id="lvBody"></div>
+  </div>
+</div>
+
+<!-- GUIDEBOOK MODAL -->
+<div class="overlay" id="guidebookModal" style="z-index:10000">
+  <div class="modal" style="max-width:900px;width:95vw;max-height:90vh;display:flex;flex-direction:column">
+    <div class="mhdr">
+      <span class="mtitle">📖 ABYSS WORLD 가이드북</span>
+      <button class="mclose" onclick="closeGuidebook()">✕</button>
+    </div>
+    <div style="display:flex;flex:1;min-height:0;overflow:hidden">
+      <!-- 좌측 사이드바 -->
+      <div id="guideNav" style="width:175px;flex-shrink:0;border-right:1px solid var(--bd);overflow-y:auto;padding:10px 0;background:var(--sf2)"></div>
+      <!-- 우측 콘텐츠 -->
+      <div id="guideContent" style="flex:1;overflow-y:auto;padding:18px 22px;line-height:1.7;font-size:12px;color:var(--tx)"></div>
+    </div>
   </div>
 </div>
 
@@ -3050,6 +3070,8 @@ async function selChar(id){
   startChat();
   checkUpdatePopup();
   checkWelcomePopup();
+  // ★ 가이드북 첫 진입 자동 노출 (신규 캐릭터)
+  setTimeout(()=>{checkGuidebookFirstShow&&checkGuidebookFirstShow();},2000);
   // ★ 일일/주간 미션 초기화 (날짜가 바뀌면 자동 갱신)
   getOrInitDailyQuests();
   getOrInitWeeklyQuest();
@@ -3899,7 +3921,415 @@ function renderCodex(){
   `;
 }
 
-// ═══ ITEM GENERATION ═══
+// ════════════════════════════════════════════
+// ★ 게임 가이드북 시스템 (v3.x)
+// ════════════════════════════════════════════
+const GUIDE_CHAPTERS=[
+  {id:'start',     icon:'🌟', title:'시작하기'},
+  {id:'combat',    icon:'⚔', title:'전투 시스템'},
+  {id:'weapons',   icon:'🗡', title:'무기별 특성'},
+  {id:'attrs',     icon:'🔥', title:'속성 & 상성'},
+  {id:'gear',      icon:'💎', title:'등급 & 장비'},
+  {id:'dungeons',  icon:'🏰', title:'던전 시스템'},
+  {id:'endgame',   icon:'🗼', title:'엔드게임'},
+  {id:'stronghold',icon:'🏯', title:'거점 시스템'},
+  {id:'economy',   icon:'💰', title:'경제 시스템'},
+  {id:'goals',     icon:'🎯', title:'도전과제'},
+];
+
+// ★ 가이드 콘텐츠 — 각 챕터별 HTML 빌더 (필요 시 자동 추출)
+const GUIDE_BUILDERS={
+  start:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🌟 ABYSS WORLD에 오신 것을 환영합니다</h2>
+    <p style="margin-bottom:14px">엘비아 대륙은 심연(Abyss)의 침공으로 위기에 빠졌습니다. 당신은 그 균열을 막을 마지막 모험가.</p>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📌 첫 진행 루트</h3>
+    <ol style="padding-left:18px;line-height:2">
+      <li>캐릭터 생성 → 시작 장비 자동 지급</li>
+      <li><b>마을 → 던전</b>으로 이동, T1(동굴) 노말 시작</li>
+      <li>드랍 장비 즉시 장착 (<b>인벤 → 클릭 → 착용</b>)</li>
+      <li>레벨 업 시 스탯 포인트 분배 (<b>캐릭터 탭</b>)</li>
+      <li>골드 모이면 마을 상점에서 더 좋은 장비 구매</li>
+      <li>Lv.20+ → T2(어둠숲) 시도</li>
+    </ol>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💡 핵심 팁</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>장비 <b>잠금</b> 기능으로 실수 판매 방지</li>
+      <li>캐릭터 <b>프리셋</b> 3개까지 저장 (장비 세팅 빠른 전환)</li>
+      <li>매일 <b>일일 / 주간 미션</b> 챙기기 (마을 → 현상금)</li>
+      <li>HP 관리 — 던전 전 <b>포션 5개</b> 자동 충전</li>
+      <li>매우어려움 사망 시 <b>장비 분실 가능</b> — 주의</li>
+    </ul>
+  `,
+  combat:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">⚔ 전투 시스템</h2>
+    <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">📌 전투 흐름</h3>
+    <p style="margin-bottom:10px"><b>액션 페이즈</b>(10초) → <b>해결 페이즈</b>(자동) → 다음 턴</p>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🎯 행동 4종</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>⚔ 공격</b>: 평타 + 무기 스킬 / 인챈트 스킬 발동 가능</li>
+      <li><b>🛡 방어</b>: 받는 데미지 60% 감소 + 어그로 +20</li>
+      <li><b>💊 회복</b>: 포션 1개 사용 (최대 HP 50% 회복, 시작 시 5개)</li>
+      <li><b>💨 도주</b>: 던전 탈출 (보상 X)</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚙ 데미지 공식</h3>
+    <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.9">
+      <div><b>물리</b>: ATK × (100 / (100 + DEF))</div>
+      <div><b>마법</b>: MATK × (100 / (100 + DEF×0.5))</div>
+      <div style="color:var(--tx3);font-size:10px;margin-top:4px">DEF는 곱셈식 감소 — 빼기가 아닌 비율 감소</div>
+    </div>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🎲 추가 효과</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>치명타</b>: CRIT% 확률, CRITDMG 배율 데미지 (기본 ×1.5)</li>
+      <li><b>회피</b>: SPD 기반 + DEX 보너스. 최대 50%</li>
+      <li><b>밸런스</b>: 무기 데미지 변동폭. 99%면 거의 고정 데미지</li>
+      <li><b>SPD 선공</b>: SPD/800 확률로 보스 반격 회피 (최대 20%)</li>
+    </ul>
+  `,
+  weapons:()=>{
+    // ★ WBASES에서 자동 추출 + 정적 설명 혼합
+    const W_DESC={
+      sword:     {n:'한손검', emoji:'⚔', stat:'STR',   feat:'균형형 — ATK + 1H로 방패 병행', tip:'초보자 추천. 방패와 같이 쓰면 안정적'},
+      greatsword:{n:'대검',   emoji:'🗡', stat:'STR',   feat:'최고 ATK (2.2배). 2H 무기',     tip:'순수 데미지 딜러 — 방패 못 씀'},
+      dagger:    {n:'단검',   emoji:'🔪', stat:'DEX',   feat:'SPD 보너스 + 치명 발동 빠름',   tip:'CRIT 빌드 추천 — 짧은 사거리지만 빠름'},
+      dual:      {n:'쌍검',   emoji:'⚔⚔', stat:'STR/DEX',feat:'2H지만 SPD 보너스',           tip:'공격속도 + 데미지 균형'},
+      axe:       {n:'도끼',   emoji:'🪓', stat:'STR',   feat:'1H ATK 강함',                   tip:'한손검보다 데미지 우선'},
+      greataxe:  {n:'대도끼', emoji:'⛏', stat:'STR',   feat:'최고 ATK 배율 (2.0)',           tip:'느리지만 압도적 데미지'},
+      bow:       {n:'활',     emoji:'🏹', stat:'DEX',   feat:'<b style="color:var(--gold)">선공 회피 15~30%</b>',  tip:'보스 반격 회피 가능 — 토벌전 최고'},
+      spear:     {n:'창',     emoji:'🔱', stat:'STR/DEX',feat:'관통 (DEF 35% 무시)',          tip:'고방어 적에게 효과적'},
+      mace:      {n:'메이스', emoji:'🔨', stat:'STR',   feat:'관통 25% + 1H',                 tip:'한손 사용하면서 방어 무시'},
+      staff:     {n:'지팡이', emoji:'🪄', stat:'INT',   feat:'<b style="color:var(--purple)">MATK 사용</b> + HP 보너스', tip:'마법 빌드 — INT 위주로 키움'},
+      dualgun:   {n:'듀얼건', emoji:'🔫', stat:'INT/DEX',feat:'<b style="color:var(--purple)">MATK 최고</b> + 스킬 +15%', tip:'마법 데미지 최강 + 2H'},
+    };
+    const rows=Object.entries(W_DESC).map(([id,d])=>{
+      const wb=WBASES.find(b=>b.id===id);
+      const handTxt=wb?.hand==='2H'?'<span style="color:var(--red)">2H</span>':'<span style="color:var(--blue)">1H</span>';
+      const ar=wb?.ar?`ATK×${wb.ar}`:'';
+      const mr=wb?.mr?` <b style="color:var(--purple)">MATK×${wb.mr}</b>`:'';
+      const sr=wb?.sr?` SPD×${wb.sr}`:'';
+      const dr=wb?.dr?` <b style="color:var(--gold)">방무 ${Math.round(wb.dr*100)}%</b>`:'';
+      const hr=wb?.hr?` HP×${wb.hr}`:'';
+      const bal=wb?`밸런스 ${wb.balMin}~${wb.balMax}%`:'';
+      return`<tr style="border-bottom:1px solid var(--bd)">
+        <td style="padding:8px 10px;white-space:nowrap"><span style="font-size:14px">${d.emoji}</span> <b>${d.n}</b><br><span style="font-size:9px;color:var(--tx3)">${handTxt}</span></td>
+        <td style="padding:8px 10px;font-size:10px;color:var(--tx2)">${ar}${mr}${sr}${dr}${hr}<br><span style="color:var(--tx3);font-size:9px">${bal}</span></td>
+        <td style="padding:8px 10px;font-size:10px"><b>${d.stat}</b><br>${d.feat}<br><span style="color:var(--tx3);font-size:9px">${d.tip}</span></td>
+      </tr>`;
+    }).join('');
+    return`
+      <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🗡 무기별 특성</h2>
+      <p style="margin-bottom:12px;color:var(--tx2)">무기마다 사용하는 주력 스탯과 공격 방식이 다릅니다. 자신의 빌드에 맞는 무기를 선택하세요.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden">
+        <thead style="background:rgba(64,160,255,.08)">
+          <tr style="text-align:left">
+            <th style="padding:8px 10px">무기</th>
+            <th style="padding:8px 10px">배율</th>
+            <th style="padding:8px 10px">특징 / 추천</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <h3 style="color:var(--blue);font-size:14px;margin:18px 0 6px">📌 1H vs 2H</h3>
+      <ul style="padding-left:18px;line-height:2">
+        <li><b>1H 무기</b>: 방패 슬롯(offhand)에 방패 장착 가능 — 방어 보강</li>
+        <li><b>2H 무기</b>: 방패 슬롯 사용 불가 — 대신 무기 ATK 자체가 강함</li>
+      </ul>
+      <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚗ 빌드 가이드</h3>
+      <ul style="padding-left:18px;line-height:2">
+        <li><b>물리 딜러</b>: 대검 / 대도끼 + STR · DEX</li>
+        <li><b>마법 딜러</b>: 듀얼건 / 지팡이 + INT · LUK</li>
+        <li><b>탱커</b>: 한손검 + 방패 + VIT · STR</li>
+        <li><b>치명 빌드</b>: 단검 / 쌍검 + DEX · LUK</li>
+      </ul>
+    `;
+  },
+  attrs:()=>{
+    // ★ ATTR_EFFECT 자동 추출
+    const effRows=Object.entries(ATTR_EFFECT).map(([k,e])=>{
+      const c=ATTR_C[k];
+      return`<tr style="border-bottom:1px solid var(--bd)">
+        <td style="padding:7px 10px"><span style="color:${c};font-weight:700">${ATTR_N[k]}</span></td>
+        <td style="padding:7px 10px;font-size:11px">${e.desc}</td>
+      </tr>`;
+    }).join('');
+    // 상성 표 (ATTR_ADVANTAGE 자동 추출)
+    const advRows=Object.entries(ATTR_ADVANTAGE).map(([atk,vic])=>{
+      return`<tr style="border-bottom:1px solid var(--bd)">
+        <td style="padding:7px 10px;text-align:center"><span style="color:${ATTR_C[atk]};font-weight:700">${ATTR_N[atk]}</span></td>
+        <td style="padding:7px 10px;text-align:center;color:var(--green);font-weight:700">→</td>
+        <td style="padding:7px 10px;text-align:center"><span style="color:${ATTR_C[vic]};font-weight:700">${ATTR_N[vic]}</span></td>
+        <td style="padding:7px 10px;text-align:center;color:var(--green);font-family:'IBM Plex Mono',monospace">×1.25</td>
+      </tr>`;
+    }).join('');
+    return`
+      <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🔥 속성 & 상성 시스템</h2>
+      <p style="margin-bottom:12px;color:var(--tx2)">엘비아의 마법은 6가지 속성으로 나뉘며, 서로 강점과 약점이 있습니다.</p>
+      <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">⚡ 속성 고유 효과</h3>
+      <p style="font-size:10px;color:var(--tx3);margin-bottom:6px">속성이 부여된 무기로 공격 시 상성과 무관하게 항상 적용</p>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden">
+        <thead style="background:rgba(64,160,255,.08)">
+          <tr style="text-align:left">
+            <th style="padding:7px 10px">속성</th>
+            <th style="padding:7px 10px">고유 효과</th>
+          </tr>
+        </thead>
+        <tbody>${effRows}</tbody>
+      </table>
+      <h3 style="color:var(--blue);font-size:14px;margin:18px 0 6px">⚔ 상성 트라이앵글</h3>
+      <p style="font-size:10px;color:var(--tx3);margin-bottom:6px">유리한 속성으로 공격하면 +25% 데미지, 불리한 속성은 -20%, 동속성은 -50%</p>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden">
+        <thead style="background:rgba(64,160,255,.08)">
+          <tr>
+            <th style="padding:7px 10px;text-align:center">공격</th>
+            <th style="padding:7px 10px"></th>
+            <th style="padding:7px 10px;text-align:center">유리 대상</th>
+            <th style="padding:7px 10px;text-align:center">배율</th>
+          </tr>
+        </thead>
+        <tbody>${advRows}</tbody>
+      </table>
+      <h3 style="color:var(--blue);font-size:14px;margin:18px 0 6px">📊 배율 정리</h3>
+      <ul style="padding-left:18px;line-height:2">
+        <li><b style="color:var(--green)">유리 (예: 화염 → 냉기)</b>: 데미지 ×1.25</li>
+        <li><b style="color:var(--gold)">중립 (관계 없는 속성)</b>: 데미지 ×1.0</li>
+        <li><b style="color:var(--red)">불리 (예: 화염 → 번개)</b>: 데미지 ×0.80</li>
+        <li><b style="color:var(--tx3)">동속성</b>: 데미지 ×0.50 (속성 내성)</li>
+      </ul>
+      <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💡 속성 부여 방법</h3>
+      <ul style="padding-left:18px;line-height:2">
+        <li>장비에 <b>속성 인챈트 스크롤</b> 사용 (접두 슬롯)</li>
+        <li>일부 보스 드랍 장비는 처음부터 속성 보유</li>
+        <li>속성이 없는 무기는 속성 효과 / 상성 적용 X</li>
+      </ul>
+    `;
+  },
+  gear:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">💎 등급 & 장비 시스템</h2>
+    <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">⭐ 6단계 등급</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden;margin-bottom:14px">
+      <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px;text-align:left">등급</th><th style="padding:7px 10px">스탯 배율</th><th style="padding:7px 10px">설명</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#aaa">⚪ 노말</td><td style="padding:7px 10px;text-align:center">×1.0</td><td style="padding:7px 10px;color:var(--tx3)">기본</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#44ff88">🟢 언커먼</td><td style="padding:7px 10px;text-align:center">×1.3</td><td style="padding:7px 10px;color:var(--tx3)">+30%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#4a8fff">🔵 레어</td><td style="padding:7px 10px;text-align:center">×1.6</td><td style="padding:7px 10px;color:var(--tx3)">+60%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#b060ff">🟣 에픽</td><td style="padding:7px 10px;text-align:center">×2.0</td><td style="padding:7px 10px;color:var(--tx3)">+100% / 인챈트 1슬롯</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#f0c040">🟡 레전더리</td><td style="padding:7px 10px;text-align:center">×2.5</td><td style="padding:7px 10px;color:var(--tx3)">+150% / 인챈트 2슬롯</td></tr>
+        <tr><td style="padding:7px 10px;color:#00ffcc">💎 유일</td><td style="padding:7px 10px;text-align:center">×3.0</td><td style="padding:7px 10px;color:var(--tx3)">세트 효과 / 거래 가능</td></tr>
+      </tbody>
+    </table>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🔨 강화 (+0 ~ +9)</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>강화 단계마다 스탯 증가 (+9 = 약 +85%)</li>
+      <li>+5 이상부터 <b style="color:var(--red)">파괴 위험</b></li>
+      <li><b>파괴 방지 스크롤</b>로 1회 보호 가능</li>
+      <li>강화 비용 = 장비 레벨 × 등급 × 인챈트 가치</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">✨ 인챈트 (접두 / 접미)</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>에픽 = 1슬롯 / 레전더리 = 2슬롯 (접두 + 접미)</li>
+      <li><b>인챈트 스크롤</b> 사용 시 랜덤 효과 부여</li>
+      <li>인챈트는 추가 스탯 + 발동형 스킬 가능</li>
+      <li>티어 1 / 2 / 3 — 높을수록 강력</li>
+      <li><b>추출 스크롤</b>로 인챈트만 분리 가능</li>
+    </ul>
+  `,
+  dungeons:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🏰 던전 시스템</h2>
+    <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">📌 5티어 — 영역별</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden;margin-bottom:14px">
+      <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px">티어</th><th style="padding:7px 10px">영역</th><th style="padding:7px 10px">권장 Lv</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T1</td><td style="padding:7px 10px">⛏ 동굴</td><td style="padding:7px 10px">1~20</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T2</td><td style="padding:7px 10px">🌿 어둠숲</td><td style="padding:7px 10px">20~40</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T3</td><td style="padding:7px 10px">🏜 사막</td><td style="padding:7px 10px">40~60</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">T4</td><td style="padding:7px 10px">🏰 요새</td><td style="padding:7px 10px">60~80</td></tr>
+        <tr><td style="padding:7px 10px">T5</td><td style="padding:7px 10px">🐉 용의둥지</td><td style="padding:7px 10px">80~99</td></tr>
+      </tbody>
+    </table>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚙ 4난이도</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>쉬움</b>: 학습용. 보상 적음</li>
+      <li><b>보통</b>: 표준 난이도</li>
+      <li><b>어려움</b>: 보상 ↑, 보스 강함</li>
+      <li><b style="color:var(--red)">매우어려움</b>: 사망 시 <b>장비 손실 가능</b>! 죽음 방지 부적 필수</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏆 페이즈 진행</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>각 층 = 몬스터 그룹 1개</li>
+      <li>1~4층: 일반 몬스터 → <b>5층: 보스</b></li>
+      <li>보스 처치 시 <b>등급 상향 보너스 드랍</b> 1개 확정</li>
+      <li>티어 5 매우어려움 = <b>유일(set) 등급</b> 가능</li>
+    </ul>
+  `,
+  endgame:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🗼 엔드게임 콘텐츠</h2>
+    <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">🗼 불멸의 탑 (Lv.99 전용)</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>100층 탑 — 매주 리셋</li>
+      <li>10층마다 보스 (총 10명)</li>
+      <li><b>주간 강화 / 약화</b> 시스템 — 매주 다른 효과</li>
+      <li>100층 클리어 → <b>징수</b> 획득</li>
+      <li>징수 100개 + 레전더리 무기 = <b style="color:var(--red)">불멸 등급</b> 시도 (1% 성공)</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚔ 주간 토벌전</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>주간 보스 1마리 — 모든 유저가 같은 보스 도전</li>
+      <li>누적 데미지 랭킹 → 상위 보상</li>
+      <li>토벌전 보스 3종 (아비도스 / 라바돈 / 루) 로테이션</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏆 주간 타임어택</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>주간 속성 보스 1마리 (6속성 로테이션)</li>
+      <li>3회 도전 — 최저 턴수 기록 갱신</li>
+      <li>주간 랭킹 → 3,000G + 고티어 스크롤 보상</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">👑 챔프 시스템</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>최강 유저가 챔프 자리 차지</li>
+      <li>다른 유저가 도전 → 승리 시 자리 탈취</li>
+      <li>방어 성공 = <b>연승 적립</b></li>
+    </ul>
+  `,
+  stronghold:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🏯 거점 시스템</h2>
+    <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">📐 거점 등급 / 그리드</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>1티어: 6×6 그리드 — 무료 (기본)</li>
+      <li>2티어: 8×8 — 5억G</li>
+      <li>3티어: 10×10 — 20억G</li>
+      <li>4티어: 12×12 — 80억G</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">✨ 패시브 가구</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>일부 가구는 <b>활성 슬롯</b>에 등록 시 효과 발동</li>
+      <li>활성 슬롯: 등급별 2 / 3 / 4 / 4개</li>
+      <li>같은 패시브 키는 <b>1번만 적용</b> (중복 누적 방지)</li>
+      <li>예: 황금의 손길 (골드 +10%), 단조의 화로 (강화 5% 환급)</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚒ 합성대 가구</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>장비 합성대</b>: 레전더리 5개 → 유일 (5,000만G)</li>
+      <li><b>가구 제작대</b>: 동일 등급 N개 → 상위 등급 (5,000만G)</li>
+      <li><b>인챈트 합성대</b>: 동일 티어 인챈트 3개 → 상위 티어 (1억G)</li>
+      <li>가구 상점에서 구매 가능</li>
+    </ul>
+  `,
+  economy:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">💰 경제 시스템</h2>
+    <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">🏦 골드 분배 (3단계)</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>소지금</b>: 최대 99,999,999G (1억G 미만)</li>
+      <li><b>은행</b>: 최대 100억G — 결제 시 자동 차감</li>
+      <li><b>대기금</b>: 100억 초과 분 임시 보관 (은행 빌 때 자동 회수)</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏛 경매장</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>최대 99억G까지 등록</li>
+      <li>판매자 수수료 <b style="color:var(--red)">5%</b></li>
+      <li>최대 10개 동시 등록</li>
+      <li>구매한 아이템은 <b>재판매 불가</b></li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏪 상점 / 암시장</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>일반 상점</b>: 기본 무기 / 방어구 (저레벨용)</li>
+      <li><b>암시장</b>: 매일 다른 진귀 아이템 — 시간 제한</li>
+      <li><b>가구 상점</b>: 패시브 가구 / 합성대 / 슬롯 확장</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚙ 자동판매</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>설정에서 등급 / 스크롤 티어 임계값 지정</li>
+      <li>던전 드랍 시 자동 판매 → 인벤 절약</li>
+      <li>잠금 / 가구 / 도면 / 재료는 <b>제외</b></li>
+    </ul>
+  `,
+  goals:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🎯 도전과제 시스템</h2>
+    <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">📅 일일 / 주간 미션</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>매일 자정 갱신 (KST)</li>
+      <li>던전 클리어 / 강화 / 처치 등 다양한 목표</li>
+      <li>완료 시 골드 + 인챈트 스크롤 보상</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💰 현상금 시스템</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>마을 → 현상금 게시판</li>
+      <li>특정 행동 누적 시 보상</li>
+      <li>주간 / 월간 현상금 — 점진 진척</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📖 도감 컬렉션</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>몬스터 처치 시 자동 등록</li>
+      <li>10% 달성마다 <b>ATK / DEF +1%</b> 보너스</li>
+      <li>영역별 100% 시 <b>대형 보상</b> (골드 + 스크롤)</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🌸 위령제 이벤트 (한정)</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>매년 어린이날 시즌 14일간 진행</li>
+      <li>출석 보상 + 던전 가호 (EXP +50% / 골드 +30% / 드랍 +20%)</li>
+      <li>한정 가구 — <b>잃어버린 영혼의 등불</b>, <b>어린 왕의 옥좌</b></li>
+    </ul>
+  `,
+};
+
+let _guideCurrent='start';
+window.openGuidebook=function(){
+  const modal=document.getElementById('guidebookModal');
+  if(!modal)return;
+  modal.classList.add('open');
+  // 사이드바 빌드
+  const nav=document.getElementById('guideNav');
+  if(nav){
+    nav.innerHTML=GUIDE_CHAPTERS.map(c=>`
+      <button class="guide-nav-btn" data-chap="${c.id}" style="
+        display:flex;align-items:center;gap:6px;
+        width:100%;padding:9px 12px;border:none;
+        background:${c.id===_guideCurrent?'rgba(64,160,255,.15)':'transparent'};
+        color:${c.id===_guideCurrent?'#80c0ff':'var(--tx2)'};
+        font-size:11.5px;font-weight:${c.id===_guideCurrent?'700':'500'};
+        text-align:left;cursor:pointer;border-left:3px solid ${c.id===_guideCurrent?'#80c0ff':'transparent'};
+        transition:all .15s">
+        <span style="font-size:14px">${c.icon}</span> ${c.title}
+      </button>
+    `).join('');
+    nav.querySelectorAll('.guide-nav-btn').forEach(b=>{
+      b.onclick=()=>{
+        _guideCurrent=b.dataset.chap;
+        openGuidebook();
+      };
+    });
+  }
+  // 콘텐츠 빌드
+  const content=document.getElementById('guideContent');
+  if(content){
+    const builder=GUIDE_BUILDERS[_guideCurrent];
+    content.innerHTML=builder?builder():`<div style="color:var(--tx3)">아직 작성되지 않은 챕터입니다.</div>`;
+    content.scrollTop=0;
+  }
+};
+window.closeGuidebook=function(){
+  document.getElementById('guidebookModal')?.classList.remove('open');
+};
+// 모달 외부 클릭 시 닫기
+document.getElementById('guidebookModal')?.addEventListener('click',e=>{
+  if(e.target.id==='guidebookModal')closeGuidebook();
+});
+
+// ★ 첫 진입 시 가이드북 자동 노출 (신규 캐릭터)
+function checkGuidebookFirstShow(){
+  if(!char||char._guideShown)return;
+  // 신규 판정: Lv1 + EXP 0 + 골드 ≤ 10000
+  const isNew=char.level<=1&&(char.exp||0)===0&&(char.gold||0)<=10000;
+  if(!isNew)return;
+  char._guideShown=true;
+  saveChar();
+  // 1.5초 후 (입장 토스트들 다 뜬 후)
+  setTimeout(()=>{
+    _guideCurrent='start';
+    openGuidebook();
+  },1500);
+}
+window.checkGuidebookFirstShow=checkGuidebookFirstShow;
+
+
 function rollGrade(hint=false){
   const pool=Object.entries(GRADES).map(([k,g])=>({k,...g,w:g.w*(hint&&(k==='legendary'||k==='epic')?3:1)}));
   let t=pool.reduce((s,g)=>s+g.w,0),r=Math.random()*t;
