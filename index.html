@@ -3140,9 +3140,8 @@ async function selChar(id){
   if(_charUnsub){_charUnsub();_charUnsub=null;}
   if(_invUnsub){_invUnsub();_invUnsub=null;}
   _charUnsub=onValue(ref(db,`chars/${id}`),sn=>{
-    // ★ v3.0 핫픽스 — 저장 중인 동안 listener 무시 (race condition 방지)
-    if(window._charSaveLock&&Date.now()-window._charSaveLock<3000){
-      console.log('[char listener] blocked during save lock');
+    // ★ v3.x — 저장 중 listener 무시 (3초→10초)
+    if(window._charSaveLock&&Date.now()-window._charSaveLock<10000){
       return;
     }
     if(sn.val()){
@@ -3178,9 +3177,8 @@ async function selChar(id){
     }
   });
   _invUnsub=onValue(ref(db,`inv/${id}`),sn=>{
-    // ★ v3.0 핫픽스 — 저장 중인 동안 listener 무시 (race condition 방지)
-    if(window._invSaveLock&&Date.now()-window._invSaveLock<3000){
-      console.log('[inv listener] blocked during save lock');
+    // ★ v3.x — 저장 중 listener 무시 (race condition + 트래픽 절감) — 3초→10초
+    if(window._invSaveLock&&Date.now()-window._invSaveLock<10000){
       return;
     }
     inv=sn.val()||{};
@@ -3230,7 +3228,9 @@ async function selChar(id){
   startChampWatcher();
   initNoticeBanner();
   initBlackMarket();
-  if(isAdmin)loadAdmin();
+  // ★ v3.x — admin 자동 로드 제거 (chars+inv 전체 풀 페치 방지, 트래픽 폭주 주범)
+  // admin 탭 직접 클릭 시에만 로드되도록 변경
+  // if(isAdmin)loadAdmin();
   // ★ 서버 경험치 배율 로드
   get(ref(db,'admin/expConfig')).then(sn=>{
     const cfg=sn.val()||{};
@@ -12345,12 +12345,15 @@ window.enterSubjBattle=async function(){
 // ═══ 챔프전 시스템 ═══
 let _champWatcherUnsub=null;
 function startChampWatcher(){
-  // ★ 이미 등록된 경우 재등록 방지 (토벌전 watcher와 중복 방지)
+  // ★ v3.x — 항시 listener 제거 (트래픽 절감, 챔프 탭 진입 시에만 페치)
+  // 이전: onValue 항상 활성 → 챔프 데이터 변경마다 모든 클라이언트로 push
+  // 이후: 탭 진입 시만 get()으로 1회 페치
   if(_champWatcherUnsub){_champWatcherUnsub();_champWatcherUnsub=null;}
-  _champWatcherUnsub=onValue(ref(db,'champ/current'),sn=>{
+  // 초기 1회만 페치 (챔프 빨간 닉네임 표시용)
+  get(ref(db,'champ/current')).then(sn=>{
     window._champData=sn.val();
     window._champRank1Name=window._champData?.name||null;
-  });
+  }).catch(()=>{});
 }
 
 async function renderChamp(){
