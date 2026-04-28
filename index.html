@@ -11536,7 +11536,7 @@ async function renderImmortalTower(){
               <input type="checkbox" id="itContinuousCheck" ${window._itContinuousMode?'checked':''} onchange="window._itContinuousMode=this.checked;if(!this.checked)window._itContinuousEnd=null;" style="cursor:pointer;width:16px;height:16px;flex-shrink:0">
               <div style="flex:1;line-height:1.5">
                 <div style="font-weight:700">🚀 연속 도전 모드</div>
-                <div style="font-size:9.5px;color:var(--tx3);margin-top:2px">체크 시 — 구간 선택하면 시작층부터 끝층까지 자동 진행<br>사망/HP 30% 이하/포션 0개 시 자동 정지</div>
+                <div style="font-size:9.5px;color:var(--tx3);margin-top:2px">체크 시 — 구간 선택하면 시작층부터 끝층까지 자동 진행<br>사망/패배 시에만 자동 정지</div>
               </div>
             </label>
           </div>`
@@ -11698,41 +11698,7 @@ async function tryITContinuousNext(){
     toast(`🏆 ${endFloor}층 도달 — 연속 도전 종료`,5000);
     return false;
   }
-  // ★ v3.1 핫픽스 — 전투 종료 후엔 다음 전투 시작 시 풀체력 회복됨
-  // char.hp는 이 게임에서 추적되지 않으므로 사용 안 함
-  // 안전 체크 — 포션만 (포션은 char.potions로 영구 관리됨)
-  const potionMax=5+(char.extraPotions||0);
-  if((char.potions||0)<=0){
-    window._itContinuousMode=false;
-    window._itContinuousEnd=null;
-    const checkbox=document.getElementById('itContinuousCheck');
-    if(checkbox)checkbox.checked=false;
-    toast('💊 포션 부족 — 연속 도전 정지',5000);
-    return false;
-  }
-  // ★ 마지막 전투 결과 기준 위험도 체크 (battle.players 살아있을 때만)
-  if(battle&&battle.players&&battle.players[0]){
-    const p=battle.players[0];
-    if(p.status==='dead'||p.hp<=0){
-      window._itContinuousMode=false;
-      window._itContinuousEnd=null;
-      const checkbox=document.getElementById('itContinuousCheck');
-      if(checkbox)checkbox.checked=false;
-      toast('💀 사망 — 연속 도전 정지',5000);
-      return false;
-    }
-    // 마지막 전투 HP가 너무 낮으면 정지 (아슬아슬한 클리어)
-    // ※ 다음 전투 진입 시 풀체력으로 회복되지만 위험 신호로 간주
-    const hpRate=p.hp/p.maxHp;
-    if(hpRate<0.15){
-      window._itContinuousMode=false;
-      window._itContinuousEnd=null;
-      const checkbox=document.getElementById('itContinuousCheck');
-      if(checkbox)checkbox.checked=false;
-      toast(`⚠️ 마지막 전투 HP ${Math.round(hpRate*100)}% — 위험! 연속 도전 정지`,5000);
-      return false;
-    }
-  }
+  // ★ v3.1 — 안전 체크 없음 (사망 시 endBattle에서 자동 정지됨)
   // 자동 진입 (보스층 포함)
   const nextF=lastFloor+1;
   setTimeout(()=>{startITBattle(nextF);},1500);
