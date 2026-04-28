@@ -6093,9 +6093,9 @@ const TALENT_NODES={
   s111:{tree:'s',branch:1,tier:11,cost:3,req:['s110'],type:'keystone',name:'★ 불괴',desc:'DEF +50, HP +200, 받는 데미지 -8%',effect:{def:50,hp:200,defPct:8},pos:_talPos('s',1,11)},
 
   // ❤ 가지2: 자생 (12노드)
-  s201:{tree:'s',branch:2,tier:1,cost:1,req:['s00'],type:'minor',name:'재생',desc:'HP +30 (소량 회복 보너스)',effect:{hp:30},pos:_talPos('s',2,1)},
-  s202:{tree:'s',branch:2,tier:2,cost:1,req:['s201'],type:'minor',name:'흡혈',desc:'HP +40',effect:{hp:40},pos:_talPos('s',2,2)},
-  s203:{tree:'s',branch:2,tier:3,cost:1,req:['s202'],type:'minor',name:'포션 효율',desc:'HP +50',effect:{hp:50},pos:_talPos('s',2,3)},
+  s201:{tree:'s',branch:2,tier:1,cost:1,req:['s00'],type:'minor',name:'강건',desc:'HP +30',effect:{hp:30},pos:_talPos('s',2,1)},
+  s202:{tree:'s',branch:2,tier:2,cost:1,req:['s201'],type:'minor',name:'체력',desc:'HP +40',effect:{hp:40},pos:_talPos('s',2,2)},
+  s203:{tree:'s',branch:2,tier:3,cost:1,req:['s202'],type:'minor',name:'활력',desc:'HP +50',effect:{hp:50},pos:_talPos('s',2,3)},
   s204:{tree:'s',branch:2,tier:4,cost:2,req:['s203'],type:'major',name:'생명력',desc:'HP +100, VIT +3',effect:{hp:100,vit:3},pos:_talPos('s',2,4)},
   s205:{tree:'s',branch:2,tier:5,cost:1,req:['s204'],type:'minor',name:'강령',desc:'HP +60',effect:{hp:60},pos:_talPos('s',2,5)},
   s206:{tree:'s',branch:2,tier:6,cost:1,req:['s204'],type:'minor',name:'인내',desc:'HP +60, DEF +5',effect:{hp:60,def:5},pos:_talPos('s',2,6)},
@@ -16812,7 +16812,7 @@ setInterval(()=>{
 // 트리 메타
 const TALENT_TREE_META={
   s:{name:'생존',icon:'🛡',color:'#7adc9b',colorBg:'rgba(122,220,155,.10)',colorBd:'rgba(122,220,155,.4)',
-     branches:{1:'정통 탱',2:'자생',3:'회피',4:'신성 보호'}},
+     branches:{1:'정통 탱',2:'체력',3:'회피',4:'신성 보호'}},
   a:{name:'공격',icon:'⚔',color:'#dc7a5a',colorBg:'rgba(220,122,90,.10)',colorBd:'rgba(220,122,90,.4)',
      branches:{1:'치명타',2:'근접',3:'원거리',4:'관통'}},
   p:{name:'특화',icon:'✨',color:'#a78cff',colorBg:'rgba(167,140,255,.10)',colorBd:'rgba(167,140,255,.4)',
