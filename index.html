@@ -1096,6 +1096,24 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="acont" id="ac-tools">
         <div style="font-size:12px;color:var(--tx2);font-weight:700;margin-bottom:14px">⚠️ 전체 유저 일괄 작업</div>
 
+        <!-- ★ v3.0 핫픽스 — 대역폭 진단 도구 -->
+        <div class="card2" style="margin-bottom:12px;border-color:rgba(128,160,255,.45);background:rgba(128,160,255,.05)">
+          <div style="font-size:11px;font-weight:700;color:#80a0ff;margin-bottom:4px">📡 Firebase 대역폭 진단</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:10px;line-height:1.8">
+            saveChar/saveInv 페이로드 크기 측정 · F12 콘솔에서 결과 확인<br>
+            <span style="color:#80a0ff">진단 통계</span>: 본인 세션의 누적 저장량 ·
+            <span style="color:#80a0ff">필드 분석</span>: char 객체 어느 필드가 비대한지 ·
+            <span style="color:#80a0ff">전체 분석</span>: 모든 캐릭터 크기 비교 (관리자 전용)
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+            <button class="btn btn-ghost btn-sm" onclick="diagSaveStats()">📊 저장 통계</button>
+            <button class="btn btn-ghost btn-sm" onclick="diagResetStats()">🔄 카운터 리셋</button>
+            <button class="btn btn-ghost btn-sm" onclick="diagCharFields()">🔍 char 필드 분석</button>
+            <button class="btn btn-ghost btn-sm" onclick="diagInvSize()">📦 inv 크기</button>
+          </div>
+          <button class="btn btn-blue" style="width:100%" onclick="diagAllChars()">📊 전체 캐릭터 크기 비교 (관리자 전용)</button>
+        </div>
+
         <!-- ① 점검 선물 지급 -->
         <div class="card2" style="margin-bottom:12px;border-color:rgba(240,192,64,.35)">
           <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:2px">🎁 점검 선물 지급</div>
@@ -2713,6 +2731,98 @@ function payPreview(amount){
 // Firebase는 set 1회당 onValue 구독자에게 전체 객체를 push하므로,
 // 호출 통합 = 다운로드 대역폭 직접 절감
 const SAVE_DEBOUNCE_MS=400;
+
+// ★★★ v3.0 핫픽스 — 진단 인프라 (대역폭 누수 식별용)
+// 매 saveChar/saveInv 호출 시 페이로드 크기 누적 → diagSaveStats()로 확인
+window._diagSaveCounts={charCalls:0,charBytes:0,charMaxBytes:0,invCalls:0,invBytes:0,invMaxBytes:0,startTs:Date.now()};
+window.diagSaveStats=function(){
+  const d=window._diagSaveCounts;
+  const sec=Math.max(1,(Date.now()-d.startTs)/1000);
+  const min=sec/60;
+  console.log(`%c[ABYSS WORLD 진단] 측정 시간: ${sec.toFixed(0)}초 (${min.toFixed(1)}분)`,'color:#f0c040;font-weight:700;font-size:13px');
+  console.log(`  📤 saveChar: ${d.charCalls}회 호출, 누적 ${(d.charBytes/1024).toFixed(1)}KB, 평균 ${d.charCalls?(d.charBytes/d.charCalls/1024).toFixed(2):0}KB/회, 최대 ${(d.charMaxBytes/1024).toFixed(2)}KB`);
+  console.log(`  📤 saveInv : ${d.invCalls}회 호출, 누적 ${(d.invBytes/1024).toFixed(1)}KB, 평균 ${d.invCalls?(d.invBytes/d.invCalls/1024).toFixed(2):0}KB/회, 최대 ${(d.invMaxBytes/1024).toFixed(2)}KB`);
+  const totalKb=(d.charBytes+d.invBytes)/1024;
+  const perMin=totalKb/min;
+  console.log(`%c  📡 분당 본인 다운로드 추정 (자기 onValue): ${perMin.toFixed(1)}KB/분 → ${(perMin*60/1024).toFixed(1)}MB/시간`,'color:#80a0ff;font-weight:700');
+  console.log(`%c  ⚠️ Firebase는 saveChar 1회당 onValue 구독자(자기 자신 포함)에게 전체 페이로드 push`,'color:#ff8080;font-size:10px');
+  return d;
+};
+window.diagResetStats=function(){
+  window._diagSaveCounts={charCalls:0,charBytes:0,charMaxBytes:0,invCalls:0,invBytes:0,invMaxBytes:0,startTs:Date.now()};
+  console.log('%c[진단] 카운터 리셋 완료','color:#80ff80');
+};
+// 본인 char 객체 필드별 크기 분석
+window.diagCharFields=function(){
+  if(!char){console.warn('char 미로드');return;}
+  const rows=[];
+  for(const k of Object.keys(char)){
+    try{
+      const s=JSON.stringify(char[k]);
+      const size=s?s.length:0;
+      const itemCount=Array.isArray(char[k])?char[k].length:(typeof char[k]==='object'&&char[k]?Object.keys(char[k]).length:null);
+      rows.push({field:k,bytes:size,kb:(size/1024).toFixed(2),items:itemCount});
+    }catch(e){rows.push({field:k,bytes:0,kb:'err',items:null});}
+  }
+  rows.sort((a,b)=>b.bytes-a.bytes);
+  const total=rows.reduce((a,b)=>a+b.bytes,0);
+  console.log(`%c[char 필드 분석] 총 ${(total/1024).toFixed(1)}KB`,'color:#f0c040;font-weight:700;font-size:13px');
+  console.table(rows.slice(0,20));
+  if(total>30000)console.warn(`⚠️ char 객체가 ${(total/1024).toFixed(1)}KB로 비대 — saveChar마다 이만큼 다운로드 발생`);
+  return rows;
+};
+window.diagInvSize=function(){
+  if(!inv){console.warn('inv 미로드');return;}
+  const total=JSON.stringify(inv).length;
+  const itemCount=Object.keys(inv).length;
+  console.log(`%c[inv 크기] ${(total/1024).toFixed(1)}KB · 아이템 ${itemCount}개 · 평균 ${itemCount?(total/itemCount).toFixed(0):0}바이트/아이템`,'color:#f0c040;font-weight:700');
+  return {total,itemCount};
+};
+// 관리자 전용 — 전체 캐릭터 크기 분석
+window.diagAllChars=async function(){
+  if(!isAdmin){console.warn('관리자 전용');return;}
+  console.log('%c[전체 캐릭터 크기 분석 시작] chars 풀 페치 중...','color:#80a0ff');
+  const sn=await get(ref(db,'chars'));
+  const all=sn.val()||{};
+  const stats=[];
+  for(const[id,c]of Object.entries(all)){
+    if(!c)continue;
+    try{
+      const total=JSON.stringify(c).length;
+      const codex=c._codex?JSON.stringify(c._codex).length:0;
+      const house=c.house?JSON.stringify(c.house).length:0;
+      const temp=c._tempStorage?JSON.stringify(c._tempStorage).length:0;
+      const memorial=c._memorialEvent?JSON.stringify(c._memorialEvent).length:0;
+      const equip=c.equipment?JSON.stringify(c.equipment).length:0;
+      stats.push({name:c.name||id.slice(0,8),total,codex,house,temp,memorial,equip,other:total-codex-house-temp-memorial-equip});
+    }catch(e){}
+  }
+  stats.sort((a,b)=>b.total-a.total);
+  const top=stats.slice(0,20);
+  const totalSum=stats.reduce((a,b)=>a+b.total,0);
+  const avg=stats.length?totalSum/stats.length:0;
+  console.log(`%c[전체 캐릭터: ${stats.length}명] 평균 ${(avg/1024).toFixed(1)}KB · 합계 ${(totalSum/1024/1024).toFixed(2)}MB`,'color:#f0c040;font-weight:700;font-size:13px');
+  console.table(top.map(s=>({
+    name:s.name,
+    'total(KB)':(s.total/1024).toFixed(1),
+    'codex(KB)':(s.codex/1024).toFixed(1),
+    'house(KB)':(s.house/1024).toFixed(1),
+    'temp(KB)':(s.temp/1024).toFixed(1),
+    'memo(KB)':(s.memorial/1024).toFixed(1),
+    'equip(KB)':(s.equip/1024).toFixed(1),
+    'other(KB)':(s.other/1024).toFixed(1)
+  })));
+  // 비대 필드 합산
+  const sumCodex=stats.reduce((a,b)=>a+b.codex,0);
+  const sumHouse=stats.reduce((a,b)=>a+b.house,0);
+  const sumTemp=stats.reduce((a,b)=>a+b.temp,0);
+  console.log(`%c[비대 필드 총합]`,'color:#ff8080;font-weight:700');
+  console.log(`  _codex: ${(sumCodex/1024/1024).toFixed(2)}MB (${(sumCodex/totalSum*100).toFixed(1)}%)`);
+  console.log(`  house : ${(sumHouse/1024/1024).toFixed(2)}MB (${(sumHouse/totalSum*100).toFixed(1)}%)`);
+  console.log(`  _tempStorage: ${(sumTemp/1024/1024).toFixed(2)}MB (${(sumTemp/totalSum*100).toFixed(1)}%)`);
+  return stats;
+};
+
 let _saveCharTimer=null;
 let _saveCharResolves=[];
 let _saveInvTimer=null;
@@ -2834,6 +2944,15 @@ async function _doSaveChar(){
   }
   try{
     window._charSaveLock=Date.now();
+    // ★ v3.0 핫픽스 — 페이로드 크기 측정 (대역폭 진단)
+    try{
+      const _charJson=JSON.stringify(char);
+      const _sz=_charJson.length;
+      window._diagSaveCounts.charCalls++;
+      window._diagSaveCounts.charBytes+=_sz;
+      if(_sz>window._diagSaveCounts.charMaxBytes)window._diagSaveCounts.charMaxBytes=_sz;
+      if(_sz>50000)console.warn(`[saveChar] ⚠️ 페이로드 ${(_sz/1024).toFixed(1)}KB — char 객체 비대 (chars/${charId}). diagCharFields()로 분석`);
+    }catch(e){}
     await set(ref(db,`chars/${charId}`),char);
     invalidateCache(`chars/${charId}`); // ★ 캐시 무효화
     setTimeout(()=>{window._charSaveLock=0;},1500);
@@ -2871,6 +2990,15 @@ async function _doSaveInv(){
     }
   }
   try{
+    // ★ v3.0 핫픽스 — 페이로드 크기 측정 (대역폭 진단)
+    try{
+      const _invJson=JSON.stringify(inv);
+      const _sz=_invJson.length;
+      window._diagSaveCounts.invCalls++;
+      window._diagSaveCounts.invBytes+=_sz;
+      if(_sz>window._diagSaveCounts.invMaxBytes)window._diagSaveCounts.invMaxBytes=_sz;
+      if(_sz>100000)console.warn(`[saveInv] ⚠️ 페이로드 ${(_sz/1024).toFixed(1)}KB — inv 객체 비대 (inv/${charId}). diagInvSize()로 확인`);
+    }catch(e){}
     await set(ref(db,`inv/${charId}`),inv);
     invalidateCache(`inv/${charId}`); // ★ 캐시 무효화
     // ★ 락 해제는 약간의 지연 후 (Firebase가 자기 자신 onValue 콜백을 호출하기 전까지)
@@ -8484,7 +8612,12 @@ async function resolvePhase(){
         if(dead){
           dead.status='alive'; dead.hp=1;
           blogAdd(`<span class="l-revive">⌛ 시간의 모래시계 발동! HP 1로 부활!</span>`);
-          battle._resolving=false;return;
+          // ★ v3.0 핫픽스 — 부활 후 다음 턴 진행 트리거 (이 호출 누락이 화면 정지 버그 원인)
+          syncBattleState();
+          battle._resolving=false;
+          renderBattle();
+          setTimeout(()=>startActionPhase(), (battle.mode==='solo'||battle.mode==='immortaltower'||battle.mode==='timeattack')?350:2000);
+          return;
         }
       }
     }
