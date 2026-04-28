@@ -1657,13 +1657,13 @@ const PRE=[
   {n:'전장의',     attr:null,        b:{atk:4,str:2},         sk:'cleave',         w:10},
   {n:'대지의',     attr:null,        b:{atk:5,vit:2},         sk:'ground_slam',    w:8},
   // ─── 리스크형 고성능 (물리) ───
-  {n:'피에 굶주린',attr:'dark',      b:{atk:7,crit:2,hp:-40}, sk:'blood_rage',     w:5},  // ★ v3.0 - crit 4→2, atk 5→7
+  {n:'피에 굶주린',attr:'dark',      b:{atk:3,crit:1,hp:-40}, sk:'blood_rage',     w:5},  // ★ v3.0 - base 하향 (Lv99 레전 atk≈+18% crit≈+6%)
   {n:'잔혹한',     attr:null,        b:{atk:7,def:-4,spd:-2}, sk:'armor_break',    w:4},  // 물리 고딜+방속페널티
-  {n:'광기어린',   attr:null,        b:{crit:5,atk:6,hp:-30}, sk:'berserk',        w:4},  // ★ v3.0 - crit 7→5, atk 4→6
+  {n:'광기어린',   attr:null,        b:{crit:2,atk:2,hp:-30}, sk:'berserk',        w:4},  // ★ v3.0 - base 하향 (Lv99 레전 ≈ +12%)
   // ─── 크리티컬 피해 특화 ───
-  {n:'치명적인',   attr:null,        b:{critDmg:15,crit:3},   sk:null,             w:5},  // 크뎀+크확
-  {n:'급소노리는', attr:null,        b:{critDmg:20,hp:-25},   sk:'doom_strike',    w:4},  // 고크뎀+HP페널티
-  {n:'파괴자의',   attr:'dark',      b:{critDmg:25,atk:4,def:-5},sk:'armor_break', w:3},  // 최고크뎀+리스크
+  {n:'치명적인',   attr:null,        b:{crit:1},              sk:null,             w:5},  // ★ v3.0 - base 하향 (Lv99 레전 ≈ +6%)
+  {n:'급소노리는', attr:null,        b:{critDmg:6,hp:-25},    sk:'doom_strike',    w:4},  // ★ v3.0 - 한방딜 컨셉 (Lv99 레전 ≈ +36%)
+  {n:'파괴자의',   attr:'dark',      b:{critDmg:7,atk:2,def:-5},sk:'armor_break', w:3},  // ★ v3.0 - 한방딜 컨셉 (Lv99 레전 ≈ +42%)
   // ─── 리스크형 고성능 (마법) ───
   {n:'영혼의',     attr:'dark',      b:{matk:6,int:2,hp:-30}, sk:'soul_drain',     w:6},  // 마법딜+HP페널티
   {n:'낙뢰의',     attr:'lightning', b:{matk:5,int:2,def:-3}, sk:'thunder_crash',  w:5},  // 마법+방어페널티
@@ -1674,12 +1674,12 @@ const PRE=[
   {n:'공허의',     attr:'dark',      b:{matk:7,int:4,hp:-50}, sk:'void_nova',      w:3},  // 범위마법+대형HP페널티
   // ★ v3.0 핫픽스 — 누락 카테고리 보강 (크뎀 고티어, 밸런스, 스킬보너스)
   // T3 크뎀: 중간 스펙
-  {n:'살수의',     attr:null,        b:{critDmg:18,crit:4,dex:2}, sk:'void_slash',  w:5},
+  {n:'살수의',     attr:null,        b:{crit:2,dex:2},        sk:'void_slash',     w:5},  // ★ v3.0 - base 하향 (Lv99 레전 ≈ +12%)
   // T4 크뎀: 강력형
-  {n:'심판자의',   attr:'holy',      b:{critDmg:25,atk:5,crit:4}, sk:'holy_judgment', w:4},
-  {n:'단죄의',     attr:'dark',      b:{critDmg:30,atk:6,hp:-30}, sk:'doom_strike', w:3},
+  {n:'심판자의',   attr:'holy',      b:{crit:2,atk:2},        sk:'holy_judgment',  w:4},  // ★ v3.0 - base 하향 (Lv99 레전 ≈ +12%)
+  {n:'단죄의',     attr:'dark',      b:{critDmg:9,atk:3,hp:-30}, sk:'doom_strike', w:3},  // ★ v3.0 - 한방딜 컨셉 (Lv99 레전 ≈ +54%)
   // T5 크뎀: 최고 스펙 (리스크 큼)
-  {n:'학살자의',   attr:'dark',      b:{critDmg:40,atk:7,crit:5,hp:-50}, sk:'doom_strike', w:2},
+  {n:'학살자의',   attr:'dark',      b:{crit:3,atk:3,hp:-50}, sk:'doom_strike',    w:2},  // ★ v3.0 - base 하향 (Lv99 레전 ≈ +18%)
   // T2~T4 밸런스 (무기 밸런스 보강 — 기존 풀에 0개)
   {n:'정밀한',     attr:null,        b:{balance:8,dex:2},     sk:null,             w:7},  // T2 균형
   {n:'섬세한',     attr:null,        b:{balance:12,dex:4},    sk:null,             w:5},  // T3 균형 ★ v3.0 - crit 제거, dex 보강
@@ -1749,13 +1749,13 @@ const SUF=[
   {n:'참격',      b:{atk:5,str:2},               sk:'cleave',         w:10},
   {n:'진동',      b:{atk:4,vit:2},               sk:'ground_slam',    w:8},
   // ─── 리스크형 고성능 (물리) ───
-  {n:'학살',      b:{atk:12,crit:3,hp:-60},      sk:'doom_strike',    w:3},  // ★ v3.0 - crit 5→3, atk 10→12
+  {n:'학살',      b:{atk:4,crit:1,hp:-60},       sk:'doom_strike',    w:3},  // ★ v3.0 - base 하향 (Lv99 레전 atk≈+24% crit≈+6%)
   {n:'공격광',    b:{atk:7,str:3,def:-6},        sk:'berserk',        w:5},  // 공격특화+방어페널티
   {n:'역습',      b:{atk:8,spd:-4},              sk:'counter_strike', w:5},  // ★ v3.0 - crit 제거, atk 6→8
   // ─── 크리티컬 피해 특화 ───
-  {n:'급소',      b:{critDmg:12,crit:2},               sk:null,             w:6},  // 크뎀 기본
-  {n:'치명타',    b:{critDmg:18,dex:2},                sk:null,             w:4},  // 크뎀+DEX
-  {n:'멸살',      b:{critDmg:25,atk:5,hp:-40},         sk:'doom_strike',    w:3},  // 최고크뎀+리스크
+  {n:'급소',      b:{crit:1},                    sk:null,             w:6},  // ★ v3.0 - base 하향 (Lv99 레전 ≈ +6%)
+  {n:'치명타',    b:{critDmg:5,dex:2},                 sk:null,             w:4},  // ★ v3.0 - 한방딜 컨셉 (Lv99 레전 ≈ +30%)
+  {n:'멸살',      b:{critDmg:7,atk:2,hp:-40},          sk:'doom_strike',    w:3},  // ★ v3.0 - 한방딜 컨셉 (Lv99 레전 ≈ +42%)
   // ─── 리스크형 고성능 (마법) ───
   {n:'낙뢰',      b:{matk:7,int:3,def:-4},       sk:'thunder_crash',  w:5},  // 마법+방어페널티
   {n:'공허',      b:{matk:8,int:4,hp:-50},       sk:'void_nova',      w:3},  // 최고MATK+대형HP페널티
@@ -1766,12 +1766,12 @@ const SUF=[
   {n:'방어붕괴',  b:{atk:6,str:2,def:-5},        sk:'armor_break',    w:5},  // 방어붕괴+자신방패페널티
   // ★ v3.0 핫픽스 — 누락 카테고리 보강
   // T3 크뎀: 중간형
-  {n:'예리함',    b:{critDmg:18,crit:3,str:2},    sk:'void_slash',    w:5},
+  {n:'예리함',    b:{crit:2,str:2},               sk:'void_slash',    w:5},  // ★ v3.0 - base 하향 (Lv99 레전 ≈ +12%)
   // T4 크뎀: 강력형
-  {n:'섬멸',      b:{critDmg:25,atk:5,crit:4},    sk:'explosion',     w:4},
-  {n:'재단',      b:{critDmg:30,dex:4,hp:-30},    sk:'doom_strike',   w:3},
+  {n:'섬멸',      b:{crit:2,atk:2},               sk:'explosion',     w:4},  // ★ v3.0 - base 하향 (Lv99 레전 ≈ +12%)
+  {n:'재단',      b:{critDmg:9,dex:3,hp:-30},     sk:'doom_strike',   w:3},  // ★ v3.0 - 한방딜 컨셉 (Lv99 레전 ≈ +54%)
   // T5 크뎀: 최고
-  {n:'사형선고',  b:{critDmg:40,atk:7,crit:5,hp:-50}, sk:'doom_strike', w:2},
+  {n:'사형선고',  b:{crit:3,atk:3,hp:-50},        sk:'doom_strike',   w:2},  // ★ v3.0 - base 하향 (Lv99 레전 ≈ +18%)
   // T2~T4 밸런스
   {n:'균형',      b:{balance:8,dex:2},           sk:null,             w:7},  // T2
   {n:'명중',      b:{balance:15,dex:3},          sk:null,             w:5},  // T3 ★ v3.0 - crit 제거, balance 12→15
@@ -4393,7 +4393,7 @@ const MASTER_BESTIARY=(()=>{
     out[k]=_MK(n,'timeattack',5,attr,true,'주간 타임어택 보스');
   }
   // 토벌전 보스 (3종 — 아비도스/라바돈/루)
-  const subjBosses=[['심연의 군주 아비도스','dark'],['불꽃의 군주 라바돈','fire'],['절망의 군주 루','dark']];
+  const subjBosses=[['심연의 군주 아비도스','dark'],['불의 정령 라바돈','fire'],['오염된 영원의 기사 루','holy']];
   for(const[n,attr]of subjBosses){
     const k=n.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
     out[k]=_MK(n,'subjugation',6,attr,true,'주간 토벌전 보스');
@@ -4909,13 +4909,34 @@ const GUIDE_BUILDERS={
       <li><b>인챈트 합성대</b> (가구) — 동일 티어 인챈트 3개 → 상위 티어 1개 (1억G)</li>
     </ul>
 
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚔💥 크리 vs 크뎀 (분리)</h3>
+    <p style="font-size:11px;color:var(--tx2);margin-bottom:6px">v3.0부터 두 컨셉이 완전히 분리되었습니다. 둘 다 강화하려면 슬롯을 나눠 써야 합니다.</p>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b style="color:#ffd060">⚔ 크리 인챈트</b>: 자주 터지지만 데미지는 기본 1.4배
+        <br><span style="font-size:10px;color:var(--tx3)">치명적인 / 살수의 / 심판자의 / 학살자의 / 급소 / 예리함 / 섬멸 / 사형선고 등</span></li>
+      <li><b style="color:#ff8c00">💥 크뎀 인챈트</b>: 가끔 터지지만 한 방이 강력 (한방딜 컨셉)
+        <br><span style="font-size:10px;color:var(--tx3)">급소노리는 / 파괴자의 / 단죄의 / 치명타 / 멸살 / 재단</span></li>
+      <li>둘 다 박은 빌드: 자주 + 강력 → 진짜 크리 딜러 (슬롯 8개 분배 필요)</li>
+      <li>한방딜 빌드 예: 크뎀 풀세팅 (Lv99 레전 critDmg ~+260% → 한 방 4배)</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📈 인챈트 스케일링</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>인챈트 효과는 <b>장비 레벨 + 등급</b>에 따라 자동 배수 적용</li>
+      <li>Lv1 → Lv99: 약 2.65배 / 노말 → 레전더리: 2.3배 / 유일: 2.7배</li>
+      <li>같은 인챈트라도 Lv99 레전더리 장비에 박으면 <b>Lv1 노말 대비 약 6배 강함</b></li>
+      <li>고레벨 후반에는 <b>장비 슬롯 1개당 인챈트 효과가 매우 큼</b> — 신중한 선택</li>
+    </ul>
+
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💡 빌드 가이드</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li><b>크리 빌드</b>: 분노/크림슨 세트 + 학살자의/사형선고 인챈트</li>
-      <li><b>탱커 빌드</b>: 신성 빛 세트 + 요새의/불괴의/난공 인챈트</li>
-      <li><b>마법 빌드</b>: 비전 학자 세트 + 대마법사의/고대마법 인챈트</li>
-      <li><b>밸런스 빌드</b>: 무기 명중률 극대화 + 정밀한/정밀타격 인챈트</li>
-      <li><b>LUK 빌드</b>: 골드/드랍 극대화 + 풍요/대운/운명의가호 인챈트</li>
+      <li><b>⚔ 크리 빌드</b>: 분노/크림슨 세트 + 학살자의·사형선고·살수의·예리함</li>
+      <li><b>💥 한방딜 빌드</b>: 단죄의·재단·파괴자의·멸살 (크뎀 풀세팅)</li>
+      <li><b>⚡ 하이브리드</b>: 크리 4슬롯 + 크뎀 4슬롯 (균형, 중급자 추천)</li>
+      <li><b>🛡 탱커 빌드</b>: 신성 빛 세트 + 요새의/불괴의/난공 인챈트</li>
+      <li><b>🪄 마법 빌드</b>: 비전 학자 세트 + 대마법사의/고대마법 인챈트</li>
+      <li><b>🎯 밸런스 빌드</b>: 무기 명중률 극대화 + 정밀한/정밀타격 인챈트</li>
+      <li><b>🍀 LUK 빌드</b>: 골드/드랍 극대화 + 풍요/대운/운명의가호 인챈트</li>
     </ul>
   `,
   dungeons:()=>`
@@ -4960,9 +4981,11 @@ const GUIDE_BUILDERS={
     </ul>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💀 매우어려움 사망 처리</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>사망 시 장착 장비 1개 <b>랜덤 분실</b></li>
-      <li><b>죽음 방지 부적</b> 보유 시 자동 차감 → 분실 회피</li>
-      <li>잠금 장비도 분실 대상이므로 부적 필수</li>
+      <li><b>인벤 아이템 1~2개 랜덤 손실</b> (스크롤·보호 스크롤·박스 제외)</li>
+      <li><b>장착 장비 각 슬롯 20% 확률 파괴</b> (슬롯 단위, 평균 1~2개)</li>
+      <li><b>잠금 처리는 분실 방지 X</b> — 잠금 장비도 파괴 대상</li>
+      <li><b>죽음 방지 부적</b>: 자동 차감 → 분실 완전 회피 (1회 보호)</li>
+      <li>매우어려움 진입 전 부적 보유 권장</li>
     </ul>
   `,
   endgame:()=>`
@@ -4986,7 +5009,7 @@ const GUIDE_BUILDERS={
       <li>토벌전 보스 3종 — 매주 1마리 등장:
         <br><span style="color:#a335ee">👁 심연의 군주 아비도스</span> (어둠) /
         <span style="color:var(--red)">🔥 불의 정령 라바돈</span> (화염) /
-        <span style="color:var(--purple)">⚔ 절망의 군주 루</span> (어둠)</li>
+        <span style="color:var(--gold)">⚔ 오염된 영원의 기사 루</span> (신성)</li>
       <li>각 도전 = 데미지 누적 → 보스 처치 시 <b>최후 처치자</b>에게 추가 박스</li>
       <li><b>주간 누적 데미지 랭킹</b> → 상위 보상</li>
       <li>도전 보상 박스: 골드 + 인챈트 스크롤 (레벨 기반 티어)</li>
@@ -5666,9 +5689,9 @@ const ENCHANT_STAT_MAP={
   '섬세한':    {balance:12,dex:4},                  // ★ v3.0 - crit 제거
   '운명의가호':{luk:8,dex:4},                       // ★ v3.0 - crit 제거
   // ── 접두 (물리 리스크)
-  '피에 굶주린':{atk:7,crit:2,hp:-40},              // ★ v3.0 - atk 5→7, crit 4→2
+  '피에 굶주린':{atk:3,crit:1,hp:-40},              // ★ v3.0 - base 하향
   '잔혹한':    {atk:7,def:-4,spd:-2},
-  '광기어린':  {crit:5,atk:6,hp:-30},               // ★ v3.0 - crit 7→5, atk 4→6
+  '광기어린':  {crit:2,atk:2,hp:-30},               // ★ v3.0 - base 하향
   // ── 접두 (마법)
   '번개의':    {matk:4,int:2,spd:2},
   '독의':      {matk:4,int:2},
@@ -5696,7 +5719,7 @@ const ENCHANT_STAT_MAP={
   '난공불락':  {def:12,hp:60,vit:4,dex:2},
   '빛':        {dex:3,hp:20},
   '성스러움':  {hp:50,vit:5,dex:3},
-  '학살':      {atk:12,crit:3,hp:-60},              // ★ v3.0 - crit 5→3, atk 10→12
+  '학살':      {atk:4,crit:1,hp:-60},               // ★ v3.0 - base 하향
   '공격광':    {atk:7,str:3,def:-6},
   '역습':      {atk:8,spd:-4},                      // ★ v3.0 - crit 제거
   '방어붕괴':  {atk:6,str:2,def:-5},
@@ -5722,9 +5745,9 @@ const ENCHANT_STAT_MAP={
   '회오리':    {atk:3,str:1},
   '전장의':    {atk:4,str:2},
   '대지의':    {atk:5,vit:2},
-  '치명적인':  {critDmg:15,crit:3},
-  '급소노리는':{critDmg:20,hp:-25},
-  '파괴자의':  {critDmg:25,atk:4,def:-5},
+  '치명적인':  {crit:1},                          // ★ v3.0 - base 하향
+  '급소노리는':{critDmg:6,hp:-25},                  // ★ v3.0 - 한방딜 컨셉
+  '파괴자의':  {critDmg:7,atk:2,def:-5},            // ★ v3.0 - 한방딜 컨셉
   '시간의':    {dex:3,spd:5,def:-2},
   '잔영의':    {dex:5,spd:4,hp:-25},
   // 접두 — 탱/생존/범용
@@ -5747,10 +5770,10 @@ const ENCHANT_STAT_MAP={
   '마법사의':  {matk:3},
   '파동의':    {matk:3,int:1},
   // ★ v3.0 신규 접두
-  '살수의':    {critDmg:18,crit:4,dex:2},
-  '심판자의':  {critDmg:25,atk:5,crit:4},
-  '단죄의':    {critDmg:30,atk:6,hp:-30},
-  '학살자의':  {critDmg:40,atk:7,crit:5,hp:-50},
+  '살수의':    {crit:2,dex:2},                    // ★ v3.0 - base 하향
+  '심판자의':  {crit:2,atk:2},                    // ★ v3.0 - base 하향
+  '단죄의':    {critDmg:9,atk:3,hp:-30},          // ★ v3.0 - 한방딜 컨셉
+  '학살자의':  {crit:3,atk:3,hp:-50},             // ★ v3.0 - base 하향
   '정밀한':    {balance:8,dex:2},
   '완벽한':    {balance:18,dex:4,atk:3},
   '주문술의':  {matk:5,int:2,skillBonus:5},
@@ -5794,14 +5817,14 @@ const ENCHANT_STAT_MAP={
   '마력강화':  {matk:4},
   '파동':      {matk:3,int:1},
   // 크뎀 특화
-  '급소':      {critDmg:12,crit:2},
-  '치명타':    {critDmg:18,dex:2},
-  '멸살':      {critDmg:25,atk:5,hp:-40},
+  '급소':      {crit:1},                          // ★ v3.0 - base 하향
+  '치명타':    {critDmg:5,dex:2},                  // ★ v3.0 - 한방딜 컨셉
+  '멸살':      {critDmg:7,atk:2,hp:-40},           // ★ v3.0 - 한방딜 컨셉
   // ★ v3.0 신규 접미
-  '예리함':    {critDmg:18,crit:3,str:2},
-  '섬멸':      {critDmg:25,atk:5,crit:4},
-  '재단':      {critDmg:30,dex:4,hp:-30},
-  '사형선고':  {critDmg:40,atk:7,crit:5,hp:-50},
+  '예리함':    {crit:2,str:2},                    // ★ v3.0 - base 하향
+  '섬멸':      {crit:2,atk:2},                    // ★ v3.0 - base 하향
+  '재단':      {critDmg:9,dex:3,hp:-30},          // ★ v3.0 - 한방딜 컨셉
+  '사형선고':  {crit:3,atk:3,hp:-50},             // ★ v3.0 - base 하향
   '균형':      {balance:8,dex:2},
   '정밀타격':  {balance:18,atk:3,dex:3},
   '영창':      {matk:5,int:2,skillBonus:5},
@@ -5814,7 +5837,7 @@ const ENCHANT_STAT_MAP={
 };
 
 // ★ 이 숫자만 올리면 다음 접속 시 모든 유저 아이템 재마이그레이션
-const ENCHANT_STAT_VER=6; // ★ v3.0 핫픽스 — crit 인챈트 일괄 정리 (5→6)
+const ENCHANT_STAT_VER=8; // ★ v3.0 핫픽스 — base값 대폭 하향 (스케일링 폭주 방지) 7→8
 
 function autoMigrateEnchantStats(it){
   if(!it||it._esv>=ENCHANT_STAT_VER||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
