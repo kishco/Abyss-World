@@ -394,7 +394,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div id="loginScr">
   <div class="lwrap">
     <div class="llogo">⚔ ABYSS WORLD</div>
-    <div class="lsub">DARK FANTASY RPG v3.0</div>
+    <div class="lsub">DARK FANTASY RPG v3.1</div>
     <div style="text-align:center;margin-bottom:18px;margin-top:2px">
       <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener"
         style="display:inline-flex;align-items:center;gap:6px;background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.4);color:#7289da;padding:5px 14px;border-radius:20px;font-size:11px;text-decoration:none;font-family:'IBM Plex Mono',monospace;transition:.2s"
@@ -467,7 +467,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <span id="bossKillBanner" style="display:none;font-size:9px;color:var(--gold);font-family:'IBM Plex Mono',monospace;animation:pulse 1s infinite"></span>
   </div>
   <span class="sdot" id="sdot"></span>
-  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);margin-left:auto;margin-right:4px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);padding:1px 6px;border-radius:5px">v3.0</span>
+  <span class="v2badge" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);margin-left:auto;margin-right:4px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);padding:1px 6px;border-radius:5px">v3.1</span>
   <button class="v2badge" onclick="openGuidebook()" title="게임 가이드북" style="cursor:pointer;background:rgba(64,160,255,.12);border:1px solid rgba(64,160,255,.35);color:#80c0ff;padding:2px 8px;border-radius:5px;font-size:11px;margin-right:6px;white-space:nowrap">📖 가이드</button>
   <a href="https://discord.gg/E37fDrehTg" target="_blank" rel="noopener" class="v2badge"
     style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.35);color:#7289da;padding:2px 7px;border-radius:5px;font-size:9px;text-decoration:none;margin-right:6px;white-space:nowrap;font-family:'IBM Plex Mono',monospace"
@@ -485,68 +485,68 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <button onclick="closeNoticeBanner()" style="background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--tx)'" onmouseout="this.style.color='var(--tx3)'">✕</button>
 </div>
 
-<!-- 업데이트 팝업 v3.0 -->
+<!-- 업데이트 팝업 v3.1 -->
 <div id="updatePopup" style="display:none;position:fixed;inset:0;background:rgba(4,6,12,.88);z-index:8999;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
   <div style="background:var(--sf);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;max-width:540px;width:90%;max-height:88vh;overflow-y:auto">
     <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px">⚔ ABYSS WORLD</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap">
-      <span style="font-size:12px;color:var(--gold);font-family:'IBM Plex Mono',monospace;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);padding:3px 10px;border-radius:5px;font-weight:700">v3.0 — 거점 시스템 & 위령제 이벤트</span>
+      <span style="font-size:12px;color:var(--gold);font-family:'IBM Plex Mono',monospace;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);padding:3px 10px;border-radius:5px;font-weight:700">v3.1 — 특성 트리 시스템</span>
     </div>
 
-    <!-- 거점 시스템 -->
-    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">🏯 거점 시스템 신설</div>
+    <!-- 특성 트리 (v3.1 핵심) -->
+    <div style="font-size:11px;color:#a78cff;font-weight:700;margin-bottom:6px">🌳 특성 트리 시스템 (Lv.99 해금)</div>
+    <div style="background:linear-gradient(135deg,rgba(167,140,255,.10),rgba(167,140,255,.04));border:1px solid rgba(167,140,255,.4);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      <b style="color:var(--tx)">Lv.99 도달 후 새로운 성장 — 특성 Lv.1~50</b><br>
+      🛡 생존 / ⚔ 공격 / ✨ 특화 — 3트리 × 50노드 = <b style="color:#a78cff">총 150 노드</b><br>
+      📊 노드 종류: ⚪ 일반 (1pt) · 🔷 중급 (2pt) · ★ 키스톤 (3pt)<br>
+      ✨ 신규 효과: <b>무기 마스터리</b>(근접/원거리/마법) · <b>속성 데미지/저항</b> · <b>스킬 데미지</b><br>
+      🔄 리셋 점진 비용 (100만G → 200만G → ... 최대 1억G)<br>
+      <span style="font-size:10px;color:var(--tx3)">→ 캐릭터 탭 → 🌳 특성 트리 카드 (Lv.99 도달 시 자동 표시)</span>
+    </div>
+
+    <!-- 인챈트 시스템 개편 -->
+    <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px">⚔ 크리/크뎀 인챈트 분리</div>
     <div style="background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      <b style="color:var(--tx)">마을 한 켠에 자신만의 공간이 생깁니다.</b><br>
-      📐 4단계 그리드: 6×6 → 8×8 → 10×10 → 12×12 (확장 5억G/20억G/80억G)<br>
-      ✨ 활성 패시브 슬롯: 2 → 3 → 4 (단계별 확장)<br>
-      📦 인벤 100→<b style="color:var(--lg)">최대 1,000칸</b> · 창고 200→<b style="color:var(--lg)">최대 2,000칸</b> (가구 누적 확장)<br>
-      <span style="font-size:10px;color:var(--tx3)">→ 마을 → 🏯 거점 카드에서 진입</span>
+      <b style="color:var(--tx)">크리 + 크뎀 동봉 인챈트 → 각각 분리 (8종)</b><br>
+      ⚔ 크리 인챈트: 자주 터짐, 데미지 1.4배 (살수의·심판자의·학살자의)<br>
+      💥 크뎀 인챈트: 한방딜 (단죄의·재단·파괴자의 — Lv99 레전 최대 +260%)<br>
+      📐 base값 정상화 — Lv99 레전 단일 인챈트 약 +18~30%<br>
+      🔧 ENCHANT_STAT_VER 8 자동 마이그레이션
     </div>
 
-    <!-- 합성 시스템 -->
-    <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:6px">⚒️ 합성 시스템 (장비/가구/인챈트)</div>
-    <div style="background:rgba(176,96,255,.05);border:1px solid rgba(176,96,255,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      <b style="color:var(--tx)">합성대 가구를 거점에 배치하면 합성이 활성화됩니다.</b><br>
-      <span style="color:var(--tx3)">🗡 장비 합성:</span> 동급 ×5 + 골드 → 상위 등급 (Legendary ×5 → <b style="color:var(--st)">Set 1개 30억G</b>)<br>
-      <span style="color:var(--tx3)">🪑 가구 합성:</span> 동급 ×N + 골드 → 상위 등급 가구<br>
-      <span style="color:var(--tx3)">📜 인챈트 합성:</span> 동tier ×3 + 골드 → 상위 tier<br>
-      <span style="font-size:10px;color:#FF8888">※ 합성 결과 거래 불가 / 던전 드랍 유일은 거래 가능 풀림</span>
+    <!-- 방어 시스템 보강 -->
+    <div style="font-size:11px;color:#80c0ff;font-weight:700;margin-bottom:6px">🛡 방어 시스템 보강</div>
+    <div style="background:rgba(128,192,255,.05);border:1px solid rgba(128,192,255,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      ⚔ 패링 시스템 신규 — DEX 기반 8% + DEX×0.08% (캡 18%)<br>
+      🛡 블록 시스템 신규 — 1H + 방패, 등급별 10/15/20/25/30%<br>
+      📌 방어 행동 시 회피 배제 (회피와 패링·블록은 선택)<br>
+      👹 보스 방어 자세 — HP 30% 이하 12% 확률 (1턴 쿨다운)
     </div>
 
-    <!-- 경매 / 결제 -->
-    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:6px">🏛 경매장 대개편</div>
-    <div style="background:rgba(74,143,255,.05);border:1px solid rgba(74,143,255,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      <b style="color:var(--tx)">가격 상한 9,999만G → <span style="color:var(--gold)">99억G</span></b> (10000% 상향)<br>
-      <span style="color:var(--tx3)">💰 거래 수수료:</span> 5% 도입 (판매자 차감)<br>
-      <span style="color:var(--tx3)">💳 통합 결제:</span> 소지금 + 은행 자동 인출 (1억G+ 결제 시 차감 출처 표시)<br>
-      <span style="color:var(--tx3)">🔓 유일 장비:</span> 던전 드랍 set 모두 거래 가능 풀림 (자동 마이그레이션)
+    <!-- CRIT 밸런스 -->
+    <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:6px">⚖ CRIT 밸런스 패치</div>
+    <div style="background:rgba(220,50,50,.05);border:1px solid rgba(220,50,50,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      📐 기본 공식 하향: 8 → 5, DEX·LUK 환산 약화<br>
+      🎯 75% 상한은 유지 — 도달 비용 증가<br>
+      🧬 CRIT 부수효과 인챈트 17종 정리 (크리 빌드 정체성 강화)
     </div>
 
-    <!-- 위령제 이벤트 -->
-    <div style="font-size:11px;color:#80a0ff;font-weight:700;margin-bottom:6px">🏮 어린이날 위령제 이벤트 (4/27 ~ 5/10)</div>
-    <div style="background:linear-gradient(135deg,rgba(80,120,255,.06),rgba(140,80,200,.04));border:1px solid rgba(80,120,255,.3);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      <b style="color:#80a0ff">"심연에 사라진 아이들을 기리며, 그 영혼에 빛을 바친다."</b><br>
-      🎏 14일 출석 보상 (1일차 100만G + 인챈트 → 9일차 <b style="color:var(--st)">잃어버린 영혼의 등불</b> → 14일차 500만G + 인챈트 ×2)<br>
-      ⚡ 던전 가호 상시: <b>EXP +50% · 골드 +30% · 드랍률 +20%</b><br>
-      👹 5/5 위령제 보스 (라바돈 강화판) → <b style="color:var(--st)">어린 왕의 옥좌</b> 확정<br>
-      ✨ 추모의 빛 챌린지: 던전 50회 → <b style="color:var(--lg)">심연의 잔영</b><br>
-      <span style="font-size:10px;color:var(--tx3)">→ 마을 → 🏮 위령제 카드 (이벤트 기간만 표시)</span>
-    </div>
-
-    <!-- 신규 환영 -->
-    <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px">🎁 신규 유저 환영 패키지</div>
-    <div style="background:rgba(68,212,136,.05);border:1px solid rgba(68,212,136,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
-      <b style="color:var(--rare)">레어 등급 무기 1종 + 방어구 2종</b> + <b style="color:var(--gold)">5,000,000G</b><br>
-      <span style="font-size:10px;color:var(--tx3)">신규 캐릭터 첫 접속 시 자동 인벤 지급 (1회 한정)</span>
+    <!-- 강화권 시스템 -->
+    <div style="font-size:11px;color:#ff8c00;font-weight:700;margin-bottom:6px">⚒ 강화권 / 불멸 정수 (관리자 보상)</div>
+    <div style="background:rgba(255,140,0,.05);border:1px solid rgba(255,140,0,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--tx2);line-height:2;margin-bottom:14px">
+      ⚡ 즉시 +5/+7/+9 강화권 (실패 X)<br>
+      ⚒ 강화 보장권 ×1/×3/×5 (1회 100% 성공)<br>
+      🔱 불멸의 정수 (1~99,999개 수량 입력 가능)<br>
+      <span style="font-size:10px;color:var(--tx3)">대장간에서 즉시 강화권 사용 가능</span>
     </div>
 
     <!-- 기타 -->
     <div style="font-size:11px;color:var(--tx2);font-weight:700;margin-bottom:6px">🔧 기타 변경</div>
     <div style="font-size:10.5px;color:var(--tx2);line-height:2;margin-bottom:14px;padding-left:4px">
-      <span style="color:var(--tx3)">• 임시보관함 7일 유예 — 가구 해제로 인벤 초과 시 안전망</span><br>
-      <span style="color:var(--tx3)">• 자동판매 가드 강화 — 가구·도면·재료·합성결과 영구 제외</span><br>
-      <span style="color:var(--tx3)">• 유령 코드 정리 (파티 시스템 잔재 제거)</span><br>
-      <span style="color:var(--tx3)">• 유일 무기 밸런스 스탯 버그 수정</span>
+      <span style="color:var(--tx3)">• 토벌전 보스 메타 정정 — 라바돈 "불의 정령" / 루 "오염된 영원의 기사" 신성</span><br>
+      <span style="color:var(--tx3)">• 가이드북 v3.0 → v3.1 갱신 (특성 트리 챕터 추가 예정)</span><br>
+      <span style="color:var(--tx3)">• 인게임 가이드 — 매우어려움 사망 처리 정확화</span><br>
+      <span style="color:var(--tx3)">• 시간의 모래시계 부활 시 화면 멈춤 수정</span>
     </div>
 
     <div style="display:flex;gap:8px">
@@ -601,13 +601,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <button class="nbtn" data-tab="admin" id="adminNav" style="display:none"><div class="ni">🛡</div><div class="nl">관리자</div></button>
   </nav>
   <main class="main">
-    <!-- ★ v3.0 업데이트 상단 배너 -->
-    <div id="referralBanner" style="margin:10px 10px 0;background:linear-gradient(135deg,rgba(240,192,64,.15),rgba(176,96,255,.12));border:1px solid rgba(240,192,64,.4);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;position:relative">
-      <span style="font-size:22px;flex-shrink:0">🏯</span>
+    <!-- ★ v3.1 업데이트 상단 배너 -->
+    <div id="referralBanner" style="margin:10px 10px 0;background:linear-gradient(135deg,rgba(167,140,255,.18),rgba(240,192,64,.12));border:1px solid rgba(167,140,255,.4);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;position:relative">
+      <span style="font-size:22px;flex-shrink:0">🌳</span>
       <div style="flex:1;min-width:0">
-        <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:2px">v3.0 업데이트 — 거점 시스템 & 위령제 이벤트</div>
-        <div style="font-size:10px;color:var(--tx2)"><b style="color:var(--gold)">🏯 거점</b> 가구 배치·패시브 · <b style="color:var(--purple)">⚒️ 합성</b> 장비/가구/인챈트 · <b style="color:var(--blue)">🏛 경매 99억G</b> · <b style="color:#80a0ff">🏮 위령제 4/27~5/5</b></div>
-        <div style="font-size:9px;color:var(--tx3);margin-top:2px">🎁 신규 환영 패키지 (레어 무기/방어구 + 500만G) · 던전 가호 EXP+50% 골드+30% 드랍+20%</div>
+        <div style="font-size:11px;font-weight:700;color:#a78cff;margin-bottom:2px">v3.1 업데이트 — 특성 트리 시스템</div>
+        <div style="font-size:10px;color:var(--tx2)"><b style="color:#a78cff">🌳 특성 트리</b> Lv.99 해금 150노드 · <b style="color:var(--gold)">⚔ 인챈트 분리</b> · <b style="color:#80c0ff">🛡 패링/블록</b> · <b style="color:var(--red)">⚖ CRIT 밸런스</b></div>
+        <div style="font-size:9px;color:var(--tx3);margin-top:2px">🛡 생존 / ⚔ 공격 / ✨ 특화 — 무기 마스터리·속성 데미지·키스톤 9종</div>
       </div>
       <div style="flex-shrink:0">
         <button onclick="document.getElementById('referralBanner').style.display='none'" style="background:none;border:none;color:var(--tx3);font-size:11px;cursor:pointer;padding:0">✕</button>
@@ -641,6 +641,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <div style="font-size:9px;color:var(--tx2);margin-bottom:2px">EXP</div>
             <div class="expbar"><div class="expfill" id="expfill" style="width:0%"></div></div>
             <div style="font-size:10px;color:var(--tx3);margin-top:2px;font-family:'IBM Plex Mono',monospace" id="exptxt">0/100</div>
+          </div>
+          <!-- ★ v3.1 — 특성 트리 진입 (Lv.99 도달 시만 표시) -->
+          <div id="talentEntryCard" class="card" style="display:none;margin-bottom:10px;background:linear-gradient(135deg,rgba(167,140,255,.10),rgba(167,140,255,.04));border-color:rgba(167,140,255,.4);cursor:pointer" onclick="openTalentTree()">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:#a78cff">🌳 특성 트리</div>
+              <div style="font-size:11px;color:#a78cff" id="talentLvBadge">Lv.1</div>
+            </div>
+            <div style="font-size:9px;color:var(--tx2);margin-bottom:2px;display:flex;justify-content:space-between"><span>특성 EXP</span><span id="talentPtBadge" style="color:#ffd060;font-weight:700">남은 포인트: 0</span></div>
+            <div class="expbar"><div class="expfill" id="talentExpFill" style="width:0%;background:linear-gradient(90deg,#7adc9b,#a78cff)"></div></div>
+            <div style="font-size:10px;color:var(--tx3);margin-top:2px;font-family:'IBM Plex Mono',monospace" id="talentExpTxt">0/100,000</div>
           </div>
           <div class="card" style="margin-bottom:10px">
             <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
@@ -1953,23 +1963,27 @@ const SETS={
   crimson_blade:{name:'크림슨 블레이드',col:'#ff4444',pcs:{
     cb_helm:   {n:'크림슨 투구',     slot:'head',  stats:{atk:95, crit:14}},
     cb_chest:  {n:'크림슨 흉갑',     slot:'chest', stats:{atk:110,crit:10}},
+    cb_legs:   {n:'크림슨 각반',     slot:'legs',  stats:{atk:90, crit:12}},
     cb_sword:  {n:'크림슨 대검',     slot:'weapon',hand:'2H',stats:{atk:265,crit:16,balance:65}},
     cb_boots:  {n:'크림슨 장화',     slot:'boots', stats:{atk:85, spd:25}},
   },bonuses:[
     {cnt:2,desc:'CRIT+10% 크리티컬 피해+20%',b:{crit:10,critDmg:20}},
     {cnt:3,desc:'ATK+100',b:{atk:100}},
     {cnt:4,desc:'ATK+180 CRIT+18%',b:{atk:180,crit:18}},
+    {cnt:5,desc:'ATK+250 CRIT+22% CRITDMG+30%',b:{atk:250,crit:22,critDmg:30}},
   ]},
   // ★ SPD/회피 딜러 — 빠르고 치명적, DEF 약간
   shadow_hunter:{name:'그림자 사냥꾼',col:'#9060ff',pcs:{
     sh_hood:   {n:'암영 두건',        slot:'head',  stats:{spd:55, crit:16}},
     sh_cloak:  {n:'암영 망토',        slot:'chest', stats:{spd:45, atk:85}},
+    sh_legs:   {n:'암영 각반',        slot:'legs',  stats:{spd:50, atk:75, dex:8}},
     sh_dagger: {n:'암영 이도류',      slot:'weapon',hand:'2H',stats:{atk:245,spd:65,balance:72}},
     sh_ring:   {n:'암영 반지',        slot:'accessory',stats:{spd:55,crit:20}},
   },bonuses:[
     {cnt:2,desc:'SPD+20 회피+10%',b:{spd:20,dodge:10}},
     {cnt:3,desc:'ATK+70 CRIT+12%',b:{atk:70,crit:12}},
     {cnt:4,desc:'스킬 발동률+18% ATK+130',b:{atk:130,skillBonus:18}},
+    {cnt:5,desc:'ATK+200 SPD+30 회피+12%',b:{atk:200,spd:30,dodge:12}},
   ]},
   // ★ 순수 탱커 — DEF/HP 최강, ATK 없음
   iron_fortress:{name:'강철 요새',col:'#60a0ff',pcs:{
@@ -1987,17 +2001,21 @@ const SETS={
   // ★ 밸런스 탱 — DEF+HP 중간, 딜 약함
   stone_guardian:{name:'석상 수호자',col:'#88aacc',pcs:{
     sg_helm:   {n:'수호자 투구',      slot:'head',  stats:{def:82, hp:260}},
+    sg_chest:  {n:'수호자 갑옷',      slot:'chest', stats:{def:115, hp:380}},
+    sg_legs:   {n:'수호자 각반',      slot:'legs',  stats:{def:95, hp:300}},
     sg_bracelet:{n:'수호자 팔찌',     slot:'accessory',stats:{def:60,hp:220}},
     sg_ring:   {n:'수호자 반지',      slot:'accessory',stats:{def:55,hp:200}},
     sg_boots:  {n:'수호자 장화',      slot:'boots', stats:{def:70, spd:28}},
   },bonuses:[
     {cnt:2,desc:'DEF+50 HP+150',b:{def:50,hp:150}},
     {cnt:4,desc:'DEF+130 회피+8% SPD+20',b:{def:130,spd:20,dodge:8}},
+    {cnt:6,desc:'DEF+200 HP+600 받피-10%',b:{def:200,hp:600}},
   ]},
   // ★ HP/힐 — HP 최강, ATK/DEF 없음
   divine_light:{name:'신성한 빛',col:'#ffee80',pcs:{
     dl_crown:  {n:'신성 왕관',        slot:'head',  stats:{hp:360, matk:88}},
     dl_robe:   {n:'신성 로브',        slot:'chest', stats:{hp:430, matk:125}},
+    dl_legs:   {n:'신성 각반',        slot:'legs',  stats:{hp:380, matk:95}},
     dl_staff:  {n:'신성 지팡이',      slot:'weapon',hand:'1H',stats:{matk:188,hp:260,balance:60}},
     dl_earring:{n:'신성 귀걸이',      slot:'accessory',stats:{matk:92,hp:260}},
     dl_neck:   {n:'신성 목걸이',      slot:'neck',  stats:{hp:420, matk:78}},
@@ -2006,22 +2024,26 @@ const SETS={
     {cnt:3,desc:'MATK+80 스킬발동+10%',b:{matk:80,skillBonus:10}},
     {cnt:4,desc:'포션 회복량+30% HP+500',b:{hp:500,_potionBonus:0.30}},
     {cnt:5,desc:'MATK+160 HP+800 스킬발동+20%',b:{matk:160,hp:800,skillBonus:20}},
+    {cnt:6,desc:'MATK+240 HP+1200 스킬데미지+30%',b:{matk:240,hp:1200,_skillDmgBonus:0.30}},
   ]},
   // ★ 순수 MATK — 스킬 최강, 생존 취약
   arcane_scholar:{name:'비전 학자',col:'#cc88ff',pcs:{
     as_hat:    {n:'학자 모자',         slot:'head',  stats:{matk:92, hp:180}},
     as_robe:   {n:'학자 로브',         slot:'chest', stats:{matk:122,hp:220}},
+    as_legs:   {n:'학자 각반',         slot:'legs',  stats:{matk:100,hp:200}},
     as_staff:  {n:'학자 지팡이',       slot:'weapon',hand:'1H',stats:{matk:265,hp:160,balance:68}},
     as_amulet: {n:'학자 부적',         slot:'accessory',stats:{matk:85,hp:160}},
   },bonuses:[
     {cnt:2,desc:'MATK+60 INT 효율+20%',b:{matk:60,_intBonus:0.20}},
     {cnt:3,desc:'스킬 발동+15% MATK+110',b:{matk:110,skillBonus:15}},
     {cnt:4,desc:'MATK+200 모든 스킬 피해+25%',b:{matk:200,skillBonus:25,_skillDmgBonus:0.25}},
+    {cnt:5,desc:'MATK+280 HP+500 마법흡혈+5%',b:{matk:280,hp:500,magicLifesteal:5}},
   ]},
   // ★ 올라운더 — 어느쪽도 최강 아님, 섞어쓰기 최적화
   dragon_sovereign:{name:'용군주',col:'#ff8c00',pcs:{
     ds_helm:   {n:'용군주 왕관',      slot:'head',  stats:{atk:55, def:55, hp:160}},
     ds_chest:  {n:'용군주 갑주',      slot:'chest', stats:{atk:70, def:80, hp:220}},
+    ds_legs:   {n:'용군주 각반',      slot:'legs',  stats:{atk:60, def:70, hp:200}},
     ds_weapon: {n:'용군주 창',        slot:'weapon',hand:'2H',stats:{atk:220,crit:12,balance:80}},
     ds_ring:   {n:'용군주 반지',      slot:'accessory',stats:{atk:50, def:40}},
     ds_amulet: {n:'용군주 부적',      slot:'accessory',stats:{matk:65,hp:200}},
@@ -2030,21 +2052,25 @@ const SETS={
     {cnt:3,desc:'CRIT+8% ATK+50',b:{atk:50,crit:8}},
     {cnt:4,desc:'ATK+80 DEF+60 HP+300',b:{atk:80,def:60,hp:300}},
     {cnt:5,desc:'ATK+100 DEF+80 HP+400 SPD+15',b:{atk:100,def:80,hp:400,spd:15,crit:10}},
+    {cnt:6,desc:'ATK+150 DEF+120 HP+600 CRIT+15%',b:{atk:150,def:120,hp:600,crit:15}},
   ]},
   // ★ 회피 탱커 — SPD+회피 특화, DEF 중간
   frost:{name:'서리 군주',col:'#00ffcc',pcs:{
     frost_helm: {n:'서리군주 투구',   slot:'head',  stats:{spd:45, def:55, hp:180}},
     frost_chest:{n:'서리군주 흉갑',   slot:'chest', stats:{spd:35, def:85, hp:280}},
+    frost_legs: {n:'서리군주 각반',   slot:'legs',  stats:{spd:40, def:70, hp:240}},
     frost_sword:{n:'서리군주 검',     slot:'weapon',hand:'1H',stats:{atk:182,spd:50,balance:75}},
     frost_boots:{n:'서리군주 장화',   slot:'boots', stats:{spd:60, def:50}},
   },bonuses:[
     {cnt:2,desc:'회피+8% SPD+20',b:{spd:20,dodge:8}},
     {cnt:3,desc:'회피+12% DEF+60 SPD+30',b:{spd:30,def:60,dodge:12}},
     {cnt:4,desc:'회피+20% DEF+100 SPD+50',b:{spd:50,def:100,dodge:20}},
+    {cnt:5,desc:'회피+25% DEF+150 SPD+70 패링+5%',b:{spd:70,def:150,dodge:25}},
   ]},
   // ★ 광폭 딜러 — ATK 높고 HP 희생
   flame:{name:'불꽃의 분노',col:'#ff6030',pcs:{
     flame_chest:{n:'분노의 흉갑',     slot:'chest', stats:{atk:105,crit:10}},
+    flame_legs: {n:'분노의 각반',     slot:'legs',  stats:{atk:90, crit:11}},
     flame_sword:{n:'분노의 화염검',   slot:'weapon',hand:'2H',stats:{atk:260,crit:18,balance:62}},
     flame_helm: {n:'분노의 투구',     slot:'head',  stats:{atk:92, crit:12}},
     flame_ring: {n:'분노의 반지',     slot:'accessory',stats:{atk:75, crit:16}},
@@ -2052,6 +2078,7 @@ const SETS={
     {cnt:2,desc:'ATK+60 CRIT+8%',b:{atk:60,crit:8}},
     {cnt:3,desc:'ATK+110 CRIT+14%',b:{atk:110,crit:14}},
     {cnt:4,desc:'ATK+190 CRIT+22% 크리티컬 피해+30%',b:{atk:190,crit:22,critDmg:30}},
+    {cnt:5,desc:'ATK+260 CRIT+25% CRITDMG+40% 화염 +10%',b:{atk:260,crit:25,critDmg:40,attrDmgBonus:{fire:10}}},
   ]},
 };
 
@@ -2483,7 +2510,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ═══ 업데이트 팝업 ═══
 function checkUpdatePopup(){
-  const key='abyssworld_update_v3.0';
+  const key='abyssworld_update_v3.1';
   const hidden=localStorage.getItem(key);
   if(hidden&&Date.now()<parseInt(hidden))return;
   const pop=document.getElementById('updatePopup');
@@ -2494,7 +2521,7 @@ window.closeUpdatePopup=function(dontShow){
   if(pop)pop.style.display='none';
   if(dontShow){
     const expire=Date.now()+24*60*60*1000;
-    localStorage.setItem('abyssworld_update_v3.0',expire);
+    localStorage.setItem('abyssworld_update_v3.1',expire);
   }
 };
 
@@ -2715,12 +2742,39 @@ function calcStats(c){
   // ★ 도감 보너스: 10% 달성마다 ATK/DEF +1%
   const _cb=getCodexBonus();
   atk*=_cb.atkMult;def*=_cb.defMult;
+
+  // ★★★ v3.1 — 특성 트리 (Talent Tree) 효과 합산 ★★★
+  // 새 필드 4종: attrDmgBonus, attrResist, weaponMastery, skillDmgBonus
+  const attrDmgBonus={fire:0,ice:0,lightning:0,dark:0,holy:0,poison:0};
+  const attrResist={fire:0,ice:0,lightning:0,dark:0,holy:0,poison:0};
+  const weaponMastery={melee:0,ranged:0,magic:0};
+  let talentSkillDmgBonus=0;
+  if(typeof getTalentEffects==='function'){
+    const t=getTalentEffects(c);
+    // 직접 스탯
+    atk+=t.atk||0; matk+=t.matk||0; def+=t.def||0; hp+=t.hp||0; spd+=t.spd||0;
+    crit+=t.crit||0; critDmg+=t.critDmg||0; dodge+=t.dodge||0;
+    goldBonus+=t.goldBonus||0; skillBonus+=t.skillBonus||0; balance+=t.balance||0;
+    // 퍼센트 스탯 (atkPct, defPct, hpPct, matkPct, spdPct)
+    if(t.atkPct)atk*=(1+t.atkPct/100);
+    if(t.matkPct)matk*=(1+t.matkPct/100);
+    if(t.defPct)def*=(1+t.defPct/100);
+    if(t.hpPct)hp*=(1+t.hpPct/100);
+    if(t.spdPct)spd*=(1+t.spdPct/100);
+    // 새 필드들
+    if(t.attrDmgBonus)for(const k of Object.keys(attrDmgBonus))attrDmgBonus[k]+=t.attrDmgBonus[k]||0;
+    if(t.attrResist)for(const k of Object.keys(attrResist))attrResist[k]+=t.attrResist[k]||0;
+    if(t.weaponMastery)for(const k of Object.keys(weaponMastery))weaponMastery[k]+=t.weaponMastery[k]||0;
+    talentSkillDmgBonus+=t.skillDmgBonus||0;
+  }
+
   return{atk:Math.round(atk),matk:Math.round(matk),def:Math.round(def),spd:Math.round(spd),
     maxHp:Math.max(Math.round(hp),1),dodge:Math.min(Math.round(dodge),35),
     crit:Math.min(Math.round(crit),75),critDmg:Math.round(critDmg),
     goldBonus:Math.round(goldBonus),skillBonus:Math.round(skillBonus),
     balance:Math.min(99,Math.round(balance)),
-    _potionBonus,_intBonus,_skillDmgBonus};
+    attrDmgBonus,attrResist,weaponMastery,
+    _potionBonus,_intBonus,_skillDmgBonus:_skillDmgBonus+talentSkillDmgBonus};
 }
 function calcSetB(eq){
   const sc={};for(const it of Object.values(eq)){if(!it||it.grade!=='set'||!it.setId)continue;sc[it.setId]=(sc[it.setId]||0)+1;}
@@ -3866,6 +3920,11 @@ window.stopBoosterTick=stopBoosterTick;
 
 // ═══ LEVEL UP (random stats 1-5) ═══
 function gainExp(amt){
+  // ★ v3.1 — Lv.99 도달 후 EXP는 특성 EXP로 전환
+  if((char.level||1)>=99){
+    gainTalentExp(amt);
+    return;
+  }
   char.exp+=amt;let lvUps=[];
   while(char.exp>=char.expNext&&char.level<99){
     char.exp-=char.expNext;char.level++;
@@ -3978,6 +4037,34 @@ function renderChar(){
   const ep=Math.round(char.exp/char.expNext*100);
   document.getElementById('expfill').style.width=ep+'%';
   document.getElementById('exptxt').textContent=`${char.exp}/${char.expNext}`;
+  // ★ v3.1 — 특성 트리 카드 (Lv.99 도달 시만 표시)
+  const _talCard=document.getElementById('talentEntryCard');
+  if(_talCard){
+    if((char.level||1)>=99){
+      // 첫 도달 시 초기화
+      if(!char._talentLv){
+        char._talentLv=1;
+        char._talentExp=0;
+        char._talentExpNext=talentExpForLevel(1);
+        char._talentPoints=1;
+        char._talentNodes=[];
+        char._talentResetCount=0;
+        saveChar();
+      }
+      _talCard.style.display='block';
+      const tlv=char._talentLv||1;
+      const tex=char._talentExp||0;
+      const tex_n=char._talentExpNext||talentExpForLevel(tlv);
+      const tpt=char._talentPoints||0;
+      document.getElementById('talentLvBadge').textContent=`특성 Lv.${tlv}`+(tlv>=50?' (MAX)':'');
+      document.getElementById('talentPtBadge').textContent=`남은 포인트: ${tpt}`;
+      document.getElementById('talentPtBadge').style.color=tpt>0?'#ffd060':'var(--tx3)';
+      document.getElementById('talentExpFill').style.width=Math.round(tex/tex_n*100)+'%';
+      document.getElementById('talentExpTxt').textContent=`${tex.toLocaleString()}/${tex_n.toLocaleString()}`;
+    }else{
+      _talCard.style.display='none';
+    }
+  }
   const s=calcStats(char);
   document.getElementById('s-hp').textContent=s.maxHp;
   document.getElementById('s-atk').textContent=s.atk;
@@ -5899,6 +5986,337 @@ const ENCHANT_STAT_MAP={
 
 // ★ 이 숫자만 올리면 다음 접속 시 모든 유저 아이템 재마이그레이션
 const ENCHANT_STAT_VER=8; // ★ v3.0 핫픽스 — base값 대폭 하향 (스케일링 폭주 방지) 7→8
+
+// ════════════════════════════════════════════════════════════════
+// ★★★ TALENT TREE SYSTEM (v3.1) ★★★
+// Lv.99 도달 시 활성. 특성 EXP/Lv 시스템 별도. 50pt 분배.
+// 3 트리 × 50 노드 = 150노드. 노드 = {id, branch, tier, cost, req[], effect{}, type}
+// ════════════════════════════════════════════════════════════════
+
+// 특성 EXP — Lv.99 도달 후 EXP 전환
+// ★ v3.1 — 200,000 × Lv (느리게, IT/던전 보너스 고려)
+function talentExpForLevel(tlv){return 200000*Math.max(1,tlv);}
+
+// 특성 EXP 추가 — Lv.99일 때만 호출됨 (Lv.99 미만은 일반 EXP로)
+function gainTalentExp(amt){
+  if(!char||(char.level||1)<99)return;
+  if(!char._talentLv)char._talentLv=1;
+  if(!char._talentExp)char._talentExp=0;
+  if(!char._talentExpNext)char._talentExpNext=talentExpForLevel(char._talentLv);
+  if(!char._talentPoints)char._talentPoints=1; // Lv.1 도달 보상 1pt
+  char._talentExp+=amt;
+  let lvUps=0;
+  while(char._talentLv<50&&char._talentExp>=char._talentExpNext){
+    char._talentExp-=char._talentExpNext;
+    char._talentLv++;
+    char._talentPoints=(char._talentPoints||0)+1;
+    char._talentExpNext=talentExpForLevel(char._talentLv);
+    lvUps++;
+  }
+  if(char._talentLv>=50){char._talentLv=50;char._talentExp=0;}
+  if(lvUps>0){
+    toast(`✨ 특성 레벨 ${char._talentLv} 달성! +${lvUps} 특성 포인트`,4000);
+    blogAdd&&blogAdd(`<span class="l-exp" style="color:#a78cff;font-weight:700">✨ 특성 레벨 ${char._talentLv}! +${lvUps}pt</span>`);
+  }
+  saveChar();
+}
+window.gainTalentExp=gainTalentExp;
+
+// ════════════════════════════════════════════════
+// 노드 정의 — 3 트리 × 50노드 = 150 노드
+// 각 트리: 시작1 + 가지4 (각 12~13노드)
+// 노드 ID: tree(s/a/p) + branch(1/2/3/4) + idx(01~13)
+// ════════════════════════════════════════════════
+
+// 좌표 자동 생성 — 트리당 4 가지를 가로로 배치
+// canvas: 700w × 1300h, 가지별 column 4개
+// 시작 노드: x=350 (가운데), y=80
+// 가지 column: x=100/250/450/600
+// 가지 노드: y=180 ~ y=1180 (각 노드 80px 간격)
+function _talPos(tree, branch, tier){
+  // tier 0 = 시작 노드 (각 트리당 1개, 위쪽 가운데)
+  if(tier===0)return{x:350,y:80};
+  const branchX={1:100, 2:250, 3:450, 4:600};
+  const x=branchX[branch]||100;
+  const y=160+tier*80;
+  return{x,y};
+}
+
+const TALENT_NODES={
+  // ════════════════════════════════════════════════
+  // 🛡 생존 트리 (Survival) — 50노드
+  // 가지1: 정통탱(12), 가지2: 자생(12), 가지3: 회피(13), 가지4: 신성(13)
+  // 합: 1 + 12 + 12 + 13 + 13 = 51 → 정통탱 11로
+  // ════════════════════════════════════════════════
+  // 시작 노드
+  s00:{tree:'s',branch:0,tier:0,cost:1,req:[],type:'minor',name:'생존 입문',desc:'HP +20, DEF +3',effect:{hp:20,def:3},pos:_talPos('s',0,0)},
+
+  // 🛡 가지1: 정통 탱 (11노드)
+  s101:{tree:'s',branch:1,tier:1,cost:1,req:['s00'],type:'minor',name:'강철 피부',desc:'DEF +10',effect:{def:10},pos:_talPos('s',1,1)},
+  s102:{tree:'s',branch:1,tier:2,cost:1,req:['s101'],type:'minor',name:'강인한 신체',desc:'HP +30',effect:{hp:30},pos:_talPos('s',1,2)},
+  s103:{tree:'s',branch:1,tier:3,cost:2,req:['s102'],type:'major',name:'방어 숙련',desc:'DEF +25, VIT +3',effect:{def:25,vit:3},pos:_talPos('s',1,3)},
+  s104:{tree:'s',branch:1,tier:4,cost:1,req:['s103'],type:'minor',name:'견고함',desc:'DEF +15',effect:{def:15},pos:_talPos('s',1,4)},
+  s105:{tree:'s',branch:1,tier:5,cost:1,req:['s104'],type:'minor',name:'철벽',desc:'HP +50',effect:{hp:50},pos:_talPos('s',1,5)},
+  s106:{tree:'s',branch:1,tier:6,cost:2,req:['s105'],type:'major',name:'요새',desc:'DEF +40, HP +100',effect:{def:40,hp:100},pos:_talPos('s',1,6)},
+  s107:{tree:'s',branch:1,tier:7,cost:1,req:['s106'],type:'minor',name:'방패 마스터',desc:'블록률 +5%',effect:{blockBonus:5},pos:_talPos('s',1,7)},
+  s108:{tree:'s',branch:1,tier:8,cost:1,req:['s106'],type:'minor',name:'VIT 숙련',desc:'VIT +5',effect:{vit:5},pos:_talPos('s',1,8)},
+  s109:{tree:'s',branch:1,tier:9,cost:1,req:['s107','s108'],type:'minor',name:'인내',desc:'HP +80',effect:{hp:80},pos:_talPos('s',1,9)},
+  s110:{tree:'s',branch:1,tier:10,cost:2,req:['s109'],type:'major',name:'요새화',desc:'DEF +30, HP +150, VIT +5',effect:{def:30,hp:150,vit:5},pos:_talPos('s',1,10)},
+  s111:{tree:'s',branch:1,tier:11,cost:3,req:['s110'],type:'keystone',name:'★ 불괴',desc:'DEF +50, HP +200, 받는 데미지 -8%',effect:{def:50,hp:200,defPct:8},pos:_talPos('s',1,11)},
+
+  // ❤ 가지2: 자생 (12노드)
+  s201:{tree:'s',branch:2,tier:1,cost:1,req:['s00'],type:'minor',name:'재생',desc:'HP +30 (소량 회복 보너스)',effect:{hp:30},pos:_talPos('s',2,1)},
+  s202:{tree:'s',branch:2,tier:2,cost:1,req:['s201'],type:'minor',name:'흡혈',desc:'HP +40',effect:{hp:40},pos:_talPos('s',2,2)},
+  s203:{tree:'s',branch:2,tier:3,cost:1,req:['s202'],type:'minor',name:'포션 효율',desc:'HP +50',effect:{hp:50},pos:_talPos('s',2,3)},
+  s204:{tree:'s',branch:2,tier:4,cost:2,req:['s203'],type:'major',name:'생명력',desc:'HP +100, VIT +3',effect:{hp:100,vit:3},pos:_talPos('s',2,4)},
+  s205:{tree:'s',branch:2,tier:5,cost:1,req:['s204'],type:'minor',name:'강령',desc:'HP +60',effect:{hp:60},pos:_talPos('s',2,5)},
+  s206:{tree:'s',branch:2,tier:6,cost:1,req:['s204'],type:'minor',name:'인내',desc:'HP +60, DEF +5',effect:{hp:60,def:5},pos:_talPos('s',2,6)},
+  s207:{tree:'s',branch:2,tier:7,cost:1,req:['s205','s206'],type:'minor',name:'끈기',desc:'HP +80',effect:{hp:80},pos:_talPos('s',2,7)},
+  s208:{tree:'s',branch:2,tier:8,cost:2,req:['s207'],type:'major',name:'불멸의 의지',desc:'HP +120, VIT +5',effect:{hp:120,vit:5},pos:_talPos('s',2,8)},
+  s209:{tree:'s',branch:2,tier:9,cost:1,req:['s208'],type:'minor',name:'단단함',desc:'HP +80, DEF +10',effect:{hp:80,def:10},pos:_talPos('s',2,9)},
+  s210:{tree:'s',branch:2,tier:10,cost:1,req:['s208'],type:'minor',name:'생존 본능',desc:'HP +100',effect:{hp:100},pos:_talPos('s',2,10)},
+  s211:{tree:'s',branch:2,tier:11,cost:2,req:['s209','s210'],type:'major',name:'생명의 끈',desc:'HP +15%',effect:{hpPct:15},pos:_talPos('s',2,11)},
+  s212:{tree:'s',branch:2,tier:12,cost:3,req:['s211'],type:'keystone',name:'★ 영원',desc:'HP +20%, VIT +10',effect:{hpPct:20,vit:10},pos:_talPos('s',2,12)},
+
+  // 🛡 가지3: 회피 (13노드)
+  s301:{tree:'s',branch:3,tier:1,cost:1,req:['s00'],type:'minor',name:'민첩',desc:'DEX +5',effect:{dex:5},pos:_talPos('s',3,1)},
+  s302:{tree:'s',branch:3,tier:2,cost:1,req:['s301'],type:'minor',name:'바람의 발걸음',desc:'회피 +3%',effect:{dodge:3},pos:_talPos('s',3,2)},
+  s303:{tree:'s',branch:3,tier:3,cost:1,req:['s302'],type:'minor',name:'신속',desc:'SPD +10',effect:{spd:10},pos:_talPos('s',3,3)},
+  s304:{tree:'s',branch:3,tier:4,cost:2,req:['s303'],type:'major',name:'패링 마스터',desc:'DEX +5, 회피 +3%',effect:{dex:5,dodge:3},pos:_talPos('s',3,4)},
+  s305:{tree:'s',branch:3,tier:5,cost:1,req:['s304'],type:'minor',name:'잔영',desc:'SPD +15',effect:{spd:15},pos:_talPos('s',3,5)},
+  s306:{tree:'s',branch:3,tier:6,cost:1,req:['s304'],type:'minor',name:'DEX 숙련',desc:'DEX +8',effect:{dex:8},pos:_talPos('s',3,6)},
+  s307:{tree:'s',branch:3,tier:7,cost:1,req:['s305','s306'],type:'minor',name:'기민함',desc:'SPD +15, 회피 +2%',effect:{spd:15,dodge:2},pos:_talPos('s',3,7)},
+  s308:{tree:'s',branch:3,tier:8,cost:2,req:['s307'],type:'major',name:'잔상',desc:'DEX +10, 회피 +5%',effect:{dex:10,dodge:5},pos:_talPos('s',3,8)},
+  s309:{tree:'s',branch:3,tier:9,cost:1,req:['s308'],type:'minor',name:'그림자',desc:'회피 +4%',effect:{dodge:4},pos:_talPos('s',3,9)},
+  s310:{tree:'s',branch:3,tier:10,cost:1,req:['s308'],type:'minor',name:'운동',desc:'DEX +10, SPD +10',effect:{dex:10,spd:10},pos:_talPos('s',3,10)},
+  s311:{tree:'s',branch:3,tier:11,cost:1,req:['s309','s310'],type:'minor',name:'즉응',desc:'SPD +20',effect:{spd:20},pos:_talPos('s',3,11)},
+  s312:{tree:'s',branch:3,tier:12,cost:2,req:['s311'],type:'major',name:'섬광',desc:'DEX +12, 회피 +5%, SPD +15',effect:{dex:12,dodge:5,spd:15}, pos:_talPos('s',3,12)},
+  s313:{tree:'s',branch:3,tier:13,cost:3,req:['s312'],type:'keystone',name:'★ 잔영 마스터',desc:'회피 +8%, SPD +25',effect:{dodge:8,spd:25},pos:_talPos('s',3,13)},
+
+  // 🌟 가지4: 신성 보호 (13노드)
+  s401:{tree:'s',branch:4,tier:1,cost:1,req:['s00'],type:'minor',name:'신성 친화',desc:'신성 무기 데미지 +5%',effect:{attrDmgBonus:{holy:5}},pos:_talPos('s',4,1)},
+  s402:{tree:'s',branch:4,tier:2,cost:1,req:['s401'],type:'minor',name:'신성 가호',desc:'신성 받는 데미지 -5%',effect:{attrResist:{holy:5}},pos:_talPos('s',4,2)},
+  s403:{tree:'s',branch:4,tier:3,cost:2,req:['s402'],type:'major',name:'신성 빛',desc:'신성 무기 데미지 +10%',effect:{attrDmgBonus:{holy:10}},pos:_talPos('s',4,3)},
+  s404:{tree:'s',branch:4,tier:4,cost:1,req:['s403'],type:'minor',name:'정화',desc:'어둠 받는 데미지 -8%',effect:{attrResist:{dark:8}},pos:_talPos('s',4,4)},
+  s405:{tree:'s',branch:4,tier:5,cost:1,req:['s403'],type:'minor',name:'광채',desc:'신성 무기 데미지 +5%, INT +3',effect:{attrDmgBonus:{holy:5},int:3},pos:_talPos('s',4,5)},
+  s406:{tree:'s',branch:4,tier:6,cost:1,req:['s404','s405'],type:'minor',name:'신성 보호막',desc:'신성 받는 데미지 -5%, HP +50',effect:{attrResist:{holy:5},hp:50},pos:_talPos('s',4,6)},
+  s407:{tree:'s',branch:4,tier:7,cost:2,req:['s406'],type:'major',name:'강화 신성',desc:'신성 무기 데미지 +15%, 어둠 받피 -5%',effect:{attrDmgBonus:{holy:15},attrResist:{dark:5}},pos:_talPos('s',4,7)},
+  s408:{tree:'s',branch:4,tier:8,cost:1,req:['s407'],type:'minor',name:'정화의 빛',desc:'어둠/독 받피 -5%',effect:{attrResist:{dark:5,poison:5}},pos:_talPos('s',4,8)},
+  s409:{tree:'s',branch:4,tier:9,cost:1,req:['s407'],type:'minor',name:'성스러운 의지',desc:'HP +80, 신성 데미지 +5%',effect:{hp:80,attrDmgBonus:{holy:5}},pos:_talPos('s',4,9)},
+  s410:{tree:'s',branch:4,tier:10,cost:1,req:['s408','s409'],type:'minor',name:'천사의 가호',desc:'HP +100',effect:{hp:100},pos:_talPos('s',4,10)},
+  s411:{tree:'s',branch:4,tier:11,cost:1,req:['s410'],type:'minor',name:'신성 영광',desc:'신성 데미지 +10%',effect:{attrDmgBonus:{holy:10}},pos:_talPos('s',4,11)},
+  s412:{tree:'s',branch:4,tier:12,cost:2,req:['s411'],type:'major',name:'성좌의 가호',desc:'신성 데미지 +15%, 어둠 받피 -10%',effect:{attrDmgBonus:{holy:15},attrResist:{dark:10}},pos:_talPos('s',4,12)},
+  s413:{tree:'s',branch:4,tier:13,cost:3,req:['s412'],type:'keystone',name:'★ 성좌',desc:'신성 데미지 +25%, 모든 받피 -10%',effect:{attrDmgBonus:{holy:25},defPct:10},pos:_talPos('s',4,13)},
+
+  // ════════════════════════════════════════════════
+  // ⚔ 공격 트리 (Attack) — 50노드
+  // 가지1: 치명타(12), 가지2: 근접(13), 가지3: 원거리(12), 가지4: 관통(12) + 시작1
+  // ════════════════════════════════════════════════
+  a00:{tree:'a',branch:0,tier:0,cost:1,req:[],type:'minor',name:'공격 입문',desc:'ATK +8',effect:{atk:8},pos:_talPos('a',0,0)},
+
+  // 💥 가지1: 치명타 (12노드)
+  a101:{tree:'a',branch:1,tier:1,cost:1,req:['a00'],type:'minor',name:'예리한 눈',desc:'CRIT +2%',effect:{crit:2},pos:_talPos('a',1,1)},
+  a102:{tree:'a',branch:1,tier:2,cost:1,req:['a101'],type:'minor',name:'치명 일격',desc:'CRITDMG +8%',effect:{critDmg:8},pos:_talPos('a',1,2)},
+  a103:{tree:'a',branch:1,tier:3,cost:2,req:['a102'],type:'major',name:'관통',desc:'CRIT +4%, ATK +10',effect:{crit:4,atk:10},pos:_talPos('a',1,3)},
+  a104:{tree:'a',branch:1,tier:4,cost:1,req:['a103'],type:'minor',name:'강타',desc:'CRITDMG +12%',effect:{critDmg:12},pos:_talPos('a',1,4)},
+  a105:{tree:'a',branch:1,tier:5,cost:1,req:['a103'],type:'minor',name:'정확한 일격',desc:'밸런스 +3, CRIT +1%',effect:{balance:3,crit:1},pos:_talPos('a',1,5)},
+  a106:{tree:'a',branch:1,tier:6,cost:1,req:['a104','a105'],type:'minor',name:'약점 노리기',desc:'CRIT +3%',effect:{crit:3},pos:_talPos('a',1,6)},
+  a107:{tree:'a',branch:1,tier:7,cost:2,req:['a106'],type:'major',name:'살수의 일격',desc:'CRIT +4%, CRITDMG +15%',effect:{crit:4,critDmg:15},pos:_talPos('a',1,7)},
+  a108:{tree:'a',branch:1,tier:8,cost:1,req:['a107'],type:'minor',name:'무자비',desc:'CRITDMG +12%',effect:{critDmg:12},pos:_talPos('a',1,8)},
+  a109:{tree:'a',branch:1,tier:9,cost:1,req:['a107'],type:'minor',name:'조준',desc:'CRIT +3%',effect:{crit:3},pos:_talPos('a',1,9)},
+  a110:{tree:'a',branch:1,tier:10,cost:1,req:['a108','a109'],type:'minor',name:'무자비한 추격',desc:'CRIT +2%, CRITDMG +8%',effect:{crit:2,critDmg:8},pos:_talPos('a',1,10)},
+  a111:{tree:'a',branch:1,tier:11,cost:2,req:['a110'],type:'major',name:'광기',desc:'CRIT +5%, CRITDMG +15%, HP -50',effect:{crit:5,critDmg:15,hp:-50},pos:_talPos('a',1,11)},
+  a112:{tree:'a',branch:1,tier:12,cost:3,req:['a111'],type:'keystone',name:'★ 사형선고',desc:'CRIT +6%, CRITDMG +25%',effect:{crit:6,critDmg:25},pos:_talPos('a',1,12)},
+
+  // 🗡 가지2: 근접 (13노드)
+  a201:{tree:'a',branch:2,tier:1,cost:1,req:['a00'],type:'minor',name:'STR 숙련',desc:'STR +5',effect:{str:5},pos:_talPos('a',2,1)},
+  a202:{tree:'a',branch:2,tier:2,cost:1,req:['a201'],type:'minor',name:'강한 일격',desc:'ATK +10',effect:{atk:10},pos:_talPos('a',2,2)},
+  a203:{tree:'a',branch:2,tier:3,cost:1,req:['a202'],type:'minor',name:'근접 숙련',desc:'근접 무기 데미지 +5%',effect:{weaponMastery:{melee:5}},pos:_talPos('a',2,3)},
+  a204:{tree:'a',branch:2,tier:4,cost:2,req:['a203'],type:'major',name:'근접 마스터',desc:'근접 무기 데미지 +10%, STR +5',effect:{weaponMastery:{melee:10},str:5},pos:_talPos('a',2,4)},
+  a205:{tree:'a',branch:2,tier:5,cost:1,req:['a204'],type:'minor',name:'분쇄',desc:'ATK +12',effect:{atk:12},pos:_talPos('a',2,5)},
+  a206:{tree:'a',branch:2,tier:6,cost:1,req:['a204'],type:'minor',name:'무기 단련',desc:'ATK +15',effect:{atk:15},pos:_talPos('a',2,6)},
+  a207:{tree:'a',branch:2,tier:7,cost:1,req:['a205','a206'],type:'minor',name:'STR 강화',desc:'STR +8',effect:{str:8},pos:_talPos('a',2,7)},
+  a208:{tree:'a',branch:2,tier:8,cost:2,req:['a207'],type:'major',name:'광전사',desc:'ATK +15%, DEF -3%',effect:{atkPct:15,defPct:-3},pos:_talPos('a',2,8)},
+  a209:{tree:'a',branch:2,tier:9,cost:1,req:['a208'],type:'minor',name:'강력',desc:'ATK +18',effect:{atk:18},pos:_talPos('a',2,9)},
+  a210:{tree:'a',branch:2,tier:10,cost:1,req:['a208'],type:'minor',name:'STR 마스터',desc:'STR +10',effect:{str:10},pos:_talPos('a',2,10)},
+  a211:{tree:'a',branch:2,tier:11,cost:1,req:['a209','a210'],type:'minor',name:'폭주',desc:'ATK +20',effect:{atk:20},pos:_talPos('a',2,11)},
+  a212:{tree:'a',branch:2,tier:12,cost:2,req:['a211'],type:'major',name:'근접 패권',desc:'근접 무기 +15%, STR +8',effect:{weaponMastery:{melee:15},str:8},pos:_talPos('a',2,12)},
+  a213:{tree:'a',branch:2,tier:13,cost:3,req:['a212'],type:'keystone',name:'★ 도륙자',desc:'근접 무기 +25%, ATK +30, STR +10',effect:{weaponMastery:{melee:25},atk:30,str:10},pos:_talPos('a',2,13)},
+
+  // 🏹 가지3: 원거리 (12노드)
+  a301:{tree:'a',branch:3,tier:1,cost:1,req:['a00'],type:'minor',name:'DEX 숙련',desc:'DEX +5',effect:{dex:5},pos:_talPos('a',3,1)},
+  a302:{tree:'a',branch:3,tier:2,cost:1,req:['a301'],type:'minor',name:'원거리 숙련',desc:'원거리 무기 데미지 +5%',effect:{weaponMastery:{ranged:5}},pos:_talPos('a',3,2)},
+  a303:{tree:'a',branch:3,tier:3,cost:1,req:['a302'],type:'minor',name:'사거리',desc:'SPD +10',effect:{spd:10},pos:_talPos('a',3,3)},
+  a304:{tree:'a',branch:3,tier:4,cost:2,req:['a303'],type:'major',name:'정밀 사격',desc:'DEX +8, CRIT +3%',effect:{dex:8,crit:3},pos:_talPos('a',3,4)},
+  a305:{tree:'a',branch:3,tier:5,cost:1,req:['a304'],type:'minor',name:'신속 사격',desc:'SPD +12, ATK +8',effect:{spd:12,atk:8},pos:_talPos('a',3,5)},
+  a306:{tree:'a',branch:3,tier:6,cost:1,req:['a304'],type:'minor',name:'관통 사격',desc:'원거리 무기 +5%, ATK +10',effect:{weaponMastery:{ranged:5},atk:10},pos:_talPos('a',3,6)},
+  a307:{tree:'a',branch:3,tier:7,cost:1,req:['a305','a306'],type:'minor',name:'DEX 강화',desc:'DEX +10',effect:{dex:10},pos:_talPos('a',3,7)},
+  a308:{tree:'a',branch:3,tier:8,cost:2,req:['a307'],type:'major',name:'원거리 마스터',desc:'원거리 무기 +12%, DEX +5',effect:{weaponMastery:{ranged:12},dex:5},pos:_talPos('a',3,8)},
+  a309:{tree:'a',branch:3,tier:9,cost:1,req:['a308'],type:'minor',name:'폭격',desc:'ATK +20',effect:{atk:20},pos:_talPos('a',3,9)},
+  a310:{tree:'a',branch:3,tier:10,cost:1,req:['a308'],type:'minor',name:'명사수',desc:'CRIT +4%',effect:{crit:4},pos:_talPos('a',3,10)},
+  a311:{tree:'a',branch:3,tier:11,cost:2,req:['a309','a310'],type:'major',name:'원거리 폭격',desc:'원거리 무기 +15%, CRIT +3%',effect:{weaponMastery:{ranged:15},crit:3},pos:_talPos('a',3,11)},
+  a312:{tree:'a',branch:3,tier:12,cost:3,req:['a311'],type:'keystone',name:'★ 처형자의 화살',desc:'원거리 무기 +25%, CRIT +5%',effect:{weaponMastery:{ranged:25},crit:5},pos:_talPos('a',3,12)},
+
+  // ⚒ 가지4: 관통/광역 (12노드)
+  a401:{tree:'a',branch:4,tier:1,cost:1,req:['a00'],type:'minor',name:'무게',desc:'ATK +8, STR +2',effect:{atk:8,str:2},pos:_talPos('a',4,1)},
+  a402:{tree:'a',branch:4,tier:2,cost:1,req:['a401'],type:'minor',name:'강철 의지',desc:'ATK +10, DEF +5',effect:{atk:10,def:5},pos:_talPos('a',4,2)},
+  a403:{tree:'a',branch:4,tier:3,cost:1,req:['a402'],type:'minor',name:'광역 타격',desc:'ATK +12',effect:{atk:12},pos:_talPos('a',4,3)},
+  a404:{tree:'a',branch:4,tier:4,cost:2,req:['a403'],type:'major',name:'분쇄',desc:'ATK +15, STR +5',effect:{atk:15,str:5},pos:_talPos('a',4,4)},
+  a405:{tree:'a',branch:4,tier:5,cost:1,req:['a404'],type:'minor',name:'일격필살',desc:'CRITDMG +10%',effect:{critDmg:10},pos:_talPos('a',4,5)},
+  a406:{tree:'a',branch:4,tier:6,cost:1,req:['a404'],type:'minor',name:'처형',desc:'CRITDMG +12%',effect:{critDmg:12},pos:_talPos('a',4,6)},
+  a407:{tree:'a',branch:4,tier:7,cost:1,req:['a405','a406'],type:'minor',name:'분노',desc:'ATK +18',effect:{atk:18},pos:_talPos('a',4,7)},
+  a408:{tree:'a',branch:4,tier:8,cost:2,req:['a407'],type:'major',name:'폭발적 일격',desc:'ATK +20, CRITDMG +12%',effect:{atk:20,critDmg:12},pos:_talPos('a',4,8)},
+  a409:{tree:'a',branch:4,tier:9,cost:1,req:['a408'],type:'minor',name:'강력한 타격',desc:'ATK +25',effect:{atk:25},pos:_talPos('a',4,9)},
+  a410:{tree:'a',branch:4,tier:10,cost:1,req:['a408'],type:'minor',name:'양면 베기',desc:'ATK +18, CRIT +2%',effect:{atk:18,crit:2},pos:_talPos('a',4,10)},
+  a411:{tree:'a',branch:4,tier:11,cost:2,req:['a409','a410'],type:'major',name:'끝없는 욕망',desc:'ATK +25, STR +8',effect:{atk:25,str:8},pos:_talPos('a',4,11)},
+  a412:{tree:'a',branch:4,tier:12,cost:3,req:['a411'],type:'keystone',name:'★ 학살자',desc:'ATK +15%, STR +12',effect:{atkPct:15,str:12},pos:_talPos('a',4,12)},
+
+  // ════════════════════════════════════════════════
+  // ✨ 특화 트리 (Specialty) — 50노드
+  // 가지1: 마법(13), 가지2: 행운(12), 가지3: 유틸(13), 가지4: 속성(11) + 시작1
+  // ════════════════════════════════════════════════
+  p00:{tree:'p',branch:0,tier:0,cost:1,req:[],type:'minor',name:'특화 입문',desc:'INT +3, LUK +2',effect:{int:3,luk:2},pos:_talPos('p',0,0)},
+
+  // 🪄 가지1: 마법 (13노드)
+  p101:{tree:'p',branch:1,tier:1,cost:1,req:['p00'],type:'minor',name:'INT 숙련',desc:'INT +5',effect:{int:5},pos:_talPos('p',1,1)},
+  p102:{tree:'p',branch:1,tier:2,cost:1,req:['p101'],type:'minor',name:'마력',desc:'MATK +12',effect:{matk:12},pos:_talPos('p',1,2)},
+  p103:{tree:'p',branch:1,tier:3,cost:1,req:['p102'],type:'minor',name:'마법 친화',desc:'마법 무기 데미지 +5%',effect:{weaponMastery:{magic:5}},pos:_talPos('p',1,3)},
+  p104:{tree:'p',branch:1,tier:4,cost:2,req:['p103'],type:'major',name:'마법 숙련',desc:'마법 무기 +8%, INT +5',effect:{weaponMastery:{magic:8},int:5},pos:_talPos('p',1,4)},
+  p105:{tree:'p',branch:1,tier:5,cost:1,req:['p104'],type:'minor',name:'마력 회복',desc:'마법 데미지 3% HP 흡혈',effect:{magicLifesteal:3},pos:_talPos('p',1,5)},
+  p106:{tree:'p',branch:1,tier:6,cost:1,req:['p104'],type:'minor',name:'INT 강화',desc:'INT +8',effect:{int:8},pos:_talPos('p',1,6)},
+  p107:{tree:'p',branch:1,tier:7,cost:1,req:['p105','p106'],type:'minor',name:'마법 관통',desc:'MATK +20',effect:{matk:20},pos:_talPos('p',1,7)},
+  p108:{tree:'p',branch:1,tier:8,cost:2,req:['p107'],type:'major',name:'대마법사',desc:'마법 무기 +12%, INT +8',effect:{weaponMastery:{magic:12},int:8},pos:_talPos('p',1,8)},
+  p109:{tree:'p',branch:1,tier:9,cost:1,req:['p108'],type:'minor',name:'마력 보호막',desc:'HP +150, 스킬 데미지 +5%',effect:{hp:150,skillDmgBonus:5},pos:_talPos('p',1,9)},
+  p110:{tree:'p',branch:1,tier:10,cost:1,req:['p108'],type:'minor',name:'마력 폭주',desc:'MATK +25',effect:{matk:25},pos:_talPos('p',1,10)},
+  p111:{tree:'p',branch:1,tier:11,cost:1,req:['p109','p110'],type:'minor',name:'INT 마스터',desc:'INT +12',effect:{int:12},pos:_talPos('p',1,11)},
+  p112:{tree:'p',branch:1,tier:12,cost:2,req:['p111'],type:'major',name:'마력 폭주',desc:'마법 무기 +15%, MATK +20',effect:{weaponMastery:{magic:15},matk:20},pos:_talPos('p',1,12)},
+  p113:{tree:'p',branch:1,tier:13,cost:3,req:['p112'],type:'keystone',name:'★ 원소 폭주',desc:'마법 무기 +25%, 스킬 데미지 +15%, 마법 흡혈 +5%, 마법 다중발동 +15%',effect:{weaponMastery:{magic:25},skillDmgBonus:15,magicLifesteal:5,magicMultiCastChance:15},pos:_talPos('p',1,13)},
+
+  // 🍀 가지2: 행운 (12노드)
+  p201:{tree:'p',branch:2,tier:1,cost:1,req:['p00'],type:'minor',name:'LUK 숙련',desc:'LUK +3',effect:{luk:3},pos:_talPos('p',2,1)},
+  p202:{tree:'p',branch:2,tier:2,cost:1,req:['p201'],type:'minor',name:'황금 손길',desc:'골드 +10%',effect:{goldBonus:10},pos:_talPos('p',2,2)},
+  p203:{tree:'p',branch:2,tier:3,cost:1,req:['p202'],type:'minor',name:'풍요',desc:'LUK +5',effect:{luk:5},pos:_talPos('p',2,3)},
+  p204:{tree:'p',branch:2,tier:4,cost:2,req:['p203'],type:'major',name:'행운의 가호',desc:'골드 +15%, LUK +5',effect:{goldBonus:15,luk:5},pos:_talPos('p',2,4)},
+  p205:{tree:'p',branch:2,tier:5,cost:1,req:['p204'],type:'minor',name:'운명',desc:'LUK +8, CRIT +1%',effect:{luk:8,crit:1},pos:_talPos('p',2,5)},
+  p206:{tree:'p',branch:2,tier:6,cost:1,req:['p204'],type:'minor',name:'보물 사냥꾼',desc:'골드 +15%',effect:{goldBonus:15},pos:_talPos('p',2,6)},
+  p207:{tree:'p',branch:2,tier:7,cost:1,req:['p205','p206'],type:'minor',name:'운명의 손',desc:'LUK +10',effect:{luk:10},pos:_talPos('p',2,7)},
+  p208:{tree:'p',branch:2,tier:8,cost:2,req:['p207'],type:'major',name:'풍요로움',desc:'골드 +20%, LUK +8',effect:{goldBonus:20,luk:8},pos:_talPos('p',2,8)},
+  p209:{tree:'p',branch:2,tier:9,cost:1,req:['p208'],type:'minor',name:'대운',desc:'LUK +12, CRIT +2%',effect:{luk:12,crit:2},pos:_talPos('p',2,9)},
+  p210:{tree:'p',branch:2,tier:10,cost:1,req:['p208'],type:'minor',name:'재물',desc:'골드 +20%',effect:{goldBonus:20},pos:_talPos('p',2,10)},
+  p211:{tree:'p',branch:2,tier:11,cost:1,req:['p209','p210'],type:'minor',name:'행운의 별',desc:'LUK +15',effect:{luk:15},pos:_talPos('p',2,11)},
+  p212:{tree:'p',branch:2,tier:12,cost:3,req:['p211'],type:'keystone',name:'★ 운명의 화살',desc:'LUK +20, 골드 +30%, CRIT +3%',effect:{luk:20,goldBonus:30,crit:3},pos:_talPos('p',2,12)},
+
+  // ⏳ 가지3: 유틸리티 (13노드)
+  p301:{tree:'p',branch:3,tier:1,cost:1,req:['p00'],type:'minor',name:'학자',desc:'INT +3, LUK +2',effect:{int:3,luk:2},pos:_talPos('p',3,1)},
+  p302:{tree:'p',branch:3,tier:2,cost:1,req:['p301'],type:'minor',name:'스킬 효율',desc:'스킬 발동 +5%',effect:{skillBonus:5},pos:_talPos('p',3,2)},
+  p303:{tree:'p',branch:3,tier:3,cost:1,req:['p302'],type:'minor',name:'각성',desc:'INT +5, DEX +5',effect:{int:5,dex:5},pos:_talPos('p',3,3)},
+  p304:{tree:'p',branch:3,tier:4,cost:2,req:['p303'],type:'major',name:'마스터',desc:'스킬 데미지 +5%, 스킬 발동 +5%',effect:{skillDmgBonus:5,skillBonus:5},pos:_talPos('p',3,4)},
+  p305:{tree:'p',branch:3,tier:5,cost:1,req:['p304'],type:'minor',name:'추출 효율',desc:'INT +8',effect:{int:8},pos:_talPos('p',3,5)},
+  p306:{tree:'p',branch:3,tier:6,cost:1,req:['p304'],type:'minor',name:'합성 효율',desc:'LUK +8',effect:{luk:8},pos:_talPos('p',3,6)},
+  p307:{tree:'p',branch:3,tier:7,cost:1,req:['p305','p306'],type:'minor',name:'어드벤처',desc:'골드 +5%, EXP 보너스(특성)',effect:{goldBonus:5},pos:_talPos('p',3,7)},
+  p308:{tree:'p',branch:3,tier:8,cost:2,req:['p307'],type:'major',name:'모험가',desc:'골드 +10%, LUK +5',effect:{goldBonus:10,luk:5},pos:_talPos('p',3,8)},
+  p309:{tree:'p',branch:3,tier:9,cost:1,req:['p308'],type:'minor',name:'분석가',desc:'INT +10, DEX +5',effect:{int:10,dex:5},pos:_talPos('p',3,9)},
+  p310:{tree:'p',branch:3,tier:10,cost:1,req:['p308'],type:'minor',name:'각인',desc:'스킬 데미지 +8%',effect:{skillDmgBonus:8},pos:_talPos('p',3,10)},
+  p311:{tree:'p',branch:3,tier:11,cost:1,req:['p309','p310'],type:'minor',name:'심층 분석',desc:'CRITDMG +10%',effect:{critDmg:10},pos:_talPos('p',3,11)},
+  p312:{tree:'p',branch:3,tier:12,cost:2,req:['p311'],type:'major',name:'스킬 마스터',desc:'스킬 데미지 +12%, 스킬 발동 +8%',effect:{skillDmgBonus:12,skillBonus:8},pos:_talPos('p',3,12)},
+  p313:{tree:'p',branch:3,tier:13,cost:3,req:['p312'],type:'keystone',name:'★ 시간 통제',desc:'스킬 데미지 +20%, SPD +20',effect:{skillDmgBonus:20,spd:20},pos:_talPos('p',3,13)},
+
+  // 🔥 가지4: 속성 (11노드)
+  p401:{tree:'p',branch:4,tier:1,cost:1,req:['p00'],type:'minor',name:'속성 친화',desc:'화염/냉기/번개 데미지 +3%',effect:{attrDmgBonus:{fire:3,ice:3,lightning:3}},pos:_talPos('p',4,1)},
+  p402:{tree:'p',branch:4,tier:2,cost:1,req:['p401'],type:'minor',name:'화염 강화',desc:'화염 무기 +8%',effect:{attrDmgBonus:{fire:8}},pos:_talPos('p',4,2)},
+  p403:{tree:'p',branch:4,tier:3,cost:1,req:['p401'],type:'minor',name:'냉기 강화',desc:'냉기 무기 +8%',effect:{attrDmgBonus:{ice:8}},pos:_talPos('p',4,3)},
+  p404:{tree:'p',branch:4,tier:4,cost:2,req:['p402','p403'],type:'major',name:'원소 마스터',desc:'화/냉/번개 무기 +5%',effect:{attrDmgBonus:{fire:5,ice:5,lightning:5}},pos:_talPos('p',4,4)},
+  p405:{tree:'p',branch:4,tier:5,cost:1,req:['p404'],type:'minor',name:'번개 강화',desc:'번개 무기 +10%',effect:{attrDmgBonus:{lightning:10}},pos:_talPos('p',4,5)},
+  p406:{tree:'p',branch:4,tier:6,cost:1,req:['p404'],type:'minor',name:'어둠 친화',desc:'어둠 무기 +10%',effect:{attrDmgBonus:{dark:10}},pos:_talPos('p',4,6)},
+  p407:{tree:'p',branch:4,tier:7,cost:1,req:['p405','p406'],type:'minor',name:'독 친화',desc:'독 무기 +10%',effect:{attrDmgBonus:{poison:10}},pos:_talPos('p',4,7)},
+  p408:{tree:'p',branch:4,tier:8,cost:2,req:['p407'],type:'major',name:'속성 저항',desc:'모든 속성 받피 -5%',effect:{attrResist:{fire:5,ice:5,lightning:5,dark:5,holy:5,poison:5}},pos:_talPos('p',4,8)},
+  p409:{tree:'p',branch:4,tier:9,cost:1,req:['p408'],type:'minor',name:'속성 마스터',desc:'모든 속성 무기 +5%',effect:{attrDmgBonus:{fire:5,ice:5,lightning:5,dark:5,holy:5,poison:5}},pos:_talPos('p',4,9)},
+  p410:{tree:'p',branch:4,tier:10,cost:2,req:['p409'],type:'major',name:'원소 폭주',desc:'모든 속성 무기 +10%',effect:{attrDmgBonus:{fire:10,ice:10,lightning:10,dark:10,holy:10,poison:10}},pos:_talPos('p',4,10)},
+  p411:{tree:'p',branch:4,tier:11,cost:3,req:['p410'],type:'keystone',name:'★ 속성 지배자',desc:'모든 속성 무기 +20%, 모든 속성 받피 -10%',effect:{attrDmgBonus:{fire:20,ice:20,lightning:20,dark:20,holy:20,poison:20},attrResist:{fire:10,ice:10,lightning:10,dark:10,holy:10,poison:10}},pos:_talPos('p',4,11)},
+};
+
+// 특성 효과 합산 — calcStats에서 호출
+function getTalentEffects(c){
+  const result={};
+  if(!c||!c._talentNodes||!Array.isArray(c._talentNodes))return result;
+  for(const nid of c._talentNodes){
+    const node=TALENT_NODES[nid];
+    if(!node||!node.effect)continue;
+    for(const[k,v]of Object.entries(node.effect)){
+      if(typeof v==='number'){
+        result[k]=(result[k]||0)+v;
+      }else if(typeof v==='object'&&v!==null){
+        // attrDmgBonus, attrResist, weaponMastery 같은 중첩 객체
+        if(!result[k])result[k]={};
+        for(const[sk,sv]of Object.entries(v)){
+          result[k][sk]=(result[k][sk]||0)+sv;
+        }
+      }
+    }
+  }
+  return result;
+}
+window.getTalentEffects=getTalentEffects;
+
+// 노드 활성화 가능 여부
+function canActivateTalent(nid){
+  const node=TALENT_NODES[nid];
+  if(!node)return{ok:false,reason:'노드 없음'};
+  if((char.level||1)<99)return{ok:false,reason:'Lv.99 도달 후 활성'};
+  if(!char._talentNodes)char._talentNodes=[];
+  if(char._talentNodes.includes(nid))return{ok:false,reason:'이미 찍음'};
+  const cost=node.cost||1;
+  if((char._talentPoints||0)<cost)return{ok:false,reason:`포인트 부족 (필요 ${cost}pt)`};
+  // 선행 노드 모두 찍어야
+  if(node.req&&node.req.length>0){
+    for(const rid of node.req){
+      if(!char._talentNodes.includes(rid))return{ok:false,reason:'선행 노드 필요'};
+    }
+  }
+  return{ok:true};
+}
+
+// 노드 찍기
+async function activateTalent(nid){
+  const check=canActivateTalent(nid);
+  if(!check.ok){toast(`❌ ${check.reason}`);return false;}
+  const node=TALENT_NODES[nid];
+  const cost=node.cost||1;
+  char._talentPoints=(char._talentPoints||0)-cost;
+  if(!char._talentNodes)char._talentNodes=[];
+  char._talentNodes.push(nid);
+  await saveChar();
+  toast(`✨ "${node.name}" 활성!`,2500);
+  return true;
+}
+window.activateTalent=activateTalent;
+
+// 특성 리셋 — 점진 비용 (1회 100만G, 2회 200만G, ...)
+function getTalentResetCost(){
+  const n=char._talentResetCount||0;
+  return Math.min(100000000,1000000*Math.pow(2,n)); // 1M → 2M → 4M → ... 최대 1억
+}
+async function resetTalents(){
+  if(!char._talentNodes||char._talentNodes.length===0){toast('찍은 노드가 없습니다');return;}
+  const cost=getTalentResetCost();
+  if(!canPay(cost)){toast(`💰 골드 부족 (${cost.toLocaleString()}G 필요)`);return;}
+  if(!confirm(`특성 트리를 리셋하시겠습니까?\n\n비용: 💰 ${cost.toLocaleString()}G\n(다음 리셋: ${Math.min(100000000,cost*2).toLocaleString()}G)\n\n찍은 노드 ${char._talentNodes.length}개 모두 초기화됩니다.`))return;
+  payGold(cost);
+  // 사용 포인트 환원
+  let refund=0;
+  for(const nid of char._talentNodes){
+    const node=TALENT_NODES[nid];
+    if(node)refund+=node.cost||1;
+  }
+  char._talentPoints=(char._talentPoints||0)+refund;
+  char._talentNodes=[];
+  char._talentResetCount=(char._talentResetCount||0)+1;
+  await saveChar();
+  toast(`🔄 특성 리셋 완료! ${refund}pt 환원`,4000);
+  if(typeof renderTalentTree==='function')renderTalentTree();
+}
+window.resetTalents=resetTalents;
+
 
 function autoMigrateEnchantStats(it){
   if(!it||it._esv>=ENCHANT_STAT_VER||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
@@ -9329,6 +9747,31 @@ async function resolvePhase(){
       if(!isMiss&&_attrMult!==1)dmg=Math.round(dmg*_attrMult);
       if(isMiss){dmg=0;SFX.play('miss');}
       else target.hp=Math.max(0,target.hp-dmg);
+      // ★ v3.1 — 마법 무기 다중발동 (MATK 무기만, 25% 기본 + 키스톤 보너스)
+      let _multiCastDmg=0;
+      if(!isMiss&&dmg>0&&(wt.isStaff||wt.isDualgun)){
+        const baseChance=25;
+        const bonus=s.magicMultiCastChance||0;
+        const totalChance=Math.min(60,baseChance+bonus); // 캡 60%
+        if(Math.random()*100<totalChance){
+          // 같은 데미지로 한 번 더 시도 (변량 다시 굴림)
+          let dmg2=Math.round(dmg*(0.85+Math.random()*0.3)); // 85~115% 변동
+          if(target.status==='alive'){
+            target.hp=Math.max(0,target.hp-dmg2);
+            _multiCastDmg=dmg2;
+            blogAdd(`<span class="l-skill" style="color:#a78cff;font-weight:700">✨ 마법 다중 발동! ${target.name}에게 추가 -${dmg2}</span>`);
+          }
+        }
+      }
+      // ★ v3.1 — 마법 흡혈 (특성 노드)
+      if(!isMiss&&(wt.isStaff||wt.isDualgun)&&(s.magicLifesteal||0)>0&&dmg>0){
+        const totalDmg=dmg+_multiCastDmg;
+        const heal=Math.round(totalDmg*s.magicLifesteal/100);
+        if(heal>0){
+          p.hp=Math.min(p.maxHp,p.hp+heal);
+          blogAdd(`<span class="l-heal" style="color:#a78cff">🪄 마력 흡수 +${heal}HP</span>`);
+        }
+      }
       // ★ 속성 효과: 적중 후 — 번개(마비), 신성(회복), 독(DoT) + 상성 텍스트
       if(wAttr&&!isMiss&&target._attr)blogAdd(attrMatchMsg(wAttr,target._attr));
       if(wAttr&&!isMiss&&target.status==='alive'){
@@ -9512,6 +9955,8 @@ async function resolvePhase(){
     }
     // ★ v3.0 거점 패시브 — 첫 피격 회피 (그림자 거울)
     if(dmg>0&&tryDungeonFirstDodge())continue;
+    // ★ v3.1 — 특성 트리: 속성 저항 적용 (몬스터 속성 기준)
+    if(m._attr&&tgt.stats?.attrResist)dmg=applyAttrResist(dmg,tgt.stats,m._attr);
     tgt.hp=Math.max(0,tgt.hp-dmg);
     tgt.isBoss?SFX.play('monster_boss_hit'):SFX.play('monster_hit');
     blogAdd(`<span class="l-dmg">👹 ${m.name} → ${tgt.name} <strong>-${dmg}</strong>${tgt.defending?' (방어)':''}</span>`);
@@ -9643,7 +10088,10 @@ function calcPlayerDmg(p,s){
   // ★ 단검: CRIT +8% (calcStats에 없으므로 여기서 반영)
   // ★ 대도끼: 치명타 데미지 +10% → 나중에 크리 시 적용
   const variance=Math.round(base*0.1);
-  return Math.max(1,Math.min(base+rand(-variance,variance),99999));
+  let dmg=Math.max(1,Math.min(base+rand(-variance,variance),99999));
+  // ★ v3.1 — 특성 트리: 무기 마스터리 + 속성 데미지 보너스
+  dmg=applyTalentDmgBonus(dmg, s, eq);
+  return Math.max(1,Math.min(dmg,99999));
 }
 
 // ★ 무기별 공격 문구
@@ -9902,12 +10350,20 @@ async function lootPhase(){
     const matChance=(0.18+battle.tierIdx*0.04)*memBoost_.drop;
     if(Math.random()<matChance){
       let mat='wood', count=rand(1,3);
-      if(battle.tierIdx>=4){mat=Math.random()<0.3?'magicCrystal':'steel'; count=rand(1,2);}
+      if(battle.tierIdx>=4){
+        // T4 매우어려움: magicCrystal 25% / abyssShard 8% / steel 67%
+        const r=Math.random();
+        if(r<0.08){mat='abyssShard'; count=1;} // 심연의 파편 — 희귀 (Lv.90+ 던전 한정)
+        else if(r<0.33){mat='magicCrystal'; count=rand(1,2);}
+        else{mat='steel'; count=rand(1,2);}
+      }
       else if(battle.tierIdx>=2){mat='steel'; count=rand(1,2);}
       char._materials=char._materials||{wood:0,steel:0,magicCrystal:0,abyssShard:0,blueprint:0};
       char._materials[mat]=Math.min(99999,(char._materials[mat]||0)+count);
       const matNames={wood:'🪵 목재',steel:'⚙️ 강철',magicCrystal:'💎 마법 결정',abyssShard:'🩸 심연의 파편',blueprint:'📜 가구 도면'};
-      blogAdd(`<span class="l-item" style="color:#88aacc">${matNames[mat]} ×${count} 획득</span>`);
+      // 심연의 파편은 강조
+      const isRareMat=mat==='abyssShard';
+      blogAdd(`<span class="l-item" style="color:${isRareMat?'#FF2244;font-weight:700':'#88aacc'}">${matNames[mat]} ×${count} 획득${isRareMat?' ✨':''}</span>`);
     }
     // ★ v3.0 — 가구 도면 드랍 (낮은 확률)
     if(Math.random()<0.005+battle.tierIdx*0.002){
@@ -10029,6 +10485,29 @@ async function dungeonClear(){
     const sealReward=floor<=20?1:floor<=50?2:floor<=80?3:floor<=99?4:5;
     char._immortalSeals=(char._immortalSeals||0)+sealReward;
     blogAdd(`<span class="l-exp">🔱 불멸의 징수 ${sealReward>1?'×'+sealReward+' ':''}획득! (총 ${char._immortalSeals}개)</span>`);
+
+    // ★ v3.1 — IT 클리어 EXP 보상 (층별 차등)
+    // 1~20층: 50K, 21~50층: 100K, 51~80층: 200K, 81~99층: 350K, 100층: 500K
+    // (Lv.99는 자동으로 특성 EXP로 전환됨)
+    let itExpReward=50000;
+    if(floor>=100)itExpReward=500000;
+    else if(floor>=81)itExpReward=350000;
+    else if(floor>=51)itExpReward=200000;
+    else if(floor>=21)itExpReward=100000;
+    gainExp(itExpReward);
+    const _isMaxLv=(char.level||1)>=99;
+    blogAdd(`<span class="l-exp" style="color:${_isMaxLv?'#a78cff':'var(--green)'}">${_isMaxLv?'✨ 특성':'⭐ 경험치'} +${itExpReward.toLocaleString()} EXP (${floor}층)</span>`);
+
+    // ★ v3.1 — IT 30층+에서 심연의 파편 보상 (확률 차등)
+    if(floor>=30){
+      const shardChance=floor<=50?0.15:floor<=80?0.25:0.35;
+      if(Math.random()<shardChance){
+        const shardCount=floor>=80?2:1;
+        char._materials=char._materials||{wood:0,steel:0,magicCrystal:0,abyssShard:0,blueprint:0};
+        char._materials.abyssShard=Math.min(99999,(char._materials.abyssShard||0)+shardCount);
+        blogAdd(`<span class="l-item" style="color:#FF2244;font-weight:700">🩸 심연의 파편 ×${shardCount} 획득 ✨</span>`);
+      }
+    }
 
     // ★ 고층 보너스 골드 (51층부터)
     if(floor>=51){
@@ -13320,6 +13799,8 @@ window.enterSubjBattle=async function(){
               let sd=res.dmg*bAtkMult;
               if(boss._guardTurn){sd=Math.round(sd*0.4);boss._guardTurn=false;}
               if(defending)sd=Math.round(sd*0.5); // ★ 보스 스킬은 50% 감소만 (패링/블록 X)
+              // ★ v3.1 특성 — 속성 저항
+              if(boss._attr&&s.attrResist)sd=applyAttrResist(sd,s,boss._attr);
               // ★ v3.0 — 회피는 평타 시에만 (방어 시 배제)
               if(!defending&&Math.random()*100<s.dodge){slog(`<span class="l-sys">✨ 회피!</span>`);}
               else{myHp=Math.max(0,myHp-Math.round(sd));slog(`<span class="l-dmg">${boss.icon} ${boss.name} → ${char.name} -<b>${Math.round(sd)}</b> (${myHp}/${s.maxHp})</span>`);}
@@ -13367,6 +13848,8 @@ window.enterSubjBattle=async function(){
         // 회피는 평타 시에만 (방어 행동 시는 배제)
         slog(`<span class="l-sys">✨ 회피!</span>`);
       }else if(bDmg>0){
+        // ★ v3.1 특성 — 속성 저항
+        if(boss._attr&&s.attrResist)bDmg=applyAttrResist(bDmg,s,boss._attr);
         myHp=Math.max(0,myHp-bDmg);slog(`<span class="l-dmg">${boss.icon} ${boss.name} → ${char.name} -<b>${bDmg}</b> (${myHp}/${s.maxHp})</span>`);
       }
       // 카운터 데미지 적용 (보스 HP 차감 + 누적 데미지로 토벌전에 반영)
@@ -13433,6 +13916,8 @@ window.enterSubjBattle=async function(){
       }
       // ★ 속성 고유효과: 냉기 — 보스 회피 감소
       const _sIceReduce=(_sAttr==='ice'&&ATTR_EFFECT.ice)?ATTR_EFFECT.ice.dodgeReduce:0;
+      // ★ v3.1 — 특성 트리: 무기 마스터리 + 속성 데미지
+      dmg=applyTalentDmgBonus(dmg, s, char.equipment||{});
       const effDodge=Math.max(0,((boss.dodge||0)-_sIceReduce)*(1-(s.balance||0)/100));
       const isMiss=Math.random()*100<effDodge;
       // ★ v3.0 — 보스 방어 시도 (HP 30% 이하 + 12% 확률 + 1턴 쿨다운)
@@ -13891,6 +14376,8 @@ window.enterChampBattle=async function(){
       }
       // ★ 속성 고유효과: 냉기 — 회피 감소
       const _cIceReduce=(_cMyAttr==='ice'&&ATTR_EFFECT.ice)?ATTR_EFFECT.ice.dodgeReduce:0;
+      // ★ v3.1 — 특성 트리: 무기 마스터리 + 속성 데미지
+      dmg=applyTalentDmgBonus(dmg, s, char.equipment||{});
       const effDodge=Math.max(0,((cs.dodge||0)-_cIceReduce)*(1-(s.balance||0)/100));
       const isMiss=Math.random()*100<effDodge;
       if(isMiss){dmg=0;clog(`<span class="l-sys">💨 ${champ.name}이 회피했다!</span>`);}
@@ -14063,6 +14550,9 @@ window.enterChampBattle=async function(){
         _chFirstDodgeUsed=true;
         clog(`<span class="l-skill" style="color:var(--purple)">🪞 그림자 거울 발동! 첫 피격 회피</span>`);
       }else if(cDmg>0){
+      // ★ v3.1 특성 — 속성 저항 (챔프 무기 속성)
+      const _chAttr=champ?.equipment?.weapon?.attr||champ?.equipment?.weapon?.prefix?.attr||null;
+      if(_chAttr&&s.attrResist)cDmg=applyAttrResist(cDmg,s,_chAttr);
       myHp=Math.max(0,myHp-cDmg);
       if(cCrit)clog(`<span class="l-crit">💥 ${champ.name} 치명타! → ${char.name} -<b>${cDmg}</b></span>`);
       else clog(`<span class="l-dmg">⚔ ${champ.name} → ${char.name} -<b>${cDmg}</b></span>`);
@@ -14591,7 +15081,7 @@ window.applyStrongholdBattleStart=applyStrongholdBattleStart;
 const SHIELD_BLOCK_RATE={normal:10,uncommon:15,rare:20,epic:25,legendary:30,set:30};
 
 // 1H + 방패일 때 블록 확률 반환 (0~30%)
-function getBlockChance(eq){
+function getBlockChance(eq, charData){
   if(!eq)return 0;
   const wep=eq.weapon;
   const off=eq.offhand;
@@ -14600,7 +15090,14 @@ function getBlockChance(eq){
   const wb=WBASES.find(b=>b.id===wep.baseId);
   if(wb?.hand==='2H')return 0;
   // 방패 등급별 블록 확률
-  return SHIELD_BLOCK_RATE[off.grade]||0;
+  let block=SHIELD_BLOCK_RATE[off.grade]||0;
+  // ★ v3.1 특성 — 방패 마스터 등 blockBonus 합산
+  const c=charData||char;
+  if(c&&typeof getTalentEffects==='function'){
+    const t=getTalentEffects(c);
+    block+=t.blockBonus||0;
+  }
+  return Math.min(50,block); // 캡 50% (안전장치)
 }
 
 // 패링 확률 반환 (DEX 기반 + 2H 보너스)
@@ -14637,6 +15134,62 @@ function tryBossDefend(boss){
   return false;
 }
 
+// ★★★ v3.1 특성 트리 — 데미지 헬퍼 ★★★
+
+// 무기 → 카테고리 매핑 (옵션 2 — 3카테고리)
+// melee: sword, dagger, dual, axe, mace, greatsword, greataxe, spear
+// ranged: bow, dualgun (듀얼건은 ranged + magic 양쪽)
+// magic: staff, dualgun
+function getWeaponCategories(eq){
+  const wid=eq?.weapon?.baseId||'';
+  const cats=[];
+  if(['sword','dagger','dual','axe','mace','greatsword','greataxe','spear'].includes(wid))cats.push('melee');
+  if(['bow','dualgun'].includes(wid))cats.push('ranged');
+  if(['staff','dualgun'].includes(wid))cats.push('magic');
+  return cats;
+}
+
+// 무기 마스터리 보너스 — 데미지에 곱셈 (1 + N/100)
+function getMasteryMult(stats, eq){
+  if(!stats?.weaponMastery)return 1;
+  const cats=getWeaponCategories(eq);
+  let bonus=0;
+  for(const c of cats){
+    bonus=Math.max(bonus,stats.weaponMastery[c]||0); // 여러 카테고리 매칭 시 최대값 (듀얼건이 ranged·magic 둘 다)
+  }
+  return 1+bonus/100;
+}
+
+// 무기 속성 보너스 — 무기 속성 일치 시 적용 (방식 1: 단순)
+function getAttrDmgMult(stats, eq){
+  if(!stats?.attrDmgBonus)return 1;
+  const wAttr=getWeaponAttr(eq);
+  if(!wAttr)return 1;
+  const bonus=stats.attrDmgBonus[wAttr]||0;
+  return 1+bonus/100;
+}
+
+// 받는 데미지 속성 저항 — 공격자 속성 기준
+function applyAttrResist(rawDmg, defenderStats, attackerAttr){
+  if(!defenderStats?.attrResist||!attackerAttr)return rawDmg;
+  const resist=defenderStats.attrResist[attackerAttr]||0;
+  if(resist<=0)return rawDmg;
+  return Math.round(rawDmg*(1-resist/100));
+}
+
+// 통합 데미지 보너스 — 마스터리 + 속성 합산
+// applyTalentDmgBonus(dmg, stats, eq) → 보강된 데미지
+function applyTalentDmgBonus(dmg, stats, eq){
+  if(!dmg||!stats||!eq)return dmg;
+  const masteryMult=getMasteryMult(stats,eq);
+  const attrMult=getAttrDmgMult(stats,eq);
+  return Math.round(dmg*masteryMult*attrMult);
+}
+
+window.getWeaponCategories=getWeaponCategories;
+window.applyTalentDmgBonus=applyTalentDmgBonus;
+window.applyAttrResist=applyAttrResist;
+
 // 플레이어 방어 행동 시 흐름 처리 (헬퍼)
 // 반환: {finalDmg, msg, counterDmg}
 //   finalDmg: 최종 받는 데미지 (0=완전 무효)
@@ -14656,7 +15209,7 @@ function applyDefendingFlow(rawDmg, eq, charData, mode){
     };
   }
   // 2. 블록 시도 (1H + 방패만)
-  const blockRate=getBlockChance(eq);
+  const blockRate=getBlockChance(eq,charData);
   if(blockRate>0&&Math.random()*100<blockRate){
     return {
       finalDmg:0,
@@ -15448,7 +16001,11 @@ window.startMemorialBoss=async function(){
       mlog(`<span class="l-skill" style="color:var(--purple)">🪞 그림자 거울 발동! 첫 피격 회피</span>`);
       return;
     }
-    if(dmg>0)myHp-=dmg;
+    if(dmg>0){
+      // ★ v3.1 특성 — 속성 저항 (위령제 보스는 화염)
+      if(boss._attr&&s.attrResist)dmg=applyAttrResist(dmg,s,boss._attr);
+      myHp-=dmg;
+    }
     // ★ v3.0 방어 시스템 — 패링 카운터 데미지 (보스 HP에 적용)
     if(_mbCounter>0){
       bossHp=Math.max(0,bossHp-_mbCounter);
@@ -15477,6 +16034,8 @@ window.startMemorialBoss=async function(){
     const wt=getWeaponTraits(char.equipment||{});
     const baseDmg=wt.isStaff||wt.isDualgun?s.matk:s.atk;
     let dmg=Math.max(1,Math.round(baseDmg*(100/(100+boss.def))*1.5));
+    // ★ v3.1 — 특성 트리: 무기 마스터리 + 속성 데미지
+    dmg=applyTalentDmgBonus(dmg, s, char.equipment||{});
     // 첫 3턴 SPD 버프 → 추가 공격 확률
     const extraHit=startSpdBuff>0&&turn<=3&&Math.random()<startSpdBuff/200; // 50→25%
     // 크리티컬
@@ -16074,6 +16633,259 @@ setInterval(()=>{
   if(char.exp>=char.expNext*0.95){sp.style.display='inline';sp.textContent='⬆LV UP SOON';}
   else sp.style.display='none';
 },5000);
+
+// ════════════════════════════════════════════════════════════════
+// ★★★ TALENT TREE UI (v3.1) ★★★
+// 풀스크린 모달 + SVG 트리 + 모바일 가시성
+// ════════════════════════════════════════════════════════════════
+
+// 트리 메타
+const TALENT_TREE_META={
+  s:{name:'생존',icon:'🛡',color:'#7adc9b',colorBg:'rgba(122,220,155,.10)',colorBd:'rgba(122,220,155,.4)',
+     branches:{1:'정통 탱',2:'자생',3:'회피',4:'신성 보호'}},
+  a:{name:'공격',icon:'⚔',color:'#dc7a5a',colorBg:'rgba(220,122,90,.10)',colorBd:'rgba(220,122,90,.4)',
+     branches:{1:'치명타',2:'근접',3:'원거리',4:'관통'}},
+  p:{name:'특화',icon:'✨',color:'#a78cff',colorBg:'rgba(167,140,255,.10)',colorBd:'rgba(167,140,255,.4)',
+     branches:{1:'마법',2:'행운',3:'유틸',4:'속성'}},
+};
+
+let _curTalentTree='s'; // 현재 보고 있는 트리
+
+window.openTalentTree=function(){
+  if((char.level||1)<99){toast('Lv.99 도달 후 사용 가능');return;}
+  // ★ v3.1 — 기존 Lv.99 유저 첫 진입 시 초기화
+  if(!char._talentLv){
+    char._talentLv=1;
+    char._talentExp=0;
+    char._talentExpNext=talentExpForLevel(1);
+    char._talentPoints=1; // Lv.1 도달 보상 1pt
+    char._talentNodes=[];
+    char._talentResetCount=0;
+    saveChar();
+    toast('🌳 특성 시스템 활성! Lv.1 시작 (1pt 지급)',4000);
+  }
+  _curTalentTree='s';
+  let modal=document.getElementById('talentModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='talentModal';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(8,12,20,.96);z-index:9000;display:flex;flex-direction:column;backdrop-filter:blur(6px)';
+    modal.innerHTML=`
+      <!-- 헤더 -->
+      <div style="background:linear-gradient(180deg,rgba(167,140,255,.10),transparent);border-bottom:1px solid var(--bd);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#a78cff">🌳 특성 트리</div>
+        <div id="talentHeaderInfo" style="flex:1;font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+        <button onclick="resetTalents()" style="background:rgba(220,50,50,.15);border:1px solid rgba(220,50,50,.35);color:var(--red);font-size:10px;padding:5px 10px;border-radius:5px;cursor:pointer">🔄 리셋</button>
+        <button onclick="closeTalentTree()" style="background:rgba(255,255,255,.08);border:1px solid var(--bd);color:var(--tx);font-size:13px;padding:5px 11px;border-radius:5px;cursor:pointer;font-weight:700">✕</button>
+      </div>
+      <!-- 트리 탭 -->
+      <div id="talentTabs" style="display:flex;gap:4px;padding:8px;background:rgba(0,0,0,.3);flex-shrink:0;border-bottom:1px solid var(--bd)"></div>
+      <!-- 메인 — SVG 캔버스 (가로 스크롤 가능) + 정보 패널 (하단 고정) -->
+      <div id="talentBody" style="flex:1;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative">
+        <div id="talentCanvas" style="min-width:720px;padding:20px"></div>
+      </div>
+      <!-- 하단 정보 패널 -->
+      <div id="talentInfo" style="background:rgba(0,0,0,.7);border-top:1px solid var(--bd);padding:10px 14px;flex-shrink:0;min-height:80px;max-height:160px;overflow-y:auto;font-size:11px;color:var(--tx2);line-height:1.7">
+        <div style="color:var(--tx3);font-style:italic">노드를 탭하면 정보가 표시됩니다</div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  modal.style.display='flex';
+  renderTalentTree();
+};
+
+window.closeTalentTree=function(){
+  const m=document.getElementById('talentModal');
+  if(m)m.style.display='none';
+  // 캐릭터 카드 갱신
+  if(typeof renderChar==='function')renderChar();
+};
+
+// 메인 렌더
+window.renderTalentTree=function(){
+  const tlv=char._talentLv||1;
+  const tpt=char._talentPoints||0;
+  const tnodes=char._talentNodes||[];
+  const tex=char._talentExp||0;
+  const texN=char._talentExpNext||talentExpForLevel(tlv);
+  // 헤더
+  document.getElementById('talentHeaderInfo').innerHTML=`
+    <span style="color:var(--tx)">특성 Lv.${tlv}</span>
+    <span style="color:var(--tx3)"> · </span>
+    <span style="color:#ffd060;font-weight:700">남은 ${tpt}pt</span>
+    <span style="color:var(--tx3)"> · 사용 ${tnodes.length}노드</span>
+  `;
+  // 탭
+  const tabs=document.getElementById('talentTabs');
+  tabs.innerHTML=Object.entries(TALENT_TREE_META).map(([k,m])=>{
+    const treeNodes=Object.values(TALENT_NODES).filter(n=>n.tree===k);
+    const treeUsed=treeNodes.filter(n=>tnodes.includes(`${n.tree}${n.branch===0?'00':String(n.branch)+String(n.tier).padStart(2,'0')}`)).length;
+    const isActive=k===_curTalentTree;
+    return `<button onclick="switchTalentTree('${k}')" style="
+      flex:1;padding:9px 6px;
+      background:${isActive?m.colorBg:'rgba(255,255,255,.03)'};
+      border:1px solid ${isActive?m.colorBd:'var(--bd)'};
+      color:${isActive?m.color:'var(--tx2)'};
+      font-size:11px;border-radius:6px;cursor:pointer;font-weight:${isActive?'700':'400'};
+    ">${m.icon} ${m.name} <span style="font-size:9px;color:var(--tx3)">(${treeUsed})</span></button>`;
+  }).join('');
+  // 캔버스 (SVG)
+  renderTalentCanvas();
+};
+
+window.switchTalentTree=function(t){
+  _curTalentTree=t;
+  renderTalentTree();
+};
+
+// SVG 캔버스 렌더
+function renderTalentCanvas(){
+  const t=_curTalentTree;
+  const meta=TALENT_TREE_META[t];
+  const tnodes=char._talentNodes||[];
+  const treeNodes=Object.values(TALENT_NODES).filter(n=>n.tree===t);
+  // 캔버스 크기
+  const W=720, H=1300;
+  // 가지 라벨
+  const branchLabels={1:{x:100,y:130},2:{x:250,y:130},3:{x:450,y:130},4:{x:600,y:130}};
+  // 노드 → ID 매핑
+  const _id=(n)=>n.branch===0?`${n.tree}00`:`${n.tree}${n.branch}${String(n.tier).padStart(2,'0')}`;
+
+  let svg=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;background:rgba(0,0,0,.2);border-radius:10px">`;
+  // 가지 라벨
+  for(const[bn,p] of Object.entries(branchLabels)){
+    const bName=meta.branches[parseInt(bn)]||'';
+    svg+=`<text x="${p.x}" y="${p.y}" text-anchor="middle" font-size="11" fill="${meta.color}" opacity="0.7">${bName}</text>`;
+  }
+  // 시작 노드 → 4 가지 분기 라인
+  for(let b=1;b<=4;b++){
+    const branchX=branchLabels[b].x;
+    svg+=`<line x1="350" y1="100" x2="${branchX}" y2="180" stroke="${meta.color}" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.3"/>`;
+  }
+  // 노드 간 연결선 그리기 (req 기반)
+  for(const n of treeNodes){
+    if(!n.req||n.req.length===0)continue;
+    const nid=_id(n);
+    const isActive=tnodes.includes(nid);
+    for(const rid of n.req){
+      const reqNode=TALENT_NODES[rid];
+      if(!reqNode)continue;
+      const reqActive=tnodes.includes(rid);
+      const lineColor=(isActive&&reqActive)?meta.color:reqActive?meta.color:'#3d445a';
+      const lineOpacity=(isActive&&reqActive)?0.9:reqActive?0.5:0.3;
+      const lineDash=(isActive&&reqActive)?'':'2 2';
+      svg+=`<line x1="${reqNode.pos.x}" y1="${reqNode.pos.y}" x2="${n.pos.x}" y2="${n.pos.y}" stroke="${lineColor}" stroke-width="${(isActive&&reqActive)?1.5:0.8}" opacity="${lineOpacity}" stroke-dasharray="${lineDash}"/>`;
+    }
+  }
+  // 노드 그리기
+  for(const n of treeNodes){
+    const nid=_id(n);
+    const isActive=tnodes.includes(nid);
+    // 활성화 가능 여부
+    const canAct=!isActive&&((char.level||1)>=99)&&(()=>{
+      if(n.req&&n.req.length>0)return n.req.every(r=>tnodes.includes(r));
+      return true;
+    })();
+    const cost=n.cost||1;
+    const canAfford=(char._talentPoints||0)>=cost;
+    const isAvailable=canAct&&canAfford;
+
+    let fill, stroke, txtColor, sw=1.5;
+    if(isActive){fill=meta.colorBg.replace('.10','.25');stroke=meta.color;txtColor=meta.color;sw=2;}
+    else if(isAvailable){fill='#1a2a3e';stroke='#88c4ff';txtColor='#88c4ff';sw=2;}
+    else{fill='#0d1119';stroke='#3d445a';txtColor='#5e6680';sw=1;}
+
+    // 모양: minor=원, major=사각형, keystone=다이아
+    if(n.type==='keystone'){
+      const r=14;
+      svg+=`<g style="cursor:pointer" onclick="selectTalentNode('${nid}')">
+        <polygon points="${n.pos.x},${n.pos.y-r} ${n.pos.x+r},${n.pos.y} ${n.pos.x},${n.pos.y+r} ${n.pos.x-r},${n.pos.y}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
+        <text x="${n.pos.x}" y="${n.pos.y+3}" text-anchor="middle" font-size="10" fill="${txtColor}" font-weight="700">★</text>
+      </g>`;
+    }else if(n.type==='major'){
+      svg+=`<g style="cursor:pointer" onclick="selectTalentNode('${nid}')">
+        <rect x="${n.pos.x-13}" y="${n.pos.y-13}" width="26" height="26" rx="5" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
+        <text x="${n.pos.x}" y="${n.pos.y+3}" text-anchor="middle" font-size="10" fill="${txtColor}">${cost}</text>
+      </g>`;
+    }else{
+      svg+=`<g style="cursor:pointer" onclick="selectTalentNode('${nid}')">
+        <circle cx="${n.pos.x}" cy="${n.pos.y}" r="11" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
+        <text x="${n.pos.x}" y="${n.pos.y+3}" text-anchor="middle" font-size="9" fill="${txtColor}">${cost}</text>
+      </g>`;
+    }
+  }
+  // 시작 노드 (트리당 1개)
+  const startNode=treeNodes.find(n=>n.branch===0);
+  if(startNode){
+    const sid=_id(startNode);
+    const isActive=tnodes.includes(sid);
+    const fill=isActive?meta.colorBg.replace('.10','.30'):'#0d1119';
+    const stroke=meta.color;
+    const txtColor=isActive?meta.color:'#5e6680';
+    svg+=`<g style="cursor:pointer" onclick="selectTalentNode('${sid}')">
+      <circle cx="350" cy="80" r="20" fill="${fill}" stroke="${stroke}" stroke-width="2.5"/>
+      <text x="350" y="84" text-anchor="middle" font-size="11" fill="${txtColor}">${meta.icon}</text>
+    </g>`;
+  }
+  svg+=`</svg>`;
+  document.getElementById('talentCanvas').innerHTML=svg;
+}
+window.renderTalentCanvas=renderTalentCanvas;
+
+// 노드 선택 → 정보 패널 갱신
+window.selectTalentNode=function(nid){
+  const node=TALENT_NODES[nid];
+  if(!node)return;
+  const tnodes=char._talentNodes||[];
+  const tpt=char._talentPoints||0;
+  const isActive=tnodes.includes(nid);
+  const cost=node.cost||1;
+  const meta=TALENT_TREE_META[node.tree];
+  const typeLabel={minor:'⚪ 일반',major:'🔷 중급',keystone:'★ 키스톤'}[node.type]||'';
+  let reqText='';
+  if(node.req&&node.req.length>0){
+    const reqNames=node.req.map(rid=>{
+      const r=TALENT_NODES[rid];
+      const rActive=tnodes.includes(rid);
+      return `<span style="color:${rActive?meta.color:'var(--red)'}">${r?.name||rid}</span>`;
+    }).join(', ');
+    reqText=`<div style="font-size:10px;color:var(--tx3);margin-top:3px">선행: ${reqNames}</div>`;
+  }
+  let actionBtn;
+  if(isActive){
+    actionBtn=`<button disabled style="padding:7px 14px;background:rgba(122,220,155,.15);border:1px solid rgba(122,220,155,.4);color:#7adc9b;font-size:11px;border-radius:5px;cursor:not-allowed">✓ 활성화됨</button>`;
+  }else{
+    const check=canActivateTalent(nid);
+    if(check.ok){
+      actionBtn=`<button onclick="doActivateTalent('${nid}')" style="padding:7px 14px;background:rgba(74,143,255,.20);border:1px solid var(--blue);color:var(--blue);font-size:11px;border-radius:5px;cursor:pointer;font-weight:700">⚡ 찍기 (${cost}pt)</button>`;
+    }else{
+      actionBtn=`<button disabled style="padding:7px 14px;background:rgba(220,50,50,.10);border:1px solid rgba(220,50,50,.3);color:var(--red);font-size:11px;border-radius:5px;cursor:not-allowed">⛔ ${check.reason}</button>`;
+    }
+  }
+  const info=document.getElementById('talentInfo');
+  info.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <span style="font-size:13px;font-weight:700;color:${isActive?meta.color:'var(--tx)'}">${node.name}</span>
+      <span style="font-size:9px;color:var(--tx3);background:rgba(255,255,255,.05);padding:2px 6px;border-radius:3px">${typeLabel}</span>
+      <span style="font-size:9px;color:#ffd060">${cost}pt</span>
+    </div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:4px">${node.desc}</div>
+    ${reqText}
+    <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
+      ${actionBtn}
+      <span style="font-size:10px;color:var(--tx3)">잔여: ${tpt}pt</span>
+    </div>
+  `;
+};
+
+window.doActivateTalent=async function(nid){
+  const ok=await activateTalent(nid);
+  if(ok){
+    renderTalentTree();
+    selectTalentNode(nid);
+  }
+};
 </script>
 </body>
 </html>
