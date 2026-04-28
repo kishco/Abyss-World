@@ -6305,17 +6305,24 @@ function canActivateTalent(nid){
 }
 
 // 노드 찍기
+let _talentActivating=false; // ★ v3.1 — race condition 차단
 async function activateTalent(nid){
-  const check=canActivateTalent(nid);
-  if(!check.ok){toast(`❌ ${check.reason}`);return false;}
-  const node=TALENT_NODES[nid];
-  const cost=node.cost||1;
-  char._talentPoints=(char._talentPoints||0)-cost;
-  if(!char._talentNodes)char._talentNodes=[];
-  char._talentNodes.push(nid);
-  await saveChar();
-  toast(`✨ "${node.name}" 활성!`,2500);
-  return true;
+  if(_talentActivating){toast('⏳ 처리 중...');return false;}
+  _talentActivating=true;
+  try{
+    const check=canActivateTalent(nid);
+    if(!check.ok){toast(`❌ ${check.reason}`);return false;}
+    const node=TALENT_NODES[nid];
+    const cost=node.cost||1;
+    char._talentPoints=(char._talentPoints||0)-cost;
+    if(!char._talentNodes)char._talentNodes=[];
+    char._talentNodes.push(nid);
+    await saveChar();
+    toast(`✨ "${node.name}" 활성!`,2500);
+    return true;
+  }finally{
+    _talentActivating=false;
+  }
 }
 window.activateTalent=activateTalent;
 
@@ -6324,6 +6331,34 @@ function getTalentResetCost(){
   const n=char._talentResetCount||0;
   return Math.min(100000000,1000000*Math.pow(2,n)); // 1M → 2M → 4M → ... 최대 1억
 }
+
+// ★ v3.1 핫픽스 — 특성 무결성 체크
+// 특성 Lv 받은 총 포인트 = 사용 포인트 + 남은 포인트 검증
+// 불일치 시 사용자에게 알림 + 자동 리셋 권장
+function validateTalentIntegrity(){
+  if(!char._talentLv)return;
+  const tlv=char._talentLv||1;
+  const totalEarned=tlv; // 받은 총 포인트 = 레벨 (Lv.1부터 1pt씩)
+  const nodes=char._talentNodes||[];
+  let totalSpent=0;
+  for(const nid of nodes){
+    const node=TALENT_NODES[nid];
+    if(node)totalSpent+=node.cost||1;
+  }
+  const remaining=char._talentPoints||0;
+  const expected=totalSpent+remaining;
+  if(expected!==totalEarned){
+    console.warn(`[특성 무결성] Lv.${tlv} 받은 ${totalEarned}pt vs 사용+잔여 ${expected}pt (${totalSpent}+${remaining})`);
+    // 자동 보정 — 받은 만큼 - 사용한 만큼 = 잔여
+    const corrected=Math.max(0,totalEarned-totalSpent);
+    if(corrected!==remaining){
+      char._talentPoints=corrected;
+      saveChar();
+      toast(`⚙ 특성 포인트 자동 보정: ${remaining}pt → ${corrected}pt`,5000);
+    }
+  }
+}
+window.validateTalentIntegrity=validateTalentIntegrity;
 async function resetTalents(){
   if(!char._talentNodes||char._talentNodes.length===0){toast('찍은 노드가 없습니다');return;}
   const cost=getTalentResetCost();
@@ -16834,6 +16869,8 @@ window.openTalentTree=function(){
     saveChar();
     toast('🌳 특성 시스템 활성! Lv.1 시작 (1pt 지급)',4000);
   }
+  // ★ v3.1 핫픽스 — 무결성 체크 (특성 Lv vs 실제 사용 포인트 검증)
+  validateTalentIntegrity();
   _curTalentTree='s';
   let modal=document.getElementById('talentModal');
   if(!modal){
