@@ -1608,12 +1608,12 @@ const PRE=[
   // ─── 물리 딜러 (physical: ATK/STR/CRIT) — 9개 ───
   {n:'불타는',     attr:'fire',      b:{atk:4},               sk:'flame_burst',    w:14},
   {n:'어둠의',     attr:'dark',      b:{atk:3,str:2},         sk:'shadow_strike',  w:10},
-  {n:'피의',       attr:null,        b:{atk:4,crit:2},        sk:'vampiric',       w:9},
+  {n:'피의',       attr:null,        b:{atk:5,str:2},         sk:'vampiric',       w:9}, // ★ v3.0 - crit 제거, atk·str 보강
   {n:'저주받은',   attr:null,        b:{atk:8,def:-3},        sk:null,             w:6},
-  {n:'폭풍의',     attr:'lightning', b:{atk:4,str:2,crit:2},  sk:'storm_strike',   w:7},
+  {n:'폭풍의',     attr:'lightning', b:{atk:5,str:3},         sk:'storm_strike',   w:7}, // ★ v3.0 - crit 제거, atk·str 보강
   {n:'심판의',     attr:'holy',      b:{atk:4,str:2},         sk:'holy_judgment',  w:6},
   {n:'심연의',     attr:'dark',      b:{atk:7,str:3},         sk:'shadow_strike',  w:6},
-  {n:'광전사의',   attr:null,        b:{dex:4,spd:3,crit:4,hp:-20},sk:'berserk',   w:4},
+  {n:'광전사의',   attr:null,        b:{dex:5,spd:4,hp:-20},  sk:'berserk',        w:4}, // ★ v3.0 - crit 제거, dex·spd 보강
   {n:'파멸의',     attr:'dark',      b:{atk:9,def:-5},        sk:'doom_strike',    w:3},
   // ─── 마법 딜러 (magic: MATK/skillBonus) — 9개 ───
   {n:'번개의',     attr:'lightning', b:{matk:4,int:2,spd:2},  sk:'lightning',      w:12},
@@ -1643,7 +1643,7 @@ const PRE=[
   {n:'고대의',     attr:null,        b:{atk:5,def:3},         sk:null,             w:7},
   {n:'용사의',     attr:null,        b:{str:3,vit:2},         sk:'counter_strike', w:9},
   {n:'민첩한',     attr:null,        b:{dex:3,spd:2},         sk:'evasion',        w:10},
-  {n:'운명의',     attr:null,        b:{luk:4,crit:3},        sk:null,             w:4},
+  {n:'운명의',     attr:null,        b:{luk:5,dex:2},         sk:null,             w:4}, // ★ v3.0 - crit 제거, luk·dex 보강
   {n:'서리의',     attr:'ice',       b:{def:4,dex:3},         sk:'ice_shard',      w:14},
   // ─── 뉴비 T1 (단순·명확한 효과) ───
   {n:'전사의',     attr:null,        b:{atk:3},               sk:null,             w:18},
@@ -1657,9 +1657,9 @@ const PRE=[
   {n:'전장의',     attr:null,        b:{atk:4,str:2},         sk:'cleave',         w:10},
   {n:'대지의',     attr:null,        b:{atk:5,vit:2},         sk:'ground_slam',    w:8},
   // ─── 리스크형 고성능 (물리) ───
-  {n:'피에 굶주린',attr:'dark',      b:{atk:5,crit:4,hp:-40}, sk:'blood_rage',     w:5},  // 고딜+HP페널티
+  {n:'피에 굶주린',attr:'dark',      b:{atk:7,crit:2,hp:-40}, sk:'blood_rage',     w:5},  // ★ v3.0 - crit 4→2, atk 5→7
   {n:'잔혹한',     attr:null,        b:{atk:7,def:-4,spd:-2}, sk:'armor_break',    w:4},  // 물리 고딜+방속페널티
-  {n:'광기어린',   attr:null,        b:{crit:7,atk:4,hp:-30}, sk:'berserk',        w:4},  // 크리특화+HP페널티
+  {n:'광기어린',   attr:null,        b:{crit:5,atk:6,hp:-30}, sk:'berserk',        w:4},  // ★ v3.0 - crit 7→5, atk 4→6
   // ─── 크리티컬 피해 특화 ───
   {n:'치명적인',   attr:null,        b:{critDmg:15,crit:3},   sk:null,             w:5},  // 크뎀+크확
   {n:'급소노리는', attr:null,        b:{critDmg:20,hp:-25},   sk:'doom_strike',    w:4},  // 고크뎀+HP페널티
@@ -1682,7 +1682,7 @@ const PRE=[
   {n:'학살자의',   attr:'dark',      b:{critDmg:40,atk:7,crit:5,hp:-50}, sk:'doom_strike', w:2},
   // T2~T4 밸런스 (무기 밸런스 보강 — 기존 풀에 0개)
   {n:'정밀한',     attr:null,        b:{balance:8,dex:2},     sk:null,             w:7},  // T2 균형
-  {n:'섬세한',     attr:null,        b:{balance:12,dex:3,crit:2}, sk:null,         w:5},  // T3 균형
+  {n:'섬세한',     attr:null,        b:{balance:12,dex:4},    sk:null,             w:5},  // T3 균형 ★ v3.0 - crit 제거, dex 보강
   {n:'완벽한',     attr:null,        b:{balance:18,dex:4,atk:3}, sk:null,          w:3},  // T4 정밀
   // T3~T4 스킬보너스 (마법 빌드 보강)
   {n:'주문술의',   attr:null,        b:{matk:5,int:2,skillBonus:5}, sk:'mana_surge', w:5}, // T3 스킬강화
@@ -1695,16 +1695,16 @@ const PRE=[
   // ★ v3.0 핫픽스 — LUK 빌드 인챈트 (드랍/골드/크리티컬 시너지)
   {n:'행운의',     attr:null,        b:{luk:4,dex:2},         sk:null,             w:7},  // T2 LUK 기본
   {n:'풍요로운',   attr:null,        b:{luk:5,goldBonus:12,dex:2}, sk:null,        w:5},  // T3 LUK+골드
-  {n:'운명의가호', attr:null,        b:{luk:7,crit:5,dex:3},  sk:null,             w:3},  // T4 LUK+크리
+  {n:'운명의가호', attr:null,        b:{luk:8,dex:4},         sk:null,             w:3},  // T4 LUK ★ v3.0 - crit 제거, luk·dex 보강
 ];
 const SUF=[
   // ─── 물리 딜러 (physical: ATK/STR/CRIT) — 9개 ───
   {n:'힘',        b:{str:3,atk:5},               sk:null,             w:14},
-  {n:'광기',      b:{dex:4,spd:3,crit:3},        sk:'berserk',        w:9},
+  {n:'광기',      b:{dex:5,spd:4},               sk:'berserk',        w:9}, // ★ v3.0 - crit 제거, dex·spd 보강
   {n:'파멸',      b:{atk:7,def:-3},              sk:'doom_strike',    w:6},
-  {n:'심연',      b:{atk:7,crit:4},              sk:'void_slash',     w:6},
-  {n:'분노',      b:{dex:3,spd:2,crit:4},        sk:'berserk',        w:7},
-  {n:'폭발',      b:{atk:6,crit:3},              sk:'explosion',      w:6},
+  {n:'심연',      b:{atk:9,str:2},               sk:'void_slash',     w:6}, // ★ v3.0 - crit 제거, atk·str 보강
+  {n:'분노',      b:{dex:5,spd:3},               sk:'berserk',        w:7}, // ★ v3.0 - crit 제거, dex·spd 보강
+  {n:'폭발',      b:{atk:8},                     sk:'explosion',      w:6}, // ★ v3.0 - crit 제거, atk 보강
   {n:'재앙',      b:{atk:9,hp:-30},              sk:'catastrophe',    w:4},
   {n:'절멸',      b:{atk:11,hp:-50,def:-5},      sk:'doom_strike',    w:2},
   {n:'어둠',      b:{atk:5,str:4},               sk:'shadow_strike',  w:7},
@@ -1715,7 +1715,7 @@ const SUF=[
   {n:'주문',      b:{matk:6,int:2,skillBonus:2}, sk:'arcane_burst',   w:8},
   {n:'신비',      b:{matk:6,skillBonus:4},       sk:'mana_surge',     w:6},
   {n:'예지',      b:{matk:4,luk:2},              sk:null,             w:9},
-  {n:'격노의주문',b:{matk:8,crit:3,hp:-20},      sk:'chaos_blast',    w:4},
+  {n:'격노의주문',b:{matk:10,hp:-20},            sk:'chaos_blast',    w:4}, // ★ v3.0 - crit 제거, matk 8→10
   {n:'마력폭주',  b:{matk:9,int:3,skillBonus:9,hp:-20},sk:'chaos_blast',w:3},
   // ─── 탱커 특화 ───
   {n:'수호',      b:{def:4,hp:15},               sk:null,             w:14},
@@ -1749,9 +1749,9 @@ const SUF=[
   {n:'참격',      b:{atk:5,str:2},               sk:'cleave',         w:10},
   {n:'진동',      b:{atk:4,vit:2},               sk:'ground_slam',    w:8},
   // ─── 리스크형 고성능 (물리) ───
-  {n:'학살',      b:{atk:10,crit:5,hp:-60},      sk:'doom_strike',    w:3},  // 최고ATK+대형HP페널티
+  {n:'학살',      b:{atk:12,crit:3,hp:-60},      sk:'doom_strike',    w:3},  // ★ v3.0 - crit 5→3, atk 10→12
   {n:'공격광',    b:{atk:7,str:3,def:-6},        sk:'berserk',        w:5},  // 공격특화+방어페널티
-  {n:'역습',      b:{atk:6,crit:5,spd:-4},       sk:'counter_strike', w:5},  // 반격특화+속도페널티
+  {n:'역습',      b:{atk:8,spd:-4},              sk:'counter_strike', w:5},  // ★ v3.0 - crit 제거, atk 6→8
   // ─── 크리티컬 피해 특화 ───
   {n:'급소',      b:{critDmg:12,crit:2},               sk:null,             w:6},  // 크뎀 기본
   {n:'치명타',    b:{critDmg:18,dex:2},                sk:null,             w:4},  // 크뎀+DEX
@@ -1774,7 +1774,7 @@ const SUF=[
   {n:'사형선고',  b:{critDmg:40,atk:7,crit:5,hp:-50}, sk:'doom_strike', w:2},
   // T2~T4 밸런스
   {n:'균형',      b:{balance:8,dex:2},           sk:null,             w:7},  // T2
-  {n:'명중',      b:{balance:12,dex:3,crit:2},   sk:null,             w:5},  // T3
+  {n:'명중',      b:{balance:15,dex:3},          sk:null,             w:5},  // T3 ★ v3.0 - crit 제거, balance 12→15
   {n:'정밀타격',  b:{balance:18,atk:3,dex:3},    sk:null,             w:3},  // T4
   // T3~T4 스킬보너스
   {n:'영창',      b:{matk:5,int:2,skillBonus:5}, sk:'mana_surge',     w:5},  // T3
@@ -1787,7 +1787,7 @@ const SUF=[
   // ★ v3.0 핫픽스 — LUK 빌드 인챈트
   {n:'행운',      b:{luk:4,dex:2},               sk:null,             w:7},  // T2
   {n:'풍요',      b:{luk:5,goldBonus:12,dex:2},  sk:null,             w:5},  // T3
-  {n:'대운',      b:{luk:7,crit:5,dex:3},        sk:null,             w:3},  // T4
+  {n:'대운',      b:{luk:8,dex:4},               sk:null,             w:3},  // T4 ★ v3.0 - crit 제거, luk·dex 보강
 ];
 // Weapon / Armor names (10 each)
 const WN={
@@ -5388,10 +5388,10 @@ function migrateItem(it){
 const ENCHANT_STAT_MAP={
   // ── 접두 (물리)
   '어둠의':    {atk:3,str:2},
-  '폭풍의':    {atk:4,str:2,crit:2},
+  '폭풍의':    {atk:5,str:3},                       // ★ v3.0 - crit 제거
   '심판의':    {atk:4,str:2},
   '심연의':    {atk:7,str:3},
-  '광전사의':  {dex:4,spd:3,crit:4,hp:-20},
+  '광전사의':  {dex:5,spd:4,hp:-20},                // ★ v3.0 - crit 제거
   '파멸의':    {atk:9,def:-5},
   '축복받은':  {hp:30,def:4,dex:2},
   '얼어붙은':  {def:6,dex:2},
@@ -5399,11 +5399,15 @@ const ENCHANT_STAT_MAP={
   '신성한':    {hp:20,atk:3},
   '치유자의':  {hp:50,vit:4,dex:2},
   '서리의':    {def:4,dex:3},
+  '피의':      {atk:5,str:2},                       // ★ v3.0 - crit 제거
+  '운명의':    {luk:5,dex:2},                       // ★ v3.0 - crit 제거
+  '섬세한':    {balance:12,dex:4},                  // ★ v3.0 - crit 제거
+  '운명의가호':{luk:8,dex:4},                       // ★ v3.0 - crit 제거
   // ── 접두 (물리 리스크)
-  '피에 굶주린':{atk:5,crit:4,hp:-40},
+  '피에 굶주린':{atk:7,crit:2,hp:-40},              // ★ v3.0 - atk 5→7, crit 4→2
   '잔혹한':    {atk:7,def:-4,spd:-2},
-  '광기어린':  {crit:7,atk:4,hp:-30},
-  // ── 접두 (마법 — v2.3 하향)
+  '광기어린':  {crit:5,atk:6,hp:-30},               // ★ v3.0 - crit 7→5, atk 4→6
+  // ── 접두 (마법)
   '번개의':    {matk:4,int:2,spd:2},
   '독의':      {matk:4,int:2},
   '현자의':    {matk:5,int:2},
@@ -5413,34 +5417,37 @@ const ENCHANT_STAT_MAP={
   '신비로운':  {matk:5,int:2},
   '격류의':    {matk:4,skillBonus:2},
   '파멸의주문':{matk:8,int:3,hp:-20},
-  // ── 접두 (마법 리스크 — v2.3 하향)
+  // ── 접두 (마법 리스크)
   '영혼의':    {matk:6,int:2,hp:-30},
   '낙뢰의':    {matk:5,int:2,def:-3},
   '죽음의':    {matk:6,int:3,spd:-3},
   '공허의':    {matk:7,int:4,hp:-50},
-  // ── 접미 (물리 — v2.3 하향)
+  // ── 접미 (물리)
   '파멸':      {atk:7,def:-3},
-  '심연':      {atk:7,crit:4},
+  '심연':      {atk:9,str:2},                       // ★ v3.0 - crit 제거
   '재앙':      {atk:9,hp:-30},
   '절멸':      {atk:11,hp:-50,def:-5},
   '어둠':      {atk:5,str:4},
-  '광기':      {dex:4,spd:3,crit:3},
-  '분노':      {dex:3,spd:2,crit:4},
+  '광기':      {dex:5,spd:4},                       // ★ v3.0 - crit 제거
+  '분노':      {dex:5,spd:3},                       // ★ v3.0 - crit 제거
+  '폭발':      {atk:8},                             // ★ v3.0 - crit 제거
   '난공불락':  {def:12,hp:60,vit:4,dex:2},
   '빛':        {dex:3,hp:20},
   '성스러움':  {hp:50,vit:5,dex:3},
-  '학살':      {atk:10,crit:5,hp:-60},
+  '학살':      {atk:12,crit:3,hp:-60},              // ★ v3.0 - crit 5→3, atk 10→12
   '공격광':    {atk:7,str:3,def:-6},
-  '역습':      {atk:6,crit:5,spd:-4},
+  '역습':      {atk:8,spd:-4},                      // ★ v3.0 - crit 제거
   '방어붕괴':  {atk:6,str:2,def:-5},
-  // ── 접미 (마법 — v2.3 하향)
+  '명중':      {balance:15,dex:3},                  // ★ v3.0 - crit 제거
+  '대운':      {luk:8,dex:4},                       // ★ v3.0 - crit 제거
+  // ── 접미 (마법)
   '마력':      {matk:5},
   '냉기':      {matk:5,int:2,spd:2},
   '지혜':      {matk:5,int:3},
   '주문':      {matk:6,int:2,skillBonus:2},
   '신비':      {matk:6,skillBonus:4},
   '예지':      {matk:4,luk:2},
-  '격노의주문':{matk:8,crit:3,hp:-20},
+  '격노의주문':{matk:10,hp:-20},                    // ★ v3.0 - crit 제거, matk 8→10
   '마력폭주':  {matk:9,int:3,skillBonus:9,hp:-20},
   '낙뢰':      {matk:7,int:3,def:-4},
   '공허':      {matk:8,int:4,hp:-50},
@@ -5449,7 +5456,7 @@ const ENCHANT_STAT_MAP={
 };
 
 // ★ 이 숫자만 올리면 다음 접속 시 모든 유저 아이템 재마이그레이션
-const ENCHANT_STAT_VER=5;
+const ENCHANT_STAT_VER=6; // ★ v3.0 핫픽스 — crit 인챈트 일괄 정리 (5→6)
 
 function autoMigrateEnchantStats(it){
   if(!it||it._esv>=ENCHANT_STAT_VER||it.isScroll||it.isEnchantScroll||it.isSubjBox)return false;
