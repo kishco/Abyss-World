@@ -2748,6 +2748,10 @@ function calcStats(c){
   const attrDmgBonus={fire:0,ice:0,lightning:0,dark:0,holy:0,poison:0};
   const attrResist={fire:0,ice:0,lightning:0,dark:0,holy:0,poison:0};
   const weaponMastery={melee:0,ranged:0,magic:0};
+  // ★ v3.1 핫픽스 — 마법/방어 특성 효과 집계
+  let magicLifesteal=0;
+  let magicMultiCastChance=0;
+  let blockBonus=0;
   let talentSkillDmgBonus=0;
   if(typeof getTalentEffects==='function'){
     const t=getTalentEffects(c);
@@ -2766,6 +2770,16 @@ function calcStats(c){
     if(t.attrResist)for(const k of Object.keys(attrResist))attrResist[k]+=t.attrResist[k]||0;
     if(t.weaponMastery)for(const k of Object.keys(weaponMastery))weaponMastery[k]+=t.weaponMastery[k]||0;
     talentSkillDmgBonus+=t.skillDmgBonus||0;
+    // ★ v3.1 핫픽스 — 마법/방어 특성 효과
+    magicLifesteal+=t.magicLifesteal||0;
+    magicMultiCastChance+=t.magicMultiCastChance||0;
+    blockBonus+=t.blockBonus||0;
+  }
+  // ★ v3.1 — 세트 보너스에서 magicLifesteal 합산 (비전 학자 5세트본)
+  magicLifesteal+=sb.magicLifesteal||0;
+  // ★ 세트 attrDmgBonus 합산 (분노 5세트본 화염 등)
+  if(sb.attrDmgBonus){
+    for(const k of Object.keys(attrDmgBonus))attrDmgBonus[k]+=sb.attrDmgBonus[k]||0;
   }
 
   return{atk:Math.round(atk),matk:Math.round(matk),def:Math.round(def),spd:Math.round(spd),
@@ -2774,6 +2788,7 @@ function calcStats(c){
     goldBonus:Math.round(goldBonus),skillBonus:Math.round(skillBonus),
     balance:Math.min(99,Math.round(balance)),
     attrDmgBonus,attrResist,weaponMastery,
+    magicLifesteal,magicMultiCastChance,blockBonus,
     _potionBonus,_intBonus,_skillDmgBonus:_skillDmgBonus+talentSkillDmgBonus};
 }
 function calcSetB(eq){
@@ -8107,6 +8122,11 @@ window.bmBuy=async(i)=>{
   await saveChar();updateTop();
   // ★ 인벤 변경 가능성 (extract 카드 추가) — 항상 갱신
   renderInv();
+  // ★ v3.1 핫픽스 — 암시장 패널도 재렌더 (동적 가격·잔여 횟수·부스터 활성 표시 갱신)
+  const _bmSb=document.getElementById('secbody');
+  if(_bmSb&&typeof renderBlackMarket==='function'){
+    try{await renderBlackMarket(_bmSb);}catch(e){}
+  }
 };
 
 // 암시장 시스템 → renderBlackMarket은 위에서 정의됨 (initBlackMarket 포함)
@@ -10654,6 +10674,13 @@ async function dungeonClear(){
     if(battle.timer){clearInterval(battle.timer);battle.timer=null;}
     updateNavLock();
 
+    // ★ v3.1 — 연속 도전 모드면 자동 다음 층 진입
+    window._itLastClearedFloor=floor;
+    if(window._itContinuousMode){
+      const advanced=await tryITContinuousNext();
+      if(advanced)return; // 자동 진입 성공 → 결과 화면 스킵
+    }
+
     // 클리어 후 버튼
     const nextF=floor+1;
     setTimeout(()=>{
@@ -10781,6 +10808,14 @@ function endBattle(success,fled){
   if(battle.timer)clearInterval(battle.timer);
   if(battle._leaderFallbackTimer){clearTimeout(battle._leaderFallbackTimer);battle._leaderFallbackTimer=null;}
   updateNavLock();
+  // ★ v3.1 — IT 패배/도주 시 연속 도전 모드 해제
+  if(battle.mode==='immortaltower'&&!success&&window._itContinuousMode){
+    window._itContinuousMode=false;
+    window._itContinuousEnd=null;
+    const checkbox=document.getElementById('itContinuousCheck');
+    if(checkbox)checkbox.checked=false;
+    toast(fled?'💨 도주 — 연속 도전 정지':'💀 패배 — 연속 도전 정지',5000);
+  }
 
   const db2=document.getElementById('dungBattle');
   db2.style.display='block';
@@ -11496,6 +11531,14 @@ async function renderImmortalTower(){
                 </button>`;
               }).join('')}
             </div>
+            <!-- ★ v3.1 — 연속 도전 체크박스 (정복자 편의성) -->
+            <label style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 12px;background:rgba(204,136,255,.08);border:1px solid rgba(204,136,255,.3);border-radius:8px;cursor:pointer;font-size:11px;color:#cc88ff" onclick="event.stopPropagation()">
+              <input type="checkbox" id="itContinuousCheck" ${window._itContinuousMode?'checked':''} onchange="window._itContinuousMode=this.checked;if(!this.checked)window._itContinuousEnd=null;" style="cursor:pointer;width:16px;height:16px;flex-shrink:0">
+              <div style="flex:1;line-height:1.5">
+                <div style="font-weight:700">🚀 연속 도전 모드</div>
+                <div style="font-size:9.5px;color:var(--tx3);margin-top:2px">체크 시 — 구간 선택하면 시작층부터 끝층까지 자동 진행<br>사망/HP 30% 이하/포션 0개 시 자동 정지</div>
+              </div>
+            </label>
           </div>`
         :(()=>{
           const isBoss=nextFloor%10===0;
@@ -11551,6 +11594,19 @@ window.startITBattle=async function(floorNum){
   if(char.level<99){toast('⚠️ Lv.99 전용 콘텐츠입니다');return;}
   if(Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length>=(char?.invSlots||100)){
     toast('⚠️ 인벤토리가 가득 찼습니다!');return;
+  }
+
+  // ★ v3.1 — 연속 도전 모드 시작 시 끝층 자동 계산 (구간의 끝층까지)
+  // 체크박스가 ON이고, 시작층이 구간 시작점(1,11,21...91)이면 그 구간 끝층까지 자동
+  if(window._itContinuousMode&&!window._itContinuousEnd){
+    // 시작 층이 구간 시작점인 경우 (1,11,21...91) → 해당 구간 끝층까지
+    if(floorNum%10===1){
+      window._itContinuousEnd=floorNum+9; // 1→10, 11→20, ..., 91→100
+      toast(`🚀 ${floorNum}~${window._itContinuousEnd}층 연속 도전 시작!`,4000);
+    }else{
+      // 구간 시작점 아니면 100층까지 (예외)
+      window._itContinuousEnd=IT_TOTAL_FLOORS;
+    }
   }
 
   const rotation=getITWeekRotation();
@@ -11622,6 +11678,37 @@ window.startITBattle=async function(floorNum){
 async function checkITWeeklyReset(){
   // Firebase weekKey 기반 자동 초기화
 }
+
+// ════════════════════════════════════════════
+// ★ v3.1 — IT 연속 도전 시스템 (정복자 편의성)
+// 체크박스로 모드 ON/OFF, 구간 버튼 누르면 시작층 → 끝층 자동
+// ════════════════════════════════════════════
+
+// 연속 도전 — 다음 층 자동 진입 (IT 클리어 후 호출)
+async function tryITContinuousNext(){
+  if(!window._itContinuousMode)return false;
+  const lastFloor=window._itLastClearedFloor||0;
+  const endFloor=window._itContinuousEnd||IT_TOTAL_FLOORS;
+  // 구간 끝층 도달 시 정상 종료
+  if(lastFloor>=endFloor){
+    window._itContinuousMode=false;
+    window._itContinuousEnd=null;
+    const checkbox=document.getElementById('itContinuousCheck');
+    if(checkbox)checkbox.checked=false;
+    toast(`🏆 ${endFloor}층 도달 — 연속 도전 종료`,5000);
+    return false;
+  }
+  // 안전 체크 — 사망/HP/포션
+  if(char.hp<=0){window._itContinuousMode=false;window._itContinuousEnd=null;toast('💀 사망 — 연속 도전 정지',5000);return false;}
+  const hpRate=char.hp/calcStats(char).maxHp;
+  if(hpRate<0.3){window._itContinuousMode=false;window._itContinuousEnd=null;toast(`⚠️ HP ${Math.round(hpRate*100)}% — 연속 도전 자동 정지`,5000);return false;}
+  if((char.potions||0)<=0){window._itContinuousMode=false;window._itContinuousEnd=null;toast('💊 포션 부족 — 연속 도전 정지',5000);return false;}
+  // 자동 진입 (보스층 포함)
+  const nextF=lastFloor+1;
+  setTimeout(()=>{startITBattle(nextF);},1500);
+  return true;
+}
+window.tryITContinuousNext=tryITContinuousNext;
 
 // ════════════════════════════════════════════
 // ★ 불멸 제련 (대장간)
