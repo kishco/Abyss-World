@@ -2734,6 +2734,21 @@ function payPreview(amount){
 // 호출 통합 = 다운로드 대역폭 직접 절감
 const SAVE_DEBOUNCE_MS=400;
 
+// ★★★ v3.0 핫픽스 — invSync 인프라 (자기 inv onValue 제거, 다운로드 폭증 해결)
+// 자기 saveInv 시: inv는 부분 update + invSync에 알림 timestamp만 기록
+// 외부 변경 시: invSync 알림 받고 inv 명시적 재페치
+// 결과: 자기 inv onValue 다운로드 99% 절감 (152KB → 50B)
+const _tabId=Math.random().toString(36).slice(2,10);
+let _lastInvHash={}; // {itemId: JSON.stringify(item)} - 부분 update diff 기준
+
+// 외부에서 다른 캐릭 inv 변경 시 호출 (추천 보상, admin 조작 등)
+// 대상 캐릭이 접속 중이면 invSync 알림으로 즉시 재페치 트리거
+async function notifyInvSync(targetCharId,source){
+  if(!db||!targetCharId)return;
+  try{await set(ref(db,`invSync/${targetCharId}`),{ts:Date.now(),src:source||'external'});}catch(e){console.warn('[notifyInvSync 실패]',e);}
+}
+window.notifyInvSync=notifyInvSync;
+
 // ★★★ v3.0 핫픽스 — 진단 인프라 (대역폭 누수 식별용)
 // 매 saveChar/saveInv 호출 시 페이로드 크기 누적 → diagSaveStats()로 확인
 window._diagSaveCounts={charCalls:0,charBytes:0,charMaxBytes:0,invCalls:0,invBytes:0,invMaxBytes:0,startTs:Date.now()};
@@ -3084,18 +3099,40 @@ async function _doSaveInv(){
     }
   }
   try{
-    // ★ v3.0 핫픽스 — 페이로드 크기 측정 (대역폭 진단)
+    // ★ v3.0 핫픽스 — 부분 update (다운로드 폭증 해결 핵심)
+    // 1) 변경된 아이템만 추출 (해시 비교)
+    const changes={};
+    const newHash={};
+    for(const[iid,item]of Object.entries(inv)){
+      const h=JSON.stringify(item);
+      newHash[iid]=h;
+      if(_lastInvHash[iid]!==h)changes[iid]=item;
+    }
+    // 삭제된 아이템은 null로 명시 (update가 해당 키 제거)
+    for(const iid of Object.keys(_lastInvHash)){
+      if(!inv[iid])changes[iid]=null;
+    }
+    // 2) 페이로드 측정 (변경분만)
     try{
-      const _invJson=JSON.stringify(inv);
-      const _sz=_invJson.length;
+      const _changesJson=JSON.stringify(changes);
+      const _sz=_changesJson.length;
       window._diagSaveCounts.invCalls++;
       window._diagSaveCounts.invBytes+=_sz;
       if(_sz>window._diagSaveCounts.invMaxBytes)window._diagSaveCounts.invMaxBytes=_sz;
-      if(_sz>100000)console.warn(`[saveInv] ⚠️ 페이로드 ${(_sz/1024).toFixed(1)}KB — inv 객체 비대 (inv/${charId}). diagInvSize()로 확인`);
+      if(_sz>50000)console.warn(`[saveInv] ⚠️ 변경 페이로드 ${(_sz/1024).toFixed(1)}KB — diff 큰 일괄 변경 발생 (inv/${charId})`);
     }catch(e){}
-    await set(ref(db,`inv/${charId}`),inv);
+    // 3) 변경 없으면 no-op
+    if(Object.keys(changes).length===0){
+      setTimeout(()=>{window._invSaveLock=0;},1500);
+      return;
+    }
+    // 4) 부분 update + 해시 갱신
+    await update(ref(db,`inv/${charId}`),changes);
     invalidateCache(`inv/${charId}`); // ★ 캐시 무효화
-    // ★ 락 해제는 약간의 지연 후 (Firebase가 자기 자신 onValue 콜백을 호출하기 전까지)
+    _lastInvHash=newHash;
+    // 5) invSync 알림 (다른 탭/디바이스가 외부 변경으로 감지하지 않도록 src=self+tab)
+    try{await set(ref(db,`invSync/${charId}`),{ts:Date.now(),src:'self',tab:_tabId});}catch(e){}
+    // ★ 락 해제는 약간의 지연 후
     setTimeout(()=>{window._invSaveLock=0;},1500);
   }catch(e){
     window._invSaveLock=0;
@@ -3468,38 +3505,71 @@ async function selChar(id){
       updateTop();renderChar();
     }
   });
-  _invUnsub=onValue(ref(db,`inv/${id}`),sn=>{
-    // ★ v3.x — 저장 중 listener 무시 (race condition + 트래픽 절감) — 3초→10초
-    if(window._invSaveLock&&Date.now()-window._invSaveLock<10000){
-      return;
+  // ★ v3.0 핫픽스 — inv onValue 제거 (자기 inv 다운로드 폭증의 진짜 원인 해결)
+  // 변경: 명시적 get으로 초기 로드 + invSync 알림 path로 외부 변경만 감지
+  // 효과: 자기 saveInv 시 자기 onValue로 inv 전체(최대 152KB) 다운로드 차단 → 99% 절감
+  try{
+    const _initInvSn=await get(ref(db,`inv/${id}`));
+    inv=_initInvSn.val()||{};
+  }catch(e){console.error('[inv 초기 로드 실패]',e);inv={};}
+  let needSave=false;
+  for(const it of Object.values(inv)){
+    if(it&&it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;needSave=true;}
+    if(it&&(it.enhance||0)>9){it.enhance=9;needSave=true;}
+    if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
+    if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){if(autoMigrateEnchantStats(it))needSave=true;else it._esv=ENCHANT_STAT_VER;}
+    if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))needSave=true;else it._smv=1;}
+    // ★ v2.8 — 유일 무기 balance 마이그레이션 (인벤 초기 로드)
+    if(it&&autoMigrateSetWeaponBalance(it))needSave=true;
+    // ★ v2.8 — 유일(set) 거래 가능 마이그레이션 (인벤)
+    if(it&&autoMigrateSetTradeable(it))needSave=true;
+    // ★ 인벤 무기 balance 마이그레이션
+    if(it&&it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
+      const wb=WBASES.find(b=>b.id===it.baseId);
+      if(wb?.balMin!==undefined){
+        it.stats.balance=rand(wb.balMin,wb.balMax);
+        needSave=true;
+      }
     }
-    inv=sn.val()||{};
-    let needSave=false;
+    // ★ balance 99% 상한 마이그레이션 (인벤)
+    if(it&&it.stats&&it.stats.balance!==undefined&&it.stats.balance>99&&!it._balv){
+      it.stats.balance=99;it._balv=1;needSave=true;
+    }
+  }
+  // ★ 부분 update 기준점 초기화 (반드시 마이그레이션 이후, saveInv 이전)
+  // 마이그레이션이 inv를 수정했어도 hash가 비어있으면 첫 saveInv가 변경분 포함하여 정상 update 됨
+  _lastInvHash={};
+  for(const[iid,item]of Object.entries(inv))_lastInvHash[iid]=JSON.stringify(item);
+  if(needSave){
+    // 마이그레이션된 아이템들이 hash와 다르므로 자연스럽게 변경분으로 잡혀 update됨
+    // hash를 마이그레이션 직전 상태로 되돌려야 변경 감지됨
     for(const it of Object.values(inv)){
-      if(it&&it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;needSave=true;}
-      if(it&&(it.enhance||0)>9){it.enhance=9;needSave=true;}
-      if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
-      if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){if(autoMigrateEnchantStats(it))needSave=true;else it._esv=ENCHANT_STAT_VER;}
-      if(it&&(!it._smv||it._smv<1)){if(autoMigrateStaffMatk(it))needSave=true;else it._smv=1;}
-      // ★ v2.8 — 유일 무기 balance 마이그레이션 (인벤)
-      if(it&&autoMigrateSetWeaponBalance(it))needSave=true;
-      // ★ v2.8 — 유일(set) 거래 가능 마이그레이션 (인벤)
-      if(it&&autoMigrateSetTradeable(it))needSave=true;
-      // ★ 인벤 무기 balance 마이그레이션
-      if(it&&it.slot==='weapon'&&it.stats&&it.stats.balance===undefined){
-        const wb=WBASES.find(b=>b.id===it.baseId);
-        if(wb?.balMin!==undefined){
-          it.stats.balance=rand(wb.balMin,wb.balMax);
-          needSave=true;
-        }
-      }
-      // ★ balance 99% 상한 마이그레이션 (인벤)
-      if(it&&it.stats&&it.stats.balance!==undefined&&it.stats.balance>99&&!it._balv){
-        it.stats.balance=99;it._balv=1;needSave=true;
+      if(it&&it.id){
+        // 강제 dirty 처리: 해당 키 hash 비움
+        delete _lastInvHash[it.id];
       }
     }
-    if(needSave)saveInv();
-    renderInv();
+    saveInv();
+  }
+  renderInv();
+  // ★ invSync 알림 path 구독 — 외부에서 inv 변경 시(추천 보상, GM 조작, 다른 탭) 감지
+  _invUnsub=onValue(ref(db,`invSync/${id}`),async sn=>{
+    const data=sn.val();
+    if(!data||!data.ts)return;
+    // 자기 자신 발생 변경은 무시 (src=self & 같은 탭)
+    if(data.src==='self'&&data.tab===_tabId)return;
+    // 자기 saveInv 직후 윈도우는 무시 (race 방지)
+    if(window._invSaveLock&&Date.now()-window._invSaveLock<10000)return;
+    console.log('[invSync] 외부 inv 변경 감지 → 재페치');
+    try{
+      const isn=await get(ref(db,`inv/${id}`));
+      inv=isn.val()||{};
+      // 해시 동기화 (다음 saveInv가 정확한 diff 계산하도록)
+      _lastInvHash={};
+      for(const[iid,item]of Object.entries(inv))_lastInvHash[iid]=JSON.stringify(item);
+      if(typeof renderInv==='function')renderInv();
+      if(typeof updateTop==='function')updateTop();
+    }catch(e){console.error('[invSync 재페치 실패]',e);}
   });
   updateTop();renderChar();renderInv();renderDungeon();
   startChat();
@@ -10708,6 +10778,7 @@ window.adminGiveItem=async function(cid){
   }
 
   await set(ref(db,`inv/${cid}/${it.id}`),it);
+  await notifyInvSync(cid,'admin'); // ★ v3.0 핫픽스 — 대상 유저 인벤 즉시 갱신
   toast(`✅ ${itName(it)} 지급 완료!`);
   adminOpenUser(cid);
 };
@@ -10783,7 +10854,10 @@ window.adminMigrateSkills=async()=>{
     for(const[iid,it]of Object.entries(items||{})){
       if(migrateItemSkills(it)){updatedItems[iid]=it;invChanged=true;itemCount++;}
     }
-    if(invChanged)await set(ref(db,`inv/${cid}`),updatedItems);
+    if(invChanged){
+      await set(ref(db,`inv/${cid}`),updatedItems);
+      await notifyInvSync(cid,'admin_migrate'); // ★ v3.0 핫픽스 — 마이그 대상 유저 인벤 갱신
+    }
   }
 
   // 착용 장비 마이그레이션
@@ -10876,7 +10950,10 @@ window.adminMigrateEnchantStats=async function(){
     for(const[iid,it]of Object.entries(items||{})){
       if(migrateItem(it)){updated[iid]=it;changed=true;totalItems++;}
     }
-    if(changed)await set(ref(db,`inv/${cid}`),updated);
+    if(changed){
+      await set(ref(db,`inv/${cid}`),updated);
+      await notifyInvSync(cid,'admin_migrate'); // ★ v3.0 핫픽스
+    }
   }
 
   // 2. 착용 장비
@@ -11017,6 +11094,8 @@ async function giveGiftToChar(cid, charLevel, tierData){
   for(const it of giftItems){
     await set(ref(db,`inv/${cid}/${it.id}`),it);
   }
+  // ★ v3.0 핫픽스 — 선물 받는 유저가 접속 중이면 인벤 즉시 갱신
+  if(giftItems.length>0)await notifyInvSync(cid,'admin_gift');
 }
 
 window.adminSendGift=async()=>{
@@ -11508,6 +11587,8 @@ window.submitReferral=async function(){
   const refReroll=genScrollItem();
   refReroll.tradeable=false;
   await set(ref(db,`inv/${refCharId}/${refReroll.id}`),refReroll);
+  // ★ v3.0 핫픽스 — 추천인이 접속 중이면 invSync 알림으로 인벤 즉시 갱신
+  await notifyInvSync(refCharId,'referral');
   // 추천인에게 알림 채팅
   await push(ref(db,'chat/system'),{
     author:'SYSTEM',
