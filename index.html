@@ -2769,7 +2769,9 @@ function calcStats(c){
     if(t.attrDmgBonus)for(const k of Object.keys(attrDmgBonus))attrDmgBonus[k]+=t.attrDmgBonus[k]||0;
     if(t.attrResist)for(const k of Object.keys(attrResist))attrResist[k]+=t.attrResist[k]||0;
     if(t.weaponMastery)for(const k of Object.keys(weaponMastery))weaponMastery[k]+=t.weaponMastery[k]||0;
-    talentSkillDmgBonus+=t.skillDmgBonus||0;
+    // ★ v3.1 핫픽스 — 특성 skillDmgBonus는 정수%(예: 15)로 정의됨, 소수(0.15)로 변환해 합산
+    // 세트 _skillDmgBonus와 단위 통일 (세트는 0.25 같은 소수 형식)
+    talentSkillDmgBonus+=(t.skillDmgBonus||0)/100;
     // ★ v3.1 핫픽스 — 마법/방어 특성 효과
     magicLifesteal+=t.magicLifesteal||0;
     magicMultiCastChance+=t.magicMultiCastChance||0;
