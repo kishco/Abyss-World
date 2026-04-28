@@ -3497,6 +3497,7 @@ async function selChar(id){
     if(it&&autoMigrateSetTradeable(it))invMigrated=true;
     if(it&&migrateItemLv(it,false))invMigrated=true;
     if(it&&migrateEnchantName(it))invMigrated=true;
+    if(it&&migrateScrollName(it))invMigrated=true; // ★ v3.0 핫픽스 — 손상 스크롤 이름 복구
   }
   // ★ 창고 마이그레이션
   let whMigrated=false;
@@ -3511,6 +3512,7 @@ async function selChar(id){
     if(it&&autoMigrateSetWeaponBalance(it))whMigrated=true;
     if(it&&autoMigrateSetTradeable(it))whMigrated=true;
     if(it&&migrateEnchantName(it))whMigrated=true;
+    if(it&&migrateScrollName(it))whMigrated=true; // ★ v3.0 핫픽스 — 손상 스크롤 이름 복구
   }
   // ★ 스탯 변화 OR 플래그만 변화 모두 저장 (플래그 미저장 시 매 로그인 재체크 방지)
   if(equipMigrated||equipStatsDirty)await saveChar();
@@ -5110,8 +5112,29 @@ function migrateForgeWard(){
 // ★ v3.0 핫픽스 — 등급 접두사 제거 마이그레이션 (_nameMig3)
 // 기존: "지명적인 회전 전설의 결말을 나누는 자" (4단계)
 // 신규: "지명적인 회전 결말을 나누는 자" (3단계, 등급은 색상 태그로 표시)
+// ★ v3.0 핫픽스 — 손상된 인챈트 스크롤 이름 복구 함수
+// 마이그 버그로 인챈트명이 잘려나간 스크롤(예: "[상급] 인챈트 스크롤")을
+// enchantData.n과 gradeName으로 복원
+function migrateScrollName(it){
+  if(!it||!it.isEnchantScroll||it._scrollNameFix)return false;
+  it._scrollNameFix=true;
+  const enchN=it.enchantData?.n;
+  const gradeN=it.gradeName||'중급';
+  if(!enchN)return false;
+  const expected=`[${gradeN}] ${enchN} 인챈트 스크롤`;
+  if(it.name!==expected){
+    it.name=expected;
+    return true;
+  }
+  return false;
+}
+
 function migrateEnchantName(it){
   if(!it)return false;
+  // ★ v3.0 핫픽스 — 스크롤/소비 아이템은 마이그 스킵 (인챈트명이 잘려나가는 버그 방지)
+  if(it.isEnchantScroll||it.isScroll||it.slot==='scroll'||it.slot==='potion')return false;
+  // ★ 가구도 마이그 스킵 (이름 형식이 다름)
+  if(it.cat||it.targetType||it.passive)return false;
   const needsV2=!it._enchNameMig2;
   const needsV3=!it._nameMig3;
   if(!needsV2&&!needsV3)return false;
