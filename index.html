@@ -9330,7 +9330,18 @@ window.renderLootBidPanel=function(){};
 window.confirmExitBattle=function(){};
 
 // ★ 만료 경매 자동 취소 (7일 경과 + 본인 등록 건은 인벤 반환) + 완료/만료 건 아카이브
+// ★ v3.x — 세션당 1회 + DB 락으로 시간당 1번만 실제 실행 (auction 풀 페치 빈도 감소)
+let _cleanExpRanThisSession=false;
 async function cleanExpiredAuctions(){
+  if(_cleanExpRanThisSession)return;
+  _cleanExpRanThisSession=true;
+  // ★ DB 락 — 마지막 실행 1시간 안이면 스킵 (다른 사용자가 이미 처리)
+  try{
+    const lockSn=await get(ref(db,'auction_meta/lastClean'));
+    const lastClean=lockSn.val()||0;
+    if(Date.now()-lastClean<3600000)return; // 1시간 가드
+    await set(ref(db,'auction_meta/lastClean'),Date.now());
+  }catch(e){console.warn('[cleanExp lock]',e);}
   const sn=await get(ref(db,'auction'));
   const all=sn.val()||{};
   const now=Date.now();
