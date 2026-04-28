@@ -2708,7 +2708,77 @@ function payPreview(amount){
   return {inv,bank};
 }
 
-async function saveChar(){
+// ★★★ v3.0 핫픽스 — saveChar/saveInv 디바운스 (Firebase 대역폭 절감 핵심)
+// 짧은 시간(400ms) 내 여러 번 호출되면 마지막 한 번만 실제 set 실행
+// Firebase는 set 1회당 onValue 구독자에게 전체 객체를 push하므로,
+// 호출 통합 = 다운로드 대역폭 직접 절감
+const SAVE_DEBOUNCE_MS=400;
+let _saveCharTimer=null;
+let _saveCharResolves=[];
+let _saveInvTimer=null;
+let _saveInvResolves=[];
+
+function saveChar(){
+  return new Promise((resolve,reject)=>{
+    if(!db||!charId){resolve();return;}
+    _saveCharResolves.push({resolve,reject});
+    if(_saveCharTimer)clearTimeout(_saveCharTimer);
+    _saveCharTimer=setTimeout(_flushSaveChar,SAVE_DEBOUNCE_MS);
+  });
+}
+async function _flushSaveChar(){
+  _saveCharTimer=null;
+  const resolves=_saveCharResolves;
+  _saveCharResolves=[];
+  if(!db||!charId||!char){resolves.forEach(r=>r.resolve());return;}
+  try{
+    await _doSaveChar();
+    resolves.forEach(r=>r.resolve());
+  }catch(e){
+    resolves.forEach(r=>r.reject(e));
+  }
+}
+
+function saveInv(){
+  return new Promise((resolve,reject)=>{
+    if(!db||!charId){resolve();return;}
+    _saveInvResolves.push({resolve,reject});
+    if(_saveInvTimer)clearTimeout(_saveInvTimer);
+    _saveInvTimer=setTimeout(_flushSaveInv,SAVE_DEBOUNCE_MS);
+  });
+}
+async function _flushSaveInv(){
+  _saveInvTimer=null;
+  const resolves=_saveInvResolves;
+  _saveInvResolves=[];
+  if(!db||!charId){resolves.forEach(r=>r.resolve());return;}
+  try{
+    await _doSaveInv();
+    resolves.forEach(r=>r.resolve());
+  }catch(e){
+    resolves.forEach(r=>r.reject(e));
+  }
+}
+
+// 페이지 떠날 때, 탭 숨길 때 강제 플러시 (데이터 손실 방지)
+async function flushSaves(){
+  const promises=[];
+  if(_saveCharTimer){clearTimeout(_saveCharTimer);promises.push(_flushSaveChar());}
+  if(_saveInvTimer){clearTimeout(_saveInvTimer);promises.push(_flushSaveInv());}
+  if(promises.length)await Promise.all(promises);
+}
+window.flushSaves=flushSaves;
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden')flushSaves().catch(()=>{});
+});
+window.addEventListener('beforeunload',()=>{
+  // 동기 컨텍스트라 await 불가, fire-and-forget
+  if(_saveCharTimer){clearTimeout(_saveCharTimer);_saveCharTimer=null;if(db&&charId&&char){try{set(ref(db,`chars/${charId}`),char);}catch(e){}}}
+  if(_saveInvTimer){clearTimeout(_saveInvTimer);_saveInvTimer=null;if(db&&charId){try{set(ref(db,`inv/${charId}`),inv);}catch(e){}}}
+});
+
+async function _doSaveChar(){
   if(!db||!charId)return;
   // ★ 저장 전 수치 검증
   if(char){
@@ -2774,7 +2844,7 @@ async function saveChar(){
     throw e;
   }
 }
-async function saveInv(){
+async function _doSaveInv(){
   if(!db||!charId)return;
   // ★ v3.0 핫픽스 — Firebase listener race 방지: 저장 중 listener 무시
   window._invSaveLock=Date.now();
@@ -7246,6 +7316,7 @@ async function renderAuction(sb){
       await set(ref(db,`auction/${lid}`),listing);
       invalidateCache('auction');
       await saveInv();
+      await flushSaves(); // ★ v3.0 핫픽스 — 디바운스 즉시 flush로 트랜잭션 보호 (auction 등록 + inv 삭제 일관성)
     }catch(e){console.error('[listAuction save FAILED]',e);}
   };
 
@@ -7262,6 +7333,7 @@ async function renderAuction(sb){
       await saveInv();
       await set(ref(db,`auction/${lid}/status`),'cancelled');
       invalidateCache('auction');
+      await flushSaves(); // ★ v3.0 핫픽스 — 디바운스 즉시 flush로 트랜잭션 보호 (inv 반환 + auction 취소 일관성)
     }catch(e){console.error('[cancelAuction save FAILED]',e);}
   };
 
@@ -7306,6 +7378,7 @@ async function renderAuction(sb){
       await saveInv();
       await update(ref(db,`auction/${lid}`),{status:'sold',buyerCharId:charId,buyerName:char.name,soldAt:Date.now()});
       invalidateCache('auction');
+      await flushSaves(); // ★ v3.0 핫픽스 — 디바운스 즉시 flush (payGold 차감 + 판매자 골드 지급 + auction 거래완료 일관성, 골드 회피 방지)
     }catch(e){console.error('[buyAuction save FAILED]',e);}
   };
 
@@ -7314,7 +7387,7 @@ async function renderAuction(sb){
   // 실시간 업데이트 — 초기 렌더 완료 후 연결 (즉시 발동 방지)
   _auctionTimer=setTimeout(()=>{
     _auctionTimer=null;
-    _auctionUnsub=onValue(query(ref(db,'auction'),orderByKey(),limitToLast(25)),sn=>{
+    _auctionUnsub=onValue(query(ref(db,'auction'),orderByKey(),limitToLast(20)),sn=>{
       // ★ snapshot 데이터 직접 사용 — 별도 get() 중복 호출 제거
       const currentTab=document.querySelector('#atab-browse.btn-gold')?'browse':
                        document.querySelector('#atab-mine.btn-gold')?'mine':'sell';
@@ -9385,15 +9458,15 @@ const cwUnsub={world:null,whisper:null,system:null};
 function startChat(){
   if(cwActive)return; // ★ 이미 초기화된 경우 중복 등록 방지
   cwActive=true;
-  // 월드 채팅 리스너 1회만 등록 — 최근 30개만 (Firebase 트래픽 절감)
+  // 월드 채팅 리스너 1회만 등록 — 최근 25개만 (v3.0 핫픽스: 30→25, 대역폭 절감)
   if(cwUnsub.world)cwUnsub.world();
-  cwUnsub.world=onValue(query(ref(db,'chat/world'),orderByKey(),limitToLast(30)),sn=>{
+  cwUnsub.world=onValue(query(ref(db,'chat/world'),orderByKey(),limitToLast(25)),sn=>{
     if(cwMode!=='world')return;
     renderChatMsgs(sn.val()||{},'world');
   });
-  // ★ 시스템 채널 리스너 — 최근 20개만
+  // ★ 시스템 채널 리스너 — 최근 10개만 (v3.0 핫픽스: 20→10, 대역폭 절감)
   if(cwUnsub.system)cwUnsub.system();
-  cwUnsub.system=onValue(query(ref(db,'chat/system'),orderByKey(),limitToLast(20)),sn=>{
+  cwUnsub.system=onValue(query(ref(db,'chat/system'),orderByKey(),limitToLast(10)),sn=>{
     const msgs=sn.val()||{};
     if(cwMode==='system'){
       renderChatMsgs(msgs,'system');
@@ -9491,7 +9564,7 @@ window.cwTab=function(m){
     get(ref(db,'chat/system')).then(sn=>renderChatMsgs(sn.val()||{},'system'));
   }else if(m==='whisper'){
     if(cwUnsub.whisper)cwUnsub.whisper();
-    cwUnsub.whisper=onValue(query(ref(db,`chat/whisper/${charId}`),orderByKey(),limitToLast(20)),sn=>{
+    cwUnsub.whisper=onValue(query(ref(db,`chat/whisper/${charId}`),orderByKey(),limitToLast(10)),sn=>{
       if(cwMode==='whisper')renderChatMsgs(sn.val()||{},'whisper');
     });
   }
@@ -11214,6 +11287,7 @@ window.submitReferral=async function(){
     text:`🎁 ${char.name}님이 ${input}님의 추천으로 합류했습니다! ${input}님에게 +3,000G + 인챈트 스크롤 2개 + 재조정 주문서 지급!`,
     ts:Date.now(),isAdmin:true
   });
+  await flushSaves(); // ★ v3.0 핫픽스 — 추천 보상은 본인(디바운스) + 추천인(즉시)이 섞이므로 본인 보상 일관성 보장 (본인 미지급 방지)
   renderSettings();
 };
 
@@ -12334,6 +12408,7 @@ window.enterSubjBattle=async function(){
       const ok=await addItem(extraBox);
       if(!ok)await set(ref(db,`inv/${charId}/${extraBox.id}`),extraBox);
       await saveInv();
+      await flushSaves(); // ★ v3.0 핫픽스 — 보스킬 외부 path + 보상 박스 inv 일관성 (처치자 박스 손실 방지)
       // Broadcast banner
       await push(ref(db,'chat/system'),{author:'SYSTEM',text:`🎉 ${boss.name}가 처치되었습니다!! 처치자: ${char.name}`,ts:Date.now(),isAdmin:true});
       trackMonsterKill(boss.name,'subjugation',boss._attr,true); // ★ 도감 등록
@@ -13328,6 +13403,7 @@ async function recalcSlotsAndOverflow(){
   char.invSlots=newInvSlots;
   char.whSlots=newWhSlots;
   await saveChar();await saveInv();
+  await flushSaves(); // ★ v3.0 핫픽스 — 가구 해제 시 char._tempStorage + inv 동시 변경 보호 (아이템 복사/손실 방지)
 }
 
 // 거점 메인 렌더
@@ -13891,7 +13967,9 @@ window.checkinMemorial=async function(){
       if(fItem){fItem._gotAt=Date.now(); await addItem(fItem); itemMsgs.push(fItem.name);}
     }
   }
-  await saveChar();await saveInv();updateTop();
+  await saveChar();await saveInv();
+  await flushSaves(); // ★ v3.0 핫픽스 — 위령제 보상 수령 즉시 저장 (체크인 데이터 + 골드 + 아이템 일관성, 이중 수령 방지)
+  updateTop();
   let msg=`🎏 ${day}일차 출석 보상 수령!`;
   if(goldNote)msg+=` ${goldNote}`;
   if(itemMsgs.length)msg+=` / ${itemMsgs.join(', ')}`;
