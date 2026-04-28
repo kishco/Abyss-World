@@ -2822,10 +2822,12 @@ window.diagAllInvs=async function(){
     items:s.itemCount,
     'avg(B/item)':s.avg
   })));
-  // 분석: 만약 활성 30명이 시간당 50번 saveInv 하면?
+  // 분석: 부분 update 적용 후엔 saveInv 1회당 변경분만 업로드 (전체 inv 크기 무관)
   const top30avg=stats.slice(0,30).reduce((a,b)=>a+b.total,0)/Math.min(30,stats.length);
-  const estPerHour=top30avg*50*30/1024/1024;
-  console.log(`%c💡 추정: 상위 30명 평균 ${(top30avg/1024).toFixed(1)}KB · 활성 30명이 시간당 50번 saveInv 시 자기 onValue 다운로드 ~${estPerHour.toFixed(1)}MB/시간`,'color:#80a0ff;font-weight:700');
+  console.log(`%c💡 상위 30명 평균 inv 크기: ${(top30avg/1024).toFixed(1)}KB`,'color:#80a0ff;font-weight:700');
+  console.log(`%c⚠️ 이전 추정 (전체 set + onValue) — saveInv 1회당 ${(top30avg/1024).toFixed(1)}KB×2 (왕복) ≈ ${(top30avg*2/1024).toFixed(0)}KB/회`,'color:#ff8080');
+  console.log(`%c✅ 현재 (부분 update + invSync) — saveInv 1회당 변경분만 (~0.5~2KB) + invSync 알림 50B ≈ 1~2KB/회`,'color:#80ff80;font-weight:700');
+  console.log(`%c👉 진짜 효과는 diagSaveStats() 의 'saveInv 평균 KB/회' 로 확인`,'color:#f0c040');
   return stats;
 };
 
