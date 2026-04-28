@@ -1111,7 +1111,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <button class="btn btn-ghost btn-sm" onclick="diagCharFields()">🔍 char 필드 분석</button>
             <button class="btn btn-ghost btn-sm" onclick="diagInvSize()">📦 inv 크기</button>
           </div>
-          <button class="btn btn-blue" style="width:100%" onclick="diagAllChars()">📊 전체 캐릭터 크기 비교 (관리자 전용)</button>
+          <button class="btn btn-blue" style="width:100%;margin-bottom:6px" onclick="diagAllChars()">📊 전체 캐릭터 크기 비교 (관리자)</button>
+          <button class="btn btn-red" style="width:100%;margin-bottom:6px" onclick="diagAllInvs()">📦 전체 인벤 크기 비교 (관리자)</button>
+          <button class="btn btn-purple" style="width:100%" onclick="diagOtherPaths()">📨 chat/subj/auction 트래픽 추정 (관리자)</button>
         </div>
 
         <!-- ① 점검 선물 지급 -->
@@ -2778,6 +2780,98 @@ window.diagInvSize=function(){
   console.log(`%c[inv 크기] ${(total/1024).toFixed(1)}KB · 아이템 ${itemCount}개 · 평균 ${itemCount?(total/itemCount).toFixed(0):0}바이트/아이템`,'color:#f0c040;font-weight:700');
   return {total,itemCount};
 };
+// 관리자 전용 — 전체 인벤 크기 분석 (진짜 큰 누수 의심)
+window.diagAllInvs=async function(){
+  if(!isAdmin){console.warn('관리자 전용');return;}
+  console.log('%c[전체 인벤 크기 분석 시작] inv 풀 페치 중... (큰 작업)','color:#ff8080');
+  const sn=await get(ref(db,'inv'));
+  const all=sn.val()||{};
+  const stats=[];
+  for(const[id,iv]of Object.entries(all)){
+    if(!iv)continue;
+    try{
+      const total=JSON.stringify(iv).length;
+      const itemCount=Object.keys(iv).length;
+      stats.push({charId:id.slice(0,8),total,itemCount,avg:itemCount?Math.round(total/itemCount):0});
+    }catch(e){}
+  }
+  stats.sort((a,b)=>b.total-a.total);
+  const top=stats.slice(0,20);
+  const totalSum=stats.reduce((a,b)=>a+b.total,0);
+  const avg=stats.length?totalSum/stats.length:0;
+  const maxItem=Math.max(...stats.map(s=>s.itemCount));
+  console.log(`%c[전체 인벤: ${stats.length}명] 평균 ${(avg/1024).toFixed(1)}KB · 합계 ${(totalSum/1024/1024).toFixed(2)}MB · 최대 아이템 ${maxItem}개`,'color:#f0c040;font-weight:700;font-size:13px');
+  console.table(top.map(s=>({
+    charId:s.charId,
+    'total(KB)':(s.total/1024).toFixed(1),
+    items:s.itemCount,
+    'avg(B/item)':s.avg
+  })));
+  // 분석: 만약 활성 30명이 시간당 50번 saveInv 하면?
+  const top30avg=stats.slice(0,30).reduce((a,b)=>a+b.total,0)/Math.min(30,stats.length);
+  const estPerHour=top30avg*50*30/1024/1024;
+  console.log(`%c💡 추정: 상위 30명 평균 ${(top30avg/1024).toFixed(1)}KB · 활성 30명이 시간당 50번 saveInv 시 자기 onValue 다운로드 ~${estPerHour.toFixed(1)}MB/시간`,'color:#80a0ff;font-weight:700');
+  return stats;
+};
+
+// 관리자 전용 — chat/subj 트래픽 추정
+window.diagOtherPaths=async function(){
+  if(!isAdmin){console.warn('관리자 전용');return;}
+  console.log('%c[기타 path 분석 시작]','color:#80a0ff');
+  const results={};
+  // chat/world 현재 데이터 크기
+  try{
+    const sn=await get(query(ref(db,'chat/world'),orderByKey(),limitToLast(25)));
+    const data=sn.val()||{};
+    const size=JSON.stringify(data).length;
+    const count=Object.keys(data).length;
+    results.chatWorld={size,count,kb:(size/1024).toFixed(1)};
+    console.log(`📨 chat/world (limit 25): ${(size/1024).toFixed(1)}KB · ${count}개 메시지 · 평균 ${count?(size/count).toFixed(0):0}바이트/메시지`);
+  }catch(e){}
+  // subjugation/weeklyRanking
+  try{
+    const sn=await get(query(ref(db,'subjugation/weeklyRanking'),orderByKey(),limitToLast(20)));
+    const data=sn.val()||{};
+    const size=JSON.stringify(data).length;
+    const count=Object.keys(data).length;
+    results.subjRank={size,count,kb:(size/1024).toFixed(1)};
+    console.log(`⚔️ subjugation/weeklyRanking (limit 20): ${(size/1024).toFixed(1)}KB · ${count}개 항목`);
+  }catch(e){}
+  // auction
+  try{
+    const sn=await get(query(ref(db,'auction'),orderByKey(),limitToLast(20)));
+    const data=sn.val()||{};
+    const size=JSON.stringify(data).length;
+    const count=Object.keys(data).length;
+    results.auction={size,count,kb:(size/1024).toFixed(1)};
+    console.log(`🏛 auction (limit 20): ${(size/1024).toFixed(1)}KB · ${count}개 항목 · 평균 ${count?(size/count).toFixed(0):0}바이트/항목`);
+  }catch(e){}
+  // 활성 사용자 (presence)
+  try{
+    const sn=await get(ref(db,'presence'));
+    const data=sn.val()||{};
+    const now=Date.now();
+    const active=Object.values(data).filter(p=>p&&p.ts&&now-p.ts<300000).length; // 5분 내
+    results.activeUsers=active;
+    console.log(`👥 활성 사용자 (5분 내): ${active}명`);
+  }catch(e){}
+  // 추정 계산
+  console.log('%c💡 트래픽 추정 (활성 사용자 N명 동시 접속 가정)','color:#f0c040;font-weight:700');
+  if(results.chatWorld&&results.activeUsers){
+    const u=results.activeUsers;
+    // chat/world 메시지 1개당 모든 활성 구독자에게 25개 전체 푸시 = u명 * 25 페이로드
+    const chatPerMsg=results.chatWorld.size*u/1024;
+    console.log(`  💬 chat/world 메시지 1개당 모든 구독자가 ${(results.chatWorld.size/1024).toFixed(1)}KB 받음 → ${u}명 × ${(results.chatWorld.size/1024).toFixed(1)}KB = ${chatPerMsg.toFixed(0)}KB/메시지`);
+    console.log(`     시간당 100메시지 가정 = ${(chatPerMsg*100/1024).toFixed(1)}MB/시간`);
+  }
+  if(results.subjRank&&results.activeUsers){
+    const u=results.activeUsers;
+    const subjPerKill=results.subjRank.size*u/1024;
+    console.log(`  ⚔️ subjugation/weeklyRanking 갱신 1회당 ${u}명 × ${(results.subjRank.size/1024).toFixed(1)}KB = ${subjPerKill.toFixed(0)}KB/갱신`);
+  }
+  return results;
+};
+
 // 관리자 전용 — 전체 캐릭터 크기 분석
 window.diagAllChars=async function(){
   if(!isAdmin){console.warn('관리자 전용');return;}
