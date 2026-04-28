@@ -1672,6 +1672,30 @@ const PRE=[
   {n:'시간의',     attr:null,        b:{dex:3,spd:5,def:-2},  sk:'time_stop',      w:5},  // 시간정지+방어페널티
   {n:'잔영의',     attr:null,        b:{dex:5,spd:4,hp:-25},  sk:'phantom_step',   w:5},  // 완전회피+HP페널티
   {n:'공허의',     attr:'dark',      b:{matk:7,int:4,hp:-50}, sk:'void_nova',      w:3},  // 범위마법+대형HP페널티
+  // ★ v3.0 핫픽스 — 누락 카테고리 보강 (크뎀 고티어, 밸런스, 스킬보너스)
+  // T3 크뎀: 중간 스펙
+  {n:'살수의',     attr:null,        b:{critDmg:18,crit:4,dex:2}, sk:'void_slash',  w:5},
+  // T4 크뎀: 강력형
+  {n:'심판자의',   attr:'holy',      b:{critDmg:25,atk:5,crit:4}, sk:'holy_judgment', w:4},
+  {n:'단죄의',     attr:'dark',      b:{critDmg:30,atk:6,hp:-30}, sk:'doom_strike', w:3},
+  // T5 크뎀: 최고 스펙 (리스크 큼)
+  {n:'학살자의',   attr:'dark',      b:{critDmg:40,atk:7,crit:5,hp:-50}, sk:'doom_strike', w:2},
+  // T2~T4 밸런스 (무기 밸런스 보강 — 기존 풀에 0개)
+  {n:'정밀한',     attr:null,        b:{balance:8,dex:2},     sk:null,             w:7},  // T2 균형
+  {n:'섬세한',     attr:null,        b:{balance:12,dex:3,crit:2}, sk:null,         w:5},  // T3 균형
+  {n:'완벽한',     attr:null,        b:{balance:18,dex:4,atk:3}, sk:null,          w:3},  // T4 정밀
+  // T3~T4 스킬보너스 (마법 빌드 보강)
+  {n:'주문술의',   attr:null,        b:{matk:5,int:2,skillBonus:5}, sk:'mana_surge', w:5}, // T3 스킬강화
+  {n:'대마법사의', attr:null,        b:{matk:7,int:3,skillBonus:8}, sk:'arcane_burst', w:3}, // T4 고급
+  // ★ v3.0 핫픽스 — 정통 탱커형 (페널티 없는 순수 탱)
+  {n:'견고한',     attr:null,        b:{def:8,hp:25,vit:2},   sk:null,             w:6},  // T2 무페널티 탱
+  {n:'요새의',     attr:null,        b:{def:12,hp:50,vit:3},  sk:'counter_strike', w:4},  // T3 정통 탱
+  {n:'성벽의',     attr:'holy',      b:{def:15,hp:80,vit:4},  sk:'divine_shield',  w:3},  // T4 무페널티 정통 탱
+  {n:'불괴의',     attr:'holy',      b:{def:20,hp:120,vit:5,atk:4}, sk:'divine_shield', w:2}, // T5 최정통 탱
+  // ★ v3.0 핫픽스 — LUK 빌드 인챈트 (드랍/골드/크리티컬 시너지)
+  {n:'행운의',     attr:null,        b:{luk:4,dex:2},         sk:null,             w:7},  // T2 LUK 기본
+  {n:'풍요로운',   attr:null,        b:{luk:5,goldBonus:12,dex:2}, sk:null,        w:5},  // T3 LUK+골드
+  {n:'운명의가호', attr:null,        b:{luk:7,crit:5,dex:3},  sk:null,             w:3},  // T4 LUK+크리
 ];
 const SUF=[
   // ─── 물리 딜러 (physical: ATK/STR/CRIT) — 9개 ───
@@ -1740,6 +1764,30 @@ const SUF=[
   {n:'잔영',      b:{dex:5,spd:4,hp:-30},        sk:'phantom_step',   w:4},  // 완전회피+HP페널티
   {n:'흡혼',      b:{matk:5,int:2,hp:-20},       sk:'soul_drain',     w:5},  // 영혼흡수+HP페널티
   {n:'방어붕괴',  b:{atk:6,str:2,def:-5},        sk:'armor_break',    w:5},  // 방어붕괴+자신방패페널티
+  // ★ v3.0 핫픽스 — 누락 카테고리 보강
+  // T3 크뎀: 중간형
+  {n:'예리함',    b:{critDmg:18,crit:3,str:2},    sk:'void_slash',    w:5},
+  // T4 크뎀: 강력형
+  {n:'섬멸',      b:{critDmg:25,atk:5,crit:4},    sk:'explosion',     w:4},
+  {n:'재단',      b:{critDmg:30,dex:4,hp:-30},    sk:'doom_strike',   w:3},
+  // T5 크뎀: 최고
+  {n:'사형선고',  b:{critDmg:40,atk:7,crit:5,hp:-50}, sk:'doom_strike', w:2},
+  // T2~T4 밸런스
+  {n:'균형',      b:{balance:8,dex:2},           sk:null,             w:7},  // T2
+  {n:'명중',      b:{balance:12,dex:3,crit:2},   sk:null,             w:5},  // T3
+  {n:'정밀타격',  b:{balance:18,atk:3,dex:3},    sk:null,             w:3},  // T4
+  // T3~T4 스킬보너스
+  {n:'영창',      b:{matk:5,int:2,skillBonus:5}, sk:'mana_surge',     w:5},  // T3
+  {n:'고대마법',  b:{matk:7,int:3,skillBonus:8}, sk:'arcane_burst',   w:3},  // T4
+  // ★ v3.0 핫픽스 — 정통 탱커형 (페널티 없음)
+  {n:'견고',      b:{def:8,hp:25,vit:2},         sk:null,             w:6},  // T2
+  {n:'요새',      b:{def:12,hp:50,vit:3},        sk:'counter_strike', w:4},  // T3
+  {n:'난공',      b:{def:15,hp:80,vit:4},        sk:'divine_shield',  w:3},  // T4
+  {n:'불멸',      b:{def:20,hp:120,vit:5,atk:4}, sk:'divine_shield',  w:2},  // T5
+  // ★ v3.0 핫픽스 — LUK 빌드 인챈트
+  {n:'행운',      b:{luk:4,dex:2},               sk:null,             w:7},  // T2
+  {n:'풍요',      b:{luk:5,goldBonus:12,dex:2},  sk:null,             w:5},  // T3
+  {n:'대운',      b:{luk:7,crit:5,dex:3},        sk:null,             w:3},  // T4
 ];
 // Weapon / Armor names (10 each)
 const WN={
@@ -2263,6 +2311,17 @@ const SHOP_ITEMS=[
 const gId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2);
 const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
+// ★ v3.0 핫픽스 — 가중치 기반 픽 (인챈트 드랍 시스템에서 사용)
+// 기존 pick은 균등 확률이라 PRE/SUF 배열의 w 필드가 무시되고 있었음 → 인챈트 가중치 시스템 복원
+const pickWeighted=(arr,wField='w')=>{
+  if(!arr||arr.length===0)return null;
+  let total=0;
+  for(const x of arr)total+=(x?.[wField]||1);
+  if(total<=0)return arr[Math.floor(Math.random()*arr.length)];
+  let r=Math.random()*total;
+  for(const x of arr){r-=(x?.[wField]||1);if(r<=0)return x;}
+  return arr[arr.length-1];
+};
 function wRand(pool){let t=pool.reduce((s,x)=>s+(x.w||1),0),r=Math.random()*t;for(const x of pool){r-=(x.w||1);if(r<=0)return x;}return pool[pool.length-1];}
 function toast(msg,d=2200){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 const toEmail=s=>s.includes('@')?s:s+'@ag.game';
@@ -4428,7 +4487,7 @@ async function checkCollectionReward(area){
       const isPre=Math.random()<0.5;
       const tier=area==='immortaltower'||area==='subjugation'?3:area==='dragon'||area==='fortress'?2:1;
       const pool=isPre?PRE.filter(e=>getEnchantTier(e.n)===tier):SUF.filter(e=>getEnchantTier(e.n)===tier);
-      const enchData=pool.length?pool[Math.floor(Math.random()*pool.length)]:(isPre?PRE[0]:SUF[0]);
+      const enchData=pool.length?(pickWeighted(pool)||pool[0]):(isPre?PRE[0]:SUF[0]); // ★ v3.0 핫픽스 - 가중치 기반 픽
       const scroll=genEnchantScrollItem(enchData,isPre,tier,tier);
       scroll._gotAt=Date.now(); scroll.tradeable=true;
       await addItem(scroll);
@@ -5022,8 +5081,10 @@ function genItem(pool,forcedGrade=null,lv=1,hint=false,dungeonTier=0){
   const suf=sufRaw?{n:sufRaw.n,sk:sufRaw.sk||null,b:scaleEnchant(sufRaw.b,lv,enchGM),_naturalEnchant:true}:null;
   const attr=pre?.attr||(gi>=4?pick(Object.keys(ATTR_N)):null);
   const bname=getItemName(base,grade);
-  const gAdj=grade==='legendary'?'전설의 ':grade==='epic'?'정예 ':grade==='rare'?'강화된 ':grade==='uncommon'?'좋은 ':'';
-  const fullN=(pre?pre.n+' ':'')+(suf?suf.n+' ':'')+gAdj+bname;
+  // ★ v3.0 핫픽스 — 등급 접두사 제거 (이름이 너무 길어지는 문제)
+  // Before: "지명적인 회전 전설의 결말을 나누는 자" (4단계 누적)
+  // After : "지명적인 회전 결말을 나누는 자" (등급은 색상/태그로 충분히 표현됨)
+  const fullN=(pre?pre.n+' ':'')+(suf?suf.n+' ':'')+bname;
   const reqLv=Math.min(99,Math.max(1,lv)); // ★ 레벨 상한 99 강제
   return{id:gId(),name:fullN,baseName:bname,baseId:base.id,slot:base.slot,hand:base.hand||null,
     grade,gradeName:GRADES[grade].name,gradeColor:GRADES[grade].color,
@@ -5046,11 +5107,19 @@ function migrateForgeWard(){
 // ★ 아이템레벨 삭제 마이그레이션 (_lv3)
 // isEquipped=true: 장착 중인 아이템 — char.level 이하로 reqLv 캡 (실수 해제 후 재장착 보호)
 // ★ 인챈트 이름 중첩 마이그레이션 (_enchNameMig2)
+// ★ v3.0 핫픽스 — 등급 접두사 제거 마이그레이션 (_nameMig3)
+// 기존: "지명적인 회전 전설의 결말을 나누는 자" (4단계)
+// 신규: "지명적인 회전 결말을 나누는 자" (3단계, 등급은 색상 태그로 표시)
 function migrateEnchantName(it){
-  if(!it||it._enchNameMig2)return false;
+  if(!it)return false;
+  const needsV2=!it._enchNameMig2;
+  const needsV3=!it._nameMig3;
+  if(!needsV2&&!needsV3)return false;
   it._enchNameMig2=true;
-  if(!it.prefix&&!it.suffix)return false;
-  const gAdj=it.grade==='legendary'?'전설의 ':it.grade==='epic'?'정예 ':it.grade==='rare'?'강화된 ':it.grade==='uncommon'?'좋은 ':'';
+  it._nameMig3=true;
+  if(!it.prefix&&!it.suffix&&!needsV3)return false;
+  // basePart 결정
+  const gAdj=''; // ★ v3.0 핫픽스 — 등급 접두사 제거 (남겨두면 안 쓰는 변수, 아래 로직 호환용 빈 문자열)
   // basePart 결정
   let basePart='';
   if(it.grade==='set'&&it.setId&&it.baseId){
@@ -5085,8 +5154,12 @@ function migrateEnchantName(it){
     tmp=tmp.replace(/^(전설의|정예|강화된|좋은)\s/,'').trim();
     basePart=tmp||it.name;
   }
-  const finalGAdj=it.grade==='set'?'':gAdj;
-  const newName=(it.prefix?it.prefix.n+' ':'')+(it.suffix?it.suffix.n+' ':'')+finalGAdj+basePart;
+  // ★ v3.0 핫픽스 — 등급 접두사("전설의/정예/강화된/좋은") 제거하고 깔끔하게 조립
+  // basePart에 등급 접두사가 섞여 있으면 제거
+  basePart=basePart.replace(/^(전설의|정예|강화된|좋은)\s+/,'').trim();
+  // 안전망: basePart가 비어있으면 마이그레이션 스킵 (이름 손상 방지)
+  if(!basePart||basePart.length<2)return false;
+  const newName=(it.prefix?it.prefix.n+' ':'')+(it.suffix?it.suffix.n+' ':'')+basePart;
   if(newName!==it.name){it.name=newName;return true;}
   return false;
 }
@@ -5165,6 +5238,18 @@ const ENCHANT_TIER_MAP={
   '학살':5,'공격광':4,'역습':3,
   '낙뢰':4,'공허':5,'독아':3,
   '잔영':4,'흡혼':3,'방어붕괴':3,
+  // ★ v3.0 핫픽스 — 누락 카테고리 보강 (크뎀 고티어, 밸런스, 스킬보너스, 크뎀 접두/접미)
+  '살수의':3,'심판자의':4,'단죄의':4,'학살자의':5, // 접두 크뎀
+  '예리함':3,'섬멸':4,'재단':4,'사형선고':5,       // 접미 크뎀
+  '정밀한':2,'섬세한':3,'완벽한':4,                  // 접두 밸런스
+  '균형':2,'명중':3,'정밀타격':4,                    // 접미 밸런스
+  '주문술의':3,'대마법사의':4,                       // 접두 스킬보너스
+  '영창':3,'고대마법':4,                             // 접미 스킬보너스
+  // ★ v3.0 핫픽스 — 정통 탱커 + LUK 빌드 보강
+  '견고한':2,'요새의':3,'성벽의':4,'불괴의':5,       // 접두 정통 탱커
+  '견고':2,'요새':3,'난공':4,'불멸':5,               // 접미 정통 탱커
+  '행운의':2,'풍요로운':3,'운명의가호':4,            // 접두 LUK 빌드
+  '행운':2,'풍요':3,'대운':4,                         // 접미 LUK 빌드
 };
 function getEnchantTier(enchantName){return ENCHANT_TIER_MAP[enchantName]||2;}
 
@@ -5208,7 +5293,7 @@ function genTieredEnchantScroll(dungeonTier, difficulty='normal'){
   const isPrefix=Math.random()<0.5;
   const pool=isPrefix?PRE:SUF;
   const candidates=pool.filter(e=>getEnchantTier(e.n)===chosenTier);
-  const chosen=candidates.length>0?pick(candidates):pick(pool);
+  const chosen=candidates.length>0?pickWeighted(candidates):pickWeighted(pool); // ★ v3.0 핫픽스 - 가중치 기반 픽
   return genEnchantScrollItem(chosen, isPrefix, dungeonTier, chosenTier);
 }
 
@@ -5216,7 +5301,7 @@ function genEnchantScroll(){
   // 기존 호환 (랜덤 중급 스크롤)
   const isPrefix=Math.random()<0.5;
   const pool=isPrefix?PRE:SUF;
-  return genEnchantScrollItem(pick(pool.filter(e=>getEnchantTier(e.n)<=3)),isPrefix,1);
+  return genEnchantScrollItem(pickWeighted(pool.filter(e=>getEnchantTier(e.n)<=3)),isPrefix,1); // ★ v3.0 핫픽스 - 가중치 기반 픽
 }
 function genScrollItem(){
   return{id:gId(),name:'능력치 재조정 주문서',baseId:'reroll_scroll',slot:'scroll',hand:null,
@@ -5822,7 +5907,8 @@ function openIM(it){
       const scaledB=enchData._scaled ? enchData.b : scaleEnchant(enchData.b,lv,gm);
       const enchObj={n:enchData.n,b:scaledB,sk:enchData.sk||null,attr:enchData.attr||null,_fromScroll:true};
       if(isPrefix)eq.prefix=enchObj;else eq.suffix=enchObj;
-      const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
+      // ★ v3.0 핫픽스 — 등급 접두사 제거
+      const gAdj='';
       let basePart='';
       if(eq._itUniqueName){
         // ★ IT 고유 이름 아이템: 저장된 고유 이름 사용
@@ -5921,10 +6007,10 @@ function openIM(it){
       if(!confirm(`${eq.name}에서\n[${enchObj.n}] 인챈트를 추출합니까?\n장비에서 해당 인챈트가 제거됩니다.`))return;
       delete inv[scrollId];
       if(which==='prefix')eq.prefix=null;else eq.suffix=null;
-      const gAdj=eq.grade==='legendary'?'전설의 ':eq.grade==='epic'?'정예 ':eq.grade==='rare'?'강화된 ':eq.grade==='uncommon'?'좋은 ':'';
+      // ★ v3.0 핫픽스 — 등급 접두사 제거
       // ★ baseName이 있으면 사용, 없으면 현재 이름에서 접두/접미 제거 시도
       const baseN=eq.baseName||(eq.name.replace(/^(?:.*\s)?(\S+)$/,'$1'));
-      eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+gAdj+baseN;
+      eq.name=(eq.prefix?eq.prefix.n+' ':'')+(eq.suffix?eq.suffix.n+' ':'')+baseN;
       const isPrefix=(which==='prefix');
       // ★ tier는 enchObj에서 직접 못 가져오므로 이름으로 조회
       const tier=getEnchantTier(enchObj.n)||2;
@@ -12359,7 +12445,7 @@ window.openSubjBox=async function(boxId){
   const isPrefix=Math.random()<0.5;
   const pool=isPrefix?PRE:SUF;
   const candidates=pool.filter(e=>getEnchantTier(e.n)===scrollTier);
-  const chosen=candidates.length>0?pick(candidates):pick(pool);
+  const chosen=candidates.length>0?pickWeighted(candidates):pickWeighted(pool); // ★ v3.0 핫픽스 - 가중치 기반 픽
   const scroll=genEnchantScrollItem(chosen,isPrefix,5,scrollTier);
   scroll.tradeable=true;
   const ok=await addItem(scroll);
