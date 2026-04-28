@@ -3646,6 +3646,13 @@ async function selChar(id){
     if(it&&autoMigrateSetTradeable(it))whMigrated=true;
     if(it&&migrateEnchantName(it))whMigrated=true;
     if(it&&migrateScrollName(it))whMigrated=true; // ★ v3.0 핫픽스 — 손상 스크롤 이름 복구
+    // ★ v3.1 핫픽스 — 잘못 강등된 set 가구 복구 (FURNITURE 정의에서 set인 가구는 set 유지)
+    if(it&&it.isFurniture&&it.baseId&&FURNITURE[it.baseId]?.grade==='set'&&it.grade!=='set'){
+      it.grade='set';
+      it.gradeName='유일';
+      it.gradeColor=GRADES.set.color;
+      whMigrated=true;
+    }
   }
   // ★ 스탯 변화 OR 플래그만 변화 모두 저장 (플래그 미저장 시 매 로그인 재체크 방지)
   if(equipMigrated||equipStatsDirty)await saveChar();
@@ -3714,7 +3721,14 @@ async function selChar(id){
   // (inv 자체는 위 3361 라인에서 이미 명시적으로 get 완료됨 — 중복 로드 제거)
   let needSave=false;
   for(const it of Object.values(inv)){
-    if(it&&it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;needSave=true;}
+    if(it&&it.grade==='set'&&!it.setId&&!it.isFurniture){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;needSave=true;}
+    // ★ v3.1 핫픽스 — 잘못 강등된 set 가구 복구 (FURNITURE 정의에서 set인 가구는 set 유지)
+    if(it&&it.isFurniture&&it.baseId&&FURNITURE[it.baseId]?.grade==='set'&&it.grade!=='set'){
+      it.grade='set';
+      it.gradeName='유일';
+      it.gradeColor=GRADES.set.color;
+      needSave=true;
+    }
     if(it&&(it.enhance||0)>9){it.enhance=9;needSave=true;}
     if(it&&(!it._v||it._v<2)){migrateItem(it);needSave=true;}
     if(it&&(!it._esv||it._esv<ENCHANT_STAT_VER)){if(autoMigrateEnchantStats(it))needSave=true;else it._esv=ENCHANT_STAT_VER;}
@@ -4139,7 +4153,7 @@ function renderEq(){
     let tooltip='';
     if(it){
       const statLabels={atk:'ATK',def:'DEF',hp:'HP',spd:'SPD',crit:'치명',critDmg:'크뎀',matk:'MATK',balance:'밸런스'};
-      // ★ 인챈트 포함 총합 스탯 계산
+      // ★ 인챈트 포함 총합 스탯 계산 (calcStats 실효과 비율과 동일)
       const ts=(()=>{
         const t={...it.stats};
         for(const enc of[it.prefix,it.suffix]){
@@ -4148,11 +4162,11 @@ function renderEq(){
           for(const[k,v]of Object.entries(enc.b)){
             const cv=cap(v);if(cv===0)continue;
             if(['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))t[k]=(t[k]||0)+cv;
-            if(k==='str')t.atk=(t.atk||0)+Math.round(cv*1.8);
-            if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
-            if(k==='int')t.matk=(t.matk||0)+Math.round(cv*2);
-            if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*10);t.def=(t.def||0)+Math.round(cv*0.6);}
-            if(k==='luk')t.crit=(t.crit||0)+Math.round(cv*0.08);
+            if(k==='str')t.atk=(t.atk||0)+Math.round(cv*0.8);
+            if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.25);t.crit=(t.crit||0)+Math.round(cv*0.04);}
+            if(k==='int')t.matk=(t.matk||0)+Math.round(cv*1.5);
+            if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*3);t.def=(t.def||0)+Math.round(cv*0.3);}
+            if(k==='luk')t.crit=(t.crit||0)+Math.round(cv*0.04);
           }
         }
         return t;
@@ -4233,7 +4247,7 @@ window.openEqDetail=function(slotKey){
   const content=document.getElementById('eqDetailContent');
   if(!it){panel.style.display='none';return;}
 
-  // ★ 총합 스탯 (기본 + 접두 + 접미, str/dex/int/vit 환산 포함)
+  // ★ 총합 스탯 (기본 + 접두 + 접미, str/dex/int/vit 환산 포함 — calcStats 실효과 비율과 동일)
   const totalSt={...it.stats};
   for(const enc of[it.prefix,it.suffix]){
     if(!enc?.b)continue;
@@ -4241,11 +4255,11 @@ window.openEqDetail=function(slotKey){
     for(const[k,v]of Object.entries(enc.b)){
       const cv=cap(v);if(cv===0)continue;
       if(['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))totalSt[k]=(totalSt[k]||0)+cv;
-      if(k==='str')totalSt.atk=(totalSt.atk||0)+Math.round(cv*1.8);
-      if(k==='dex'){totalSt.spd=(totalSt.spd||0)+Math.round(cv*0.4);totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.08);}
-      if(k==='int')totalSt.matk=(totalSt.matk||0)+Math.round(cv*2);
-      if(k==='vit'){totalSt.hp=(totalSt.hp||0)+Math.round(cv*10);totalSt.def=(totalSt.def||0)+Math.round(cv*0.6);}
-      if(k==='luk')totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.08);
+      if(k==='str')totalSt.atk=(totalSt.atk||0)+Math.round(cv*0.8);
+      if(k==='dex'){totalSt.spd=(totalSt.spd||0)+Math.round(cv*0.25);totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.04);}
+      if(k==='int')totalSt.matk=(totalSt.matk||0)+Math.round(cv*1.5);
+      if(k==='vit'){totalSt.hp=(totalSt.hp||0)+Math.round(cv*3);totalSt.def=(totalSt.def||0)+Math.round(cv*0.3);}
+      if(k==='luk')totalSt.crit=(totalSt.crit||0)+Math.round(cv*0.04);
     }
   }
   const statsHtml=Object.entries(totalSt).filter(([k,v])=>v>0&&['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))
@@ -4255,10 +4269,10 @@ window.openEqDetail=function(slotKey){
   const gM=GRADES[it.grade]?.skillM||0;
 const encHint={
   str:v=>{const a=Math.round(v*0.8);return a?`→ATK+${a}`:'';}         ,
-  dex:v=>{const s=Math.round(v*0.25),c=Math.round(v*0.06);const parts=[];if(s)parts.push(`SPD+${s}`);if(c)parts.push(`CRIT+${c}`);return parts.length?'→'+parts.join('/'):'';},
+  dex:v=>{const s=Math.round(v*0.25),c=Math.round(v*0.04);const parts=[];if(s)parts.push(`SPD+${s}`);if(c)parts.push(`CRIT+${c}`);return parts.length?'→'+parts.join('/'):'';},
   int:v=>{const m=Math.round(v*1.5);return m?`→MATK+${m}`:'';},
   vit:v=>{const h=Math.round(v*3),d=Math.round(v*0.3);const parts=[];if(h)parts.push(`HP+${h}`);if(d)parts.push(`DEF+${d}`);return parts.length?'→'+parts.join('/'):'';},
-  luk:v=>{const c=Math.round(v*0.06);return c?`→CRIT+${c}`:'';},
+  luk:v=>{const c=Math.round(v*0.04);return c?`→CRIT+${c}`:'';},
 };
   const enchantHtml=[it.prefix,it.suffix].filter(Boolean).map(enc=>{
     const isLegacy=enc._legacy===true;
@@ -6505,7 +6519,7 @@ function renderInv(){
   const gr=document.getElementById('invgrid');
   if(!fil.length){gr.innerHTML='<div class="iempty">🎒 아이템 없음</div>';return;}
   gr.innerHTML=fil.map(it=>{
-    // ★ 인챈트 포함 총합 스탯
+    // ★ 인챈트 포함 총합 스탯 (calcStats 실효과 비율과 동일)
     const ts=(()=>{
       const t={...it.stats};
       for(const enc of[it.prefix,it.suffix]){
@@ -6514,11 +6528,11 @@ function renderInv(){
         for(const[k,v]of Object.entries(enc.b)){
           const cv=cap(v);if(cv===0)continue;
           if(['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k))t[k]=(t[k]||0)+cv;
-          if(k==='str')t.atk=(t.atk||0)+Math.round(cv*1.8);
-          if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.4);t.crit=(t.crit||0)+Math.round(cv*0.08);}
-          if(k==='int')t.matk=(t.matk||0)+Math.round(cv*2);
-          if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*10);t.def=(t.def||0)+Math.round(cv*0.6);}
-          if(k==='luk')t.crit=(t.crit||0)+Math.round(cv*0.08);
+          if(k==='str')t.atk=(t.atk||0)+Math.round(cv*0.8);
+          if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.25);t.crit=(t.crit||0)+Math.round(cv*0.04);}
+          if(k==='int')t.matk=(t.matk||0)+Math.round(cv*1.5);
+          if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*3);t.def=(t.def||0)+Math.round(cv*0.3);}
+          if(k==='luk')t.crit=(t.crit||0)+Math.round(cv*0.04);
         }
       }
       return t;
@@ -7034,10 +7048,10 @@ function openIM(it){
         const cv=cap(v);if(cv===0)continue;
         if(['atk','def','hp','spd','crit','critDmg','matk','balance'].includes(k)) t[k]=(t[k]||0)+cv;
         if(k==='str') t.atk=(t.atk||0)+Math.round(cv*0.8);
-        if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.25);t.crit=(t.crit||0)+Math.round(cv*0.06);}
+        if(k==='dex'){t.spd=(t.spd||0)+Math.round(cv*0.25);t.crit=(t.crit||0)+Math.round(cv*0.04);}
         if(k==='int') t.matk=(t.matk||0)+Math.round(cv*1.5);
         if(k==='vit'){t.hp=(t.hp||0)+Math.round(cv*3);t.def=(t.def||0)+Math.round(cv*0.3);}
-        if(k==='luk') t.crit=(t.crit||0)+Math.round(cv*0.06);
+        if(k==='luk') t.crit=(t.crit||0)+Math.round(cv*0.04);
       }
     }
     return t;
@@ -7050,7 +7064,7 @@ function openIM(it){
 
   // ★ 인챈트 스탯을 "str+3 (→ATK+5)" 형태로 표시하는 헬퍼
   function fmtEncStat(k,v){
-    const hint={str:`→ATK+${Math.round(v*0.8)}`,dex:`→SPD+${Math.round(v*0.25)}/CRIT+${Math.round(v*0.06)}`,int:`→MATK+${Math.round(v*1.5)}`,vit:`→HP+${Math.round(v*3)}/DEF+${Math.round(v*0.3)}`,luk:`→CRIT+${Math.round(v*0.06)}`};
+    const hint={str:`→ATK+${Math.round(v*0.8)}`,dex:`→SPD+${Math.round(v*0.25)}/CRIT+${Math.round(v*0.04)}`,int:`→MATK+${Math.round(v*1.5)}`,vit:`→HP+${Math.round(v*3)}/DEF+${Math.round(v*0.3)}`,luk:`→CRIT+${Math.round(v*0.04)}`};
     const suf=hint[k]?` <span style="color:var(--tx3);font-size:9px">(${hint[k]})</span>`:'';
     return`${k}${v>0?'+':''}${v}${suf}`;
   }
