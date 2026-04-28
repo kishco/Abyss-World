@@ -6286,6 +6286,22 @@ const TALENT_NODES={
   p411:{tree:'p',branch:4,tier:11,cost:3,req:['p410'],type:'keystone',name:'★ 속성 지배자',desc:'모든 속성 데미지 +20%, 모든 속성 받피 -10%',effect:{attrDmgBonus:{fire:20,ice:20,lightning:20,dark:20,holy:20,poison:20},attrResist:{fire:10,ice:10,lightning:10,dark:10,holy:10,poison:10}},pos:_talPos('p',4,11)},
 };
 
+// ★ v3.1 핫픽스 — 분기 노드 X 좌표 보정 (좌우로 펼쳐 시각적 분기 표현)
+// 같은 부모(req)를 공유하는 두 자식 노드는 좌/오로 분리
+(function(){
+  const LEFT_NODES=["a104","a108","a205","a209","a305","a309","a405","a409","p105","p109","p205","p209","p305","p309","p402","p405","s107","s205","s209","s305","s309","s404","s408"];
+  const RIGHT_NODES=["a105","a109","a206","a210","a306","a310","a406","a410","p106","p110","p206","p210","p306","p310","p403","p406","s108","s206","s210","s306","s310","s405","s409"];
+  const OFFSET=35; // 좌우 분기 거리 (px)
+  for(const nid of LEFT_NODES){
+    const n=TALENT_NODES[nid];
+    if(n&&n.pos)n.pos={...n.pos,x:n.pos.x-OFFSET};
+  }
+  for(const nid of RIGHT_NODES){
+    const n=TALENT_NODES[nid];
+    if(n&&n.pos)n.pos={...n.pos,x:n.pos.x+OFFSET};
+  }
+})();
+
 // 특성 효과 합산 — calcStats에서 호출
 function getTalentEffects(c){
   const result={};
