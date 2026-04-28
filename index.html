@@ -1144,6 +1144,40 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <button class="btn btn-gold" style="width:100%" onclick="adminSendGift()">🎁 선물 지급 실행</button>
         </div>
 
+        <!-- ★ v3.0 — 강화권 / 불멸 정수 지급 -->
+        <div class="card2" style="margin-bottom:12px;border-color:rgba(255,140,0,.4);background:rgba(255,140,0,.04)">
+          <div style="font-size:11px;font-weight:700;color:#ff8c00;margin-bottom:2px">⚒ 강화권 / 🔱 불멸 정수 지급</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:10px;line-height:1.7">
+            <span style="color:#ff8c00">즉시 +N 강화권</span>: 장비를 인벤에서 선택해 즉시 지정 강화 단계로 만들기 (실패 X)<br>
+            <span style="color:#4a8fff">강화 보장권</span>: 다음 강화 1회 100% 성공 (기존 시스템 활용)<br>
+            <span style="color:#FF2244">불멸의 정수</span>: 불멸 제련 재료 (100개 + Lv.99 레전 무기 = 1% 시도)
+          </div>
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">강화권 종류</div>
+          <select id="enhTicketType" onchange="document.getElementById('sealAmtWrap').style.display=this.value==='seal'?'block':'none'" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:8px">
+            <option value="instant5">⚡ 즉시 +5 강화권 (즉시 +5로 만듦)</option>
+            <option value="instant7">⚡ 즉시 +7 강화권 (즉시 +7로 만듦)</option>
+            <option value="instant9">🔥 즉시 +9 강화권 (즉시 +9로 만듦, 최대치)</option>
+            <option value="guarantee1">⚒ 강화 보장권 ×1 (1회 100% 보장)</option>
+            <option value="guarantee3">⚒ 강화 보장권 ×3 (3회 100% 보장)</option>
+            <option value="guarantee5">⚒ 강화 보장권 ×5 (5회 100% 보장)</option>
+            <option value="seal">🔱 불멸의 정수 (수량 입력)</option>
+          </select>
+          <div id="sealAmtWrap" style="display:none;margin-bottom:8px">
+            <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">정수 수량</div>
+            <input id="sealAmtInput" type="number" min="1" max="99999" value="100" placeholder="정수 개수 (1~99999)" style="width:100%;padding:7px;background:var(--bg);border:1px solid rgba(255,34,68,.4);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
+            <div style="font-size:9px;color:var(--tx3);margin-top:4px">참고: 1회 불멸 제련 분량 = 100개</div>
+          </div>
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">지급 대상</div>
+          <select id="enhTicketTarget" onchange="document.getElementById('enhTicketCharWrap').style.display=this.value==='one'?'block':'none'" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px">
+            <option value="all">👥 전체 유저</option>
+            <option value="one">👤 특정 캐릭터</option>
+          </select>
+          <div id="enhTicketCharWrap" style="display:none;margin-bottom:6px">
+            <input id="enhTicketCharName" placeholder="캐릭터 이름 (정확히 입력)" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
+          </div>
+          <button class="btn btn-gold" style="width:100%" onclick="adminGiveEnhTicket()">⚒ 지급 실행</button>
+        </div>
+
         <!-- ② 물약 리셋 -->
         <div class="card2" style="margin-bottom:12px">
           <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">💊 전체 물약 리셋</div>
@@ -7626,6 +7660,15 @@ const FORGE_TABLE=[
 ];
 
 function renderForge(sb){
+  const _instCnt=(char._instantEnh5||0)+(char._instantEnh7||0)+(char._instantEnh9||0);
+  // 즉시 +N 버튼 HTML 생성기
+  const _instBtn=(target,key,enh)=>{
+    const opts=[];
+    if(enh<5&&(char._instantEnh5||0)>0)opts.push(`<button class="btn btn-ghost btn-xs" style="background:rgba(255,140,0,.15);border-color:rgba(255,140,0,.4);color:#ff8c00" onclick="doInstantEnh('${target}','${key}',5)">⚡ +5</button>`);
+    if(enh<7&&(char._instantEnh7||0)>0)opts.push(`<button class="btn btn-ghost btn-xs" style="background:rgba(255,140,0,.15);border-color:rgba(255,140,0,.4);color:#ff8c00" onclick="doInstantEnh('${target}','${key}',7)">⚡ +7</button>`);
+    if(enh<9&&(char._instantEnh9||0)>0)opts.push(`<button class="btn btn-ghost btn-xs" style="background:rgba(255,40,40,.15);border-color:rgba(255,40,40,.45);color:#ff5050;font-weight:700" onclick="doInstantEnh('${target}','${key}',9)">🔥 +9</button>`);
+    return opts.length?`<div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap">${opts.join('')}</div>`:'';
+  };
   const rows=EQSLOTS.map(sl=>{
     const it=char.equipment[sl.k];if(!it)return'';
     const enh=it.enhance||0;
@@ -7648,6 +7691,7 @@ function renderForge(sb){
       <button class="btn ${maxed?'btn-ghost':canAfford?'btn-gold':'btn-red'} btn-sm" style="width:100%" 
         onclick="doForge('${sl.k}')" ${maxed?'disabled':''}
       >${maxed?'최대':`강화 (${cost.toLocaleString()}G)`}</button>
+      ${!maxed?_instBtn('eq',sl.k,enh):''}
     </div>`;
   }).join('');
 
@@ -7674,6 +7718,7 @@ function renderForge(sb){
       <button class="btn ${maxed?'btn-ghost':canAfford?'btn-gold':'btn-red'} btn-sm" style="width:100%" 
         onclick="doForgeInv('${it.id}')" ${maxed?'disabled':''}
       >${maxed?'최대':`강화 (${cost.toLocaleString()}G)`}</button>
+      ${!maxed?_instBtn('inv',it.id,enh):''}
     </div>`;
   }).join('');
 
@@ -7692,6 +7737,24 @@ function renderForge(sb){
         </div>
       </div>`
     :`<div style="font-size:10px;color:var(--tx3);margin-bottom:8px">💡 파괴방지 스크롤 사용 시 강화 파괴를 막을 수 있습니다</div>`;
+
+  // ★ v3.0 — 즉시 +N 강화권 표시
+  const inst5=char._instantEnh5||0;
+  const inst7=char._instantEnh7||0;
+  const inst9=char._instantEnh9||0;
+  const guarantee=char._forgeGuarantee||0;
+  const hasInstantTickets=inst5>0||inst7>0||inst9>0;
+  const ticketInfo=(hasInstantTickets||guarantee>0)?`
+    <div style="background:linear-gradient(135deg,rgba(255,140,0,.08),rgba(255,140,0,.04));border:1px solid rgba(255,140,0,.35);border-radius:8px;padding:9px 12px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;color:#ff8c00;margin-bottom:4px">⚒ 보유 강화권</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;font-size:10px;color:var(--tx2)">
+        ${inst5>0?`<span style="background:rgba(255,140,0,.15);padding:2px 7px;border-radius:4px">⚡ +5권 ×${inst5}</span>`:''}
+        ${inst7>0?`<span style="background:rgba(255,140,0,.15);padding:2px 7px;border-radius:4px">⚡ +7권 ×${inst7}</span>`:''}
+        ${inst9>0?`<span style="background:rgba(255,40,40,.15);padding:2px 7px;border-radius:4px;color:#ff5050;font-weight:700">🔥 +9권 ×${inst9}</span>`:''}
+        ${guarantee>0?`<span style="background:rgba(74,143,255,.15);padding:2px 7px;border-radius:4px">⚒ 보장권 ×${guarantee}</span>`:''}
+      </div>
+      ${hasInstantTickets?`<div style="font-size:9px;color:var(--tx3);margin-top:5px">💡 장비 카드의 [즉시 +N] 버튼으로 사용</div>`:''}
+    </div>`:'';
 
   // ★ 불멸 제련 섹션 (Lv.99만 노출)
   const immortalSection=char.level>=99?`
@@ -7716,6 +7779,7 @@ function renderForge(sb){
 
   sb.innerHTML=`
     ${immortalSection}
+    ${ticketInfo}
     ${protectInfo}
     <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">강화 단계가 높을수록 <span style="color:var(--red)">파괴 확률</span>이 증가합니다.</div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:12px">비용은 장비 레벨 · 등급 · 인챈트 가치에 따라 달라집니다.</div>
@@ -7723,6 +7787,39 @@ function renderForge(sb){
     ${invRows?`<div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin:12px 0 7px">인벤토리 장비</div><div class="shopgrid">${invRows}</div>`:''}`
 ;
 }
+
+// ★ v3.0 — 즉시 +N 강화권 사용
+window.doInstantEnh=async(target, key, level)=>{
+  // target: 'eq' | 'inv', key: slotKey 또는 itemId, level: 5/7/9
+  const ticketKey=`_instantEnh${level}`;
+  if(!char[ticketKey]||char[ticketKey]<=0){toast(`즉시 +${level} 강화권이 없습니다`);return;}
+  let it;
+  if(target==='eq')it=char.equipment[key];
+  else it=inv[key];
+  if(!it){toast('장비를 찾을 수 없습니다');return;}
+  const enh=it.enhance||0;
+  if(enh>=level){toast(`이미 +${enh}이라 +${level} 권 사용 불가`);return;}
+  if(enh>=9){toast('최대 강화 +9');return;}
+  if(!confirm(`${it.name} 을(를) +${level} 으로 만드시겠습니까?\n현재: +${enh} → +${level}\n(즉시 +${level} 강화권 ×1 소모)`))return;
+
+  // 강화권 차감 + 장비 enhance 업데이트
+  char[ticketKey]--;
+  it.enhance=level;
+  if(!it._baseStats)it._baseStats={...it.stats};
+  // 강화 스탯 재계산: 강화수치^1.3 * 6%
+  for(const k of Object.keys(it._baseStats)){
+    if((it._baseStats[k]||0)>0){
+      const newVal=Math.round(it._baseStats[k]*(1+Math.pow(level,1.3)*0.06));
+      if(Number.isFinite(newVal))it.stats[k]=newVal;
+    }
+  }
+  if(target==='eq'){char.equipment[key]=it;await saveChar();}
+  else{inv[key]=it;await saveInv();await saveChar();}
+  toast(`⚡ ${it.name} 즉시 +${level} 적용! (남은 권: ${char[ticketKey]}회)`,3500);
+  blogAdd&&blogAdd(`<span class="l-exp" style="color:#ff8c00">⚡ ${it.name} +${level} 즉시 강화권 사용!</span>`);
+  updateTop();renderChar();renderInv();
+  const sb=document.getElementById('secbody');if(sb)renderForge(sb);
+};
 
 window.doForge=async sl=>{
   const it=char.equipment[sl];if(!it){toast('장비 없음');return;}
@@ -11774,6 +11871,66 @@ window.adminSendGift=async()=>{
     }
     toast(`✅ 전체 ${cnt}명에게 ${tier}단계 선물 지급 완료!`,4000);
     loadAdmin();
+  }
+};
+
+// ★ v3.0 — 강화권 지급 (즉시 +N 또는 강화 보장권 또는 불멸 정수)
+async function giveEnhTicketToChar(cid, type, amount){
+  const path=`chars/${cid}`;
+  const sn=await get(ref(db,path));const c=sn.val();if(!c)return;
+  const updates={};
+  if(type==='instant5'){updates._instantEnh5=(c._instantEnh5||0)+1;}
+  else if(type==='instant7'){updates._instantEnh7=(c._instantEnh7||0)+1;}
+  else if(type==='instant9'){updates._instantEnh9=(c._instantEnh9||0)+1;}
+  else if(type==='guarantee1'){updates._forgeGuarantee=(c._forgeGuarantee||0)+1;}
+  else if(type==='guarantee3'){updates._forgeGuarantee=(c._forgeGuarantee||0)+3;}
+  else if(type==='guarantee5'){updates._forgeGuarantee=(c._forgeGuarantee||0)+5;}
+  else if(type==='seal'){
+    const amt=Math.max(1,Math.min(99999,parseInt(amount)||0));
+    updates._immortalSeals=(c._immortalSeals||0)+amt;
+  }
+  await update(ref(db,path),updates);
+}
+
+window.adminGiveEnhTicket=async()=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
+  const type=document.getElementById('enhTicketType')?.value||'instant5';
+  const target=document.getElementById('enhTicketTarget')?.value||'all';
+  const labels={
+    instant5:'⚡ 즉시 +5 강화권',
+    instant7:'⚡ 즉시 +7 강화권',
+    instant9:'🔥 즉시 +9 강화권',
+    guarantee1:'⚒ 강화 보장권 ×1',
+    guarantee3:'⚒ 강화 보장권 ×3',
+    guarantee5:'⚒ 강화 보장권 ×5',
+  };
+  let label=labels[type]||type;
+  let sealAmt=0;
+  if(type==='seal'){
+    sealAmt=Math.max(1,Math.min(99999,parseInt(document.getElementById('sealAmtInput')?.value)||0));
+    if(sealAmt<=0){toast('정수 수량을 1 이상 입력하세요');return;}
+    label=`🔱 불멸의 정수 ×${sealAmt}`;
+  }
+
+  if(target==='one'){
+    const name=(document.getElementById('enhTicketCharName')?.value||'').trim();
+    if(!name){toast('캐릭터 이름을 입력하세요');return;}
+    const cs=await get(ref(db,'chars'));const all=cs.val()||{};
+    const entry=Object.entries(all).find(([,c])=>c.name===name);
+    if(!entry){toast(`'${name}' 캐릭터를 찾을 수 없습니다`);return;}
+    if(!confirm(`[${label}]\n\n'${name}'에게 지급하시겠습니까?`))return;
+    await giveEnhTicketToChar(entry[0],type,sealAmt);
+    toast(`✅ '${name}'에게 ${label} 지급 완료!`);
+  }else{
+    const cs=await get(ref(db,'chars'));const all=cs.val()||{};
+    const cnt=Object.keys(all).length;
+    if(!confirm(`[${label}]\n\n전체 ${cnt}명에게 지급하시겠습니까?`))return;
+    let done=0;
+    for(const[cid] of Object.entries(all)){
+      await giveEnhTicketToChar(cid,type,sealAmt);
+      done++;
+    }
+    toast(`✅ 전체 ${done}명에게 ${label} 지급 완료!`,4000);
   }
 };
 
