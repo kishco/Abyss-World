@@ -4603,11 +4603,13 @@ const GUIDE_CHAPTERS=[
   {id:'weapons',   icon:'🗡', title:'무기별 특성'},
   {id:'attrs',     icon:'🔥', title:'속성 & 상성'},
   {id:'gear',      icon:'💎', title:'등급 & 장비'},
+  {id:'enchant',   icon:'✨', title:'인챈트 시스템'},
   {id:'dungeons',  icon:'🏰', title:'던전 시스템'},
   {id:'endgame',   icon:'🗼', title:'엔드게임'},
   {id:'stronghold',icon:'🏯', title:'거점 시스템'},
+  {id:'blackmarket',icon:'🌑',title:'암시장'},
   {id:'economy',   icon:'💰', title:'경제 시스템'},
-  {id:'goals',     icon:'🎯', title:'도전과제'},
+  {id:'goals',     icon:'🎯', title:'도전·이벤트'},
 ];
 
 // ★ 가이드 콘텐츠 — 각 챕터별 HTML 빌더 (필요 시 자동 추출)
@@ -4623,6 +4625,7 @@ const GUIDE_BUILDERS={
       <li>레벨 업 시 스탯 포인트 분배 (<b>캐릭터 탭</b>)</li>
       <li>골드 모이면 마을 상점 / 가구 상점에서 장비/슬롯 확장</li>
       <li>Lv.20+ → T2(어둠숲) 시도</li>
+      <li>Lv.40+ → 거점 활성화·가구 배치 시작</li>
     </ol>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💡 핵심 팁</h3>
     <ul style="padding-left:18px;line-height:2">
@@ -4631,7 +4634,14 @@ const GUIDE_BUILDERS={
       <li>매일 <b>일일 / 주간 미션</b> 챙기기 (마을 → 현상금)</li>
       <li>HP 관리 — 던전 전 <b>포션 5개</b> 자동 충전</li>
       <li>매우어려움 사망 시 <b>장비 분실 가능</b> — 죽음 방지 부적 활용</li>
+      <li><b>자동판매 필터</b> 설정으로 인벤 관리 자동화 (설정 탭)</li>
       <li>진행 중인 <b>이벤트</b>가 있다면 마을에서 확인 (한정 보상)</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🎁 추천 시스템</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>친구 추천 코드 입력 (설정 탭)</li>
+      <li>받는 사람: 파괴방지 ×3 + 인챈트 + 추출 + 1,500G</li>
+      <li>추천한 사람: 3,000G + 인챈트 ×2 + 재조정 주문서</li>
     </ul>
   `,
   combat:()=>`
@@ -4653,11 +4663,36 @@ const GUIDE_BUILDERS={
     </div>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🎲 추가 효과</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li><b>치명타</b>: CRIT% 확률, CRITDMG 배율 데미지 (기본 ×1.5)</li>
-      <li><b>회피</b>: SPD 기반 + DEX 보너스. <b>최대 35%</b></li>
+      <li><b>치명타(CRIT)</b>: 기본 5% + DEX×0.18 + LUK×0.08 (최대 75%)</li>
+      <li><b>크리티컬 데미지</b>: 기본 140% + 인챈트/세트 보너스</li>
+      <li><b>회피</b>: SPD 기반 + DEX 보너스 (최대 35%)</li>
       <li><b>밸런스</b>: 무기 데미지 변동폭. 99%면 거의 고정 데미지</li>
       <li><b>SPD 선공 회피</b>: SPD/800 확률로 보스 반격 회피 (최대 20%)</li>
       <li><b>활 선공</b>: 15% + SPD/800 (최대 30%) — 보스 반격 회피</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🛡 방어 시스템 (v3.0 보강)</h3>
+    <p style="font-size:11px;color:var(--tx2);margin-bottom:6px">방어 행동 시 회피는 발동하지 않으며, 대신 다음 순서로 시도됩니다:</p>
+    <ol style="padding-left:18px;line-height:2">
+      <li><b style="color:#ffd060">⚔ 패링</b>: 8% + DEX×0.08% (캡 18%) — 2H 무기는 +5%
+        <br><span style="font-size:10px;color:var(--tx3)">성공 시 데미지 0 + 카운터 (일반/IT 80% / 챔프·토벌·위령제 50%)</span></li>
+      <li><b style="color:#80c0ff">🛡 블록</b>: 1H + 방패만 발동 — 방패 등급별 10/15/20/25/30%
+        <br><span style="font-size:10px;color:var(--tx3)">성공 시 데미지 0 (카운터 없음)</span></li>
+      <li><b>🛡 일반 방어</b>: 패링/블록 둘 다 실패 시 — 받는 데미지 50% 감소</li>
+    </ol>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">👹 보스 방어 시스템</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>보스도 HP가 30% 이하로 떨어지면 방어 자세 시도</li>
+      <li>매 턴 12% 확률 발동 (1턴 쿨다운 — 연속 방어 불가)</li>
+      <li>보스 방어 성공 시 받는 데미지 60% 감소</li>
+      <li>일반 던전 보스 / 토벌전 / IT 보스 모두 적용</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏯 거점 패시브 영향</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>전투 시작 시 발동</b>: 전쟁의 깃발 (3턴 SPD+50%), 축복의 제단 (1턴 무적)</li>
+      <li><b>피격 시 발동</b>: 그림자 회피 (전투당 1회 회피)</li>
+      <li><b>사망 시 발동</b>: 시간의 모래시계 (5% 부활)</li>
+      <li><b>처치 시 발동</b>: 영혼 수확 (보스 처치 시 10% 추가 스크롤)</li>
+      <li>활성화는 거점 → 가구 → "활성" 슬롯에 배치</li>
     </ul>
   `,
   weapons:()=>{
@@ -4789,24 +4824,98 @@ const GUIDE_BUILDERS={
         <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#a335ee">🟣 에픽</td><td style="padding:7px 10px;text-align:center">×2.6</td><td style="padding:7px 10px;color:var(--tx3)">인챈트 ~70%</td></tr>
         <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#ff8c00">🟡 레전더리</td><td style="padding:7px 10px;text-align:center">×3.8</td><td style="padding:7px 10px;color:var(--tx3)">인챈트 ~90%</td></tr>
         <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#00ffcc">💎 유일</td><td style="padding:7px 10px;text-align:center">×3.0</td><td style="padding:7px 10px;color:var(--tx3)">세트 효과 / 거래 가능</td></tr>
-        <tr><td style="padding:7px 10px;color:#FF2244">🔱 불멸</td><td style="padding:7px 10px;text-align:center">×5.0</td><td style="padding:7px 10px;color:var(--tx3)">불멸의 탑 제련 한정</td></tr>
+        <tr><td style="padding:7px 10px;color:#FF2244">🔱 불멸</td><td style="padding:7px 10px;text-align:center">×5.0</td><td style="padding:7px 10px;color:var(--tx3)">불멸의 탑 제련 한정 + 전용 스킬</td></tr>
       </tbody>
     </table>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🔨 강화 (+0 ~ +9)</h3>
     <ul style="padding-left:18px;line-height:2">
       <li>강화 단계마다 스탯 증가 (강화수치^1.3 × 6% 가산)</li>
       <li>강화 단계가 높을수록 <b style="color:var(--red)">파괴 확률 증가</b> (+5 이후 본격 위험)</li>
-      <li><b>파괴 방지 스크롤</b> / <b>파괴방지 보호</b>로 1회 보호 가능</li>
-      <li>강화 비용 = 장비 레벨 × 등급 × 인챈트 가치 × 강화 단계</li>
+      <li><b>파괴 방지 스크롤</b>로 1회 보호 (자동 사용)</li>
+      <li><b>강화 보장권</b> (암시장): 다음 강화 100% 성공 확정</li>
+      <li>거점 패시브 <b>강화 의지</b>: 5% 확률 비용 환급</li>
     </ul>
-    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">✨ 인챈트 (접두 / 접미)</h3>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🎲 자연 인챈트</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>장비 등급에 따라 인챈트 슬롯 부여 (자연 발생 + 스크롤 부여)</li>
-      <li>접두 / 접미 각 1개씩 부여 가능 (총 2슬롯)</li>
-      <li><b>인챈트 스크롤</b> 사용 시 해당 슬롯에 효과 부여</li>
-      <li>인챈트는 추가 스탯 + 발동형 스킬 가능</li>
-      <li>티어 5단계: 하급 / 중급 / 상급 / 고급 / 전설</li>
-      <li><b>추출 스크롤</b>로 인챈트만 분리 가능</li>
+      <li>장비 드랍 시 등급별 확률로 인챈트 자동 부여</li>
+      <li>접두 / 접미 각 1슬롯 (총 2개)</li>
+      <li>등급별 인챈트 티어 상한:
+        언커먼=T1 / 레어=T2 / 에픽=T3 / 레전더리=T4 / 유일=T5</li>
+      <li><b>인챈트 시스템</b> 챕터에서 자세한 내용 참조</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💎 유일(Set) 장비</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>T5 매우어려움 + Lv.90+ 던전에서 드랍</li>
+      <li>같은 세트 N개 장착 시 <b>세트 효과 발동</b> (2/3/4/5 단계)</li>
+      <li>대표 세트: 크림슨 검(딜) / 그림자 사냥꾼(SPD) / 분노(크리) / 용군주(범용) / 신성한 빛(탱) / 비전 학자(마법) / 빙결(MATK) / 화염(MATK)</li>
+      <li>장비 합성대(가구)로 레전더리 5개 → 유일 1개 (5,000만G)</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🔱 불멸 등급</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>불멸의 탑 100층 클리어 시 <b>불멸의 정수</b> 획득</li>
+      <li>정수 100개 + Lv.99 레전더리 무기 = 불멸 제련 (성공률 1%)</li>
+      <li>성공 시 <b>전용 불멸 스킬</b> 부여 (8종 중 무기별 매칭)</li>
+    </ul>
+  `,
+  enchant:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">✨ 인챈트 시스템</h2>
+    <p style="margin-bottom:12px;color:var(--tx2)">인챈트는 장비에 부여되는 추가 효과로, 무기/방어구의 기본 스탯 위에 추가 스탯과 발동형 스킬을 더해줍니다.</p>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📐 기본 구조</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>장비 1개당 <b>접두(prefix) 1슬롯 + 접미(suffix) 1슬롯</b>, 총 2개</li>
+      <li>접두/접미는 <b>다른 인챈트 풀</b>에서 추첨</li>
+      <li>각 인챈트 = 추가 스탯 + 발동형 스킬(있을 수도, 없을 수도)</li>
+      <li>인챈트 효과는 장비 레벨/등급에 따라 <b>스케일링</b>됨</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🎯 5단계 티어</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden;margin-bottom:14px">
+      <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px">티어</th><th style="padding:7px 10px">이름</th><th style="padding:7px 10px">성공률</th><th style="padding:7px 10px">스탯 배율</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#9d9d9d">T1</td><td style="padding:7px 10px">하급</td><td style="padding:7px 10px;text-align:center">100%</td><td style="padding:7px 10px;text-align:center">×1.0</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#1eff00">T2</td><td style="padding:7px 10px">중급</td><td style="padding:7px 10px;text-align:center">85%</td><td style="padding:7px 10px;text-align:center">×1.3</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#0070dd">T3</td><td style="padding:7px 10px">상급</td><td style="padding:7px 10px;text-align:center">70%</td><td style="padding:7px 10px;text-align:center">×1.6</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px;color:#a335ee">T4</td><td style="padding:7px 10px">고급</td><td style="padding:7px 10px;text-align:center">50%</td><td style="padding:7px 10px;text-align:center">×2.0</td></tr>
+        <tr><td style="padding:7px 10px;color:#ff8c00">T5</td><td style="padding:7px 10px">전설</td><td style="padding:7px 10px;text-align:center">30%</td><td style="padding:7px 10px;text-align:center">×2.5</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🗂 인챈트 카테고리 (140+종)</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b style="color:var(--red)">물리 딜러</b> — ATK/STR 보강 (피의·심연·파멸 등)</li>
+      <li><b style="color:var(--purple)">마법 딜러</b> — MATK/INT 보강 (현자의·혼돈의·번개의 등)</li>
+      <li><b style="color:var(--blue)">탱커</b> — DEF/HP/VIT (수호자의·요새·불멸 등)</li>
+      <li><b style="color:var(--gold)">크리티컬</b> — CRIT 직접 부여 (광기어린·학살자의 등)</li>
+      <li><b style="color:var(--gold)">크리 데미지</b> — CRITDMG 부여 (치명적인·급소·사형선고 등)</li>
+      <li><b style="color:var(--green)">밸런스</b> — 무기 안정성 (정밀한·균형·정밀타격)</li>
+      <li><b style="color:#80a0ff">스킬 강화</b> — skillBonus (마법사 빌드용)</li>
+      <li><b style="color:#44d488">행운(LUK)</b> — 골드/드랍/크리 시너지 (행운의·풍요·대운)</li>
+      <li><b style="color:var(--tx2)">특수</b> — 시간정지·잔영·반격 등 고유 효과</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🛒 인챈트 입수 경로</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>자연 인챈트</b>: 장비 드랍 시 등급별 확률로 자동 부여</li>
+      <li><b>인챈트 스크롤 드랍</b>: 던전·토벌전·미션 보상</li>
+      <li><b>도감 보상</b>: 영역 100% 시 고티어 스크롤 다수</li>
+      <li><b>옥션 거래</b>: 다른 유저로부터 매입 가능</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🔧 인챈트 도구</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>인챈트 스크롤</b> — 장비에 인챈트 부여 (실패 시 스크롤만 소모)</li>
+      <li><b>추출 스크롤</b> — 장비 인챈트를 새 스크롤로 분리 (장비 인챈트 사라짐)</li>
+      <li><b>인챈트 합성대</b> (가구) — 동일 티어 인챈트 3개 → 상위 티어 1개 (1억G)</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💡 빌드 가이드</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>크리 빌드</b>: 분노/크림슨 세트 + 학살자의/사형선고 인챈트</li>
+      <li><b>탱커 빌드</b>: 신성 빛 세트 + 요새의/불괴의/난공 인챈트</li>
+      <li><b>마법 빌드</b>: 비전 학자 세트 + 대마법사의/고대마법 인챈트</li>
+      <li><b>밸런스 빌드</b>: 무기 명중률 극대화 + 정밀한/정밀타격 인챈트</li>
+      <li><b>LUK 빌드</b>: 골드/드랍 극대화 + 풍요/대운/운명의가호 인챈트</li>
     </ul>
   `,
   dungeons:()=>`
@@ -4836,58 +4945,186 @@ const GUIDE_BUILDERS={
       <li>보스 처치 시 <b>등급 상향 보너스 드랍</b> 1개 확정</li>
       <li>티어 5 매우어려움 + Lv.90+ = <b>유일(set) 등급</b> 가능</li>
     </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📖 도감 보너스</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>몬스터 처치 시 <b>도감 자동 등록</b></li>
+      <li>도감 10% 채울 때마다 <b>ATK / DEF +1%</b> 영구 보너스</li>
+      <li>영역 100% 달성 시 <b>대형 보상</b> (랭킹 탭에서 수령)</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚙ 자동판매 필터</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>설정 탭에서 <b>등급 임계값</b> 지정 (그 이하 등급 자동판매)</li>
+      <li><b>스크롤 티어 임계값</b> 지정 (그 이하 티어 자동판매)</li>
+      <li><b>제외 대상</b>: 잠금 / 가구 / 도면 / 재료 / 유일 등급</li>
+      <li>인벤이 가득 차도 <b>자동판매로 즉시 정리</b></li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💀 매우어려움 사망 처리</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>사망 시 장착 장비 1개 <b>랜덤 분실</b></li>
+      <li><b>죽음 방지 부적</b> 보유 시 자동 차감 → 분실 회피</li>
+      <li>잠금 장비도 분실 대상이므로 부적 필수</li>
+    </ul>
   `,
   endgame:()=>`
     <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🗼 엔드게임 콘텐츠</h2>
+
     <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">🗼 불멸의 탑 (Lv.99 전용)</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>100층 탑 — 매주 리셋</li>
-      <li>10층마다 보스 (총 10명)</li>
-      <li><b>주간 강화 / 약화</b> 시스템 — 매주 다른 효과</li>
-      <li>100층 클리어 → <b>징수</b> 획득</li>
-      <li>징수 100개 + 레전더리 무기 = <b style="color:var(--red)">불멸 등급</b> 시도 (1% 성공)</li>
+      <li><b>100층</b> — 매주 월요일 0시 자동 리셋</li>
+      <li><b>10층마다 보스</b> (총 10명, 각자 고유 메커니즘)</li>
+      <li><b>주간 강화 / 약화</b> 시스템 — 매주 다른 모디파이어
+        (예: "재생 +50%" / "독안개" / "회피 무력화" 등)</li>
+      <li>층마다 데미지 감소 버프 (_dmgReduce) 누적 가능</li>
+      <li><b>100층 클리어</b> → 불멸의 정수 1개 + 대량 보상</li>
+      <li>정수 100개 + Lv.99 레전더리 무기 = <b style="color:var(--red)">불멸 제련</b> (1% 성공)</li>
+      <li>제련 성공 시 <b>전용 불멸 스킬</b> 부여 (8종 무기 매칭)</li>
     </ul>
+
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚔ 주간 토벌전</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>주간 보스 1마리 — 모든 유저가 같은 보스 도전</li>
-      <li>누적 데미지 랭킹 → 상위 보상</li>
-      <li>토벌전 보스 3종 (아비도스 / 라바돈 / 루) 로테이션</li>
+      <li>전 유저가 같은 보스 1마리에게 <b>누적 데미지</b></li>
+      <li>토벌전 보스 3종 — 매주 1마리 등장:
+        <br><span style="color:#a335ee">👁 심연의 군주 아비도스</span> (어둠) /
+        <span style="color:var(--red)">🔥 불의 정령 라바돈</span> (화염) /
+        <span style="color:var(--purple)">⚔ 절망의 군주 루</span> (어둠)</li>
+      <li>각 도전 = 데미지 누적 → 보스 처치 시 <b>최후 처치자</b>에게 추가 박스</li>
+      <li><b>주간 누적 데미지 랭킹</b> → 상위 보상</li>
+      <li>도전 보상 박스: 골드 + 인챈트 스크롤 (레벨 기반 티어)</li>
     </ul>
+
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏆 주간 타임어택</h3>
     <ul style="padding-left:18px;line-height:2">
       <li>주간 속성 보스 1마리 (6속성 로테이션)</li>
-      <li>3회 도전 — 최저 턴수 기록 갱신</li>
-      <li>주간 랭킹 → 3,000G + 고티어 스크롤 보상</li>
+      <li>로테이션: 🔥화염 → ❄냉기 → ⚡번개 → 🌑어둠 → ✨신성 → ☠독</li>
+      <li><b>주 3회 도전</b> — 최저 턴수 기록 갱신</li>
+      <li><b>최저 턴수 랭킹</b> → 3,000G + 고티어 스크롤 ×2</li>
+      <li>속성 상성을 잘 짜면 턴수 대폭 단축 가능</li>
     </ul>
+
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">👑 챔프 시스템</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>최강 유저가 챔프 자리 차지</li>
-      <li>다른 유저가 도전 → 승리 시 자리 탈취</li>
-      <li>방어 성공 = <b>연승 적립</b></li>
+      <li>현재 1명만 챔프 자리 차지</li>
+      <li><b>도전 비용</b>: 골드 + 시간 쿨다운</li>
+      <li>승리 시 자리 탈취 → 본인이 챔프</li>
+      <li>패배 시 챔프는 <b>방어 성공</b> = 연승 적립</li>
+      <li>방어 횟수에 따라 챔프 타이틀 강화 표시</li>
     </ul>
   `,
   stronghold:()=>`
     <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🏯 거점 시스템</h2>
+    <p style="margin-bottom:12px;color:var(--tx2)">자신만의 거점을 운영하며 가구를 배치해 캐릭터에게 영구적인 보너스를 부여합니다.</p>
+
     <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">📐 거점 등급 / 그리드</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden;margin-bottom:14px">
+      <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px">티어</th><th style="padding:7px 10px">그리드</th><th style="padding:7px 10px">활성 슬롯</th><th style="padding:7px 10px">확장 비용</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">1티어</td><td style="padding:7px 10px;text-align:center">6×6</td><td style="padding:7px 10px;text-align:center">2개</td><td style="padding:7px 10px;color:var(--tx3)">기본 (무료)</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">2티어</td><td style="padding:7px 10px;text-align:center">8×8</td><td style="padding:7px 10px;text-align:center">3개</td><td style="padding:7px 10px;color:var(--gold)">5억G</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">3티어</td><td style="padding:7px 10px;text-align:center">10×10</td><td style="padding:7px 10px;text-align:center">4개</td><td style="padding:7px 10px;color:var(--gold)">20억G</td></tr>
+        <tr><td style="padding:7px 10px">4티어</td><td style="padding:7px 10px;text-align:center">12×12</td><td style="padding:7px 10px;text-align:center">4개</td><td style="padding:7px 10px;color:var(--gold)">80억G</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🪑 가구 카테고리</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>1티어: 6×6 그리드 — 무료 (기본)</li>
-      <li>2티어: 8×8 — 5억G</li>
-      <li>3티어: 10×10 — 20억G</li>
-      <li>4티어: 12×12 — 80억G</li>
+      <li><b>🎨 장식 (deco)</b> — 시각적, 효과 없음</li>
+      <li><b>📦 인벤 슬롯 (inv_slot)</b> — 인벤토리 슬롯 +N 확장</li>
+      <li><b>🏦 창고 슬롯 (wh_slot)</b> — 창고 슬롯 +N 확장</li>
+      <li><b>✨ 패시브 (passive)</b> — 활성 슬롯에 등록 시 효과 발동</li>
+      <li><b>⚒ 합성대 (crafter)</b> — 가구 / 장비 / 인챈트 합성</li>
+      <li><b>🏆 트로피 (trophy)</b> — 도전 달성 보상 (장식 + 소량 효과)</li>
     </ul>
-    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">✨ 패시브 가구</h3>
-    <ul style="padding-left:18px;line-height:2">
-      <li>일부 가구는 <b>활성 슬롯</b>에 등록 시 효과 발동</li>
-      <li>활성 슬롯: 등급별 2 / 3 / 4 / 4개</li>
-      <li>같은 패시브 키는 <b>1번만 적용</b> (중복 누적 방지)</li>
-      <li>예: 황금의 손길 (골드 +10%), 단조의 화로 (강화 5% 환급)</li>
-    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">✨ 활성 패시브 가구 (전체 9종)</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden;margin-bottom:14px">
+      <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px">이름</th><th style="padding:7px 10px">트리거</th><th style="padding:7px 10px">효과</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">⚒ 강화 의지</td><td style="padding:7px 10px;color:var(--tx3)">강화 시</td><td style="padding:7px 10px">5% 확률 비용 환급</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">📚 현자의 지혜</td><td style="padding:7px 10px;color:var(--tx3)">상시</td><td style="padding:7px 10px">EXP +8%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">💰 황금의 손길</td><td style="padding:7px 10px;color:var(--tx3)">상시</td><td style="padding:7px 10px">던전 골드 +10%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🪞 그림자 회피</td><td style="padding:7px 10px;color:var(--tx3)">첫 피격 시</td><td style="padding:7px 10px">전투당 1회 회피</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">⌛ 시간의 잔영</td><td style="padding:7px 10px;color:var(--tx3)">사망 시</td><td style="padding:7px 10px">5% 확률 HP1로 부활</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">⚔ 야망</td><td style="padding:7px 10px;color:var(--tx3)">상시</td><td style="padding:7px 10px">ATK +20% / DEF -10%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🛡 수호자의 결의</td><td style="padding:7px 10px;color:var(--tx3)">상시</td><td style="padding:7px 10px">DEF +25% / SPD -15%</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">📜 영혼 수확</td><td style="padding:7px 10px;color:var(--tx3)">보스 처치</td><td style="padding:7px 10px">10% 확률 인챈트 스크롤 추가</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🏴 전쟁의 깃발</td><td style="padding:7px 10px;color:var(--tx3)">전투 시작</td><td style="padding:7px 10px">3턴 SPD +50%</td></tr>
+        <tr><td style="padding:7px 10px">✨ 축복의 제단</td><td style="padding:7px 10px;color:var(--tx3)">전투 시작</td><td style="padding:7px 10px">1턴 무적</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10px;color:var(--tx3);margin-bottom:10px">※ 활성 슬롯에 배치해야 발동. 같은 패시브 키는 중복 적용 안 됨</p>
+
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚒ 합성대 가구</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li><b>장비 합성대</b>: 레전더리 5개 → 유일 (5,000만G)</li>
+      <li><b>장비 합성대</b>: 레전더리 5개 → 유일 1개 (5,000만G)</li>
       <li><b>가구 제작대</b>: 동일 등급 N개 → 상위 등급 (5,000만G)</li>
       <li><b>인챈트 합성대</b>: 동일 티어 인챈트 3개 → 상위 티어 (1억G)</li>
       <li>가구 상점에서 구매 가능</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📥 임시보관함 (7일 유예)</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>가구 해제 시 인벤이 가득 차면 <b>임시보관함</b>으로 자동 이동</li>
+      <li><b>7일 동안</b> 보관 — 그 안에 인벤 정리하고 회수</li>
+      <li>7일 경과 시 자동 소멸 (영구 손실)</li>
+      <li>거점 → 임시보관함 탭에서 확인·회수</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🎒 재료 인벤 (별도 슬롯)</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>가구 재료는 <b>일반 인벤과 별도</b>로 보관</li>
+      <li>인벤 슬롯 카운트에 영향 없음</li>
+      <li>거점 합성대에서 재료 직접 조회·소모</li>
+    </ul>
+  `,
+  blackmarket:()=>`
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🌑 암시장</h2>
+    <p style="margin-bottom:12px;color:var(--tx2)">엘비아 마을 뒷골목에 매일 다른 시간에 나타나는 비밀 거래소. 가격은 비싸지만 흔하지 않은 매물이 풀립니다.</p>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🕐 등장 규칙</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>하루 <b>3회 랜덤 시간</b>에 30분간 개장</li>
+      <li>모든 유저 <b>동일한 시간</b>에 동시 등장 (서버 기반)</li>
+      <li>마을 탭 → "🌑 암시장" 카드가 활성화되면 진입 가능</li>
+      <li>매일 자정 KST → <b>시드 기반 6종</b> 매물 결정 (전 유저 동일)</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🛒 매물 종류 (전 8종 중 6종 노출)</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden;margin-bottom:14px">
+      <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px">매물</th><th style="padding:7px 10px">효과</th><th style="padding:7px 10px">가격</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">📦 인벤 확장권</td><td style="padding:7px 10px">인벤 슬롯 +10 (영구, 최대 200슬롯)</td><td style="padding:7px 10px;color:var(--gold)">50만G~ (점진 ↑)</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🏦 창고 확장권</td><td style="padding:7px 10px">창고 슬롯 +20 (영구, 최대 500슬롯)</td><td style="padding:7px 10px;color:var(--gold)">80만G~ (점진 ↑)</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">⚒ 강화 보장권</td><td style="padding:7px 10px">다음 강화 1회 100% 성공 (실패/파괴 차단)</td><td style="padding:7px 10px;color:var(--gold)">200만G</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">💰 골드 부스터</td><td style="padding:7px 10px">1시간 골드 획득 +50%</td><td style="padding:7px 10px;color:var(--gold)">30만G</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">📚 경험치 부스터</td><td style="padding:7px 10px">1시간 EXP 획득 +50%</td><td style="padding:7px 10px;color:var(--gold)">30만G</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🍀 행운의 부적</td><td style="padding:7px 10px">1시간 드랍률 +30%</td><td style="padding:7px 10px;color:var(--gold)">40만G</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🎭 닉네임 변경권</td><td style="padding:7px 10px">캐릭터 이름 1회 변경 (쿠폰)</td><td style="padding:7px 10px;color:var(--gold)">150만G</td></tr>
+        <tr><td style="padding:7px 10px">🔮 능력치 재조정</td><td style="padding:7px 10px">스탯 포인트 전부 재배분</td><td style="padding:7px 10px;color:var(--gold)">변동</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⏱ 시간제 부스터 규칙</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li><b>활성 시간 정확히 1시간</b> — 더 긴 부스터 누적 불가</li>
+      <li>활성 중인 부스터 <b>같은 종류 재구매 차단</b> (종료 후 가능)</li>
+      <li><b>상단바</b>에 활성 부스터 + 남은 시간 표시</li>
+      <li><b>캐릭터 창</b>에 활성 효과 카드 (진행 바 + 남은 시간)</li>
+      <li>5분 미만 시 강조 표시 (만료 임박 알림)</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📦 영구 확장권 규칙</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>인벤: <b>최대 10회</b>까지 (100 + 10×10 = 200슬롯)</li>
+      <li>창고: <b>최대 15회</b>까지 (200 + 20×15 = 500슬롯)</li>
+      <li>구매할 때마다 <b>가격 30% 증가</b> (점진적 비용 증가)</li>
+      <li>가구 슬롯 확장(거점)과 별도 — 합산 가능</li>
+    </ul>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💡 활용 팁</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>강화 보장권 = +8 → +9 처럼 실패 위험 큰 단계에서 사용</li>
+      <li>부스터 = 던전 깊이 갈 시간이 있을 때만 구매 (1시간 짧음)</li>
+      <li>인벤/창고 확장권은 <b>점진 가격 증가</b>로 일찍 살수록 이득</li>
     </ul>
   `,
   economy:()=>`
@@ -4904,45 +5141,70 @@ const GUIDE_BUILDERS={
       <li>판매자 수수료 <b style="color:var(--red)">5%</b></li>
       <li>최대 10개 동시 등록</li>
       <li>구매한 아이템은 <b>재판매 불가</b></li>
+      <li>유일(set) 등급 거래 가능 — 단, 합성/이벤트 산은 제외</li>
     </ul>
-    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏪 상점 / 암시장</h3>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏪 상점</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li><b>일반 상점</b>: 기본 무기 / 방어구 (저레벨용)</li>
-      <li><b>암시장</b>: 매일 다른 진귀 아이템 — 시간 제한</li>
+      <li><b>일반 상점</b>: 기본 무기 / 방어구 / 포션 (저레벨용)</li>
       <li><b>가구 상점</b>: 패시브 가구 / 합성대 / 슬롯 확장</li>
+      <li><b>🌑 암시장</b>: 별도 챕터 참조 (시간 제한 + 한정 매물)</li>
+    </ul>
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📋 현상금 게시판</h3>
+    <ul style="padding-left:18px;line-height:2">
+      <li>특정 행동 누적 시 골드 + 보상 (마을 → 현상금)</li>
+      <li>일일 / 주간 / 월간 현상금 — 점진 진척</li>
+      <li>실시간 골드 분 카운트 표시</li>
     </ul>
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">⚙ 자동판매</h3>
     <ul style="padding-left:18px;line-height:2">
       <li>설정에서 등급 / 스크롤 티어 임계값 지정</li>
       <li>던전 드랍 시 자동 판매 → 인벤 절약</li>
-      <li>잠금 / 가구 / 도면 / 재료는 <b>제외</b></li>
+      <li>잠금 / 가구 / 도면 / 재료 / 유일 등급은 <b>제외</b></li>
     </ul>
   `,
   goals:()=>`
-    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🎯 도전과제 시스템</h2>
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:12px">🎯 도전·이벤트</h2>
+
     <h3 style="color:var(--blue);font-size:14px;margin:0 0 6px">📅 일일 / 주간 미션</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>매일 자정 갱신 (KST)</li>
-      <li>던전 클리어 / 강화 / 처치 등 다양한 목표</li>
+      <li>매일 자정 0시(KST) 갱신</li>
+      <li>던전 클리어 / 강화 / 처치 / 인챈트 등 다양한 목표</li>
       <li>완료 시 골드 + 인챈트 스크롤 보상</li>
+      <li>주간 미션은 일일보다 큰 보상 (위패 + 고티어 스크롤)</li>
     </ul>
-    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">💰 현상금 시스템</h3>
-    <ul style="padding-left:18px;line-height:2">
-      <li>마을 → 현상금 게시판</li>
-      <li>특정 행동 누적 시 보상</li>
-      <li>주간 / 월간 현상금 — 점진 진척</li>
-    </ul>
+
     <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">📖 도감 컬렉션</h3>
     <ul style="padding-left:18px;line-height:2">
-      <li>몬스터 처치 시 자동 등록</li>
-      <li>10% 달성마다 <b>ATK / DEF +1%</b> 보너스</li>
-      <li>영역별 100% 시 <b>대형 보상</b> (골드 + 스크롤)</li>
+      <li>몬스터 처치 시 자동 등록 (이름 기준)</li>
+      <li>10% 달성마다 <b style="color:var(--gold)">ATK / DEF +1%</b> 영구 보너스</li>
+      <li>최대 100% (10단계) → ATK +10% / DEF +10%</li>
+      <li>랭킹 탭 → 도감 탭에서 진척도 확인</li>
     </ul>
-    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🌸 위령제 이벤트 (한정)</h3>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🏆 영역별 도감 100% 보상</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;background:var(--sf2);border-radius:6px;overflow:hidden;margin-bottom:14px">
+      <thead style="background:rgba(64,160,255,.08)"><tr><th style="padding:7px 10px">영역</th><th style="padding:7px 10px">골드</th><th style="padding:7px 10px">인챈트 스크롤</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">⛏ 동굴</td><td style="padding:7px 10px;color:var(--gold);text-align:center">300만G</td><td style="padding:7px 10px;text-align:center">T1 스크롤 ×3</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🌿 숲</td><td style="padding:7px 10px;color:var(--gold);text-align:center">800만G</td><td style="padding:7px 10px;text-align:center">T2 스크롤 ×3</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🏜 사막</td><td style="padding:7px 10px;color:var(--gold);text-align:center">2,000만G</td><td style="padding:7px 10px;text-align:center">T2 스크롤 ×4</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🏰 요새</td><td style="padding:7px 10px;color:var(--gold);text-align:center">5,000만G</td><td style="padding:7px 10px;text-align:center">T2 스크롤 ×5</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">🐉 용 둥지</td><td style="padding:7px 10px;color:var(--gold);text-align:center">1억G</td><td style="padding:7px 10px;text-align:center">T2 스크롤 ×6</td></tr>
+        <tr style="border-bottom:1px solid var(--bd)"><td style="padding:7px 10px">⚔ 토벌전</td><td style="padding:7px 10px;color:var(--gold);text-align:center">3억G</td><td style="padding:7px 10px;text-align:center">T3 스크롤 ×3</td></tr>
+        <tr><td style="padding:7px 10px">🗼 불멸의 탑</td><td style="padding:7px 10px;color:var(--gold);text-align:center">10억G</td><td style="padding:7px 10px;text-align:center">T3 스크롤 ×5</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--blue);font-size:14px;margin:14px 0 6px">🌸 위령제 이벤트 (시즌 한정)</h3>
+    <p style="margin-bottom:8px;color:var(--tx2);font-size:11px">매년 어린이날 시즌 14일간 진행 — 심연에 사로잡힌 어린 영혼들을 위한 추모.</p>
     <ul style="padding-left:18px;line-height:2">
-      <li>매년 어린이날 시즌 14일간 진행</li>
-      <li>출석 보상 + 던전 가호 (EXP +50% / 골드 +30% / 드랍 +20%)</li>
-      <li>한정 가구 — <b>잃어버린 영혼의 등불</b>, <b>어린 왕의 옥좌</b></li>
+      <li><b>출석 보상</b>: 14일간 매일 골드 + 한정 아이템</li>
+      <li><b>던전 가호</b>: EXP +50% / 골드 +30% / 드랍 +20% (자동 적용)</li>
+      <li><b>5/5 위령제 보스</b> (잃어버린 아이들의 망령) — 라바돈 강화판
+        <br>처치 시 <b style="color:#80a0ff">어린 왕의 옥좌</b> (한정 가구) 확정</li>
+      <li><b>추모의 빛 챌린지</b>: 던전 N회 클리어 누적 → 추가 보상</li>
+      <li><b>한정 가구</b>: 잃어버린 영혼의 등불 / 어린 왕의 옥좌</li>
+      <li>이벤트 종료 후 보상 미수령 시 소멸</li>
     </ul>
   `,
 };
@@ -8899,6 +9161,19 @@ async function resolvePhase(){
       const iceReduce=(wAttr==='ice'&&ATTR_EFFECT.ice)?ATTR_EFFECT.ice.dodgeReduce:0;
       const effDodge=monNoDodge?0:Math.max(0,((target.dodge||0)-iceReduce)*(1-(s.balance||0)/100));
       const isMiss=Math.random()*100<effDodge;
+      // ★ v3.0 — 보스 방어 시도 (HP 30% 이하 + 12% 확률 + 1턴 쿨다운)
+      if(target.isBoss&&!isMiss&&target.hp&&target.maxHp){
+        const _bRatio=target.hp/target.maxHp;
+        if(_bRatio<=0.30){
+          if(target._defCooldown&&target._defCooldown>0){target._defCooldown--;}
+          else if(Math.random()<0.12){
+            const reducedDmg=Math.round(dmg*0.4);
+            blogAdd(`<span class="l-sys" style="color:#80c0ff">🛡 ${target.name}이(가) 방어 자세! 데미지 -60% (${dmg}→${reducedDmg})</span>`);
+            dmg=reducedDmg;
+            target._defCooldown=1;
+          }
+        }
+      }
       // ★ 속성 효과: 화염 — 피해 증폭 / 어둠 — 방어 무시
       if(wAttr==='fire'&&!isMiss)dmg=Math.round(dmg*ATTR_EFFECT.fire.dmgMult);
       if(wAttr==='dark'&&!isMiss)dmg=Math.round(dmg*(1+ATTR_EFFECT.dark.defIgnore));
@@ -9011,7 +9286,8 @@ async function resolvePhase(){
     const _tgtEq=tgt.charData?.equipment||(tgt===battle.players[0]?char.equipment:null)||{};
     const _tgtWt=getWeaponTraits(_tgtEq);
     if(_tgtWt.isSword&&_tgtEq.offhand)dmg=Math.round(dmg*0.85);
-    if(tgt.defending)dmg=Math.round(dmg*0.5);
+    // ★ v3.0 방어 시스템 보강 — 패링/블록은 방어 행동 시에만 발동 (회피는 배제)
+    // 신성 방벽은 항상 적용 (스킬 인챈트 효과)
     if(tgt._shield){dmg=Math.round(dmg*0.5);tgt._shield=false;} // ★ 신성 방벽
     // ★ 불멸의 탑 — 피해 감소 버프 (_dmgReduce)
     if(battle.mode==='immortaltower'&&(tgt.stats?._dmgReduce)){
@@ -9056,7 +9332,11 @@ async function resolvePhase(){
     }
     if(skillFired)continue; // 스킬 발동 시 기본 공격 생략
 
-    if(Math.random()*100<dodge){blogAdd(`<span class="l-sys">🌀 ${tgt.name} 회피!</span>`);continue;}
+    // ★ v3.0 방어 시스템 — 회피는 평타 시에만, 방어 시에는 패링/블록/50% 감소 흐름
+    if(!tgt.defending){
+      // 평타 시: 회피 체크
+      if(Math.random()*100<dodge){blogAdd(`<span class="l-sys">🌀 ${tgt.name} 회피!</span>`);continue;}
+    }
     // ★ 속성 상성: 몬스터 속성 vs 플레이어 무기 속성
     const _pAttr=getWeaponAttr(tgt.charData?.equipment||char.equipment||{});
     const _monAttrMult=calcAttrMult(m._attr,_pAttr);
@@ -9065,6 +9345,18 @@ async function resolvePhase(){
     if(m._attr&&ATTR_EFFECT[m._attr]){
       if(ATTR_EFFECT[m._attr].dmgMult)dmg=Math.round(dmg*ATTR_EFFECT[m._attr].dmgMult);
       if(ATTR_EFFECT[m._attr].defIgnore)dmg=Math.round(dmg*(1+ATTR_EFFECT[m._attr].defIgnore));
+    }
+    // ★ v3.0 방어 시스템 — 방어 행동 시 패링/블록/50% 감소
+    if(tgt.defending){
+      const _defResult=applyDefendingFlow(dmg, _tgtEq, tgt.charData||char, battle.mode);
+      if(_defResult.msg)blogAdd(_defResult.msg);
+      // 패링 카운터 데미지 적용 (현재 공격자에게 직접 데미지)
+      if(_defResult.counterDmg>0&&m.status==='alive'){
+        m.hp=Math.max(0,m.hp-_defResult.counterDmg);
+        if(m.hp<=0){m.hp=0;m.status='dead';blogAdd(`<span class="l-dead">💀 ${m.name} 카운터에 처치!</span>`);}
+      }
+      dmg=_defResult.finalDmg;
+      if(dmg===0)continue; // 패링/블록 성공 시 데미지 무시
     }
     // ★ v3.0 거점 패시브 — 무적 턴 (축복의 제단)
     if(checkDungeonInvuln()){
@@ -12783,8 +13075,9 @@ window.enterSubjBattle=async function(){
             if(res.dmg>0){
               let sd=res.dmg*bAtkMult;
               if(boss._guardTurn){sd=Math.round(sd*0.4);boss._guardTurn=false;}
-              if(defending)sd=Math.round(sd*0.5);
-              if(Math.random()*100<s.dodge){slog(`<span class="l-sys">✨ 회피!</span>`);}
+              if(defending)sd=Math.round(sd*0.5); // ★ 보스 스킬은 50% 감소만 (패링/블록 X)
+              // ★ v3.0 — 회피는 평타 시에만 (방어 시 배제)
+              if(!defending&&Math.random()*100<s.dodge){slog(`<span class="l-sys">✨ 회피!</span>`);}
               else{myHp=Math.max(0,myHp-Math.round(sd));slog(`<span class="l-dmg">${boss.icon} ${boss.name} → ${char.name} -<b>${Math.round(sd)}</b> (${myHp}/${s.maxHp})</span>`);}
             }
             if(res.dot&&res.dot>0){boss._playerDot=(boss._playerDot||0)+res.dot;}
@@ -12801,7 +13094,6 @@ window.enterSubjBattle=async function(){
       // ★ v3.x — 한손검 + 방패 장착 시 받는 데미지 -15%
       const _wtSubj=getWeaponTraits(char.equipment||{});
       if(_wtSubj.isSword&&char.equipment?.offhand)bDmg=Math.round(bDmg*0.85);
-      if(defending)bDmg=Math.round(bDmg*0.5);
       // ★ 속성 상성: 보스 vs 플레이어 무기
       const _sbAttr=getWeaponAttr(char.equipment||{});
       const _sbMult=calcAttrMult(boss._attr,_sbAttr);
@@ -12811,7 +13103,15 @@ window.enterSubjBattle=async function(){
         if(ATTR_EFFECT[boss._attr].dmgMult)bDmg=Math.round(bDmg*ATTR_EFFECT[boss._attr].dmgMult);
         if(ATTR_EFFECT[boss._attr].defIgnore)bDmg=Math.round(bDmg*(1+ATTR_EFFECT[boss._attr].defIgnore));
       }
-      // ★ v3.0 거점 패시브 — 무적 / 첫 피격 회피 / SPD 버프 회피
+      // ★ v3.0 방어 시스템 — 방어 행동 시 패링/블록/50% 감소
+      let counterDmg=0;
+      if(defending){
+        const _defResult=applyDefendingFlow(bDmg,char.equipment||{},char,'subjugation');
+        if(_defResult.msg)slog(_defResult.msg);
+        bDmg=_defResult.finalDmg;
+        counterDmg=_defResult.counterDmg;
+      }
+      // ★ v3.0 거점 패시브 — 무적 / 첫 피격 회피
       let _subjDodgeBonus=0;
       if(_subjStartBuffSpd>0&&_subjTurn<=_subjStartBuffTurns)_subjDodgeBonus=Math.round(_subjStartBuffSpd/2);
       if(_subjInvulnTurns>0){
@@ -12819,9 +13119,17 @@ window.enterSubjBattle=async function(){
       }else if(_subjFirstDodgeAvail&&!_subjFirstDodgeUsed&&bDmg>0){
         _subjFirstDodgeUsed=true;
         slog(`<span class="l-skill" style="color:var(--purple)">🪞 그림자 거울 발동! 첫 피격 회피</span>`);
-      }else if(Math.random()*100<(s.dodge+_subjDodgeBonus)){
+      }else if(!defending&&Math.random()*100<(s.dodge+_subjDodgeBonus)){
+        // 회피는 평타 시에만 (방어 행동 시는 배제)
         slog(`<span class="l-sys">✨ 회피!</span>`);
-      }else{myHp=Math.max(0,myHp-bDmg);slog(`<span class="l-dmg">${boss.icon} ${boss.name} → ${char.name} -<b>${bDmg}</b> (${myHp}/${s.maxHp})</span>`);}
+      }else if(bDmg>0){
+        myHp=Math.max(0,myHp-bDmg);slog(`<span class="l-dmg">${boss.icon} ${boss.name} → ${char.name} -<b>${bDmg}</b> (${myHp}/${s.maxHp})</span>`);
+      }
+      // 카운터 데미지 적용 (보스 HP 차감 + 누적 데미지로 토벌전에 반영)
+      if(counterDmg>0){
+        bossHpLocal=Math.max(0,bossHpLocal-counterDmg);
+        totalDmgDealt+=counterDmg;
+      }
     }
     // 플레이어 DOT
     if(boss._playerDot&&boss._playerDot>0){
@@ -12883,6 +13191,18 @@ window.enterSubjBattle=async function(){
       const _sIceReduce=(_sAttr==='ice'&&ATTR_EFFECT.ice)?ATTR_EFFECT.ice.dodgeReduce:0;
       const effDodge=Math.max(0,((boss.dodge||0)-_sIceReduce)*(1-(s.balance||0)/100));
       const isMiss=Math.random()*100<effDodge;
+      // ★ v3.0 — 보스 방어 시도 (HP 30% 이하 + 12% 확률 + 1턴 쿨다운)
+      const _bossHpRatio=bossHpLocal/(boss.hp||1);
+      let _bossDefending=false;
+      if(_bossHpRatio<=0.30){
+        if(boss._defCooldown&&boss._defCooldown>0){boss._defCooldown--;}
+        else if(Math.random()<0.12){_bossDefending=true;boss._defCooldown=1;}
+      }
+      if(_bossDefending){
+        const reducedDmg=Math.round(dmg*0.4); // 보스 방어 = 60% 감소
+        slog(`<span class="l-sys" style="color:#80c0ff">🛡 ${boss.name}이(가) 방어 자세! 데미지 -60% (${dmg}→${reducedDmg})</span>`);
+        dmg=reducedDmg;
+      }
       if(isMiss){
         slog(`<span class="l-sys">💨 ${boss.name}이 회피했다!</span>`);
       }else{
@@ -13480,7 +13800,16 @@ window.enterChampBattle=async function(){
     const _crChAttr=champ?.equipment?.weapon?.attr||champ?.equipment?.weapon?.prefix?.attr||null;
     const _crMult=calcAttrMult(_crChAttr,_crMyAttr);
     if(_crMult!==1)cDmg=Math.round(cDmg*_crMult);
-    if(Math.random()*100<s.dodge){
+    // ★ v3.0 방어 시스템 — 방어 행동 시 패링/블록/50% 감소 (챔프전 카운터 50%)
+    let _chCounter=0;
+    if(defending){
+      const _defResult=applyDefendingFlow(cDmg,char.equipment||{},char,'champion');
+      if(_defResult.msg)clog(_defResult.msg);
+      cDmg=_defResult.finalDmg;
+      _chCounter=_defResult.counterDmg;
+    }
+    // ★ v3.0 — 회피는 평타 시에만 (방어 시 배제)
+    if(!defending&&Math.random()*100<s.dodge){
       clog(`<span class="l-sys">✨ 회피!</span>`);
     }else{
       // ★ v3.0 거점 패시브 — 무적 / 첫 피격 회피
@@ -13489,7 +13818,7 @@ window.enterChampBattle=async function(){
       }else if(_chFirstDodgeAvail&&!_chFirstDodgeUsed&&cDmg>0){
         _chFirstDodgeUsed=true;
         clog(`<span class="l-skill" style="color:var(--purple)">🪞 그림자 거울 발동! 첫 피격 회피</span>`);
-      }else{
+      }else if(cDmg>0){
       myHp=Math.max(0,myHp-cDmg);
       if(cCrit)clog(`<span class="l-crit">💥 ${champ.name} 치명타! → ${char.name} -<b>${cDmg}</b></span>`);
       else clog(`<span class="l-dmg">⚔ ${champ.name} → ${char.name} -<b>${cDmg}</b></span>`);
@@ -13535,6 +13864,11 @@ window.enterChampBattle=async function(){
         }
       }
       } // ★ v3.0 — 거점 패시브 else (myHp 차감 블록) close
+    }
+    // ★ v3.0 방어 시스템 — 패링 카운터 데미지 (챔프 HP에 적용, 50% 비율)
+    if(_chCounter>0){
+      champHp=Math.max(0,champHp-_chCounter);
+      clog(`<span class="l-skill" style="color:#ffd060">⚔ 패링 카운터! ${champ.name}에게 -<b>${_chCounter}</b></span>`);
     }
     if(myHp<=0){
       // ★ v3.0 거점 패시브 — 시간의 모래시계 (5% 부활)
@@ -14004,6 +14338,99 @@ function applyStrongholdBattleStart(ctx){
   return ctx;
 }
 window.applyStrongholdBattleStart=applyStrongholdBattleStart;
+
+// ★★★ v3.0 방어 시스템 보강 — 패링 / 블록 / 카운터 헬퍼 ★★★
+// 흐름: 방어 행동 시 [회피 배제] → 패링 시도 → 블록 시도 → 50% 감소
+// 평타 시에는 기존 회피만 적용 (변경 없음)
+
+// 방패 등급별 블록 확률 (1H + 방패 장착 시만 발동)
+const SHIELD_BLOCK_RATE={normal:10,uncommon:15,rare:20,epic:25,legendary:30,set:30};
+
+// 1H + 방패일 때 블록 확률 반환 (0~30%)
+function getBlockChance(eq){
+  if(!eq)return 0;
+  const wep=eq.weapon;
+  const off=eq.offhand;
+  if(!off||!wep)return 0;
+  // 2H 무기는 방패 못 씀 (안전 체크)
+  const wb=WBASES.find(b=>b.id===wep.baseId);
+  if(wb?.hand==='2H')return 0;
+  // 방패 등급별 블록 확률
+  return SHIELD_BLOCK_RATE[off.grade]||0;
+}
+
+// 패링 확률 반환 (DEX 기반 + 2H 보너스)
+// 기본 8% + DEX×0.08% / 2H 무기 시 +5%
+function getParryChance(eq, charData){
+  const c=charData||char||{};
+  const dex=c.dex||5;
+  let parry=8+dex*0.08;
+  // 2H 무기는 방패 못 쓰는 대신 패링 보너스
+  if(eq?.weapon){
+    const wb=WBASES.find(b=>b.id===eq.weapon.baseId);
+    if(wb?.hand==='2H')parry+=5;
+  }
+  return Math.min(23,parry); // 캡 23% (DEX 175 + 2H)
+}
+
+// 카운터 데미지 비율 — 모드별 (PvP/누적 데미지 모드는 약화)
+function getCounterRatio(mode){
+  if(mode==='champion'||mode==='subjugation'||mode==='memorial')return 0.5; // PvP·누적 → 50%
+  return 0.8; // 일반/IT/타임어택 → 80%
+}
+
+// 보스 방어 시도 — HP 30% 이하 + 매 턴 12% + 1턴 쿨다운
+// 호출 측: tryBossDefend(boss) → 진짜 방어할지 boolean 반환
+function tryBossDefend(boss){
+  if(!boss||!boss.maxHp)return false;
+  const hpRatio=boss.hp/boss.maxHp;
+  if(hpRatio>0.30)return false; // HP 30% 이하만
+  if(boss._defCooldown&&boss._defCooldown>0){boss._defCooldown--;return false;} // 쿨다운 중
+  if(Math.random()<0.12){
+    boss._defCooldown=1; // 다음 1턴 쿨다운
+    return true;
+  }
+  return false;
+}
+
+// 플레이어 방어 행동 시 흐름 처리 (헬퍼)
+// 반환: {finalDmg, msg, counterDmg}
+//   finalDmg: 최종 받는 데미지 (0=완전 무효)
+//   msg: 로그 메시지 (HTML)
+//   counterDmg: 패링 카운터 데미지 (0=카운터 없음)
+function applyDefendingFlow(rawDmg, eq, charData, mode){
+  // 1. 패링 시도
+  const parryRate=getParryChance(eq,charData);
+  if(Math.random()*100<parryRate){
+    const counterRatio=getCounterRatio(mode);
+    const stats=charData?calcStats(charData):calcStats(char);
+    const counterDmg=Math.max(1,Math.round((stats.atk||0)*counterRatio));
+    return {
+      finalDmg:0,
+      msg:`<span class="l-skill" style="color:#ffd060;font-weight:700">⚔ 패링! 공격 무효 + 카운터 ${counterDmg}!</span>`,
+      counterDmg
+    };
+  }
+  // 2. 블록 시도 (1H + 방패만)
+  const blockRate=getBlockChance(eq);
+  if(blockRate>0&&Math.random()*100<blockRate){
+    return {
+      finalDmg:0,
+      msg:`<span class="l-skill" style="color:#80c0ff;font-weight:700">🛡 블록! 방패가 공격을 완전히 막았습니다</span>`,
+      counterDmg:0
+    };
+  }
+  // 3. 둘 다 실패 → 50% 감소 (기존)
+  return {
+    finalDmg:Math.round(rawDmg*0.5),
+    msg:'',
+    counterDmg:0
+  };
+}
+window.applyDefendingFlow=applyDefendingFlow;
+window.tryBossDefend=tryBossDefend;
+window.getParryChance=getParryChance;
+window.getBlockChance=getBlockChance;
 // ★ 일반 던전 — 던전 첫 피격 회피 시도 (true 반환 시 회피 처리됨)
 function tryDungeonFirstDodge(){
   if(!battle||!battle._firstDodgeAvail||battle._firstDodgeUsed)return false;
@@ -14763,14 +15190,26 @@ window.startMemorialBoss=async function(){
       dmg=Math.max(1,Math.round(baseAtk*(100/(100+s.def))));
       mlog(`<span class="l-dmg">💥 ${boss.name}의 공격! -${dmg}</span>`);
     }
-    if(defending)dmg=Math.round(dmg*0.5);
+    // ★ v3.0 방어 시스템 — 방어 행동 시 패링/블록/50% 감소 (위령제 카운터 50%)
+    let _mbCounter=0;
+    if(defending){
+      const _defResult=applyDefendingFlow(dmg,char.equipment||{},char,'memorial');
+      if(_defResult.msg)mlog(_defResult.msg);
+      dmg=_defResult.finalDmg;
+      _mbCounter=_defResult.counterDmg;
+    }
     // ★ 그림자 거울 1회 회피
     if(hasFirstDodge&&!firstHitDodgeUsed&&dmg>0){
       firstHitDodgeUsed=true;
       mlog(`<span class="l-skill" style="color:var(--purple)">🪞 그림자 거울 발동! 첫 피격 회피</span>`);
       return;
     }
-    myHp-=dmg;
+    if(dmg>0)myHp-=dmg;
+    // ★ v3.0 방어 시스템 — 패링 카운터 데미지 (보스 HP에 적용)
+    if(_mbCounter>0){
+      bossHp=Math.max(0,bossHp-_mbCounter);
+      mlog(`<span class="l-skill" style="color:#ffd060">⚔ 패링 카운터! ${boss.name}에게 -<b>${_mbCounter}</b></span>`);
+    }
     if(myHp<=0){
       // ★ v3.0 거점 패시브 — 시간의 모래시계 (5% 부활, 1전투 1회)
       if(!_reviveUsedMb){
