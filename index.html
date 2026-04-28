@@ -461,6 +461,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     
     <span class="tg">💰<span id="tgold">0</span></span>
     <span class="tsp" id="tsp" style="display:none" onclick="navTo('character')"></span>
+    <!-- ★ v3.0 핫픽스 — 활성 부스터 표시 -->
+    <span id="tboosters" style="display:inline-flex;gap:4px;margin-left:6px"></span>
     <!-- boss-kill banner -->
     <span id="bossKillBanner" style="display:none;font-size:9px;color:var(--gold);font-family:'IBM Plex Mono',monospace;animation:pulse 1s infinite"></span>
   </div>
@@ -627,6 +629,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         </div>
         <span style="font-size:9px;color:var(--blue);white-space:nowrap">다음 목표</span>
       </div>
+      <!-- ★ v3.0 핫픽스 — 활성 부스터 카드 -->
+      <div id="charBoosterCard" style="display:none;margin-bottom:10px"></div>
       <div class="chlayout">
         <div>
           <div class="card" style="margin-bottom:10px">
@@ -2337,6 +2341,7 @@ onAuthStateChanged(auth,async user=>{
     // ★ 로그아웃 시 리스너/인터벌 정리
     if(_presenceInterval){clearInterval(_presenceInterval);_presenceInterval=null;}
     if(_bmInterval){clearInterval(_bmInterval);_bmInterval=null;}
+    if(_boosterTickHandle){clearInterval(_boosterTickHandle);_boosterTickHandle=null;} // ★ v3.0 핫픽스
     for(const k of Object.keys(cwUnsub)){if(cwUnsub[k]){cwUnsub[k]();cwUnsub[k]=null;}}
     cwActive=false;
     if(_charUnsub){_charUnsub();_charUnsub=null;}
@@ -3505,6 +3510,8 @@ async function selChar(id){
       }
       if(dirty)saveChar();
       updateTop();renderChar();
+      // ★ v3.0 핫픽스 — 재접속 시 활성 부스터 있으면 인터벌 시작
+      if(getActiveBoosters().length>0)startBoosterTick();
     }
   });
   // ★ v3.0 핫픽스 — inv onValue 제거 (자기 inv 다운로드 폭증의 진짜 원인 해결)
@@ -3639,7 +3646,101 @@ function updateTop(){
   document.getElementById('tname').innerHTML=char.name+(isAdmin?` <span style="font-size:8px;background:rgba(240,192,64,.2);border:1px solid rgba(240,192,64,.4);color:var(--gold);padding:1px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace">ADMIN</span>`:'');
   document.getElementById('tlv').textContent='Lv.'+char.level;
   document.getElementById('tgold').textContent=char.gold;
+  renderBoosterBadges(); // ★ v3.0 핫픽스 — 활성 부스터 뱃지 갱신
 }
+
+// ★ v3.0 핫픽스 — 부스터 표시 헬퍼 (상단바 + 캐릭터창 공용)
+function _fmtBoosterRemain(ms){
+  const total=Math.ceil(ms/1000);
+  const m=Math.floor(total/60);
+  const s=total%60;
+  if(m>0)return `${m}분 ${s.toString().padStart(2,'0')}초`;
+  return `${s}초`;
+}
+function getActiveBoosters(){
+  if(!char)return [];
+  const now=Date.now();
+  const list=[];
+  if(char._goldBoosterTs&&char._goldBoosterTs>now)list.push({key:'gold',icon:'💰',name:'골드 부스터',desc:'+50%',color:'#f0c040',ts:char._goldBoosterTs});
+  if(char._expBoosterTs&&char._expBoosterTs>now)list.push({key:'exp',icon:'📚',name:'경험치 부스터',desc:'+50%',color:'#80a0ff',ts:char._expBoosterTs});
+  if(char._luckyBoosterTs&&char._luckyBoosterTs>now)list.push({key:'lucky',icon:'🍀',name:'행운의 부적',desc:'드랍 +30%',color:'#44d488',ts:char._luckyBoosterTs});
+  return list;
+}
+function renderBoosterBadges(){
+  const el=document.getElementById('tboosters');
+  if(!el)return;
+  const active=getActiveBoosters();
+  if(active.length===0){el.innerHTML='';return;}
+  const now=Date.now();
+  el.innerHTML=active.map(b=>{
+    const remain=b.ts-now;
+    const remainStr=_fmtBoosterRemain(remain);
+    const urgent=remain<5*60000; // 5분 미만 강조
+    return `<span title="${b.name} ${b.desc} · 남은 ${remainStr}" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-family:'IBM Plex Mono',monospace;background:rgba(${b.color==='#f0c040'?'240,192,64':b.color==='#80a0ff'?'128,160,255':'68,212,136'},.12);border:1px solid ${b.color}66;color:${b.color};padding:2px 6px;border-radius:5px${urgent?';animation:pulse 1s infinite':''}">${b.icon}<span>${remainStr}</span></span>`;
+  }).join('');
+}
+window.renderBoosterBadges=renderBoosterBadges;
+window.getActiveBoosters=getActiveBoosters;
+
+// ★ 캐릭터창 부스터 카드 렌더
+function renderCharBoosterCard(){
+  const el=document.getElementById('charBoosterCard');
+  if(!el)return;
+  const active=getActiveBoosters();
+  if(active.length===0){el.style.display='none';el.innerHTML='';return;}
+  const now=Date.now();
+  el.style.display='block';
+  el.innerHTML=`
+    <div style="background:linear-gradient(135deg,rgba(240,192,64,.06),rgba(68,212,136,.06));border:1px solid rgba(240,192,64,.25);border-radius:8px;padding:9px 12px">
+      <div style="font-size:9px;color:var(--tx3);letter-spacing:.5px;margin-bottom:6px">⚡ 활성 효과</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        ${active.map(b=>{
+          const remain=b.ts-now;
+          const remainStr=_fmtBoosterRemain(remain);
+          const pct=Math.max(0,Math.min(100,remain/3600000*100));
+          const urgent=remain<5*60000;
+          return `<div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:14px">${b.icon}</span>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:11px">
+                <span style="color:${b.color};font-weight:700">${b.name}</span>
+                <span style="font-size:9px;color:var(--tx3)">${b.desc}</span>
+              </div>
+              <div style="height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin-top:3px">
+                <div style="height:100%;background:${b.color};width:${pct}%;transition:width .4s"></div>
+              </div>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:${urgent?'#ff8080':'var(--tx2)'};min-width:60px;text-align:right${urgent?';animation:pulse 1s infinite':''}">${remainStr}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+window.renderCharBoosterCard=renderCharBoosterCard;
+
+// ★ v3.0 핫픽스 — 부스터 표시 갱신 인터벌: 활성 시에만 동작, 만료 시 자동 정지
+let _boosterTickHandle=null;
+function startBoosterTick(){
+  if(_boosterTickHandle)return; // 이미 동작 중
+  _boosterTickHandle=setInterval(()=>{
+    if(!char){stopBoosterTick();return;}
+    const active=getActiveBoosters();
+    if(active.length===0){
+      // 만료됨 — 마지막 1회 정리 렌더 후 정지
+      renderBoosterBadges();
+      renderCharBoosterCard();
+      stopBoosterTick();
+      return;
+    }
+    renderBoosterBadges();
+    renderCharBoosterCard();
+  },1000);
+}
+function stopBoosterTick(){
+  if(_boosterTickHandle){clearInterval(_boosterTickHandle);_boosterTickHandle=null;}
+}
+window.startBoosterTick=startBoosterTick;
+window.stopBoosterTick=stopBoosterTick;
 
 // ═══ LEVEL UP (random stats 1-5) ═══
 function gainExp(amt){
@@ -3739,6 +3840,8 @@ window.closeLvModal=()=>document.getElementById('lvModal').classList.remove('ope
 // ═══ CHAR TAB ═══
 function renderChar(){
   if(!char)return;
+  // ★ v3.0 핫픽스 — 활성 부스터 카드 렌더
+  renderCharBoosterCard();
   // ★ 온보딩 2단계 — 다음 목표 힌트
   const hint=getNextGoalHint&&getNextGoalHint();
   const hintBar=document.getElementById('goalHintBar');
@@ -6874,17 +6977,29 @@ async function renderBlackMarket(sb){
         const remaining=getBMRemainingCount(item.id);
         const finalPrice=dynPrice!==null?dynPrice:item.price;
         const isMaxed=remaining===0;
+        // ★ v3.0 핫픽스 — 시간제 부스터 활성 중 체크
+        const _now=Date.now();
+        let activeUntil=0;
+        if(item.id==='bm_goldboost')activeUntil=char._goldBoosterTs||0;
+        else if(item.id==='bm_expboost')activeUntil=char._expBoosterTs||0;
+        else if(item.id==='bm_lucky')activeUntil=char._luckyBoosterTs||0;
+        const isBoosterActive=activeUntil>_now;
+        const remainMin=isBoosterActive?Math.ceil((activeUntil-_now)/60000):0;
+        const disabled=isMaxed||isBoosterActive;
+        const btnLabel=isMaxed?'최대':(isBoosterActive?'활성중':'구매');
         const progressLine=remaining!==null?`<div style="font-size:9px;color:${isMaxed?'var(--red)':'var(--tx3)'};margin-top:2px">${isMaxed?'⛔ 최대 보유 슬롯 도달':`구매 가능 ${remaining}회 남음 · 다음 구매 시 가격 30% 증가`}</div>`:'';
-        return `<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:12px;${isMaxed?'opacity:.5':''}">
+        const activeLine=isBoosterActive?`<div style="font-size:9px;color:#44d488;margin-top:2px">✓ 활성 중 — 종료까지 ${remainMin}분</div>`:'';
+        return `<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:12px;${disabled?'opacity:.55':''}">
           <div style="font-size:28px;flex-shrink:0">${item.icon}</div>
           <div style="flex:1;min-width:0">
             <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--tx);margin-bottom:3px">${item.name}</div>
             <div style="font-size:10px;color:var(--tx3)">${item.desc}</div>
             ${progressLine}
+            ${activeLine}
           </div>
           <div style="text-align:right;flex-shrink:0">
             <div style="font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:12px;font-weight:700;margin-bottom:5px">💰${finalPrice.toLocaleString()}</div>
-            <button class="btn btn-red btn-xs" onclick="bmBuy(${realIdx})" ${isMaxed?'disabled':''}>${isMaxed?'최대':'구매'}</button>
+            <button class="btn btn-red btn-xs" onclick="bmBuy(${realIdx})" ${disabled?'disabled':''}>${btnLabel}</button>
           </div>
         </div>`;
       }).join('')}
@@ -6895,6 +7010,20 @@ window.bmBuy=async(i)=>{
   const item=BM_ITEMS[i];
   if(!item){toast('아이템 정보 오류');return;}
   if(!canPay(item.price)){toast('골드 부족');return;}
+  // ★ v3.0 핫픽스 — 시간제 부스터 누적 차단 (이미 활성 중이면 거절)
+  const now=Date.now();
+  if(item.id==='bm_goldboost'&&char._goldBoosterTs&&char._goldBoosterTs>now){
+    const remainMin=Math.ceil((char._goldBoosterTs-now)/60000);
+    toast(`💰 골드 부스터가 이미 활성화 중입니다 (남은 ${remainMin}분). 종료 후 구매하세요.`,5000);return;
+  }
+  if(item.id==='bm_expboost'&&char._expBoosterTs&&char._expBoosterTs>now){
+    const remainMin=Math.ceil((char._expBoosterTs-now)/60000);
+    toast(`📚 경험치 부스터가 이미 활성화 중입니다 (남은 ${remainMin}분). 종료 후 구매하세요.`,5000);return;
+  }
+  if(item.id==='bm_lucky'&&char._luckyBoosterTs&&char._luckyBoosterTs>now){
+    const remainMin=Math.ceil((char._luckyBoosterTs-now)/60000);
+    toast(`🍀 행운의 부적이 이미 활성화 중입니다 (남은 ${remainMin}분). 종료 후 구매하세요.`,5000);return;
+  }
   // ★ reroll 사전 검증 — 결제 전에 재배분 가능 여부 확인 (환불 처리 불필요)
   if(item.id==='bm_reroll'){
     const BASE={str:5,dex:5,int:3,vit:5,luk:2};
@@ -6950,17 +7079,17 @@ window.bmBuy=async(i)=>{
     char._forgeGuarantee=(char._forgeGuarantee||0)+1;
     toast(`⚒ 강화 보장권 적용! (다음 강화 ${char._forgeGuarantee}회 100% 성공 보장)`,4000);
   }else if(item.id==='bm_goldboost'){
-    // ★ v3.x — 1시간 골드 +50%
-    const now=Date.now();
-    char._goldBoosterTs=Math.max(char._goldBoosterTs||0,now)+3600000;
+    // ★ v3.0 핫픽스 — 누적 차단: 정확히 1시간 (활성 중 구매는 위에서 막힘)
+    char._goldBoosterTs=Date.now()+3600000;
+    startBoosterTick(); // ★ 인터벌 시작
     toast(`💰 골드 부스터 활성화! (1시간 골드 +50%)`,4000);
   }else if(item.id==='bm_expboost'){
-    const now=Date.now();
-    char._expBoosterTs=Math.max(char._expBoosterTs||0,now)+3600000;
+    char._expBoosterTs=Date.now()+3600000;
+    startBoosterTick();
     toast(`📚 경험치 부스터 활성화! (1시간 EXP +50%)`,4000);
   }else if(item.id==='bm_lucky'){
-    const now=Date.now();
-    char._luckyBoosterTs=Math.max(char._luckyBoosterTs||0,now)+3600000;
+    char._luckyBoosterTs=Date.now()+3600000;
+    startBoosterTick();
     toast(`🍀 행운의 부적 활성화! (1시간 드랍률 +30%)`,4000);
   }else if(item.id==='bm_nick'){
     char.nickCoupons=(char.nickCoupons||0)+1;
