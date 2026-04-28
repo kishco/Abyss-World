@@ -2755,6 +2755,13 @@ function calcStats(c){
   let talentSkillDmgBonus=0;
   if(typeof getTalentEffects==='function'){
     const t=getTalentEffects(c);
+    // ★ v3.1 핫픽스 — 1차 스탯 (str/dex/int/vit/luk) 노드 효과를 atk/matk/hp/def/spd/dodge/crit/goldBonus에 환산
+    // 인챈트 환산식과 동일 비율 사용 (str×0.8, dex spd×0.25 dodge×0.15 crit×0.04, int×1.5, vit hp×3 def×0.3, luk crit×0.04 gold×0.2)
+    if(t.str)atk+=t.str*0.8;
+    if(t.dex){spd+=t.dex*0.25;dodge+=t.dex*0.15;crit+=t.dex*0.04;}
+    if(t.int)matk+=t.int*1.5;
+    if(t.vit){hp+=t.vit*3;def+=t.vit*0.3;}
+    if(t.luk){crit+=t.luk*0.04;goldBonus+=t.luk*0.2;}
     // 직접 스탯
     atk+=t.atk||0; matk+=t.matk||0; def+=t.def||0; hp+=t.hp||0; spd+=t.spd||0;
     crit+=t.crit||0; critDmg+=t.critDmg||0; dodge+=t.dodge||0;
