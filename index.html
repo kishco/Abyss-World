@@ -3515,12 +3515,9 @@ async function selChar(id){
     }
   });
   // ★ v3.0 핫픽스 — inv onValue 제거 (자기 inv 다운로드 폭증의 진짜 원인 해결)
-  // 변경: 명시적 get으로 초기 로드 + invSync 알림 path로 외부 변경만 감지
+  // 변경: onValue 제거 → invSync 알림 path로 외부 변경만 감지
   // 효과: 자기 saveInv 시 자기 onValue로 inv 전체(최대 152KB) 다운로드 차단 → 99% 절감
-  try{
-    const _initInvSn=await get(ref(db,`inv/${id}`));
-    inv=_initInvSn.val()||{};
-  }catch(e){console.error('[inv 초기 로드 실패]',e);inv={};}
+  // (inv 자체는 위 3361 라인에서 이미 명시적으로 get 완료됨 — 중복 로드 제거)
   let needSave=false;
   for(const it of Object.values(inv)){
     if(it&&it.grade==='set'&&!it.setId){it.grade='legendary';it.gradeName='레전더리';it.gradeColor=GRADES.legendary.color;needSave=true;}
@@ -8019,7 +8016,10 @@ window.enterTABattle=async function(){
     floor:0,floors:1,phase:0,soloMult:1.0,log:[],done:false,timer:null,timerVal:0,
     fleeVotes:new Set(),reviveQueue:new Set(),combatMs:0,totalTurns:0,_phaseStart:null,_presence:{},
     _taBossIdx:bossIdx,_taWeekKey:wk,
+    _firstDodgeUsed:false, // ★ v3.0 핫픽스 — 거점 패시브 사용 플래그 (헬퍼는 _Avail만 처리)
+    _battleStartTurn:0,
   };
+  applyStrongholdBattleStart(battle); // ★ v3.0 핫픽스 — 거점 패시브 on_battle_start 적용
   document.getElementById('dungMain').style.display='none';
   document.getElementById('dungMode').style.display='none';
   document.getElementById('dungLobby').style.display='none';
@@ -8169,26 +8169,10 @@ function startBattle(tierIdx,mode,diffKey,players){
     totalTurns:0, // ★ 총 턴수 카운트
     _phaseStart:null,
     _presence:{},
-    _reviveUsed:false, // ★ v3.0 시간의 모래시계 1전투 1회 부활
-    _firstDodgeAvail:hasActivePassive('first_dodge'), // ★ v3.0 그림자 거울 1회 회피 가용
-    _startBuffSpd:0, // ★ v3.0 전쟁의 깃발 SPD 버프 (3턴)
-    _invulnTurns:0,  // ★ v3.0 축복의 제단 무적 (1턴)
+    _firstDodgeUsed:false, // ★ v3.0 핫픽스 — 거점 패시브 사용 플래그
     _battleStartTurn:0, // ★ 전투 시작 턴 추적 (3턴 버프 만료용)
   };
-  // ★ v3.0 거점 패시브 on_battle_start 적용 (동일 패시브 키 중복 방지)
-  if(char?.house?.activePassives){
-    const _seen=new Set();
-    for(const itemId of char.house.activePassives){
-      const it=findFurnitureItem(itemId);
-      if(!it||!it.passive)continue;
-      if(_seen.has(it.passive))continue;
-      _seen.add(it.passive);
-      const p=FURNITURE_PASSIVES[it.passive];
-      if(!p||p.trigger!=='on_battle_start')continue;
-      if(p.proc?.type==='spd_buff'){battle._startBuffSpd+=p.proc.value||0; battle._startBuffTurns=p.proc.turns||3;}
-      if(p.proc?.type==='invuln')battle._invulnTurns=Math.max(battle._invulnTurns,p.proc.turns||0);
-    }
-  }
+  applyStrongholdBattleStart(battle); // ★ v3.0 핫픽스 — 거점 패시브 on_battle_start 적용
   // 솔로 전용 — 파티 모드 제거됨 (v2.0)
   document.getElementById('dungLobby').style.display='none';
   document.getElementById('dungMode').style.display='none';
@@ -10443,8 +10427,11 @@ window.startITBattle=async function(floorNum){
     soloMult:1.0, log:[], done:false, timer:null, timerVal:0,
     fleeVotes:new Set(), reviveQueue:new Set(),
     combatMs:0, totalTurns:0, _phaseStart:null, _presence:{},
-    _itFloor:floorNum, _itRotation:rotation
+    _itFloor:floorNum, _itRotation:rotation,
+    _firstDodgeUsed:false, // ★ v3.0 핫픽스 — 거점 패시브 사용 플래그
+    _battleStartTurn:0,
   };
+  applyStrongholdBattleStart(battle); // ★ v3.0 핫픽스 — 거점 패시브 on_battle_start 적용 (IT는 startBattle 미경유)
 
   document.getElementById('dungLobby').style.display='none';
   document.getElementById('dungMode').style.display='none';
@@ -12492,24 +12479,14 @@ window.enterSubjBattle=async function(){
   let myHp=s.maxHp, myPotions=5+(char.extraPotions||0);
   let bossHpLocal=boss.hp; // local session HP (we only track dmg dealt)
   let totalDmgDealt=0, phase=1, done=false;
-  // ★ v3.0 거점 패시브 (토벌전)
-  let _subjFirstDodgeAvail=hasActivePassive('first_dodge');
+  // ★ v3.0 핫픽스 — 거점 패시브 헬퍼 사용 (토벌전)
+  const _subjCtx=applyStrongholdBattleStart({});
+  let _subjFirstDodgeAvail=_subjCtx._firstDodgeAvail;
   let _subjFirstDodgeUsed=false;
   let _subjReviveUsed=false;
-  let _subjStartBuffSpd=0, _subjStartBuffTurns=0, _subjInvulnTurns=0;
-  if(char?.house?.activePassives){
-    const _seenSubj=new Set();
-    for(const itemId of char.house.activePassives){
-      const it=findFurnitureItem(itemId);
-      if(!it||!it.passive)continue;
-      if(_seenSubj.has(it.passive))continue;
-      _seenSubj.add(it.passive);
-      const p=FURNITURE_PASSIVES[it.passive];
-      if(!p||p.trigger!=='on_battle_start')continue;
-      if(p.proc?.type==='spd_buff'){_subjStartBuffSpd+=p.proc.value||0; _subjStartBuffTurns=p.proc.turns||3;}
-      if(p.proc?.type==='invuln')_subjInvulnTurns=Math.max(_subjInvulnTurns,p.proc.turns||0);
-    }
-  }
+  let _subjStartBuffSpd=_subjCtx._startBuffSpd;
+  let _subjStartBuffTurns=_subjCtx._startBuffTurns;
+  let _subjInvulnTurns=_subjCtx._invulnTurns;
   let _subjTurn=0;
   if(_subjInvulnTurns>0)slog(`<span class="l-skill" style="color:var(--gold)">✨ 축복의 제단! ${_subjInvulnTurns}턴 무적</span>`);
   if(_subjStartBuffSpd>0)slog(`<span class="l-skill" style="color:var(--blue)">⚡ 전쟁의 깃발! ${_subjStartBuffTurns}턴 SPD +${_subjStartBuffSpd}</span>`);
@@ -12982,24 +12959,14 @@ window.enterChampBattle=async function(){
   let champHpMult=1.5; // ★ 챔프전 HP 배율 — 전투 지속성
   let champLog=[],champDone=false;
   let phase=1;
-  // ★ v3.0 거점 패시브 (챔프)
-  let _chFirstDodgeAvail=hasActivePassive('first_dodge');
+  // ★ v3.0 핫픽스 — 거점 패시브 헬퍼 사용 (챔프전)
+  const _chCtx=applyStrongholdBattleStart({});
+  let _chFirstDodgeAvail=_chCtx._firstDodgeAvail;
   let _chFirstDodgeUsed=false;
   let _chReviveUsed=false;
-  let _chStartBuffSpd=0, _chStartBuffTurns=0, _chInvulnTurns=0;
-  if(char?.house?.activePassives){
-    const _seenCh=new Set();
-    for(const itemId of char.house.activePassives){
-      const it=findFurnitureItem(itemId);
-      if(!it||!it.passive)continue;
-      if(_seenCh.has(it.passive))continue;
-      _seenCh.add(it.passive);
-      const p=FURNITURE_PASSIVES[it.passive];
-      if(!p||p.trigger!=='on_battle_start')continue;
-      if(p.proc?.type==='spd_buff'){_chStartBuffSpd+=p.proc.value||0; _chStartBuffTurns=p.proc.turns||3;}
-      if(p.proc?.type==='invuln')_chInvulnTurns=Math.max(_chInvulnTurns,p.proc.turns||0);
-    }
-  }
+  let _chStartBuffSpd=_chCtx._startBuffSpd;
+  let _chStartBuffTurns=_chCtx._startBuffTurns;
+  let _chInvulnTurns=_chCtx._invulnTurns;
   let _chTurn=0;
 
   // If no champ, just become champ
@@ -13782,6 +13749,46 @@ function hasActivePassive(passiveKey){
   }
   return false;
 }
+
+// ★★★ v3.0 핫픽스 — 거점 패시브 전투 시작 적용 헬퍼 (5곳 중복 코드 통합)
+// battle 객체 또는 plain 컨텍스트 객체에 거점 패시브 on_battle_start 효과를 일괄 적용.
+// 사용처: 일반 던전(startBattle), 불멸의 탑, 시간 어택, 토벌전, 챔프전
+//
+// 입력 ctx 객체에 다음 필드를 자동 설정/누적함:
+//   _firstDodgeAvail (bool), _firstDodgeUsed (false 초기화 안 함, 호출 측 책임)
+//   _reviveUsed (false), _startBuffSpd (number 누적), _startBuffTurns (number)
+//   _invulnTurns (number max)
+// ctx가 battle 객체면 그대로 사용, 토벌전/챔프전처럼 로컬 변수 컨텍스트면 객체 만들어 받기
+function applyStrongholdBattleStart(ctx){
+  if(!ctx)return ctx;
+  // 기본 필드 보장
+  if(ctx._firstDodgeAvail===undefined)ctx._firstDodgeAvail=hasActivePassive('first_dodge');
+  if(ctx._reviveUsed===undefined)ctx._reviveUsed=false;
+  if(ctx._startBuffSpd===undefined)ctx._startBuffSpd=0;
+  if(ctx._startBuffTurns===undefined)ctx._startBuffTurns=0;
+  if(ctx._invulnTurns===undefined)ctx._invulnTurns=0;
+  // on_battle_start 패시브 적용 (동일 패시브 키 중복 방지)
+  if(char?.house?.activePassives){
+    const _seen=new Set();
+    for(const itemId of char.house.activePassives){
+      const it=findFurnitureItem(itemId);
+      if(!it||!it.passive)continue;
+      if(_seen.has(it.passive))continue;
+      _seen.add(it.passive);
+      const p=FURNITURE_PASSIVES[it.passive];
+      if(!p||p.trigger!=='on_battle_start')continue;
+      if(p.proc?.type==='spd_buff'){
+        ctx._startBuffSpd+=p.proc.value||0;
+        ctx._startBuffTurns=Math.max(ctx._startBuffTurns,p.proc.turns||3);
+      }
+      if(p.proc?.type==='invuln'){
+        ctx._invulnTurns=Math.max(ctx._invulnTurns,p.proc.turns||0);
+      }
+    }
+  }
+  return ctx;
+}
+window.applyStrongholdBattleStart=applyStrongholdBattleStart;
 // ★ 일반 던전 — 던전 첫 피격 회피 시도 (true 반환 시 회피 처리됨)
 function tryDungeonFirstDodge(){
   if(!battle||!battle._firstDodgeAvail||battle._firstDodgeUsed)return false;
