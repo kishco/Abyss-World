@@ -2608,7 +2608,9 @@ function calcStats(c){
   // 스탯 환산율 — 장비 의존도 높이고 스탯 올인 폭발 방지
   let atk=c.baseAtk+(c.str||5)*1.5,matk=(c.baseMatk||0)+(c.int||3)*1.5,def=c.baseDef+(c.vit||5)*0.6;
   let spd=c.baseSpd+(c.dex||5)*0.8,hp=(c.maxHp||100);
-  let dodge=Math.min((c.dex||5)*0.2,25),crit=8+(c.dex||5)*0.25+(c.luk||2)*0.1;
+  let dodge=Math.min((c.dex||5)*0.2,25),crit=5+(c.dex||5)*0.18+(c.luk||2)*0.08;
+  // ★ v3.0 핫픽스 — crit 기본 공식 하향 (이전: 8 + DEX×0.25 + LUK×0.1, 풀세팅 75% 너무 쉬움)
+  // 상한 75%는 유지 — 도달은 가능하지만 비용이 비싸짐 (빌드 가치 강화)
   let critDmg=140+(c.str||5)*0.4+(c.luk||2)*0.25;
   let goldBonus=(c.luk||2)*0.3,skillBonus=0,balance=0;
   const eq=c.equipment||{};
@@ -2621,9 +2623,10 @@ function calcStats(c){
       atk+=cap(b.atk)||0;def+=cap(b.def)||0;spd+=cap(b.spd)||0;hp+=cap(b.hp)||0;
       matk+=cap(b.matk)||0;crit+=cap(b.crit)||0;critDmg+=cap(b.critDmg)||0;
       goldBonus+=cap(b.goldBonus)||0;skillBonus+=cap(b.skillBonus)||0;
-      if(b.str)atk+=cap(b.str)*0.8;if(b.dex){dodge+=cap(b.dex)*0.15;spd+=cap(b.dex)*0.25;crit+=cap(b.dex)*0.06;}
+      // ★ v3.0 핫픽스 — 인챈트 DEX/LUK 숨은 crit 보너스 하향 (0.06 → 0.04)
+      if(b.str)atk+=cap(b.str)*0.8;if(b.dex){dodge+=cap(b.dex)*0.15;spd+=cap(b.dex)*0.25;crit+=cap(b.dex)*0.04;}
       if(b.int)matk+=cap(b.int)*1.5;if(b.vit){hp+=cap(b.vit)*3;def+=cap(b.vit)*0.3;}  // VIT→HP 3 (기존5), VIT→DEF 0.3
-      if(b.luk){goldBonus+=cap(b.luk)*0.2;crit+=cap(b.luk)*0.06;}
+      if(b.luk){goldBonus+=cap(b.luk)*0.2;crit+=cap(b.luk)*0.04;}
     };
     ab(it.prefix?.b);ab(it.suffix?.b);
   }
