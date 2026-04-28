@@ -6122,13 +6122,13 @@ const TALENT_NODES={
   s313:{tree:'s',branch:3,tier:13,cost:3,req:['s312'],type:'keystone',name:'★ 잔영 마스터',desc:'회피 +8%, SPD +25',effect:{dodge:8,spd:25},pos:_talPos('s',3,13)},
 
   // 🌟 가지4: 신성 보호 (13노드)
-  s401:{tree:'s',branch:4,tier:1,cost:1,req:['s00'],type:'minor',name:'신성 친화',desc:'신성 무기 데미지 +5%',effect:{attrDmgBonus:{holy:5}},pos:_talPos('s',4,1)},
+  s401:{tree:'s',branch:4,tier:1,cost:1,req:['s00'],type:'minor',name:'신성 친화',desc:'신성 데미지 +5% (평타+스킬)',effect:{attrDmgBonus:{holy:5}},pos:_talPos('s',4,1)},
   s402:{tree:'s',branch:4,tier:2,cost:1,req:['s401'],type:'minor',name:'신성 가호',desc:'신성 받는 데미지 -5%',effect:{attrResist:{holy:5}},pos:_talPos('s',4,2)},
-  s403:{tree:'s',branch:4,tier:3,cost:2,req:['s402'],type:'major',name:'신성 빛',desc:'신성 무기 데미지 +10%',effect:{attrDmgBonus:{holy:10}},pos:_talPos('s',4,3)},
+  s403:{tree:'s',branch:4,tier:3,cost:2,req:['s402'],type:'major',name:'신성 빛',desc:'신성 데미지 +10% (평타+스킬)',effect:{attrDmgBonus:{holy:10}},pos:_talPos('s',4,3)},
   s404:{tree:'s',branch:4,tier:4,cost:1,req:['s403'],type:'minor',name:'정화',desc:'어둠 받는 데미지 -8%',effect:{attrResist:{dark:8}},pos:_talPos('s',4,4)},
-  s405:{tree:'s',branch:4,tier:5,cost:1,req:['s403'],type:'minor',name:'광채',desc:'신성 무기 데미지 +5%, INT +3',effect:{attrDmgBonus:{holy:5},int:3},pos:_talPos('s',4,5)},
-  s406:{tree:'s',branch:4,tier:6,cost:1,req:['s404','s405'],type:'minor',name:'신성 보호막',desc:'신성 받는 데미지 -5%, HP +50',effect:{attrResist:{holy:5},hp:50},pos:_talPos('s',4,6)},
-  s407:{tree:'s',branch:4,tier:7,cost:2,req:['s406'],type:'major',name:'강화 신성',desc:'신성 무기 데미지 +15%, 어둠 받피 -5%',effect:{attrDmgBonus:{holy:15},attrResist:{dark:5}},pos:_talPos('s',4,7)},
+  s405:{tree:'s',branch:4,tier:5,cost:1,req:['s403'],type:'minor',name:'광채',desc:'신성 데미지 +5%, INT +3',effect:{attrDmgBonus:{holy:5},int:3},pos:_talPos('s',4,5)},
+  s406:{tree:'s',branch:4,tier:6,cost:1,req:['s404','s405'],type:'minor',name:'신성 보호막',desc:'신성 받피 -5%, HP +50',effect:{attrResist:{holy:5},hp:50},pos:_talPos('s',4,6)},
+  s407:{tree:'s',branch:4,tier:7,cost:2,req:['s406'],type:'major',name:'강화 신성',desc:'신성 데미지 +15%, 어둠 받피 -5%',effect:{attrDmgBonus:{holy:15},attrResist:{dark:5}},pos:_talPos('s',4,7)},
   s408:{tree:'s',branch:4,tier:8,cost:1,req:['s407'],type:'minor',name:'정화의 빛',desc:'어둠/독 받피 -5%',effect:{attrResist:{dark:5,poison:5}},pos:_talPos('s',4,8)},
   s409:{tree:'s',branch:4,tier:9,cost:1,req:['s407'],type:'minor',name:'성스러운 의지',desc:'HP +80, 신성 데미지 +5%',effect:{hp:80,attrDmgBonus:{holy:5}},pos:_talPos('s',4,9)},
   s410:{tree:'s',branch:4,tier:10,cost:1,req:['s408','s409'],type:'minor',name:'천사의 가호',desc:'HP +100',effect:{hp:100},pos:_talPos('s',4,10)},
@@ -6251,16 +6251,16 @@ const TALENT_NODES={
 
   // 🔥 가지4: 속성 (11노드)
   p401:{tree:'p',branch:4,tier:1,cost:1,req:['p00'],type:'minor',name:'속성 친화',desc:'화염/냉기/번개 데미지 +3%',effect:{attrDmgBonus:{fire:3,ice:3,lightning:3}},pos:_talPos('p',4,1)},
-  p402:{tree:'p',branch:4,tier:2,cost:1,req:['p401'],type:'minor',name:'화염 강화',desc:'화염 무기 +8%',effect:{attrDmgBonus:{fire:8}},pos:_talPos('p',4,2)},
-  p403:{tree:'p',branch:4,tier:3,cost:1,req:['p401'],type:'minor',name:'냉기 강화',desc:'냉기 무기 +8%',effect:{attrDmgBonus:{ice:8}},pos:_talPos('p',4,3)},
-  p404:{tree:'p',branch:4,tier:4,cost:2,req:['p402','p403'],type:'major',name:'원소 마스터',desc:'화/냉/번개 무기 +5%',effect:{attrDmgBonus:{fire:5,ice:5,lightning:5}},pos:_talPos('p',4,4)},
-  p405:{tree:'p',branch:4,tier:5,cost:1,req:['p404'],type:'minor',name:'번개 강화',desc:'번개 무기 +10%',effect:{attrDmgBonus:{lightning:10}},pos:_talPos('p',4,5)},
-  p406:{tree:'p',branch:4,tier:6,cost:1,req:['p404'],type:'minor',name:'어둠 친화',desc:'어둠 무기 +10%',effect:{attrDmgBonus:{dark:10}},pos:_talPos('p',4,6)},
-  p407:{tree:'p',branch:4,tier:7,cost:1,req:['p405','p406'],type:'minor',name:'독 친화',desc:'독 무기 +10%',effect:{attrDmgBonus:{poison:10}},pos:_talPos('p',4,7)},
+  p402:{tree:'p',branch:4,tier:2,cost:1,req:['p401'],type:'minor',name:'화염 강화',desc:'화염 데미지 +8%',effect:{attrDmgBonus:{fire:8}},pos:_talPos('p',4,2)},
+  p403:{tree:'p',branch:4,tier:3,cost:1,req:['p401'],type:'minor',name:'냉기 강화',desc:'냉기 데미지 +8%',effect:{attrDmgBonus:{ice:8}},pos:_talPos('p',4,3)},
+  p404:{tree:'p',branch:4,tier:4,cost:2,req:['p402','p403'],type:'major',name:'원소 마스터',desc:'화/냉/번개 데미지 +5%',effect:{attrDmgBonus:{fire:5,ice:5,lightning:5}},pos:_talPos('p',4,4)},
+  p405:{tree:'p',branch:4,tier:5,cost:1,req:['p404'],type:'minor',name:'번개 강화',desc:'번개 데미지 +10%',effect:{attrDmgBonus:{lightning:10}},pos:_talPos('p',4,5)},
+  p406:{tree:'p',branch:4,tier:6,cost:1,req:['p404'],type:'minor',name:'어둠 친화',desc:'어둠 데미지 +10%',effect:{attrDmgBonus:{dark:10}},pos:_talPos('p',4,6)},
+  p407:{tree:'p',branch:4,tier:7,cost:1,req:['p405','p406'],type:'minor',name:'독 친화',desc:'독 데미지 +10%',effect:{attrDmgBonus:{poison:10}},pos:_talPos('p',4,7)},
   p408:{tree:'p',branch:4,tier:8,cost:2,req:['p407'],type:'major',name:'속성 저항',desc:'모든 속성 받피 -5%',effect:{attrResist:{fire:5,ice:5,lightning:5,dark:5,holy:5,poison:5}},pos:_talPos('p',4,8)},
-  p409:{tree:'p',branch:4,tier:9,cost:1,req:['p408'],type:'minor',name:'속성 마스터',desc:'모든 속성 무기 +5%',effect:{attrDmgBonus:{fire:5,ice:5,lightning:5,dark:5,holy:5,poison:5}},pos:_talPos('p',4,9)},
-  p410:{tree:'p',branch:4,tier:10,cost:2,req:['p409'],type:'major',name:'원소 폭주',desc:'모든 속성 무기 +10%',effect:{attrDmgBonus:{fire:10,ice:10,lightning:10,dark:10,holy:10,poison:10}},pos:_talPos('p',4,10)},
-  p411:{tree:'p',branch:4,tier:11,cost:3,req:['p410'],type:'keystone',name:'★ 속성 지배자',desc:'모든 속성 무기 +20%, 모든 속성 받피 -10%',effect:{attrDmgBonus:{fire:20,ice:20,lightning:20,dark:20,holy:20,poison:20},attrResist:{fire:10,ice:10,lightning:10,dark:10,holy:10,poison:10}},pos:_talPos('p',4,11)},
+  p409:{tree:'p',branch:4,tier:9,cost:1,req:['p408'],type:'minor',name:'속성 마스터',desc:'모든 속성 데미지 +5%',effect:{attrDmgBonus:{fire:5,ice:5,lightning:5,dark:5,holy:5,poison:5}},pos:_talPos('p',4,9)},
+  p410:{tree:'p',branch:4,tier:10,cost:2,req:['p409'],type:'major',name:'원소 폭주',desc:'모든 속성 데미지 +10%',effect:{attrDmgBonus:{fire:10,ice:10,lightning:10,dark:10,holy:10,poison:10}},pos:_talPos('p',4,10)},
+  p411:{tree:'p',branch:4,tier:11,cost:3,req:['p410'],type:'keystone',name:'★ 속성 지배자',desc:'모든 속성 데미지 +20%, 모든 속성 받피 -10%',effect:{attrDmgBonus:{fire:20,ice:20,lightning:20,dark:20,holy:20,poison:20},attrResist:{fire:10,ice:10,lightning:10,dark:10,holy:10,poison:10}},pos:_talPos('p',4,11)},
 };
 
 // 특성 효과 합산 — calcStats에서 호출
@@ -10216,8 +10216,26 @@ function trySkillProc(p,s,target,allM){
       if(fx.dmg>0&&(s._skillDmgBonus||0)>0){
         fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
       }
-      // ★ 속성 효과: 스킬 타입과 무기 속성이 일치하면 보너스
+      // ★ v3.1 — 무속성 스킬은 무기 속성 따라감 (ATK 스킬에 무기 속성 부여)
+      if(fx.dmg>0&&!fx.type){
+        const wAttr=getWeaponAttr(p.charData?.equipment||char.equipment||{});
+        if(wAttr)fx.type=wAttr;
+      }
+      // ★ v3.1 — 무기-스킬 속성 일치 시 시너지 +15%
+      if(fx.dmg>0&&fx.type){
+        const wAttr=getWeaponAttr(p.charData?.equipment||char.equipment||{});
+        if(wAttr&&wAttr===fx.type){
+          fx.dmg=Math.round(fx.dmg*1.15);
+        }
+      }
+      // ★ v3.1 — 스킬 속성에도 특성 트리 속성 보너스 적용
+      // 예: 속성 트리 화염 +20% 찍으면 화염 스킬 데미지도 +20%
       const skAttr=fx.type;
+      if(skAttr&&fx.dmg>0&&s.attrDmgBonus){
+        const attrBonus=s.attrDmgBonus[skAttr]||0;
+        if(attrBonus>0)fx.dmg=Math.round(fx.dmg*(1+attrBonus/100));
+      }
+      // ★ 속성 효과: 스킬 타입과 무기 속성이 일치하면 보너스
       if(skAttr&&fx.dmg>0&&ATTR_EFFECT[skAttr]){
         const ae=ATTR_EFFECT[skAttr];
         if(ae.dmgMult)fx.dmg=Math.round(fx.dmg*ae.dmgMult); // 화염: +10%
@@ -14095,6 +14113,14 @@ window.enterSubjBattle=async function(){
               if(fx&&fx.dmg>0){
                 // ★ v3.x — 비전 학자 4pc: 모든 스킬 피해 +25%
                 if((s._skillDmgBonus||0)>0)fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
+                // ★ v3.1 — 무속성 스킬은 무기 속성 따라감
+                if(fx.dmg>0&&!fx.type){const wA=getWeaponAttr(char.equipment||{});if(wA)fx.type=wA;}
+                // ★ v3.1 — 무기-스킬 속성 일치 시너지 +15%
+                if(fx.dmg>0&&fx.type){const wA=getWeaponAttr(char.equipment||{});if(wA&&wA===fx.type)fx.dmg=Math.round(fx.dmg*1.15);}
+                // ★ v3.1 — 스킬 속성에 특성 트리 속성 보너스 적용
+                if(fx.type&&s.attrDmgBonus&&(s.attrDmgBonus[fx.type]||0)>0)fx.dmg=Math.round(fx.dmg*(1+s.attrDmgBonus[fx.type]/100));
+                // ★ v3.1 — 스킬 속성 vs 보스 속성 상성
+                if(fx.type&&boss?._attr){const sM=calcAttrMult(fx.type,boss._attr);if(sM!==1)fx.dmg=Math.round(fx.dmg*sM);}
                 const hits=fx.hits||1;
                 let skDmg=0;
                 for(let h=0;h<hits;h++)skDmg+=Math.min(Math.round(fx.dmg),99999);
@@ -14119,6 +14145,14 @@ window.enterSubjBattle=async function(){
               if(fx&&fx.dmg>0){
                 // ★ v3.x — 비전 학자 4pc 적용
                 if((s._skillDmgBonus||0)>0)fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
+                // ★ v3.1 — 무속성 스킬은 무기 속성 따라감
+                if(fx.dmg>0&&!fx.type){const wA=getWeaponAttr(char.equipment||{});if(wA)fx.type=wA;}
+                // ★ v3.1 — 무기-스킬 속성 일치 시너지 +15%
+                if(fx.dmg>0&&fx.type){const wA=getWeaponAttr(char.equipment||{});if(wA&&wA===fx.type)fx.dmg=Math.round(fx.dmg*1.15);}
+                // ★ v3.1 — 스킬 속성에 특성 트리 속성 보너스 적용
+                if(fx.type&&s.attrDmgBonus&&(s.attrDmgBonus[fx.type]||0)>0)fx.dmg=Math.round(fx.dmg*(1+s.attrDmgBonus[fx.type]/100));
+                // ★ v3.1 — 스킬 속성 vs 보스 속성 상성
+                if(fx.type&&boss?._attr){const sM=calcAttrMult(fx.type,boss._attr);if(sM!==1)fx.dmg=Math.round(fx.dmg*sM);}
                 const hits=fx.hits||1;
                 let skDmg=0;
                 for(let h=0;h<hits;h++)skDmg+=Math.min(Math.round(fx.dmg),99999);
@@ -14540,6 +14574,14 @@ window.enterChampBattle=async function(){
                   if(fx?.dmg>0){
                     // ★ v3.x — 비전 학자 4pc + 다중 타격 처리
                     if((s._skillDmgBonus||0)>0)fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
+                // ★ v3.1 — 무속성 스킬은 무기 속성 따라감
+                if(fx.dmg>0&&!fx.type){const wA=getWeaponAttr(char.equipment||{});if(wA)fx.type=wA;}
+                // ★ v3.1 — 무기-스킬 속성 일치 시너지 +15%
+                if(fx.dmg>0&&fx.type){const wA=getWeaponAttr(char.equipment||{});if(wA&&wA===fx.type)fx.dmg=Math.round(fx.dmg*1.15);}
+                // ★ v3.1 — 스킬 속성에 특성 트리 속성 보너스 적용
+                if(fx.type&&s.attrDmgBonus&&(s.attrDmgBonus[fx.type]||0)>0)fx.dmg=Math.round(fx.dmg*(1+s.attrDmgBonus[fx.type]/100));
+                // ★ v3.1 — 스킬 속성 vs 챔프 무기 속성 상성
+                {const _cA=champ?.equipment?.weapon?.attr||champ?.equipment?.weapon?.prefix?.attr||null;if(fx.type&&_cA){const sM=calcAttrMult(fx.type,_cA);if(sM!==1)fx.dmg=Math.round(fx.dmg*sM);}}
                     const hits=fx.hits||1;
                     let sd=0;
                     for(let h=0;h<hits;h++)sd+=Math.min(Math.round(fx.dmg),99999);
@@ -14561,6 +14603,14 @@ window.enterChampBattle=async function(){
                   if(fx?.dmg>0){
                     // ★ v3.x — 비전 학자 4pc + 다중 타격 처리
                     if((s._skillDmgBonus||0)>0)fx.dmg=Math.round(fx.dmg*(1+s._skillDmgBonus));
+                // ★ v3.1 — 무속성 스킬은 무기 속성 따라감
+                if(fx.dmg>0&&!fx.type){const wA=getWeaponAttr(char.equipment||{});if(wA)fx.type=wA;}
+                // ★ v3.1 — 무기-스킬 속성 일치 시너지 +15%
+                if(fx.dmg>0&&fx.type){const wA=getWeaponAttr(char.equipment||{});if(wA&&wA===fx.type)fx.dmg=Math.round(fx.dmg*1.15);}
+                // ★ v3.1 — 스킬 속성에 특성 트리 속성 보너스 적용
+                if(fx.type&&s.attrDmgBonus&&(s.attrDmgBonus[fx.type]||0)>0)fx.dmg=Math.round(fx.dmg*(1+s.attrDmgBonus[fx.type]/100));
+                // ★ v3.1 — 스킬 속성 vs 챔프 무기 속성 상성
+                {const _cA=champ?.equipment?.weapon?.attr||champ?.equipment?.weapon?.prefix?.attr||null;if(fx.type&&_cA){const sM=calcAttrMult(fx.type,_cA);if(sM!==1)fx.dmg=Math.round(fx.dmg*sM);}}
                     const hits=fx.hits||1;
                     let sd=0;
                     for(let h=0;h<hits;h++)sd+=Math.min(Math.round(fx.dmg),99999);
