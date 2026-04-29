@@ -3694,6 +3694,8 @@ async function selChar(id){
     // ★ v2.8 — 유일 무기 balance + set 거래 마이그레이션 (인벤 초기 로드)
     if(it&&autoMigrateSetWeaponBalance(it))invMigrated=true;
     if(it&&autoMigrateSetTradeable(it))invMigrated=true;
+    // ★ v3.1.1 — 가구 grade 재동기화 (NORMAL/UNCOMMON 카운트 0 버그 복구)
+    if(it&&autoMigrateFurnitureGrade(it))invMigrated=true;
     if(it&&migrateItemLv(it,false))invMigrated=true;
     if(it&&migrateEnchantName(it))invMigrated=true;
     if(it&&migrateScrollName(it))invMigrated=true; // ★ v3.0 핫픽스 — 손상 스크롤 이름 복구
@@ -3712,13 +3714,9 @@ async function selChar(id){
     if(it&&autoMigrateSetTradeable(it))whMigrated=true;
     if(it&&migrateEnchantName(it))whMigrated=true;
     if(it&&migrateScrollName(it))whMigrated=true; // ★ v3.0 핫픽스 — 손상 스크롤 이름 복구
-    // ★ v3.1 핫픽스 — 잘못 강등된 set 가구 복구 (FURNITURE 정의에서 set인 가구는 set 유지)
-    if(it&&it.isFurniture&&it.baseId&&FURNITURE[it.baseId]?.grade==='set'&&it.grade!=='set'){
-      it.grade='set';
-      it.gradeName='유일';
-      it.gradeColor=GRADES.set.color;
-      whMigrated=true;
-    }
+    // ★ v3.1.1 — 가구 grade 전반 재동기화 (set/legendary/epic/rare/uncommon/normal 모두)
+    // 기존 v3.1 set-only 핫픽스를 대체. 이벤트 플래그·카테고리·슬롯도 함께 복원.
+    if(it&&autoMigrateFurnitureGrade(it))whMigrated=true;
   }
   // ★ 스탯 변화 OR 플래그만 변화 모두 저장 (플래그 미저장 시 매 로그인 재체크 방지)
   if(equipMigrated||equipStatsDirty)await saveChar();
@@ -6623,6 +6621,33 @@ function autoMigrateSetTradeable(it){
   if(!it||it.grade!=='set'||it._crafted)return false;
   if(it.tradeable===false){it.tradeable=true; return true;}
   return false;
+}
+
+// ★ v3.1.1 — 가구 grade/속성 재동기화 (FURNITURE 정의 기준)
+// 인스턴스 grade가 깨졌거나 _eventOnly 누락된 케이스 모두 복구.
+// 합성 카운트 정상화 (NORMAL/UNCOMMON 0개 표시 버그 등) + 이벤트 한정 가구 보호.
+function autoMigrateFurnitureGrade(it){
+  if(!it||!it.isFurniture||!it.baseId)return false;
+  const f=FURNITURE[it.baseId];if(!f)return false;
+  let dirty=false;
+  if(it.grade!==f.grade){
+    it.grade=f.grade;
+    it.gradeName=GRADES[f.grade]?.name||f.grade;
+    it.gradeColor=GRADES[f.grade]?.color;
+    dirty=true;
+  }
+  // 이벤트 한정 플래그 복원 (genFurnitureItem 누락분 복구)
+  if(f._eventOnly&&it._eventOnly!==f._eventOnly){
+    it._eventOnly=f._eventOnly;
+    dirty=true;
+  }
+  // 카테고리/패시브/슬롯/제작대 타입 등 정의 변경 반영
+  if(it.cat!==f.cat){it.cat=f.cat;dirty=true;}
+  if(it.passive!==(f.passive||null)){it.passive=f.passive||null;dirty=true;}
+  if((it.targetType||null)!==(f.targetType||null)){it.targetType=f.targetType||null;dirty=true;}
+  if((it.slots||0)!==(f.slots||0)){it.slots=f.slots||0;dirty=true;}
+  if((it.crafterType||null)!==(f.crafterType||null)){it.crafterType=f.crafterType||null;dirty=true;}
+  return dirty;
 }
 
 // ═══ INVENTORY ═══
@@ -15500,7 +15525,7 @@ window.openStronghold=function(){
 // 가구 인스턴스 생성 (인벤에 추가용)
 function genFurnitureItem(furnId){
   const f=FURNITURE[furnId];if(!f)return null;
-  return{
+  const inst={
     id:gId(),
     name:f.n,
     baseId:furnId,
@@ -15519,6 +15544,9 @@ function genFurnitureItem(furnId){
     enhance:0,
     _v:2
   };
+  // ★ v3.1.1 — 이벤트 한정 플래그 복사 (위령제 가구 등 보호용)
+  if(f._eventOnly)inst._eventOnly=f._eventOnly;
+  return inst;
 }
 
 // ★ 핫픽스 — 거점 가구 검색 (inv 우선, warehouse 폴백)
@@ -16876,19 +16904,27 @@ window.synthesizeFurniture=async function(grade){
   if(!hasCrafterPlaced('furniture')){toast('가구 제작대가 거점에 배치되어 있지 않습니다');return;}
   const conf=FURN_SYNTH_DATA[grade];if(!conf){toast('합성 불가 등급');return;}
   // ★ v3.x — 보호 강화: 잠금 + 거점 배치 + 이벤트 한정 + 프리셋 모두 제외
+  // ★ v3.1.1 — canonical grade 사용 (FURNITURE 정의 우선, 인스턴스 grade가 깨졌어도 동작)
   const placedItems=char?.house?.placedItems||[];
   const placedIds=new Set(placedItems.map(p=>p.itemId));
-  const sources=Object.values(inv).filter(i=>
-    i.isFurniture &&
-    i.grade===grade &&
-    !i._locked &&                  // 잠금 제외
-    !placedIds.has(i.id) &&         // 거점 배치 제외
-    !i._eventOnly &&                // 이벤트 한정 제외 (위령제 가구 등)
-    !isInPreset(i.id)               // 프리셋 제외
-  );
+  const sources=Object.values(inv).filter(i=>{
+    if(!i.isFurniture)return false;
+    const def=FURNITURE[i.baseId];
+    const canonGrade=def?.grade||i.grade;
+    const canonEventOnly=def?._eventOnly||i._eventOnly;
+    return canonGrade===grade &&
+      !i._locked &&                  // 잠금 제외
+      !placedIds.has(i.id) &&         // 거점 배치 제외
+      !canonEventOnly &&              // 이벤트 한정 제외 (위령제 가구 등)
+      !isInPreset(i.id);              // 프리셋 제외
+  });
   if(sources.length<conf.count){
     // 보호된 가구 개수 정보 함께 표시
-    const allSameGrade=Object.values(inv).filter(i=>i.isFurniture&&i.grade===grade);
+    const allSameGrade=Object.values(inv).filter(i=>{
+      if(!i.isFurniture)return false;
+      const cg=FURNITURE[i.baseId]?.grade||i.grade;
+      return cg===grade;
+    });
     const protectedCnt=allSameGrade.length-sources.length;
     let msg=`${grade} 가구 ${conf.count}개 필요 (사용 가능 ${sources.length})`;
     if(protectedCnt>0)msg+=`\n(보호 중인 가구 ${protectedCnt}개 — 잠금/배치/이벤트한정 가구는 재료로 사용 안 됨)`;
@@ -16997,13 +17033,18 @@ window.openFurnSynth=function(){
   const placedIds=new Set(placedItems.map(p=>p.itemId));
   const html=Object.entries(FURN_SYNTH_DATA).map(([grade,conf])=>{
     // ★ v3.x — 사용 가능 = 잠금/배치/이벤트한정/프리셋 모두 제외 (실제 합성 사용 풀과 동일)
-    const sources=Object.values(inv).filter(i=>
-      i.isFurniture&&i.grade===grade&&
-      !i._locked&&
-      !placedIds.has(i.id)&&
-      !i._eventOnly&&
-      !isInPreset(i.id)
-    );
+    // ★ v3.1.1 — canonical grade 사용 (FURNITURE 정의 우선)
+    const sources=Object.values(inv).filter(i=>{
+      if(!i.isFurniture)return false;
+      const def=FURNITURE[i.baseId];
+      const canonGrade=def?.grade||i.grade;
+      const canonEventOnly=def?._eventOnly||i._eventOnly;
+      return canonGrade===grade &&
+        !i._locked &&
+        !placedIds.has(i.id) &&
+        !canonEventOnly &&
+        !isInPreset(i.id);
+    });
     const enough=sources.length>=conf.count;
     const canpay=canPay(conf.cost);
     const matsOk=canAffordMaterials(conf.mats);
