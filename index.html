@@ -14544,6 +14544,14 @@ window.enterChampBattle=async function(){
       critDmg:champ.stats.critDmg||140,
       dodge:champ.stats.dodge||0,
       matk:champ.stats.matk||0,
+      // ★ v3.1 핫픽스 — 스킬 fx의 STR/INT/DEX 보정용 (없으면 fallback 5)
+      str:champ.str||5,
+      dex:champ.dex||5,
+      int:champ.int||3,
+      vit:champ.vit||5,
+      luk:champ.luk||2,
+      skillBonus:champ.stats.skillBonus||0,
+      balance:champ.stats.balance||0,
     };
   }else{
     // baseAtk 등 기본값 추가해서 calcStats 호출
@@ -14868,7 +14876,7 @@ window.enterChampBattle=async function(){
       else clog(`<span class="l-dmg">⚔ ${champ.name} → ${char.name} -<b>${cDmg}</b></span>`);
       // ★ 챔프 스킬 발동
       if(myHp>0){
-        const CHAMP_SK_MAX=0.30;
+        const CHAMP_SK_MAX=0.35;
         let cSkProced=false;
         for(const sl of Object.values(champ.equipment||{})){
           if(!sl||cSkProced)continue;
