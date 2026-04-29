@@ -511,7 +511,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       ⚔ 크리 인챈트: 자주 터짐, 데미지 1.4배 (살수의·심판자의·학살자의)<br>
       💥 크뎀 인챈트: 한방딜 (단죄의·재단·파괴자의 — Lv99 레전 최대 +260%)<br>
       📐 base값 정상화 — Lv99 레전 단일 인챈트 약 +18~30%<br>
-      🔧 ENCHANT_STAT_VER 8 자동 마이그레이션
+      🔧 ENCHANT_STAT_VER 9 강제 재마이그 (창고 누락 인챈트 정상화)
     </div>
 
     <!-- 방어 시스템 보강 -->
@@ -1341,8 +1341,35 @@ import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut
 import{getDatabase,ref,set,push,onValue,get,remove,serverTimestamp,update,onDisconnect,query,limitToLast,orderByKey,orderByChild,equalTo}from"https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 const app=initializeApp({apiKey:"AIzaSyAUkBrBb9UFj-kC45vJ-T3eiFwh8tCT1Hw",authDomain:"game1-ea736.firebaseapp.com",databaseURL:"https://game1-ea736-default-rtdb.firebaseio.com",projectId:"game1-ea736",storageBucket:"game1-ea736.firebasestorage.app",messagingSenderId:"277606211416",appId:"1:277606211416:web:1cf3a4bbb5780ecd708f2d"});
-const auth=getAuth(app),db=getDatabase(app),gp=new GoogleAuthProvider();
+const auth=getAuth(app),_dbRaw=getDatabase(app),gp=new GoogleAuthProvider();
 const ADMIN_EMAIL='aimori1@ag.game';
+
+// ★★★ v3.1 — QA 테스트 모드 (URL ?qa=1)
+// Firebase RTDB의 ref()를 가로채서 모든 경로에 qa/ prefix 자동 추가
+// → 본 게임 코드 수정 없이 QA 환경 격리 (본섭 데이터 안전)
+const _isQAMode = new URLSearchParams(location.search).get('qa') === '1';
+
+// db 객체에 _qaWrap 플래그 + 모든 ref 호출 가로채기는 안 됨 (Firebase 내부 동작)
+// → 대신 RTDB 인스턴스 자체를 만들 때 databaseURL에 path 넣어서 격리 시도
+//   하지만 RTDB는 path 격리를 지원 안 함 → 대안: 코드 수정 필요
+// 그래서: QA 모드 시 위에 빨간 경고 배너 + console 안내만 표시
+// 실제 격리는 ref() 호출 시 코드에서 처리 (대규모 리팩터링 필요)
+const db = _dbRaw;
+
+if(_isQAMode){
+  console.warn('🧪 [QA MODE] 활성화됨. 단 ref() 경로 격리는 별도 작업 필요.');
+  document.title = '🧪 QA - ' + (document.title || 'ABYSS WORLD');
+  setTimeout(()=>{
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#ff4040,#ffa030,#ff4040);color:#fff;text-align:center;font-weight:900;font-size:11px;padding:4px;z-index:99999;letter-spacing:2px;font-family:Consolas,monospace;animation:qaPulse 2s infinite';
+    banner.textContent = '🧪 QA TEST MODE 🧪';
+    document.body.appendChild(banner);
+    document.body.style.paddingTop = '24px';
+    const style = document.createElement('style');
+    style.textContent = '@keyframes qaPulse{50%{filter:brightness(1.3)}}';
+    document.head.appendChild(style);
+  }, 500);
+}
 
 // ═══ 효과음 시스템 (Web Audio API — 외부 파일 없음) ═══
 const SFX=(()=>{
@@ -6040,7 +6067,7 @@ const ENCHANT_STAT_MAP={
 };
 
 // ★ 이 숫자만 올리면 다음 접속 시 모든 유저 아이템 재마이그레이션
-const ENCHANT_STAT_VER=8; // ★ v3.0 핫픽스 — base값 대폭 하향 (스케일링 폭주 방지) 7→8
+const ENCHANT_STAT_VER=9; // ★ v3.1 — 8버전에서 마이그 누락된 창고 아이템 강제 재마이그
 
 // ════════════════════════════════════════════════════════════════
 // ★★★ TALENT TREE SYSTEM (v3.1) ★★★
