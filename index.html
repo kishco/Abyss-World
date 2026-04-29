@@ -3793,35 +3793,36 @@ async function selChar(id){
         char._talentMig31=true;
         dirty=true;
       }
-      // ★ v3.1 핫픽스 — 슬롯 확장 카운터 마이그레이션 (1회 실행)
+      // ★ v3.1 핫픽스 — 슬롯 확장 카운터 마이그레이션 (cap 버전)
       // 이전 버그: 거점 가구 변경 시 recalcSlotsAndOverflow가 암시장 확장권 효과 무시하고 invSlots 덮어씀
-      // 수정: 현재 invSlots에서 거점 가구 슬롯 빼서 _invExpPurchases 역산 + 코드 한계 cap
+      // + 르네 케이스: 카운터가 코드 한계 초과한 비정상 값 박힘 (인벤 23회 같은)
+      // 수정: 카운터를 코드 한계로 cap + invSlots/whSlots 정확히 재계산
       if(!char._slotMig31cap){
-        // 거점 가구 슬롯 합 계산
+        // 거점 가구 슬롯 합 계산 (placedItems의 itemId로 inv/warehouse 검색 — getStrongholdInvSlots와 동일 방식)
         let furnInv=0, furnWh=0;
         if(char.house?.placedItems){
           for(const p of char.house.placedItems){
-            const fb=FURNITURE[p.baseId];
-            if(fb&&fb.targetType==='inv')furnInv+=fb.slots||0;
-            if(fb&&fb.targetType==='wh')furnWh+=fb.slots||0;
+            const fIt=inv[p.itemId]||warehouse[p.itemId];  // findFurnitureItem 인라인
+            if(fIt&&fIt.targetType==='inv')furnInv+=fIt.slots||0;
+            if(fIt&&fIt.targetType==='wh')furnWh+=fIt.slots||0;
           }
         }
-        // 현재 invSlots에서 base(100) + 가구 슬롯을 빼면 = 암시장 확장 분
+        // 카운터 역산 (이전 마이그 안 거친 케이스 대비)
         const curInv=char.invSlots||100;
         const purchasedInv=Math.max(0,curInv-100-furnInv);
-        const expCntInv=Math.round(purchasedInv/10); // 1회 +10
+        const expCntInv=Math.round(purchasedInv/10);
         if(expCntInv>(char._invExpPurchases||0)){
           char._invExpPurchases=expCntInv;
           dirty=true;
         }
         const curWh=char.whSlots||200;
         const purchasedWh=Math.max(0,curWh-200-furnWh);
-        const expCntWh=Math.round(purchasedWh/20); // 1회 +20
+        const expCntWh=Math.round(purchasedWh/20);
         if(expCntWh>(char._whExpPurchases||0)){
           char._whExpPurchases=expCntWh;
           dirty=true;
         }
-        // ★ 카운터가 코드 한계 초과 시 자동 cap (BM_INVEXP_MAX=10, BM_WHEXP_MAX=15)
+        // ★ 카운터 코드 한계 cap (BM_INVEXP_MAX=10, BM_WHEXP_MAX=15)
         if((char._invExpPurchases||0)>10){
           char._invExpPurchases=10;
           dirty=true;
@@ -3830,7 +3831,7 @@ async function selChar(id){
           char._whExpPurchases=15;
           dirty=true;
         }
-        // ★ invSlots/whSlots 자체도 코드 한계로 재계산 (가구 + base + 카운터*10)
+        // ★ invSlots/whSlots 정확히 재계산 (base + 가구 + cap된 카운터*10/20)
         const correctInv=100+furnInv+(char._invExpPurchases||0)*10;
         const correctWh=200+furnWh+(char._whExpPurchases||0)*20;
         if((char.invSlots||100)!==correctInv){char.invSlots=correctInv;dirty=true;}
@@ -12877,13 +12878,18 @@ window.adminInspectSlots=async()=>{
       if(c.name===name){found=c;foundId=id;break;}
     }
     if(!found){toast(`❌ "${name}" 캐릭터를 찾을 수 없습니다`);return;}
-    // 거점 가구 슬롯 합산
+    // 거점 가구 슬롯 합산 — placedItems에 baseId 없음, itemId로 inv/warehouse 룩업 필요
     let furnInv=0,furnWh=0;
     if(found.house?.placedItems){
+      // 해당 캐릭의 inv/warehouse 받아오기
+      const invSn=await get(ref(db,`inv/${foundId}`));
+      const whSn=await get(ref(db,`warehouse/${foundId}`));
+      const charInv=invSn.val()||{};
+      const charWh=whSn.val()||{};
       for(const p of found.house.placedItems){
-        const fb=FURNITURE[p.baseId];
-        if(fb&&fb.targetType==='inv')furnInv+=fb.slots||0;
-        if(fb&&fb.targetType==='wh')furnWh+=fb.slots||0;
+        const fIt=charInv[p.itemId]||charWh[p.itemId];
+        if(fIt&&fIt.targetType==='inv')furnInv+=fIt.slots||0;
+        if(fIt&&fIt.targetType==='wh')furnWh+=fIt.slots||0;
       }
     }
     const invExp=found._invExpPurchases||0;
@@ -12940,13 +12946,17 @@ window.adminFixSlots=async()=>{
     
     if(!confirm(`"${name}" 카운터 보정 (${mode==='add'?'추가':'직접 설정'} 모드):\n인벤: ${oldInvExp} → ${newInvExp} (= +${newInvExp*10}슬롯 효과)\n창고: ${oldWhExp} → ${newWhExp} (= +${newWhExp*20}슬롯 효과)\n\n적용?`))return;
     
-    // 거점 가구 슬롯 재계산
+    // 거점 가구 슬롯 재계산 — placedItems에 baseId 없음, itemId로 inv/warehouse 룩업 필요
     let furnInv=0,furnWh=0;
     if(foundChar.house?.placedItems){
+      const invSn=await get(ref(db,`inv/${foundId}`));
+      const whSn=await get(ref(db,`warehouse/${foundId}`));
+      const charInv=invSn.val()||{};
+      const charWh=whSn.val()||{};
       for(const p of foundChar.house.placedItems){
-        const fb=FURNITURE[p.baseId];
-        if(fb&&fb.targetType==='inv')furnInv+=fb.slots||0;
-        if(fb&&fb.targetType==='wh')furnWh+=fb.slots||0;
+        const fIt=charInv[p.itemId]||charWh[p.itemId];
+        if(fIt&&fIt.targetType==='inv')furnInv+=fIt.slots||0;
+        if(fIt&&fIt.targetType==='wh')furnWh+=fIt.slots||0;
       }
     }
     const newInvSlots=100+furnInv+newInvExp*10;
