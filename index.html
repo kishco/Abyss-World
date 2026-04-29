@@ -1215,6 +1215,32 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <button class="btn btn-gold" style="width:100%" onclick="adminGiveBankGold()">💰 은행 지급 실행</button>
         </div>
 
+        <!-- ★ v3.1 — 슬롯 확장 카운터 보정 (르네 케이스: 980→750 복구용) -->
+        <div class="card2" style="margin-bottom:12px;border-color:rgba(80,200,255,.4);background:rgba(80,200,255,.04)">
+          <div style="font-size:11px;font-weight:700;color:#50c8ff;margin-bottom:2px">🎒 슬롯 확장 카운터 보정</div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:10px;line-height:1.7">
+            암시장 확장권 효과가 사라진 유저의 <span style="color:#50c8ff">_invExpPurchases</span>/<span style="color:#50c8ff">_whExpPurchases</span> 카운터를 직접 보정합니다.<br>
+            인벤 1회 = +10슬롯, 창고 1회 = +20슬롯<br>
+            예: 인벤 +200슬롯 잃은 유저 → 인벤 카운터 +20 추가
+          </div>
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">캐릭터 이름</div>
+          <input id="slotFixCharName" placeholder="캐릭터 이름 (정확히 입력)" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px"/>
+          <div style="display:flex;gap:6px;margin-bottom:6px">
+            <div style="flex:1">
+              <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">인벤 카운터 추가</div>
+              <input id="slotFixInvAdd" type="number" value="0" min="0" max="100" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">창고 카운터 추가</div>
+              <input id="slotFixWhAdd" type="number" value="0" min="0" max="100" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <button class="btn btn-ghost btn-xs" style="flex:1" onclick="adminInspectSlots()">🔍 현재 상태 조회</button>
+          </div>
+          <button class="btn btn-blue" style="width:100%;background:rgba(80,200,255,.2);border-color:#50c8ff;color:#50c8ff" onclick="adminFixSlots()">🎒 슬롯 카운터 보정 실행</button>
+        </div>
+
         <!-- ② 물약 리셋 -->
         <div class="card2" style="margin-bottom:12px">
           <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:4px">💊 전체 물약 리셋</div>
@@ -3761,6 +3787,37 @@ async function selChar(id){
         if(tlv>=50){char._talentExp=0;}
         else if((char._talentExp||0)>=char._talentExpNext){char._talentExp=char._talentExpNext-1;}
         char._talentMig31=true;
+        dirty=true;
+      }
+      // ★ v3.1 핫픽스 — 슬롯 확장 카운터 마이그레이션 (1회 실행)
+      // 이전 버그: 거점 가구 변경 시 recalcSlotsAndOverflow가 암시장 확장권 효과 무시하고 invSlots 덮어씀
+      // 수정: 현재 invSlots에서 거점 가구 슬롯 빼서 _invExpPurchases 역산
+      if(!char._slotMig31){
+        // 거점 가구 슬롯 합 계산
+        let furnInv=0, furnWh=0;
+        if(char.house?.placedItems){
+          for(const p of char.house.placedItems){
+            const fb=FURNITURE[p.baseId];
+            if(fb&&fb.targetType==='inv')furnInv+=fb.slots||0;
+            if(fb&&fb.targetType==='wh')furnWh+=fb.slots||0;
+          }
+        }
+        // 현재 invSlots에서 base(100) + 가구 슬롯을 빼면 = 암시장 확장 분
+        const curInv=char.invSlots||100;
+        const purchasedInv=Math.max(0,curInv-100-furnInv);
+        const expCntInv=Math.round(purchasedInv/10); // 1회 +10
+        if(expCntInv>(char._invExpPurchases||0)){
+          char._invExpPurchases=expCntInv;
+          dirty=true;
+        }
+        const curWh=char.whSlots||200;
+        const purchasedWh=Math.max(0,curWh-200-furnWh);
+        const expCntWh=Math.round(purchasedWh/20); // 1회 +20
+        if(expCntWh>(char._whExpPurchases||0)){
+          char._whExpPurchases=expCntWh;
+          dirty=true;
+        }
+        char._slotMig31=true;
         dirty=true;
       }
       if(dirty)saveChar();
@@ -12788,6 +12845,101 @@ window.unban=async uid=>{await remove(ref(db,`bans/${uid}`));toast('밴 해제')
 window.delChat=async mid=>{await remove(ref(db,`chat/world/${mid}`));loadAdmin();};
 window.clearChat=async()=>{if(!confirm('전체 삭제?'))return;await set(ref(db,'chat/world'),null);toast('채팅 삭제');loadAdmin();};
 
+// ★ v3.1 — 슬롯 확장 카운터 보정 (르네 케이스: 980→750 복구용)
+window.adminInspectSlots=async()=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
+  const name=document.getElementById('slotFixCharName').value.trim();
+  if(!name){toast('⚠️ 캐릭터 이름을 입력하세요');return;}
+  try{
+    // 캐릭터 검색
+    const allChars=await get(ref(db,'chars'));
+    const data=allChars.val()||{};
+    let found=null,foundId=null;
+    for(const[id,c] of Object.entries(data)){
+      if(c.name===name){found=c;foundId=id;break;}
+    }
+    if(!found){toast(`❌ "${name}" 캐릭터를 찾을 수 없습니다`);return;}
+    // 거점 가구 슬롯 합산
+    let furnInv=0,furnWh=0;
+    if(found.house?.placedItems){
+      for(const p of found.house.placedItems){
+        const fb=FURNITURE[p.baseId];
+        if(fb&&fb.targetType==='inv')furnInv+=fb.slots||0;
+        if(fb&&fb.targetType==='wh')furnWh+=fb.slots||0;
+      }
+    }
+    const invExp=found._invExpPurchases||0;
+    const whExp=found._whExpPurchases||0;
+    const expectedInv=100+furnInv+invExp*10;
+    const expectedWh=200+furnWh+whExp*20;
+    const curInv=found.invSlots||100;
+    const curWh=found.whSlots||200;
+    
+    const msg=`📊 ${name} 슬롯 상태\n\n` +
+      `[인벤]\n` +
+      `현재: ${curInv}슬롯\n` +
+      `기본 100 + 가구 ${furnInv} + 암시장(${invExp}회×10) ${invExp*10}\n` +
+      `예상: ${expectedInv} ${curInv===expectedInv?'✓ 일치':'⚠ 불일치 ('+(expectedInv-curInv)+'슬롯 차이)'}\n\n` +
+      `[창고]\n` +
+      `현재: ${curWh}슬롯\n` +
+      `기본 200 + 가구 ${furnWh} + 암시장(${whExp}회×20) ${whExp*20}\n` +
+      `예상: ${expectedWh} ${curWh===expectedWh?'✓ 일치':'⚠ 불일치 ('+(expectedWh-curWh)+'슬롯 차이)'}`;
+    alert(msg);
+  }catch(e){
+    toast('❌ 조회 실패: '+e.message);
+  }
+};
+
+window.adminFixSlots=async()=>{
+  if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
+  const name=document.getElementById('slotFixCharName').value.trim();
+  const invAdd=parseInt(document.getElementById('slotFixInvAdd').value)||0;
+  const whAdd=parseInt(document.getElementById('slotFixWhAdd').value)||0;
+  if(!name){toast('⚠️ 캐릭터 이름을 입력하세요');return;}
+  if(invAdd<=0&&whAdd<=0){toast('⚠️ 추가할 카운터 입력');return;}
+  if(!confirm(`"${name}"에게:\n인벤 카운터 +${invAdd} (= +${invAdd*10}슬롯)\n창고 카운터 +${whAdd} (= +${whAdd*20}슬롯)\n\n적용?`))return;
+  try{
+    // 캐릭터 검색
+    const allChars=await get(ref(db,'chars'));
+    const data=allChars.val()||{};
+    let foundId=null,foundChar=null;
+    for(const[id,c] of Object.entries(data)){
+      if(c.name===name){foundId=id;foundChar=c;break;}
+    }
+    if(!foundId){toast(`❌ "${name}" 캐릭터를 찾을 수 없습니다`);return;}
+    
+    // 카운터 + invSlots/whSlots 같이 보정
+    const newInvExp=(foundChar._invExpPurchases||0)+invAdd;
+    const newWhExp=(foundChar._whExpPurchases||0)+whAdd;
+    
+    // 거점 가구 슬롯 재계산
+    let furnInv=0,furnWh=0;
+    if(foundChar.house?.placedItems){
+      for(const p of foundChar.house.placedItems){
+        const fb=FURNITURE[p.baseId];
+        if(fb&&fb.targetType==='inv')furnInv+=fb.slots||0;
+        if(fb&&fb.targetType==='wh')furnWh+=fb.slots||0;
+      }
+    }
+    const newInvSlots=100+furnInv+newInvExp*10;
+    const newWhSlots=200+furnWh+newWhExp*20;
+    
+    await update(ref(db,`chars/${foundId}`),{
+      _invExpPurchases:newInvExp,
+      _whExpPurchases:newWhExp,
+      invSlots:newInvSlots,
+      whSlots:newWhSlots
+    });
+    
+    toast(`✅ ${name}: 인벤 ${newInvSlots}슬롯, 창고 ${newWhSlots}슬롯 보정 완료`,5000);
+    document.getElementById('slotFixCharName').value='';
+    document.getElementById('slotFixInvAdd').value=0;
+    document.getElementById('slotFixWhAdd').value=0;
+  }catch(e){
+    toast('❌ 보정 실패: '+e.message,5000);
+  }
+};
+
 // ★ 유저 검색 필터
 window.adminFilterUsers=function(q){
   if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
@@ -15587,8 +15739,11 @@ function checkDungeonInvuln(){
 }
 
 // 슬롯 확장 가구 누적 합산
+// ★ v3.1 핫픽스 — 암시장 확장권으로 구매한 슬롯도 합산 (이전 버그: 가구 기반으로만 재계산되어 사라짐)
 function getStrongholdInvSlots(){
   let sum=100;
+  // 암시장 인벤 확장권 (1회당 +10)
+  sum+=(char._invExpPurchases||0)*10;
   if(!char?.house?.placedItems)return sum;
   for(const p of char.house.placedItems){
     const it=findFurnitureItem(p.itemId);
@@ -15598,6 +15753,8 @@ function getStrongholdInvSlots(){
 }
 function getStrongholdWhSlots(){
   let sum=200;
+  // 암시장 창고 확장권 (1회당 +20)
+  sum+=(char._whExpPurchases||0)*20;
   if(!char?.house?.placedItems)return sum;
   for(const p of char.house.placedItems){
     const it=findFurnitureItem(p.itemId);
