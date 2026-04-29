@@ -3685,13 +3685,12 @@ async function selChar(id){
   // ★ 기존 리스너 해제 후 재등록 (selChar 재호출 시 누수 방지)
   if(_charUnsub){_charUnsub();_charUnsub=null;}
   if(_invUnsub){_invUnsub();_invUnsub=null;}
-  _charUnsub=onValue(ref(db,`chars/${id}`),sn=>{
-    // ★ v3.x — 저장 중 listener 무시 (3초→10초)
-    if(window._charSaveLock&&Date.now()-window._charSaveLock<10000){
-      return;
-    }
-    if(sn.val()){
-      char=sn.val();char.equipment=char.equipment||{};if(!char.str)char.str=5;
+  // ★★★ v3.1 핫픽스 — char onValue 제거 (자기 char 다운로드 폭증 해결)
+  // 변경: onValue 제거 → selChar 시작에서 이미 로드된 char 사용 (라인 3437)
+  // 효과: 자기 saveChar 시 자기 onValue로 char 전체(수십KB) 다운로드 차단 → 50%+ 절감
+  // (다른 탭 감지는 _sessionUnsub가 따로 처리하므로 onValue 불필요)
+  if(char){
+      char.equipment=char.equipment||{};if(!char.str)char.str=5;
       let dirty=false;
       for(const sl of EQSLOTS){
         const it=char.equipment[sl.k];
@@ -3719,8 +3718,6 @@ async function selChar(id){
         }
       }
       // ★ v3.1 — 특성 곡선 변경 마이그레이션 (1회 실행)
-      // EXP 곡선이 200K → 500K → 300K로 바뀐 과정에서 발생한 데이터 불일치 보정
-      // 사용 포인트(노드 cost 합) > 받은 포인트(특성Lv) 인 경우 잔여를 0으로 클램프
       if(char._talentLv&&!char._talentMig31){
         const tlv=char._talentLv||0;
         let spent=0;
@@ -3733,9 +3730,7 @@ async function selChar(id){
           char._talentPoints=correct;
           dirty=true;
         }
-        // expNext도 현재 곡선 기준으로 재계산
         char._talentExpNext=talentExpForLevel(tlv);
-        // expNext 초과한 EXP 클램프 (50렙은 0)
         if(tlv>=50){char._talentExp=0;}
         else if((char._talentExp||0)>=char._talentExpNext){char._talentExp=char._talentExpNext-1;}
         char._talentMig31=true;
@@ -3746,7 +3741,6 @@ async function selChar(id){
       // ★ v3.0 핫픽스 — 재접속 시 활성 부스터 있으면 인터벌 시작
       if(getActiveBoosters().length>0)startBoosterTick();
     }
-  });
   // ★ v3.0 핫픽스 — inv onValue 제거 (자기 inv 다운로드 폭증의 진짜 원인 해결)
   // 변경: onValue 제거 → invSync 알림 path로 외부 변경만 감지
   // 효과: 자기 saveInv 시 자기 onValue로 inv 전체(최대 152KB) 다운로드 차단 → 99% 절감
@@ -14179,6 +14173,28 @@ window.enterSubjBattle=async function(){
         const fakeTarget={name:boss.name,dodge:0};
         const fakeP={charData:char,name:char.name};
         slog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
+        // ★ v3.1 — 마법 무기 다중발동 (토벌전, MATK 무기만)
+        let _sMultiDmg=0;
+        if((wt.isStaff||wt.isDualgun)&&dmg>0){
+          const baseChance=25;
+          const bonus=s.magicMultiCastChance||0;
+          const totalChance=Math.min(60,baseChance+bonus);
+          if(Math.random()*100<totalChance){
+            let dmg2=Math.round(dmg*(0.85+Math.random()*0.3));
+            totalDmgDealt+=dmg2;
+            _sMultiDmg=dmg2;
+            slog(`<span class="l-skill" style="color:#a78cff;font-weight:700">✨ 마법 다중 발동! 추가 -${dmg2}</span>`);
+          }
+        }
+        // ★ v3.1 — 마법 흡혈 (토벌전)
+        if((wt.isStaff||wt.isDualgun)&&(s.magicLifesteal||0)>0&&dmg>0){
+          const totalDmg=dmg+_sMultiDmg;
+          const heal=Math.round(totalDmg*s.magicLifesteal/100);
+          if(heal>0){
+            myHp=Math.min(s.maxHp,myHp+heal);
+            slog(`<span class="l-heal" style="color:#a78cff">🪄 마력 흡수 +${heal}HP</span>`);
+          }
+        }
         // ★ 속성 고유효과: 적중 후 — 번개(마비), 신성(회복), 독(DoT), 상성 텍스트
         if(_sAttr&&ATTR_EFFECT[_sAttr]){
           const ae=ATTR_EFFECT[_sAttr];
@@ -14642,6 +14658,28 @@ window.enterChampBattle=async function(){
         const fakeTarget={name:champ.name,dodge:0};
         const fakeP={charData:char,name:char.name};
         clog(getWeaponAttackMsg(fakeP,fakeTarget,dmg,isCrit,false));
+        // ★ v3.1 — 마법 무기 다중발동 (챔프전, MATK 무기만)
+        let _chMultiDmg=0;
+        if((wt.isStaff||wt.isDualgun)&&dmg>0&&champHp>0){
+          const baseChance=25;
+          const bonus=s.magicMultiCastChance||0;
+          const totalChance=Math.min(60,baseChance+bonus);
+          if(Math.random()*100<totalChance){
+            let dmg2=Math.round(dmg*(0.85+Math.random()*0.3));
+            champHp=Math.max(0,champHp-dmg2);
+            _chMultiDmg=dmg2;
+            clog(`<span class="l-skill" style="color:#a78cff;font-weight:700">✨ 마법 다중 발동! 추가 -${dmg2}</span>`);
+          }
+        }
+        // ★ v3.1 — 마법 흡혈 (챔프전)
+        if((wt.isStaff||wt.isDualgun)&&(s.magicLifesteal||0)>0&&dmg>0){
+          const totalDmg=dmg+_chMultiDmg;
+          const heal=Math.round(totalDmg*s.magicLifesteal/100);
+          if(heal>0){
+            myHp=Math.min(s.maxHp,myHp+heal);
+            clog(`<span class="l-heal" style="color:#a78cff">🪄 마력 흡수 +${heal}HP</span>`);
+          }
+        }
         // ★ 속성 고유효과: 적중 후 — 번개(마비 → 챔프 다음턴 스킵 없음, 스턴 없음), 신성(회복), 독(DoT 대신 추가 데미지)
         if(_cMyAttr&&ATTR_EFFECT[_cMyAttr]&&champHp>0){
           const ae=ATTR_EFFECT[_cMyAttr];
