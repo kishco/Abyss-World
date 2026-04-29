@@ -16900,18 +16900,38 @@ function matsShortageMsg(mats){
   return lack.join(', ');
 }
 
+// ★ v3.1.2 — 가구 grade 정규화 (영문/한글 모두 영문 키로 통일)
+// 손상된 인스턴스 데이터 ('노말','언커먼' 등 한글로 저장된 케이스) 대응
+const _GRADE_KO2EN={'노말':'normal','언커먼':'uncommon','레어':'rare','에픽':'epic','레전더리':'legendary','유일':'set','불멸':'immortal'};
+function canonFurnGrade(it){
+  if(!it)return null;
+  const def=FURNITURE[it.baseId];
+  if(def?.grade)return def.grade;            // FURNITURE 정의 우선
+  const g=it.grade;
+  if(GRADES[g])return g;                     // 영문 grade
+  if(_GRADE_KO2EN[g])return _GRADE_KO2EN[g]; // 한글 grade 폴백
+  // gradeName 폴백 (인스턴스에 한글 이름만 남은 케이스)
+  if(_GRADE_KO2EN[it.gradeName])return _GRADE_KO2EN[it.gradeName];
+  return null;
+}
+
 window.synthesizeFurniture=async function(grade){
   if(!hasCrafterPlaced('furniture')){toast('가구 제작대가 거점에 배치되어 있지 않습니다');return;}
   const conf=FURN_SYNTH_DATA[grade];if(!conf){toast('합성 불가 등급');return;}
+  // ★ v3.1.2 — 합성 직전 강제 재동기화 (모달 미경유 호출 대응)
+  let _fdirty=false;
+  for(const it of Object.values(inv)){
+    if(it&&it.isFurniture&&autoMigrateFurnitureGrade(it))_fdirty=true;
+  }
+  if(_fdirty){try{await saveInv();}catch(e){console.warn('[synth migrate save fail]',e);}}
   // ★ v3.x — 보호 강화: 잠금 + 거점 배치 + 이벤트 한정 + 프리셋 모두 제외
   // ★ v3.1.1 — canonical grade 사용 (FURNITURE 정의 우선, 인스턴스 grade가 깨졌어도 동작)
   const placedItems=char?.house?.placedItems||[];
   const placedIds=new Set(placedItems.map(p=>p.itemId));
   const sources=Object.values(inv).filter(i=>{
     if(!i.isFurniture)return false;
-    const def=FURNITURE[i.baseId];
-    const canonGrade=def?.grade||i.grade;
-    const canonEventOnly=def?._eventOnly||i._eventOnly;
+    const canonGrade=canonFurnGrade(i);
+    const canonEventOnly=FURNITURE[i.baseId]?._eventOnly||i._eventOnly;
     return canonGrade===grade &&
       !i._locked &&                  // 잠금 제외
       !placedIds.has(i.id) &&         // 거점 배치 제외
@@ -16922,8 +16942,7 @@ window.synthesizeFurniture=async function(grade){
     // 보호된 가구 개수 정보 함께 표시
     const allSameGrade=Object.values(inv).filter(i=>{
       if(!i.isFurniture)return false;
-      const cg=FURNITURE[i.baseId]?.grade||i.grade;
-      return cg===grade;
+      return canonFurnGrade(i)===grade;
     });
     const protectedCnt=allSameGrade.length-sources.length;
     let msg=`${grade} 가구 ${conf.count}개 필요 (사용 가능 ${sources.length})`;
@@ -17027,8 +17046,27 @@ window.openGearSynth=function(){
   openSynthModal('⚒️ 장비 합성',html);
 };
 
-window.openFurnSynth=function(){
+window.openFurnSynth=async function(){
   _lastSynthType='furniture';
+  // ★ v3.1.2 — 모달 진입 시 가구 인스턴스 즉시 재동기화 (selChar 미경유 케이스 대응)
+  // 노말/언커먼 카운트 0 버그 핫픽스 — grade·baseId 깨진 가구 즉시 복구
+  let _furnDirty=false;
+  for(const it of Object.values(inv)){
+    if(it&&it.isFurniture&&autoMigrateFurnitureGrade(it))_furnDirty=true;
+  }
+  if(_furnDirty){try{await saveInv();}catch(e){console.warn('[furnSynth migrate save fail]',e);}}
+  // 진단 로그 — 가구 grade 분포 출력 (사용자가 콘솔에서 확인 가능)
+  try{
+    const _furnDist={};
+    for(const it of Object.values(inv)){
+      if(!it?.isFurniture)continue;
+      const def=FURNITURE[it.baseId];
+      const cg=def?.grade||it.grade||'?';
+      _furnDist[cg]=(_furnDist[cg]||0)+1;
+    }
+    console.log('[가구합성] 인벤 가구 등급 분포:',_furnDist);
+  }catch(e){}
+
   const placedItems=char?.house?.placedItems||[];
   const placedIds=new Set(placedItems.map(p=>p.itemId));
   const html=Object.entries(FURN_SYNTH_DATA).map(([grade,conf])=>{
@@ -17036,9 +17074,8 @@ window.openFurnSynth=function(){
     // ★ v3.1.1 — canonical grade 사용 (FURNITURE 정의 우선)
     const sources=Object.values(inv).filter(i=>{
       if(!i.isFurniture)return false;
-      const def=FURNITURE[i.baseId];
-      const canonGrade=def?.grade||i.grade;
-      const canonEventOnly=def?._eventOnly||i._eventOnly;
+      const canonGrade=canonFurnGrade(i);
+      const canonEventOnly=FURNITURE[i.baseId]?._eventOnly||i._eventOnly;
       return canonGrade===grade &&
         !i._locked &&
         !placedIds.has(i.id) &&
