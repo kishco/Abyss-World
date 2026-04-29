@@ -1220,18 +1220,22 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <div style="font-size:11px;font-weight:700;color:#50c8ff;margin-bottom:2px">🎒 슬롯 확장 카운터 보정</div>
           <div style="font-size:10px;color:var(--tx3);margin-bottom:10px;line-height:1.7">
             암시장 확장권 효과가 사라진 유저의 <span style="color:#50c8ff">_invExpPurchases</span>/<span style="color:#50c8ff">_whExpPurchases</span> 카운터를 직접 보정합니다.<br>
-            인벤 1회 = +10슬롯, 창고 1회 = +20슬롯<br>
-            예: 인벤 +200슬롯 잃은 유저 → 인벤 카운터 +20 추가
+            인벤 1회 = +10슬롯, 창고 1회 = +20슬롯
           </div>
           <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">캐릭터 이름</div>
           <input id="slotFixCharName" placeholder="캐릭터 이름 (정확히 입력)" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px"/>
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">모드</div>
+          <select id="slotFixMode" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px">
+            <option value="add">+ 추가 (현재값에 더하기)</option>
+            <option value="set">= 직접 설정 (값으로 덮어쓰기)</option>
+          </select>
           <div style="display:flex;gap:6px;margin-bottom:6px">
             <div style="flex:1">
-              <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">인벤 카운터 추가</div>
+              <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">인벤 카운터</div>
               <input id="slotFixInvAdd" type="number" value="0" min="0" max="100" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
             </div>
             <div style="flex:1">
-              <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">창고 카운터 추가</div>
+              <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">창고 카운터</div>
               <input id="slotFixWhAdd" type="number" value="0" min="0" max="100" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:11px;outline:none"/>
             </div>
           </div>
@@ -12893,11 +12897,12 @@ window.adminInspectSlots=async()=>{
 window.adminFixSlots=async()=>{
   if(!isAdmin){toast('⛔ 관리자 권한이 없습니다.');return;}
   const name=document.getElementById('slotFixCharName').value.trim();
-  const invAdd=parseInt(document.getElementById('slotFixInvAdd').value)||0;
-  const whAdd=parseInt(document.getElementById('slotFixWhAdd').value)||0;
+  const invVal=parseInt(document.getElementById('slotFixInvAdd').value)||0;
+  const whVal=parseInt(document.getElementById('slotFixWhAdd').value)||0;
+  const mode=document.getElementById('slotFixMode').value; // 'add' or 'set'
   if(!name){toast('⚠️ 캐릭터 이름을 입력하세요');return;}
-  if(invAdd<=0&&whAdd<=0){toast('⚠️ 추가할 카운터 입력');return;}
-  if(!confirm(`"${name}"에게:\n인벤 카운터 +${invAdd} (= +${invAdd*10}슬롯)\n창고 카운터 +${whAdd} (= +${whAdd*20}슬롯)\n\n적용?`))return;
+  if(invVal===0&&whVal===0){toast('⚠️ 카운터 값 입력');return;}
+  
   try{
     // 캐릭터 검색
     const allChars=await get(ref(db,'chars'));
@@ -12908,9 +12913,18 @@ window.adminFixSlots=async()=>{
     }
     if(!foundId){toast(`❌ "${name}" 캐릭터를 찾을 수 없습니다`);return;}
     
-    // 카운터 + invSlots/whSlots 같이 보정
-    const newInvExp=(foundChar._invExpPurchases||0)+invAdd;
-    const newWhExp=(foundChar._whExpPurchases||0)+whAdd;
+    const oldInvExp=foundChar._invExpPurchases||0;
+    const oldWhExp=foundChar._whExpPurchases||0;
+    let newInvExp, newWhExp;
+    if(mode==='add'){
+      newInvExp=oldInvExp+invVal;
+      newWhExp=oldWhExp+whVal;
+    }else{ // set
+      newInvExp=invVal>0?invVal:oldInvExp;  // 0이면 변경 안 함
+      newWhExp=whVal>0?whVal:oldWhExp;
+    }
+    
+    if(!confirm(`"${name}" 카운터 보정 (${mode==='add'?'추가':'직접 설정'} 모드):\n인벤: ${oldInvExp} → ${newInvExp} (= +${newInvExp*10}슬롯 효과)\n창고: ${oldWhExp} → ${newWhExp} (= +${newWhExp*20}슬롯 효과)\n\n적용?`))return;
     
     // 거점 가구 슬롯 재계산
     let furnInv=0,furnWh=0;
