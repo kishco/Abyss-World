@@ -3718,6 +3718,29 @@ async function selChar(id){
           it.stats.balance=99;it._balv=1;dirty=true;
         }
       }
+      // ★ v3.1 — 특성 곡선 변경 마이그레이션 (1회 실행)
+      // EXP 곡선이 200K → 500K → 300K로 바뀐 과정에서 발생한 데이터 불일치 보정
+      // 사용 포인트(노드 cost 합) > 받은 포인트(특성Lv) 인 경우 잔여를 0으로 클램프
+      if(char._talentLv&&!char._talentMig31){
+        const tlv=char._talentLv||0;
+        let spent=0;
+        for(const nid of(char._talentNodes||[])){
+          const node=TALENT_NODES[nid];
+          if(node)spent+=node.cost||1;
+        }
+        const correct=Math.max(0,tlv-spent);
+        if((char._talentPoints||0)!==correct){
+          char._talentPoints=correct;
+          dirty=true;
+        }
+        // expNext도 현재 곡선 기준으로 재계산
+        char._talentExpNext=talentExpForLevel(tlv);
+        // expNext 초과한 EXP 클램프 (50렙은 0)
+        if(tlv>=50){char._talentExp=0;}
+        else if((char._talentExp||0)>=char._talentExpNext){char._talentExp=char._talentExpNext-1;}
+        char._talentMig31=true;
+        dirty=true;
+      }
       if(dirty)saveChar();
       updateTop();renderChar();
       // ★ v3.0 핫픽스 — 재접속 시 활성 부스터 있으면 인터벌 시작
