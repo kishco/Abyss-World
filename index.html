@@ -3795,8 +3795,8 @@ async function selChar(id){
       }
       // ★ v3.1 핫픽스 — 슬롯 확장 카운터 마이그레이션 (1회 실행)
       // 이전 버그: 거점 가구 변경 시 recalcSlotsAndOverflow가 암시장 확장권 효과 무시하고 invSlots 덮어씀
-      // 수정: 현재 invSlots에서 거점 가구 슬롯 빼서 _invExpPurchases 역산
-      if(!char._slotMig31){
+      // 수정: 현재 invSlots에서 거점 가구 슬롯 빼서 _invExpPurchases 역산 + 코드 한계 cap
+      if(!char._slotMig31cap){
         // 거점 가구 슬롯 합 계산
         let furnInv=0, furnWh=0;
         if(char.house?.placedItems){
@@ -3821,7 +3821,21 @@ async function selChar(id){
           char._whExpPurchases=expCntWh;
           dirty=true;
         }
-        char._slotMig31=true;
+        // ★ 카운터가 코드 한계 초과 시 자동 cap (BM_INVEXP_MAX=10, BM_WHEXP_MAX=15)
+        if((char._invExpPurchases||0)>10){
+          char._invExpPurchases=10;
+          dirty=true;
+        }
+        if((char._whExpPurchases||0)>15){
+          char._whExpPurchases=15;
+          dirty=true;
+        }
+        // ★ invSlots/whSlots 자체도 코드 한계로 재계산 (가구 + base + 카운터*10)
+        const correctInv=100+furnInv+(char._invExpPurchases||0)*10;
+        const correctWh=200+furnWh+(char._whExpPurchases||0)*20;
+        if((char.invSlots||100)!==correctInv){char.invSlots=correctInv;dirty=true;}
+        if((char.whSlots||200)!==correctWh){char.whSlots=correctWh;dirty=true;}
+        char._slotMig31cap=true;
         dirty=true;
       }
       if(dirty)saveChar();
