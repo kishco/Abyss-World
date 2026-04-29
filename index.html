@@ -6065,7 +6065,9 @@ function gainTalentExp(amt){
   if(!char._talentLv)char._talentLv=1;
   if(!char._talentExp)char._talentExp=0;
   if(!char._talentExpNext)char._talentExpNext=talentExpForLevel(char._talentLv);
-  if(!char._talentPoints)char._talentPoints=1; // Lv.1 도달 보상 1pt
+  // ★ v3.1 핫픽스 — 잔여 포인트 0이 falsy로 처리되어 매번 1로 부활하던 버그 수정
+  // 진짜 처음(undefined/null)일 때만 1로 초기화, 0pt는 정상 상태로 유지
+  if(char._talentPoints==null)char._talentPoints=1; // Lv.1 도달 보상 1pt
   char._talentExp+=amt;
   let lvUps=0;
   while(char._talentLv<50&&char._talentExp>=char._talentExpNext){
