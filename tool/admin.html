@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABYSS WORLD — 관리자 툴</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0612;--bg2:#15082a;--sf:#1a1230;--sf2:#231642;--sf3:#2d1d4e;
+  --bd:#2d1f4a;--bd2:#3d2a5e;
+  --tx:#e8e0f5;--tx2:#a896c8;--tx3:#6b5a8a;
+  --gold:#d4af37;--gold2:#f4cf57;
+  --purple:#b060ff;--purple2:#9040df;
+  --green:#4ade80;--red:#ef4444;--blue:#60a5fa;--cyan:#22d3ee;
+  --display:'Cinzel',serif;--mono:'IBM Plex Mono',monospace;--kr:'Noto Sans KR',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--kr);background:var(--bg);
+  background-image:radial-gradient(circle at 20% 0%,rgba(176,96,255,.08) 0,transparent 50%),
+                   radial-gradient(circle at 80% 100%,rgba(212,175,55,.05) 0,transparent 50%),
+                   linear-gradient(135deg,#0a0612 0%,#15082a 100%);
+  background-attachment:fixed;color:var(--tx);font-size:13px;line-height:1.5;min-height:100vh;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;color:inherit}
+input[type=text],input[type=number],select,textarea{
+  background:var(--sf);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;
+  color:var(--tx);font-size:11.5px;font-family:var(--mono);outline:none;transition:border-color .15s;
+}
+input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{
+  border-color:var(--purple);box-shadow:0 0 0 2px rgba(176,96,255,.15);
+}
+input[type=number]{width:75px;text-align:right}
+input::placeholder{color:var(--tx3);opacity:.7}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+input[type=checkbox]{accent-color:var(--purple);cursor:pointer}
+
+/* Header */
+header{
+  background:rgba(15,8,30,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--bd);padding:14px 18px 0;position:sticky;top:0;z-index:50;
+}
+.title-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.title{
+  font-family:var(--display);font-size:19px;font-weight:700;color:var(--gold);
+  letter-spacing:1.5px;text-shadow:0 0 18px rgba(212,175,55,.3);
+}
+.subtitle{font-size:9.5px;color:var(--tx3);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn{padding:6px 12px;border-radius:5px;font-size:11px;font-weight:500;letter-spacing:.3px;
+     border:1px solid var(--bd2);background:var(--sf);color:var(--tx);transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--sf2);border-color:var(--purple)}
+.btn-primary{background:linear-gradient(135deg,var(--purple),var(--purple2));border-color:var(--purple);color:#fff;font-weight:600}
+.btn-primary:hover{box-shadow:0 0 12px rgba(176,96,255,.4)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#a8841d);border-color:var(--gold);color:#1a0f00;font-weight:600}
+.btn-gold:hover{box-shadow:0 0 12px rgba(212,175,55,.4)}
+.btn-ghost{background:transparent}
+.btn-danger{color:var(--red);border-color:rgba(239,68,68,.3)}
+.btn-danger:hover{background:rgba(239,68,68,.1);border-color:var(--red)}
+.btn-sm{padding:4px 9px;font-size:10.5px}
+.btn-xs{padding:3px 7px;font-size:10px}
+
+/* Tabs (top: modules) */
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:thin;margin-bottom:-1px}
+.tabs::-webkit-scrollbar{height:4px}
+.tabs::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+.tab{padding:8px 14px;font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--tx3);
+     border:1px solid transparent;border-bottom:none;border-radius:5px 5px 0 0;white-space:nowrap;transition:all .15s;position:relative}
+.tab:hover{color:var(--tx2);background:rgba(255,255,255,.02)}
+.tab.active{color:var(--gold);background:var(--bg);border-color:var(--bd)}
+.tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--bg)}
+.tab .badge{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:9px;background:var(--sf2);color:var(--tx2);font-size:9px;font-weight:600}
+.tab.active .badge{background:var(--gold);color:#1a0f00}
+
+/* Sub-tabs (within module) */
+.subtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bd)}
+.subtab{padding:5px 12px;font-family:var(--mono);font-size:10.5px;color:var(--tx3);
+        background:var(--sf);border:1px solid var(--bd);border-radius:14px;transition:all .15s}
+.subtab:hover{color:var(--tx2);border-color:var(--bd2)}
+.subtab.active{color:#fff;background:var(--purple);border-color:var(--purple)}
+
+main{max-width:1320px;margin:0 auto;padding:18px 18px 90px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.panel-title{font-family:var(--display);font-size:15px;font-weight:600;color:var(--gold);letter-spacing:.6px}
+.panel-desc{font-size:11px;color:var(--tx2);margin:5px 0 12px;line-height:1.6}
+.banner{background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.22);border-left:3px solid var(--gold);
+        border-radius:5px;padding:9px 13px;margin-bottom:14px;font-size:11px;color:var(--tx2);line-height:1.6}
+.banner b{color:var(--gold)}
+.warning{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.25);border-left:3px solid var(--red);
+         border-radius:5px;padding:9px 13px;margin-bottom:12px;font-size:11px;color:var(--tx2);line-height:1.6}
+.warning b{color:var(--red)}
+
+/* Array (table) view */
+.table-wrap{overflow-x:auto;background:var(--sf);border:1px solid var(--bd);border-radius:7px;margin-bottom:10px}
+table.dt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+table.dt th{background:var(--sf2);color:var(--tx2);font-weight:600;font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;
+            text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd2);white-space:nowrap}
+table.dt td{padding:5px 8px;border-bottom:1px solid var(--bd);vertical-align:middle}
+table.dt tbody tr{transition:background .1s}
+table.dt tbody tr:hover{background:rgba(176,96,255,.04)}
+table.dt tbody tr:last-child td{border-bottom:none}
+table.dt input[type=text],table.dt input[type=number],table.dt select{
+  padding:4px 6px;font-size:10.5px;background:transparent;border-color:transparent;width:100%;min-width:0;
+}
+table.dt input[type=text]{min-width:80px}
+table.dt input[type=number]{min-width:55px;width:auto}
+table.dt input:hover,table.dt select:hover{background:var(--sf2);border-color:var(--bd)}
+table.dt input:focus,table.dt select:focus{background:var(--sf2);border-color:var(--purple)}
+.row-actions{display:flex;gap:2px;justify-content:flex-end}
+.row-actions button{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;
+                    border-radius:3px;font-size:10px;color:var(--tx3);border:1px solid transparent}
+.row-actions button:hover{color:var(--tx);background:var(--sf2);border-color:var(--bd2)}
+.row-actions button.danger:hover{color:var(--red);border-color:rgba(239,68,68,.4)}
+
+/* Card view (for dict-of-objects) */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:10px}
+.entry-card{background:var(--sf);border:1px solid var(--bd);border-radius:7px;padding:11px 13px;display:flex;flex-direction:column;gap:7px}
+.entry-card.gb-normal{border-left:3px solid #9d9d9d}
+.entry-card.gb-uncommon{border-left:3px solid #1eff00}
+.entry-card.gb-rare{border-left:3px solid #0070dd}
+.entry-card.gb-epic{border-left:3px solid #a335ee}
+.entry-card.gb-legendary{border-left:3px solid #ff8c00}
+.entry-card.gb-set{border-left:3px solid #00ffcc}
+.entry-card.gb-immortal{border-left:3px solid #ff2244}
+.entry-card-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.entry-key{
+  font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--gold);
+  background:transparent;border-color:transparent;flex:1;min-width:0;
+}
+.entry-key:hover,.entry-key:focus{background:var(--sf2);border-color:var(--bd2)}
+.entry-emoji{font-size:18px;flex-shrink:0}
+.entry-card .field-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px}
+.field{display:flex;flex-direction:column;gap:2px}
+.field-label{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;font-weight:500;font-family:var(--mono)}
+.field input,.field select{width:100%}
+.field-row{display:flex;gap:5px;align-items:center}
+.field-row input{flex:1}
+.field-row .label-x{font-size:10px;color:var(--tx3);font-family:var(--mono)}
+
+/* Tags input (for arrays of strings like 'from') */
+.tags-input{display:flex;flex-wrap:wrap;gap:3px;background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:4px}
+.tag{display:inline-flex;align-items:center;gap:3px;background:var(--sf3);color:var(--tx);font-family:var(--mono);
+     font-size:10px;padding:2px 6px;border-radius:9px;border:1px solid var(--bd2)}
+.tag .x{cursor:pointer;color:var(--tx3);font-weight:bold;padding:0 2px}
+.tag .x:hover{color:var(--red)}
+.tags-input input{flex:1;min-width:60px;background:transparent;border:none;font-size:10px;padding:2px;outline:none;color:var(--tx)}
+
+/* Dict-of-arrays */
+.dict-entry{background:var(--sf);border:1px solid var(--bd);border-radius:7px;padding:10px 12px;margin-bottom:8px}
+.dict-entry-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.dict-key-input{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--gold);
+                background:transparent;border-color:transparent;padding:3px 6px;min-width:120px}
+.dict-key-input:hover,.dict-key-input:focus{background:var(--sf2);border-color:var(--bd2)}
+.dict-array-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px}
+.dict-array-grid .item-wrap{position:relative}
+.dict-array-grid .item-wrap::before{content:attr(data-i);position:absolute;left:5px;top:50%;transform:translateY(-50%);
+                                     font-size:9px;color:var(--tx3);font-family:var(--mono);pointer-events:none;z-index:1}
+.dict-array-grid input{width:100%;padding-left:23px;font-size:11px}
+.dict-array-grid input:placeholder-shown{border-style:dashed;border-color:var(--bd)}
+
+/* Key-value pairs */
+.kv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px}
+.kv-row{display:flex;gap:5px;background:var(--sf);border:1px solid var(--bd);border-radius:5px;padding:5px 7px;align-items:center}
+.kv-row input.k{flex:0 0 110px;font-family:var(--mono);font-size:11px;color:var(--gold);background:transparent;border-color:transparent}
+.kv-row input.v{flex:1;background:transparent;border-color:transparent}
+.kv-row input:hover,.kv-row input:focus{background:var(--sf2);border-color:var(--bd2)}
+.kv-row button{width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--tx3);border-radius:3px}
+.kv-row button:hover{color:var(--red);background:rgba(239,68,68,.1)}
+
+.add-row{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:9px;
+        background:transparent;border:1.5px dashed var(--bd2);border-radius:5px;color:var(--tx2);font-size:11px;
+        transition:all .15s;margin-top:8px}
+.add-row:hover{border-color:var(--purple);color:var(--purple);background:rgba(176,96,255,.05)}
+
+/* Footer */
+footer{position:fixed;bottom:0;left:0;right:0;background:rgba(10,6,18,.95);backdrop-filter:blur(8px);
+       border-top:1px solid var(--bd);padding:8px 18px;font-size:10.5px;color:var(--tx3);font-family:var(--mono);
+       display:flex;align-items:center;justify-content:space-between;z-index:40;gap:10px;flex-wrap:wrap}
+.status-left{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.indicator{display:inline-flex;align-items:center;gap:5px}
+.indicator .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+.indicator.dirty .dot{background:var(--gold);box-shadow:0 0 6px var(--gold)}
+.indicator.error .dot{background:var(--red);box-shadow:0 0 6px var(--red)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--sf);border:1px solid var(--bd2);border-radius:9px;max-width:780px;width:100%;max-height:88vh;
+       display:flex;flex-direction:column;box-shadow:0 0 40px rgba(176,96,255,.2)}
+.modal-head{padding:13px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:var(--display);font-size:14px;font-weight:600;color:var(--gold);letter-spacing:.6px}
+.modal-body{padding:16px 18px;overflow-y:auto;flex:1}
+.modal-foot{padding:11px 18px;border-top:1px solid var(--bd);display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+.code-output{width:100%;height:380px;background:var(--bg2);border:1px solid var(--bd);border-radius:5px;padding:11px;
+             font-family:var(--mono);font-size:10.5px;color:var(--tx);resize:vertical;outline:none;white-space:pre;overflow:auto}
+
+.toast{position:fixed;bottom:55px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--sf3);
+       border:1px solid var(--purple);color:var(--tx);padding:9px 16px;border-radius:5px;font-size:11.5px;
+       z-index:300;opacity:0;pointer-events:none;transition:all .25s;box-shadow:0 4px 20px rgba(176,96,255,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{border-color:var(--red);box-shadow:0 4px 20px rgba(239,68,68,.3)}
+
+.empty-state{text-align:center;padding:32px 18px;color:var(--tx3);font-size:12px;background:var(--sf);
+             border:1.5px dashed var(--bd2);border-radius:7px}
+.note{font-size:10.5px;color:var(--tx3);font-style:italic;margin-top:4px}
+
+@media (max-width:640px){
+  header{padding:10px 12px 0}
+  main{padding:12px 12px 90px}
+  .title{font-size:16px}
+  .card-grid{grid-template-columns:1fr}
+  .dict-array-grid{grid-template-columns:repeat(auto-fill,minmax(125px,1fr))}
+  .kv-grid{grid-template-columns:1fr}
+  .modal{max-height:94vh}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-bar">
+    <div>
+      <div class="title">⚔ ABYSS WORLD — 관리자 툴</div>
+      <div class="subtitle">Director Console · 모든 데이터 모듈 편집</div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost" id="btn-reload" title="data/*.js 다시 읽기">↻ 파일 재로드</button>
+      <button class="btn" id="btn-export-all">📦 전체 Export</button>
+      <button class="btn btn-gold" id="btn-export">📤 현재 모듈 Export</button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+
+<main>
+  <div id="content"></div>
+</main>
+
+<footer>
+  <div class="status-left">
+    <span class="indicator" id="ind-status"><span class="dot"></span><span id="status-text">로드 대기</span></span>
+    <span id="status-counts" style="color:var(--tx3)"></span>
+  </div>
+  <div style="color:var(--tx3);font-size:10px">v3.1.1 · 자동저장 LocalStorage</div>
+</footer>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title"></div>
+      <button class="btn btn-xs btn-ghost" onclick="closeModal()">✕ 닫기</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot" id="modal-foot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 외부 데이터 로드 -->
+<script src="../data/labels.js" onerror="window._loadFailed=true"></script>
+<script src="../data/gear-bases.js" onerror="window._loadFailed=true"></script>
+<script src="../data/furniture.js" onerror="window._loadFailed=true"></script>
+<script src="../data/stronghold.js" onerror="window._loadFailed=true"></script>
+<script src="../data/synth-tables.js" onerror="window._loadFailed=true"></script>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+// MODULE DEFINITIONS — 각 데이터 모듈의 메타 + 출력 파일 매핑
+// ════════════════════════════════════════════════════════════
+const MODULES={
+  gear:{
+    file:'data/gear-bases.js',
+    label:'장비',
+    keys:['WBASES','ABASES','ACCBASES','WN','AN','ACCN','IT_UNIQUE_NAMES','SLOT_KR'],
+    sub:[
+      {id:'WBASES',label:'WBASES'},
+      {id:'ABASES',label:'ABASES'},
+      {id:'ACCBASES',label:'ACCBASES'},
+      {id:'WN',label:'WN (무기명)'},
+      {id:'AN',label:'AN (방어구명)'},
+      {id:'ACCN',label:'ACCN (장신구명)'},
+      {id:'IT_UNIQUE_NAMES',label:'IT 고유명'},
+      {id:'SLOT_KR',label:'슬롯 한글명'},
+    ],
+  },
+  furniture:{
+    file:'data/furniture.js',
+    label:'가구',
+    keys:['FURNITURE'],
+    sub:[{id:'FURNITURE',label:'FURNITURE'}],
+  },
+  stronghold:{
+    file:'data/stronghold.js',
+    label:'거점',
+    keys:['STRONGHOLD_TIERS','STRONGHOLD_AMBIANCE','FURNITURE_PASSIVES'],
+    sub:[
+      {id:'STRONGHOLD_TIERS',label:'거점 단계'},
+      {id:'STRONGHOLD_AMBIANCE',label:'분위기 텍스트'},
+      {id:'FURNITURE_PASSIVES',label:'가구 패시브'},
+    ],
+  },
+  synth:{
+    file:'data/synth-tables.js',
+    label:'합성',
+    keys:['ENCH_SYNTH_COSTS','FURN_SYNTH_DATA','GEAR_SYNTH_DATA'],
+    sub:[
+      {id:'GEAR_SYNTH_DATA',label:'장비 합성'},
+      {id:'FURN_SYNTH_DATA',label:'가구 합성'},
+      {id:'ENCH_SYNTH_COSTS',label:'인챈트 합성'},
+    ],
+  },
+  labels:{
+    file:'data/labels.js',
+    label:'라벨',
+    keys:['GRADES','ATTR_N','ATTR_C','FURN_CAT_KR','MAT_LABEL'],
+    sub:[
+      {id:'GRADES',label:'GRADES'},
+      {id:'ATTR_N',label:'속성명'},
+      {id:'ATTR_C',label:'속성색'},
+      {id:'FURN_CAT_KR',label:'가구 카테고리'},
+      {id:'MAT_LABEL',label:'재료 라벨'},
+    ],
+  },
+};
+
+// SCHEMAS for each data structure
+const GRADE_OPTS=['normal','uncommon','rare','epic','legendary','set','immortal'];
+const FURN_CAT_OPTS=['deco','inv_slot','wh_slot','passive','crafter','trophy'];
+const FURN_FROM_OPTS=['shop','drop','craft','event','synth','boss_drop','immortal_tower'];
+const ATTR_OPTS=['fire','ice','lightning','dark','holy','poison'];
+const SLOT_OPTS=['head','chest','legs','boots','neck','offhand','accessory','weapon'];
+const HAND_OPTS=['1H','2H'];
+const TARGET_OPTS=['inv','wh'];
+const CRAFTER_OPTS=['gear','furniture','enchant'];
+const TRIGGER_OPTS=['passive','on_battle_start','on_first_hit','on_death','on_forge','on_boss_kill'];
+
+const SCHEMAS={
+  WBASES:{type:'array-of-objects',label:'무기 베이스 (WBASES)',
+    desc:'무기 종류별 기본 스탯 + 밸런스. ar/mr/dr/hr/sr 중 필요한 것만 (빈칸은 출력 시 생략).',
+    fields:[
+      {key:'id',label:'ID',type:'text',req:true,uniq:true,ph:'sword'},
+      {key:'hand',label:'손',type:'select',opts:HAND_OPTS,req:true},
+      {key:'slot',label:'슬롯',type:'text',def:'weapon'},
+      {key:'ar',label:'AR',type:'number',step:0.05,hint:'물리'},
+      {key:'mr',label:'MR',type:'number',step:0.05,hint:'마법'},
+      {key:'dr',label:'DR',type:'number',step:0.05,hint:'방어'},
+      {key:'hr',label:'HR',type:'number',step:0.05,hint:'체력'},
+      {key:'sr',label:'SR',type:'number',step:0.05,hint:'속도'},
+      {key:'balMin',label:'BAL Min',type:'number',step:1},
+      {key:'balMax',label:'BAL Max',type:'number',step:1},
+      {key:'_comment',label:'비고',type:'text',ph:'한손검 — 1H 약체 보강'},
+    ]},
+  ABASES:{type:'array-of-objects',label:'방어구 베이스 (ABASES)',desc:'방어구 슬롯별 기본 스탯.',
+    fields:[
+      {key:'id',label:'ID',type:'text',req:true,uniq:true,ph:'head'},
+      {key:'slot',label:'슬롯',type:'select',opts:SLOT_OPTS,req:true},
+      {key:'ar',label:'AR',type:'number',step:0.05},
+      {key:'mr',label:'MR',type:'number',step:0.05},
+      {key:'dr',label:'DR',type:'number',step:0.05},
+      {key:'hr',label:'HR',type:'number',step:0.05},
+      {key:'sr',label:'SR',type:'number',step:0.05},
+      {key:'_comment',label:'비고',type:'text'},
+    ]},
+  ACCBASES:{type:'array-of-objects',label:'장신구 베이스 (ACCBASES)',desc:'장신구 종류별 기본 스탯 (slot은 모두 accessory).',
+    fields:[
+      {key:'id',label:'ID',type:'text',req:true,uniq:true,ph:'ring'},
+      {key:'slot',label:'슬롯',type:'text',def:'accessory'},
+      {key:'ar',label:'AR',type:'number',step:0.05},
+      {key:'mr',label:'MR',type:'number',step:0.05},
+      {key:'dr',label:'DR',type:'number',step:0.05},
+      {key:'hr',label:'HR',type:'number',step:0.05},
+      {key:'sr',label:'SR',type:'number',step:0.05},
+      {key:'_comment',label:'비고',type:'text'},
+    ]},
+  STRONGHOLD_TIERS:{type:'array-of-objects',label:'거점 단계 (STRONGHOLD_TIERS)',
+    desc:'거점 단계별 그리드 크기 / 확장 비용 / 활성 패시브 슬롯 수.',
+    fields:[
+      {key:'tier',label:'Tier',type:'number',step:1,req:true},
+      {key:'gridSize',label:'그리드',type:'number',step:1,req:true,hint:'NxN'},
+      {key:'cost',label:'비용 (G)',type:'number',step:1000000},
+      {key:'passiveSlots',label:'패시브 슬롯',type:'number',step:1},
+      {key:'name',label:'이름',type:'text',req:true,ph:'폐허'},
+    ]},
+
+  WN:{type:'dict-of-arrays',label:'무기 명칭 풀 (WN)',
+      desc:'무기 종류별 등급 1~10 명칭. 등급별로 점진 강화되는 이름 추천.',
+      keyHint:'무기 ID (예: sword, staff)',arrayLength:10},
+  AN:{type:'dict-of-arrays',label:'방어구 명칭 풀 (AN)',
+      desc:'방어구 슬롯별 등급 1~10 명칭.',
+      keyHint:'방어구 슬롯 (예: head, chest)',arrayLength:10},
+  ACCN:{type:'dict-of-arrays',label:'장신구 명칭 풀 (ACCN)',
+      desc:'장신구 종류별 등급 1~10 명칭.',
+      keyHint:'장신구 ID (예: ring, amulet)',arrayLength:10},
+  IT_UNIQUE_NAMES:{type:'dict-of-arrays',label:'불멸의 탑 고유명 (IT_UNIQUE_NAMES)',
+      desc:'불멸의 탑 레전더리 무기/방어구 고유 이름 5종. 엘든링 풍 추천.',
+      keyHint:'슬롯 또는 무기 ID',arrayLength:5},
+  STRONGHOLD_AMBIANCE:{type:'array-of-strings',label:'거점 분위기 텍스트 (STRONGHOLD_AMBIANCE)',
+      desc:'거점 단계 1~4 진입 시 표시되는 분위기 텍스트.',valueHint:'분위기 묘사 한 문장'},
+
+  SLOT_KR:{type:'dict-of-strings',label:'슬롯 한글명 (SLOT_KR)',
+      desc:'슬롯 ID → 한국어 표시명 매핑.',keyHint:'영문 ID',valueHint:'한글명'},
+  FURN_CAT_KR:{type:'dict-of-strings',label:'가구 카테고리 (FURN_CAT_KR)',
+      desc:'가구 카테고리 키 → 한국어 표시명.',keyHint:'카테고리',valueHint:'한글명'},
+  MAT_LABEL:{type:'dict-of-strings',label:'재료 라벨 (MAT_LABEL)',
+      desc:'재료 키 → 한국어 라벨 (이모지 포함). 합성 UI 등에 사용.',keyHint:'재료 ID',valueHint:'라벨'},
+  ATTR_N:{type:'dict-of-strings',label:'속성 한글명 (ATTR_N)',
+      desc:'속성 ID → 한국어 표시명 (이모지 포함).',keyHint:'속성 ID',valueHint:'한글명'},
+  ATTR_C:{type:'dict-of-strings',label:'속성 색상 (ATTR_C)',
+      desc:'속성 ID → 색상 코드.',keyHint:'속성 ID',valueHint:'#hex'},
+
+  ENCH_SYNTH_COSTS:{type:'dict-of-numbers',label:'인챈트 합성 비용 (ENCH_SYNTH_COSTS)',
+      desc:'tier → 합성 비용 (골드). 동일 tier 3개 + 비용 = 다음 tier 1개.',
+      keyHint:'tier (1~5)',valueHint:'골드'},
+
+  GRADES:{type:'dict-of-objects',label:'장비 등급 (GRADES)',
+      desc:'등급 키 → {name, color, w(드랍 가중치), mult(스탯 배율), skillM(스킬 배율)}.',
+      fields:[
+        {key:'name',label:'한글명',type:'text',req:true},
+        {key:'color',label:'색상',type:'text',req:true,ph:'#9d9d9d'},
+        {key:'w',label:'드랍 W',type:'number',step:0.1,hint:'가중치'},
+        {key:'mult',label:'스탯 배율',type:'number',step:0.1},
+        {key:'skillM',label:'스킬 배율',type:'number',step:0.1},
+      ]},
+
+  FURN_SYNTH_DATA:{type:'dict-of-objects',label:'가구 합성 (FURN_SYNTH_DATA)',
+      desc:'시작 등급 → {count, cost, nextGrade, mats}. 동일 등급 N개 + 골드 + 재료 = 상위 등급 1개.',
+      fields:[
+        {key:'count',label:'개수',type:'number',step:1,req:true},
+        {key:'cost',label:'비용 (G)',type:'number',step:1000000,req:true},
+        {key:'nextGrade',label:'결과 등급',type:'select',opts:GRADE_OPTS,req:true},
+        {key:'mats',label:'재료',type:'matdict',hint:'wood/steel/magicCrystal/abyssShard/blueprint'},
+      ]},
+
+  GEAR_SYNTH_DATA:{type:'dict-of-objects',label:'장비 합성 (GEAR_SYNTH_DATA)',
+      desc:'시작 등급 → {count, cost, nextGrade}. 재료 없음.',
+      fields:[
+        {key:'count',label:'개수',type:'number',step:1,req:true},
+        {key:'cost',label:'비용 (G)',type:'number',step:1000000,req:true},
+        {key:'nextGrade',label:'결과 등급',type:'select',opts:GRADE_OPTS,req:true},
+      ]},
+
+  FURNITURE_PASSIVES:{type:'dict-of-objects',label:'가구 패시브 (FURNITURE_PASSIVES)',
+      desc:'패시브 키 → {n, trigger, stats?, proc?, desc}. proc는 JSON 텍스트 편집.',
+      fields:[
+        {key:'n',label:'표시명',type:'text',req:true},
+        {key:'trigger',label:'트리거',type:'select',opts:TRIGGER_OPTS,req:true},
+        {key:'stats',label:'스탯 (passive 트리거용)',type:'statsdict',
+         hint:'atkPct/defPct/spdPct/hp/atk/def/spd/goldBonus/expBonus/skillBonus/critDmg/crit'},
+        {key:'proc',label:'Proc (트리거용 효과)',type:'json',ph:'{"type":"refund","rate":0.05}'},
+        {key:'desc',label:'설명',type:'text',req:true},
+      ]},
+
+  FURNITURE:{type:'dict-of-objects',label:'가구 마스터 테이블 (FURNITURE)',
+      desc:'가구 키 → {n, emoji, cat, size, grade, from, ...}. 빈 필드는 출력 시 생략.',
+      fields:[
+        {key:'n',label:'이름',type:'text',req:true,ph:'낡은 의자'},
+        {key:'emoji',label:'이모지',type:'text',req:true,ph:'🪑'},
+        {key:'cat',label:'카테고리',type:'select',opts:FURN_CAT_OPTS,req:true},
+        {key:'size',label:'크기 [w,h]',type:'tuple2',req:true},
+        {key:'grade',label:'등급',type:'select',opts:GRADE_OPTS,req:true},
+        {key:'from',label:'획득 경로',type:'tags',opts:FURN_FROM_OPTS},
+        {key:'tradeable',label:'거래 가능',type:'bool'},
+        {key:'cost',label:'구매가 (G)',type:'number',step:1000,hint:'shop'},
+        {key:'baseSell',label:'판매가 (G)',type:'number',step:1000,hint:'drop'},
+        {key:'targetType',label:'슬롯 대상',type:'select',opts:['',...TARGET_OPTS],hint:'slot 가구'},
+        {key:'slots',label:'슬롯 +',type:'number',step:1,hint:'slot 가구'},
+        {key:'stack',label:'중첩 한도',type:'number',step:1,hint:'기본 1'},
+        {key:'passive',label:'패시브 키',type:'text',hint:'FURNITURE_PASSIVES'},
+        {key:'crafterType',label:'제작대',type:'select',opts:['',...CRAFTER_OPTS]},
+        {key:'_eventOnly',label:'이벤트 ID',type:'text',hint:'이벤트 한정 가구'},
+      ]},
+};
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+const TAB_ORDER=['gear','furniture','stronghold','synth','labels'];
+const LS_KEY='abyss-admin-v1';
+
+const state={
+  data:{}, // { WBASES:[...], FURNITURE:{...}, ... }
+  _activeTab:'gear',
+  _activeSub:'WBASES',
+  _dirty:false,
+  _fileLoadedAt:null,
+};
+
+// ════════════════════════════════════════════════════════════
+// LOAD / SAVE
+// ════════════════════════════════════════════════════════════
+function loadFromWindow(){
+  const allKeys=TAB_ORDER.flatMap(t=>MODULES[t].keys);
+  for(const k of allKeys){
+    if(window[k]!==undefined){
+      // deep clone via JSON
+      try{state.data[k]=JSON.parse(JSON.stringify(window[k]));}
+      catch(e){console.error('clone fail',k,e);state.data[k]=window[k]}
+    }else{
+      state.data[k]=Array.isArray(window[k])?[]:{};
+    }
+  }
+  state._fileLoadedAt=Date.now();
+  state._dirty=false;
+}
+function loadFromLocalStorage(){
+  try{
+    const s=localStorage.getItem(LS_KEY);
+    if(!s)return false;
+    const obj=JSON.parse(s);
+    if(!obj||!obj.data)return false;
+    state.data=obj.data;
+    state._activeTab=obj._activeTab||'gear';
+    state._activeSub=obj._activeSub||'WBASES';
+    state._dirty=true;
+    return true;
+  }catch(e){return false}
+}
+function saveToLocalStorage(){
+  try{
+    localStorage.setItem(LS_KEY,JSON.stringify({
+      data:state.data,_activeTab:state._activeTab,_activeSub:state._activeSub,t:Date.now()
+    }));
+  }catch(e){console.warn('localStorage save fail',e)}
+}
+function markDirty(){state._dirty=true;saveToLocalStorage();updateStatus()}
+
+// ════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════
+function el(tag,attrs={},...children){
+  const e=document.createElement(tag);
+  for(const k in attrs){
+    if(k==='class')e.className=attrs[k];
+    else if(k==='style')e.style.cssText=attrs[k];
+    else if(k.startsWith('on')&&typeof attrs[k]==='function')e.addEventListener(k.slice(2).toLowerCase(),attrs[k]);
+    else if(k==='text')e.textContent=attrs[k];
+    else if(k==='html')e.innerHTML=attrs[k];
+    else if(attrs[k]!==undefined&&attrs[k]!==null)e.setAttribute(k,attrs[k]);
+  }
+  for(const c of children){
+    if(c==null)continue;
+    if(typeof c==='string'||typeof c==='number')e.appendChild(document.createTextNode(c));
+    else e.appendChild(c);
+  }
+  return e;
+}
+
+function renderTabs(){
+  const tabs=document.getElementById('tabs');
+  tabs.innerHTML='';
+  for(const tabId of TAB_ORDER){
+    const m=MODULES[tabId];
+    const btn=el('button',{class:'tab'+(state._activeTab===tabId?' active':''),
+      onclick:()=>{state._activeTab=tabId;state._activeSub=m.sub[0].id;saveToLocalStorage();renderAll();}
+    },m.label);
+    tabs.appendChild(btn);
+  }
+}
+
+function renderSubtabs(){
+  const m=MODULES[state._activeTab];
+  if(!m||m.sub.length<=1)return null;
+  const wrap=el('div',{class:'subtabs'});
+  for(const s of m.sub){
+    wrap.appendChild(el('button',{
+      class:'subtab'+(state._activeSub===s.id?' active':''),
+      onclick:()=>{state._activeSub=s.id;saveToLocalStorage();renderAll();}
+    },s.label));
+  }
+  return wrap;
+}
+
+function renderContent(){
+  const content=document.getElementById('content');
+  content.innerHTML='';
+  const m=MODULES[state._activeTab];
+  if(!m){content.appendChild(el('div',{class:'empty-state'},'모듈을 선택하세요'));return;}
+
+  // module info banner
+  const banner=el('div',{class:'banner',html:
+    `<b>📁 ${m.file}</b> — 이 모듈을 편집하면 위 파일이 새로 생성됩니다 (Export 클릭).
+     <br>출력된 코드를 복사해서 GitHub의 해당 파일에 붙여넣고 commit 하면 게임에 반영됩니다 (캐시 ~10분).`});
+  content.appendChild(banner);
+
+  const sub=renderSubtabs();
+  if(sub)content.appendChild(sub);
+
+  // active sub-tab content
+  const subId=state._activeSub;
+  const schema=SCHEMAS[subId];
+  if(!schema){
+    content.appendChild(el('div',{class:'empty-state'},`스키마 미정의: ${subId}`));
+    return;
+  }
+  const panel=renderPanel(subId,schema);
+  content.appendChild(panel);
+}
+
+function renderPanel(key,schema){
+  const wrap=el('div');
+  const head=el('div',{class:'panel-header'},
+    el('div',null,
+      el('div',{class:'panel-title'},schema.label),
+      schema.desc?el('div',{class:'panel-desc'},schema.desc):null
+    )
+  );
+  wrap.appendChild(head);
+
+  if(schema.type==='array-of-objects')return wrap.appendChild(renderArrayOfObjects(key,schema)),wrap;
+  if(schema.type==='dict-of-arrays')return wrap.appendChild(renderDictOfArrays(key,schema)),wrap;
+  if(schema.type==='dict-of-strings')return wrap.appendChild(renderDictOfStrings(key,schema)),wrap;
+  if(schema.type==='dict-of-numbers')return wrap.appendChild(renderDictOfNumbers(key,schema)),wrap;
+  if(schema.type==='dict-of-objects')return wrap.appendChild(renderDictOfObjects(key,schema)),wrap;
+  if(schema.type==='array-of-strings')return wrap.appendChild(renderArrayOfStrings(key,schema)),wrap;
+  wrap.appendChild(el('div',{class:'empty-state'},`타입 미구현: ${schema.type}`));
+  return wrap;
+}
+
+// ── Array of objects (table) ───────────────────────────────
+function renderArrayOfObjects(key,schema){
+  const wrap=el('div');
+  const data=Array.isArray(state.data[key])?state.data[key]:[];
+
+  const tableWrap=el('div',{class:'table-wrap'});
+  const t=el('table',{class:'dt'});
+  const thead=el('thead');
+  const trh=el('tr');
+  for(const f of schema.fields){
+    trh.appendChild(el('th',null,f.label+(f.hint?` (${f.hint})`:'')));
+  }
+  trh.appendChild(el('th',{style:'text-align:right'},'·'));
+  thead.appendChild(trh);
+  t.appendChild(thead);
+
+  const tbody=el('tbody');
+  data.forEach((row,idx)=>{
+    const tr=el('tr');
+    for(const f of schema.fields){
+      const td=el('td');
+      td.appendChild(makeFieldInput(f,row[f.key],v=>{
+        if(v===''||v==null||(typeof v==='number'&&isNaN(v))){delete row[f.key];}
+        else row[f.key]=v;
+        markDirty();
+      }));
+      tr.appendChild(td);
+    }
+    const td2=el('td',{style:'text-align:right;white-space:nowrap'});
+    const acts=el('div',{class:'row-actions'});
+    acts.appendChild(el('button',{title:'위로',onclick:()=>{if(idx>0){[data[idx-1],data[idx]]=[data[idx],data[idx-1]];markDirty();renderAll();}}},'↑'));
+    acts.appendChild(el('button',{title:'아래로',onclick:()=>{if(idx<data.length-1){[data[idx+1],data[idx]]=[data[idx],data[idx+1]];markDirty();renderAll();}}},'↓'));
+    acts.appendChild(el('button',{class:'danger',title:'삭제',onclick:()=>{
+      if(confirm(`행 ${idx+1} (${row.id||row.name||idx+1}) 삭제?`)){data.splice(idx,1);markDirty();renderAll();}
+    }},'✕'));
+    td2.appendChild(acts);
+    tr.appendChild(td2);
+    tbody.appendChild(tr);
+  });
+  t.appendChild(tbody);
+  tableWrap.appendChild(t);
+  wrap.appendChild(tableWrap);
+
+  // add button
+  const add=el('button',{class:'add-row',onclick:()=>{
+    const newRow={};
+    for(const f of schema.fields){if(f.def!==undefined)newRow[f.key]=f.def;}
+    data.push(newRow);
+    state.data[key]=data;
+    markDirty();renderAll();
+  }},'＋ 행 추가');
+  wrap.appendChild(add);
+  return wrap;
+}
+
+// ── Dict of arrays ─────────────────────────────────────────
+function renderDictOfArrays(key,schema){
+  const wrap=el('div');
+  const data=state.data[key]||{};
+  state.data[key]=data;
+
+  for(const [k,arr] of Object.entries(data)){
+    const entry=el('div',{class:'dict-entry'});
+    const head=el('div',{class:'dict-entry-head'});
+    const keyInput=el('input',{type:'text',class:'dict-key-input',value:k,placeholder:schema.keyHint||''});
+    keyInput.addEventListener('change',()=>{
+      const nk=keyInput.value.trim();
+      if(!nk||nk===k)return;
+      if(data[nk]){alert('이미 존재하는 키');keyInput.value=k;return;}
+      data[nk]=data[k];delete data[k];
+      markDirty();renderAll();
+    });
+    head.appendChild(keyInput);
+    head.appendChild(el('button',{class:'btn btn-xs btn-danger',onclick:()=>{
+      if(confirm(`항목 "${k}" 삭제?`)){delete data[k];markDirty();renderAll();}
+    }},'삭제'));
+    entry.appendChild(head);
+
+    const grid=el('div',{class:'dict-array-grid'});
+    while(arr.length<schema.arrayLength)arr.push('');
+    if(arr.length>schema.arrayLength)arr.length=schema.arrayLength;
+    for(let i=0;i<schema.arrayLength;i++){
+      const wrap2=el('div',{class:'item-wrap','data-i':String(i+1).padStart(2,'0')});
+      const inp=el('input',{type:'text',value:arr[i]||'',placeholder:`#${i+1}`});
+      inp.addEventListener('input',()=>{arr[i]=inp.value;markDirty();});
+      wrap2.appendChild(inp);
+      grid.appendChild(wrap2);
+    }
+    entry.appendChild(grid);
+    wrap.appendChild(entry);
+  }
+
+  // add new key
+  const add=el('button',{class:'add-row',onclick:()=>{
+    const k=prompt(`새 키 추가\n(${schema.keyHint||''})`);
+    if(!k||!k.trim())return;
+    const tk=k.trim();
+    if(data[tk]){alert('이미 존재');return;}
+    data[tk]=Array(schema.arrayLength).fill('');
+    markDirty();renderAll();
+  }},`＋ ${schema.keyHint||'키'} 추가`);
+  wrap.appendChild(add);
+  return wrap;
+}
+
+// ── Dict of strings ────────────────────────────────────────
+function renderDictOfStrings(key,schema){
+  const wrap=el('div');
+  const data=state.data[key]||{};
+  state.data[key]=data;
+  const grid=el('div',{class:'kv-grid'});
+
+  for(const [k,v] of Object.entries(data)){
+    const row=el('div',{class:'kv-row'});
+    const ki=el('input',{class:'k',type:'text',value:k,placeholder:schema.keyHint||'key'});
+    const vi=el('input',{class:'v',type:'text',value:v,placeholder:schema.valueHint||'value'});
+    ki.addEventListener('change',()=>{
+      const nk=ki.value.trim();
+      if(!nk||nk===k)return;
+      if(data[nk]!==undefined){alert('이미 존재');ki.value=k;return;}
+      data[nk]=data[k];delete data[k];markDirty();renderAll();
+    });
+    vi.addEventListener('input',()=>{data[k]=vi.value;markDirty();});
+    row.appendChild(ki);row.appendChild(vi);
+    row.appendChild(el('button',{title:'삭제',onclick:()=>{delete data[k];markDirty();renderAll();}},'✕'));
+    grid.appendChild(row);
+  }
+  wrap.appendChild(grid);
+
+  const add=el('button',{class:'add-row',onclick:()=>{
+    const k=prompt(`새 키 (${schema.keyHint||''})`);
+    if(!k||!k.trim())return;
+    const tk=k.trim();
+    if(data[tk]!==undefined){alert('이미 존재');return;}
+    data[tk]='';markDirty();renderAll();
+  }},'＋ 항목 추가');
+  wrap.appendChild(add);
+  return wrap;
+}
+
+// ── Dict of numbers ────────────────────────────────────────
+function renderDictOfNumbers(key,schema){
+  const wrap=el('div');
+  const data=state.data[key]||{};
+  state.data[key]=data;
+  const grid=el('div',{class:'kv-grid'});
+
+  for(const [k,v] of Object.entries(data)){
+    const row=el('div',{class:'kv-row'});
+    const ki=el('input',{class:'k',type:'text',value:k,placeholder:schema.keyHint||'key'});
+    const vi=el('input',{class:'v',type:'number',value:v,placeholder:schema.valueHint||'0'});
+    ki.addEventListener('change',()=>{
+      const nk=ki.value.trim();
+      if(!nk||nk===k)return;
+      if(data[nk]!==undefined){alert('이미 존재');ki.value=k;return;}
+      data[nk]=data[k];delete data[k];markDirty();renderAll();
+    });
+    vi.addEventListener('input',()=>{const n=parseFloat(vi.value);data[k]=isNaN(n)?0:n;markDirty();});
+    row.appendChild(ki);row.appendChild(vi);
+    row.appendChild(el('button',{title:'삭제',onclick:()=>{delete data[k];markDirty();renderAll();}},'✕'));
+    grid.appendChild(row);
+  }
+  wrap.appendChild(grid);
+
+  const add=el('button',{class:'add-row',onclick:()=>{
+    const k=prompt(`새 키 (${schema.keyHint||''})`);
+    if(!k||!k.trim())return;
+    const tk=k.trim();
+    if(data[tk]!==undefined){alert('이미 존재');return;}
+    data[tk]=0;markDirty();renderAll();
+  }},'＋ 항목 추가');
+  wrap.appendChild(add);
+  return wrap;
+}
+
+// ── Array of strings ───────────────────────────────────────
+function renderArrayOfStrings(key,schema){
+  const wrap=el('div');
+  const arr=Array.isArray(state.data[key])?state.data[key]:[];
+  state.data[key]=arr;
+  arr.forEach((s,idx)=>{
+    const row=el('div',{class:'kv-row'});
+    const numLabel=el('input',{class:'k',type:'text',value:`#${idx+1}`,readonly:true,style:'flex:0 0 50px'});
+    const inp=el('input',{class:'v',type:'text',value:s,placeholder:schema.valueHint||''});
+    inp.addEventListener('input',()=>{arr[idx]=inp.value;markDirty();});
+    row.appendChild(numLabel);row.appendChild(inp);
+    row.appendChild(el('button',{title:'위',onclick:()=>{if(idx>0){[arr[idx-1],arr[idx]]=[arr[idx],arr[idx-1]];markDirty();renderAll();}}},'↑'));
+    row.appendChild(el('button',{title:'삭제',onclick:()=>{arr.splice(idx,1);markDirty();renderAll();}},'✕'));
+    wrap.appendChild(row);
+  });
+  const add=el('button',{class:'add-row',onclick:()=>{arr.push('');markDirty();renderAll();}},'＋ 항목 추가');
+  wrap.appendChild(add);
+  return wrap;
+}
+
+// ── Dict of objects (cards) ────────────────────────────────
+function renderDictOfObjects(key,schema){
+  const wrap=el('div');
+  const data=state.data[key]||{};
+  state.data[key]=data;
+
+  // search filter for FURNITURE (50+ entries)
+  const isLarge=Object.keys(data).length>20;
+  let filterStr='';
+  if(isLarge){
+    const filterRow=el('div',{style:'margin-bottom:10px;display:flex;gap:6px;align-items:center'});
+    const f=el('input',{type:'text',placeholder:'🔍 검색 (이름/키/카테고리)',style:'flex:1;padding:7px 10px;font-size:12px'});
+    f.addEventListener('input',()=>{filterStr=f.value.toLowerCase();renderCardGrid();});
+    filterRow.appendChild(f);
+    wrap.appendChild(filterRow);
+  }
+
+  const gridWrap=el('div');
+  wrap.appendChild(gridWrap);
+
+  function renderCardGrid(){
+    gridWrap.innerHTML='';
+    const grid=el('div',{class:'card-grid'});
+    let count=0;
+    for(const [k,obj] of Object.entries(data)){
+      if(filterStr){
+        const hay=(k+' '+(obj.n||'')+' '+(obj.cat||'')+' '+(obj.grade||'')).toLowerCase();
+        if(!hay.includes(filterStr))continue;
+      }
+      grid.appendChild(renderObjectCard(key,k,obj,schema));
+      count++;
+    }
+    gridWrap.appendChild(grid);
+    if(filterStr){
+      gridWrap.appendChild(el('div',{class:'note'},`검색 결과: ${count}개`));
+    }
+  }
+  renderCardGrid();
+
+  const add=el('button',{class:'add-row',onclick:()=>{
+    const k=prompt('새 키 (영문 ID)');
+    if(!k||!k.trim())return;
+    const tk=k.trim();
+    if(data[tk]){alert('이미 존재');return;}
+    const newObj={};
+    for(const f of schema.fields){if(f.def!==undefined)newObj[f.key]=f.def;}
+    data[tk]=newObj;
+    markDirty();renderAll();
+  }},'＋ 항목 추가');
+  wrap.appendChild(add);
+  return wrap;
+}
+
+function renderObjectCard(parentKey,k,obj,schema){
+  const grade=obj.grade;
+  const card=el('div',{class:'entry-card'+(grade?' gb-'+grade:'')});
+  const head=el('div',{class:'entry-card-head'});
+  if(obj.emoji)head.appendChild(el('span',{class:'entry-emoji'},obj.emoji));
+  const ki=el('input',{type:'text',class:'entry-key',value:k,placeholder:'key'});
+  ki.addEventListener('change',()=>{
+    const nk=ki.value.trim();
+    if(!nk||nk===k)return;
+    const data=state.data[parentKey];
+    if(data[nk]){alert('이미 존재');ki.value=k;return;}
+    // preserve insertion order: rebuild
+    const newData={};
+    for(const [oldK,v] of Object.entries(data)){
+      newData[oldK===k?nk:oldK]=v;
+    }
+    state.data[parentKey]=newData;
+    markDirty();renderAll();
+  });
+  head.appendChild(ki);
+  head.appendChild(el('button',{class:'btn btn-xs btn-danger',onclick:()=>{
+    if(confirm(`"${k}" 삭제?`)){delete state.data[parentKey][k];markDirty();renderAll();}
+  }},'✕'));
+  card.appendChild(head);
+
+  const fields=el('div',{class:'field-grid'});
+  for(const f of schema.fields){
+    const fieldEl=el('div',{class:'field',style:f.type==='tags'||f.type==='json'||f.type==='matdict'||f.type==='statsdict'?'grid-column:1/-1':''});
+    fieldEl.appendChild(el('div',{class:'field-label'},f.label+(f.hint?` (${f.hint})`:'')));
+    fieldEl.appendChild(makeFieldInput(f,obj[f.key],v=>{
+      if(v===''||v==null||v===false||(typeof v==='number'&&isNaN(v))||(Array.isArray(v)&&!v.length)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v||{}).length===0)){
+        delete obj[f.key];
+      }else{
+        obj[f.key]=v;
+      }
+      markDirty();
+    }));
+    fields.appendChild(fieldEl);
+  }
+  card.appendChild(fields);
+  return card;
+}
+
+// ── Field input maker ──────────────────────────────────────
+function makeFieldInput(f,val,onChange){
+  if(f.type==='text'){
+    const inp=el('input',{type:'text',value:val==null?'':val,placeholder:f.ph||''});
+    inp.addEventListener('input',()=>onChange(inp.value));
+    return inp;
+  }
+  if(f.type==='number'){
+    const inp=el('input',{type:'number',value:val==null||isNaN(val)?'':val,step:f.step||1,placeholder:f.ph||''});
+    inp.addEventListener('input',()=>{
+      if(inp.value==='')return onChange(undefined);
+      const n=parseFloat(inp.value);
+      onChange(isNaN(n)?undefined:n);
+    });
+    return inp;
+  }
+  if(f.type==='select'){
+    const sel=el('select');
+    for(const o of f.opts){
+      const opt=el('option',{value:o},o||'(없음)');
+      if(val===o||(val==null&&o==='')||(val===undefined&&o===f.def))opt.selected=true;
+      sel.appendChild(opt);
+    }
+    if(val&&!f.opts.includes(val)){
+      // unknown value - add it
+      const opt=el('option',{value:val},val+' (?)');
+      opt.selected=true;
+      sel.appendChild(opt);
+    }
+    sel.addEventListener('change',()=>onChange(sel.value||undefined));
+    return sel;
+  }
+  if(f.type==='bool'){
+    const wrap=el('label',{style:'display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2);cursor:pointer'});
+    const cb=el('input',{type:'checkbox'});
+    if(val)cb.checked=true;
+    cb.addEventListener('change',()=>onChange(cb.checked));
+    wrap.appendChild(cb);
+    wrap.appendChild(document.createTextNode(val?'예':'아니오'));
+    return wrap;
+  }
+  if(f.type==='tuple2'){
+    const arr=Array.isArray(val)?val:[1,1];
+    const wrap=el('div',{class:'field-row'});
+    const a=el('input',{type:'number',value:arr[0]==null?'':arr[0],step:1,style:'width:70px'});
+    const b=el('input',{type:'number',value:arr[1]==null?'':arr[1],step:1,style:'width:70px'});
+    a.addEventListener('input',()=>{arr[0]=parseInt(a.value)||1;onChange([...arr]);});
+    b.addEventListener('input',()=>{arr[1]=parseInt(b.value)||1;onChange([...arr]);});
+    wrap.appendChild(a);
+    wrap.appendChild(el('span',{class:'label-x'},'×'));
+    wrap.appendChild(b);
+    return wrap;
+  }
+  if(f.type==='tags'){
+    return makeTagsInput(val||[],f.opts||[],onChange);
+  }
+  if(f.type==='matdict'){
+    return makeMatDictInput(val||{},onChange);
+  }
+  if(f.type==='statsdict'){
+    return makeStatsDictInput(val||{},onChange);
+  }
+  if(f.type==='json'){
+    const ta=el('textarea',{rows:2,style:'width:100%;font-size:10px;padding:5px',placeholder:f.ph||'{}'});
+    ta.value=val?JSON.stringify(val):'';
+    ta.addEventListener('change',()=>{
+      const s=ta.value.trim();
+      if(!s)return onChange(undefined);
+      try{onChange(JSON.parse(s));ta.style.borderColor='';}
+      catch(e){ta.style.borderColor='var(--red)';toast('JSON 파싱 실패: '+e.message,true);}
+    });
+    return ta;
+  }
+  return el('span',null,'?');
+}
+
+function makeTagsInput(arr,opts,onChange){
+  const wrap=el('div',{class:'tags-input'});
+  function render(){
+    wrap.innerHTML='';
+    for(const t of arr){
+      const tag=el('span',{class:'tag'});
+      tag.appendChild(document.createTextNode(t));
+      tag.appendChild(el('span',{class:'x',onclick:()=>{
+        arr.splice(arr.indexOf(t),1);render();onChange([...arr]);
+      }},'×'));
+      wrap.appendChild(tag);
+    }
+    const sel=el('select',{style:'background:transparent;border:none;font-size:10px;color:var(--tx2)'});
+    sel.appendChild(el('option',{value:''},'+ 추가'));
+    for(const o of opts){if(!arr.includes(o))sel.appendChild(el('option',{value:o},o));}
+    sel.appendChild(el('option',{value:'__custom__'},'(직접입력)'));
+    sel.addEventListener('change',()=>{
+      let v=sel.value;
+      if(!v)return;
+      if(v==='__custom__'){v=prompt('커스텀 태그');if(!v)return;v=v.trim();}
+      if(v&&!arr.includes(v)){arr.push(v);render();onChange([...arr]);}
+      sel.value='';
+    });
+    wrap.appendChild(sel);
+  }
+  render();
+  return wrap;
+}
+
+function makeMatDictInput(obj,onChange){
+  const wrap=el('div',{style:'display:flex;flex-wrap:wrap;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:5px'});
+  const matOpts=['wood','steel','magicCrystal','abyssShard','blueprint'];
+  function render(){
+    wrap.innerHTML='';
+    for(const [k,v] of Object.entries(obj)){
+      const tag=el('span',{class:'tag'});
+      tag.appendChild(document.createTextNode(k+':'));
+      const ni=el('input',{type:'number',value:v,step:1,style:'width:50px;padding:1px 4px;font-size:10px;background:transparent;border:none;color:var(--gold)'});
+      ni.addEventListener('input',()=>{const n=parseFloat(ni.value);obj[k]=isNaN(n)?0:n;onChange({...obj});});
+      tag.appendChild(ni);
+      tag.appendChild(el('span',{class:'x',onclick:()=>{delete obj[k];render();onChange({...obj});}},'×'));
+      wrap.appendChild(tag);
+    }
+    const sel=el('select',{style:'background:transparent;border:none;font-size:10px;color:var(--tx2)'});
+    sel.appendChild(el('option',{value:''},'+ 재료'));
+    for(const o of matOpts){if(!(o in obj))sel.appendChild(el('option',{value:o},o));}
+    sel.addEventListener('change',()=>{
+      const v=sel.value;
+      if(!v||v in obj)return;
+      obj[v]=1;render();onChange({...obj});
+      sel.value='';
+    });
+    wrap.appendChild(sel);
+  }
+  render();
+  return wrap;
+}
+
+function makeStatsDictInput(obj,onChange){
+  const wrap=el('div',{style:'display:flex;flex-wrap:wrap;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:5px'});
+  const statOpts=['atkPct','defPct','spdPct','hp','atk','def','spd','goldBonus','expBonus','skillBonus','critDmg','crit'];
+  function render(){
+    wrap.innerHTML='';
+    for(const [k,v] of Object.entries(obj)){
+      const tag=el('span',{class:'tag'});
+      tag.appendChild(document.createTextNode(k+':'));
+      const ni=el('input',{type:'number',value:v,step:1,style:'width:55px;padding:1px 4px;font-size:10px;background:transparent;border:none;color:var(--gold)'});
+      ni.addEventListener('input',()=>{const n=parseFloat(ni.value);obj[k]=isNaN(n)?0:n;onChange({...obj});});
+      tag.appendChild(ni);
+      tag.appendChild(el('span',{class:'x',onclick:()=>{delete obj[k];render();onChange({...obj});}},'×'));
+      wrap.appendChild(tag);
+    }
+    const sel=el('select',{style:'background:transparent;border:none;font-size:10px;color:var(--tx2)'});
+    sel.appendChild(el('option',{value:''},'+ 스탯'));
+    for(const o of statOpts){if(!(o in obj))sel.appendChild(el('option',{value:o},o));}
+    sel.appendChild(el('option',{value:'__custom__'},'(커스텀)'));
+    sel.addEventListener('change',()=>{
+      let v=sel.value;
+      if(!v)return;
+      if(v==='__custom__'){v=prompt('스탯 키');if(!v)return;v=v.trim();}
+      if(v&&!(v in obj)){obj[v]=0;render();onChange({...obj});}
+      sel.value='';
+    });
+    wrap.appendChild(sel);
+  }
+  render();
+  return wrap;
+}
+
+// ════════════════════════════════════════════════════════════
+// EXPORT — 모듈별 JS 코드 생성
+// ════════════════════════════════════════════════════════════
+const FILE_TEMPLATES={
+  'data/gear-bases.js':{
+    header:`/* ABYSS WORLD — 장비 데이터 모듈 (gear-bases.js) — 관리자 툴 export */`,
+    keys:['WN','AN','ACCN','WBASES','IT_UNIQUE_NAMES','SLOT_KR','ABASES','ACCBASES'],
+    consoleArgs:['WN','AN','ACCN','WBASES','ABASES','ACCBASES'],
+  },
+  'data/furniture.js':{
+    header:`/* ABYSS WORLD — 가구 마스터 (furniture.js) — 관리자 툴 export */`,
+    keys:['FURNITURE'],
+    consoleArgs:['FURNITURE'],
+  },
+  'data/stronghold.js':{
+    header:`/* ABYSS WORLD — 거점 데이터 (stronghold.js) — 관리자 툴 export */`,
+    keys:['STRONGHOLD_TIERS','STRONGHOLD_AMBIANCE','FURNITURE_PASSIVES'],
+    consoleArgs:['STRONGHOLD_TIERS','FURNITURE_PASSIVES'],
+  },
+  'data/synth-tables.js':{
+    header:`/* ABYSS WORLD — 합성 테이블 (synth-tables.js) — 관리자 툴 export */`,
+    keys:['ENCH_SYNTH_COSTS','FURN_SYNTH_DATA','GEAR_SYNTH_DATA'],
+    consoleArgs:['ENCH_SYNTH_COSTS','FURN_SYNTH_DATA','GEAR_SYNTH_DATA'],
+  },
+  'data/labels.js':{
+    header:`/* ABYSS WORLD — 라벨/등급 (labels.js) — 관리자 툴 export */`,
+    keys:['GRADES','ATTR_N','ATTR_C','FURN_CAT_KR','MAT_LABEL'],
+    consoleArgs:['GRADES','ATTR_N','MAT_LABEL'],
+  },
+};
+
+// JS literal serializer - readable, avoids JSON pure quoting
+function jsLit(v,indent=0){
+  const sp=' '.repeat(indent),sp2=' '.repeat(indent+2);
+  if(v==null)return 'null';
+  if(typeof v==='string')return JSON.stringify(v);
+  if(typeof v==='number'||typeof v==='boolean')return String(v);
+  if(Array.isArray(v)){
+    if(!v.length)return '[]';
+    // inline if all primitives & short
+    const allPrim=v.every(x=>x==null||typeof x==='string'||typeof x==='number'||typeof x==='boolean');
+    if(allPrim){
+      const inline='['+v.map(jsLit).join(',')+']';
+      if(inline.length<=80)return inline;
+    }
+    return '[\n'+v.map(x=>sp2+jsLit(x,indent+2)).join(',\n')+'\n'+sp+']';
+  }
+  if(typeof v==='object'){
+    const ents=Object.entries(v).filter(([,x])=>x!==undefined&&x!=='_comment');
+    // separate _comment for inline
+    const comment=v._comment;
+    if(!ents.length&&!comment)return '{}';
+    // pull _comment out (already filtered)
+    const realEnts=ents.filter(([k])=>k!=='_comment');
+    const isShort=realEnts.length<=4&&realEnts.every(([,x])=>typeof x==='string'||typeof x==='number'||typeof x==='boolean'||(Array.isArray(x)&&x.length<=4));
+    if(isShort){
+      const inline='{'+realEnts.map(([k,x])=>jsKey(k)+':'+jsLit(x)).join(', ')+'}';
+      if(inline.length<=120)return inline+(comment?' // '+comment:'');
+    }
+    let s='{\n';
+    s+=realEnts.map(([k,x])=>sp2+jsKey(k)+':'+jsLit(x,indent+2)).join(',\n');
+    s+='\n'+sp+'}';
+    return s+(comment?' // '+comment:'');
+  }
+  return String(v);
+}
+// JS object key — bare if valid identifier
+function jsKey(k){
+  return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(k)?k:JSON.stringify(k);
+}
+
+function exportModule(tabId){
+  const m=MODULES[tabId];
+  const tpl=FILE_TEMPLATES[m.file];
+  if(!tpl){toast('템플릿 미정의: '+m.file,true);return;}
+
+  let code=tpl.header+'\n\n';
+  for(const k of tpl.keys){
+    if(state.data[k]===undefined)continue;
+    code+=`const ${k}=${jsLit(state.data[k])};\n\n`;
+  }
+  // window exposure
+  for(const k of tpl.keys){
+    if(state.data[k]===undefined)continue;
+    code+=`window.${k}=${k};\n`;
+  }
+  code+='\n';
+  // console log
+  const args=tpl.consoleArgs.filter(k=>state.data[k]!==undefined).map(k=>{
+    const d=state.data[k];
+    const cnt=Array.isArray(d)?d.length:Object.keys(d||{}).length;
+    return `'${k}:${cnt}'`;
+  });
+  code+=`console.log('[${m.file.split('/').pop()}] loaded —', ${args.join(',\n  ')});\n`;
+
+  showExportModal(m.file,code);
+}
+
+function exportAll(){
+  let body='# 전체 Export — '+new Date().toLocaleString('ko-KR')+'\n\n';
+  body+='각 모듈을 GitHub의 해당 경로에 붙여넣고 commit 하세요.\n\n';
+  for(const tabId of TAB_ORDER){
+    const m=MODULES[tabId];
+    body+=`========================================\n`;
+    body+=`# ${m.file}\n`;
+    body+=`========================================\n\n`;
+    const tpl=FILE_TEMPLATES[m.file];
+    let code=tpl.header+'\n\n';
+    for(const k of tpl.keys){
+      if(state.data[k]===undefined)continue;
+      code+=`const ${k}=${jsLit(state.data[k])};\n\n`;
+    }
+    for(const k of tpl.keys){
+      if(state.data[k]===undefined)continue;
+      code+=`window.${k}=${k};\n`;
+    }
+    code+='\n';
+    const args=tpl.consoleArgs.filter(k=>state.data[k]!==undefined).map(k=>{
+      const d=state.data[k];
+      const cnt=Array.isArray(d)?d.length:Object.keys(d||{}).length;
+      return `'${k}:${cnt}'`;
+    });
+    code+=`console.log('[${m.file.split('/').pop()}] loaded —', ${args.join(',')});\n`;
+    body+=code+'\n\n';
+  }
+  showExportModal('전체 모듈 (5개 파일)',body,true);
+}
+
+// ════════════════════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════════════════════
+function showExportModal(filePath,code,isAll){
+  document.getElementById('modal-title').textContent='📤 '+filePath;
+  const body=document.getElementById('modal-body');
+  body.innerHTML='';
+  body.appendChild(el('div',{class:'banner',html:
+    isAll?
+      '<b>전체 모듈 Export</b> — 각 섹션을 해당 GitHub 파일에 붙여넣어주세요. 한 번에 모든 모듈을 갱신할 때 사용.':
+      `<b>${filePath}</b> 의 새 내용입니다. <br>아래 코드를 복사해서 GitHub의 해당 파일에 붙여넣고 commit 하세요. (캐시 ~10분 후 게임에 반영)`
+  }));
+  const ta=el('textarea',{class:'code-output',readonly:true});
+  ta.value=code;
+  body.appendChild(ta);
+
+  const foot=document.getElementById('modal-foot');
+  foot.innerHTML='';
+  foot.appendChild(el('button',{class:'btn',onclick:()=>{
+    ta.select();
+    document.execCommand('copy');
+    toast('📋 클립보드 복사됨');
+  }},'📋 복사'));
+  foot.appendChild(el('button',{class:'btn',onclick:()=>{
+    const blob=new Blob([code],{type:'text/javascript'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=isAll?'abyss-all-modules.txt':filePath.split('/').pop();
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),100);
+  }},'⬇ 다운로드'));
+  if(!isAll){
+    foot.appendChild(el('button',{class:'btn btn-gold',onclick:()=>{
+      const url=`https://github.com/kishco/Abyss-World/edit/main/${filePath}`;
+      window.open(url,'_blank');
+    }},'🔗 GitHub 편집'));
+  }
+
+  document.getElementById('modal').classList.add('show');
+}
+
+window.closeModal=function(){document.getElementById('modal').classList.remove('show');};
+
+// ════════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════════
+let _toastT;
+function toast(msg,isError){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.toggle('error',!!isError);
+  t.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ════════════════════════════════════════════════════════════
+// STATUS
+// ════════════════════════════════════════════════════════════
+function updateStatus(){
+  const ind=document.getElementById('ind-status');
+  const txt=document.getElementById('status-text');
+  ind.classList.toggle('dirty',state._dirty);
+  txt.textContent=state._dirty?'저장됨 (Export 필요)':'파일과 동기화됨';
+  // counts
+  const m=MODULES[state._activeTab];
+  const counts=m.keys.map(k=>{
+    const d=state.data[k];
+    if(Array.isArray(d))return `${k}:${d.length}`;
+    if(d&&typeof d==='object')return `${k}:${Object.keys(d).length}`;
+    return `${k}:?`;
+  }).join(' · ');
+  document.getElementById('status-counts').textContent=counts;
+}
+
+function renderAll(){
+  renderTabs();
+  renderContent();
+  updateStatus();
+}
+
+// ════════════════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════════════════
+function boot(){
+  // require all modules loaded
+  if(window._loadFailed||!window.WBASES||!window.FURNITURE){
+    document.getElementById('content').innerHTML=
+      `<div class="warning"><b>⚠ 데이터 파일 로드 실패</b><br>
+       <code>../data/*.js</code> 파일들을 찾을 수 없습니다.<br>
+       이 툴은 GitHub Pages 배포 환경에서 <code>/tool/admin.html</code> 에 위치해야 정상 동작합니다.<br>
+       (즉 <code>/data/*.js</code> 와 같은 디렉토리 레벨)</div>`;
+    return;
+  }
+
+  const hasSaved=loadFromLocalStorage();
+  loadFromWindow();
+  if(hasSaved){
+    if(confirm('이전 편집 내역이 LocalStorage에 있습니다. 복원할까요?\n(취소 시 파일에서 새로 시작 — 자동저장은 덮어쓰여집니다)')){
+      loadFromLocalStorage();
+    }else{
+      loadFromWindow();
+      saveToLocalStorage();
+    }
+  }
+
+  document.getElementById('btn-export').onclick=()=>exportModule(state._activeTab);
+  document.getElementById('btn-export-all').onclick=exportAll;
+  document.getElementById('btn-reload').onclick=()=>{
+    if(state._dirty&&!confirm('편집 내역이 사라집니다. 정말 재로드?'))return;
+    loadFromWindow();saveToLocalStorage();renderAll();toast('파일에서 재로드됨');
+  };
+
+  // close modal on overlay click
+  document.getElementById('modal').onclick=function(e){if(e.target===this)closeModal();};
+
+  renderAll();
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
+else boot();
+</script>
+</body>
+</html>
