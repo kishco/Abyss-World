@@ -3201,6 +3201,8 @@ let _saveCharTimer=null;
 let _saveCharResolves=[];
 let _saveInvTimer=null;
 let _saveInvResolves=[];
+// ★ v3.1.2 — 강화 재진입 락 (연속 클릭 시 보장권만 까지고 강화 안 되는 race 방지)
+let _forgeBusy=false;
 
 function saveChar(){
   return new Promise((resolve,reject)=>{
@@ -8512,6 +8514,9 @@ function renderForge(sb){
 
 // ★ v3.0 — 즉시 +N 강화권 사용
 window.doInstantEnh=async(target, key, level)=>{
+  if(_forgeBusy){toast('⏳ 이전 강화 처리 중...',1500);return;}
+  _forgeBusy=true;
+  try{
   // target: 'eq' | 'inv', key: slotKey 또는 itemId, level: 5/7/9
   const ticketKey=`_instantEnh${level}`;
   if(!char[ticketKey]||char[ticketKey]<=0){toast(`즉시 +${level} 강화권이 없습니다`);return;}
@@ -8541,9 +8546,13 @@ window.doInstantEnh=async(target, key, level)=>{
   blogAdd&&blogAdd(`<span class="l-exp" style="color:#ff8c00">⚡ ${it.name} +${level} 즉시 강화권 사용!</span>`);
   updateTop();renderChar();renderInv();
   const sb=document.getElementById('secbody');if(sb)renderForge(sb);
+  }finally{ _forgeBusy=false; }
 };
 
 window.doForge=async sl=>{
+  if(_forgeBusy){toast('⏳ 이전 강화 처리 중...',1500);return;}
+  _forgeBusy=true;
+  try{
   const it=char.equipment[sl];if(!it){toast('장비 없음');return;}
   const enh=it.enhance||0;
   if(enh>=9){toast('최대 강화 +9');return;}
@@ -8641,10 +8650,14 @@ window.doForge=async sl=>{
       await saveChar();updateTop();
     }catch(e2){console.error('[refund failed]',e2);}
   }
+  }finally{ _forgeBusy=false; }
 };
 
 // ★ 인벤 아이템 강화
 window.doForgeInv=async function(itemId){
+  if(_forgeBusy){toast('⏳ 이전 강화 처리 중...',1500);return;}
+  _forgeBusy=true;
+  try{
   const it=inv[itemId];if(!it){toast('아이템 없음');return;}
   const enh=it.enhance||0;
   if(enh>=9){toast('최대 강화 +9');return;}
@@ -8737,6 +8750,7 @@ window.doForgeInv=async function(itemId){
       await saveChar();updateTop();
     }catch(e2){console.error('[refund failed]',e2);}
   }
+  }finally{ _forgeBusy=false; }
 };
 
 function renderRerollSec(sb){
