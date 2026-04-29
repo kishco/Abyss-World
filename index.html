@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ABYSS WORLD 3.0 - 다크 판타지 RPG</title>
+<title>ABYSS WORLD 3.1 - 다크 판타지 RPG</title>
 
 <!-- SEO 기본 -->
 <meta name="description" content="ABYSS WORLD는 브라우저에서 바로 즐기는 다크 판타지 텍스트 RPG입니다. 던전 탐험, 장비 수집, 토벌전, 챔프전을 무료로 즐겨보세요.">
@@ -14,16 +14,16 @@
 
 <!-- Open Graph (카카오톡·디스코드·SNS 링크 공유 미리보기) -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="ABYSS WORLD 3.0 — 거점 시스템 & 위령제 이벤트">
-<meta property="og:description" content="🏯 거점 시스템 + 합성 + 가구 배치! 던전·토벌전·챔프전·유일 아이템. 위령제 이벤트(4/27~5/5) 진행 중. 무료 텍스트 RPG.">
+<meta property="og:title" content="ABYSS WORLD 3.1 — 특성 트리 시스템">
+<meta property="og:description" content="🌳 특성 트리 (3트리×50노드) + 거점 시스템 + 합성! 던전·토벌전·챔프전·유일 아이템. 위령제 이벤트(4/27~5/5) 진행 중. 무료 텍스트 RPG.">
 <meta property="og:url" content="https://kishco.github.io/Abyss-World/">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:site_name" content="ABYSS WORLD">
 
 <!-- Twitter 카드 -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ABYSS WORLD 3.0 — 거점 시스템 & 위령제 이벤트">
-<meta name="twitter:description" content="🏯 거점 시스템 + 합성 + 위령제 이벤트(4/27~5/5). 무료 텍스트 RPG.">
+<meta name="twitter:title" content="ABYSS WORLD 3.1 — 특성 트리 시스템">
+<meta name="twitter:description" content="🌳 특성 트리 + 거점 시스템 + 위령제 이벤트(4/27~5/5). 무료 텍스트 RPG.">
 
 <!-- 구글 검색엔진에 크롤링 허용 -->
 <meta name="googlebot" content="index, follow">
@@ -6371,33 +6371,36 @@ function getTalentResetCost(){
   return Math.min(100000000,1000000*Math.pow(2,n)); // 1M → 2M → 4M → ... 최대 1억
 }
 
-// ★ v3.1 핫픽스 — 특성 무결성 체크
-// 특성 Lv 받은 총 포인트 = 사용 포인트 + 남은 포인트 검증
-// 불일치 시 사용자에게 알림 + 자동 리셋 권장
-function validateTalentIntegrity(){
-  if(!char._talentLv)return;
-  const tlv=char._talentLv||1;
-  const totalEarned=tlv; // 받은 총 포인트 = 레벨 (Lv.1부터 1pt씩)
-  const nodes=char._talentNodes||[];
-  let totalSpent=0;
-  for(const nid of nodes){
+// ★ v3.1 핫픽스 — 특성 포인트 진단 (헤더 5번 탭 발동)
+// 본인 데이터의 받은 포인트 vs 사용+잔여 포인트 검증, 불일치 시 사용자 동의로 보정
+async function diagnoseTalentPoints(){
+  const tlv=char._talentLv||0;
+  if(tlv<=0){toast('특성 시스템 미활성');return;}
+  let spent=0;
+  for(const nid of(char._talentNodes||[])){
     const node=TALENT_NODES[nid];
-    if(node)totalSpent+=node.cost||1;
+    if(node)spent+=node.cost||1;
   }
   const remaining=char._talentPoints||0;
-  const expected=totalSpent+remaining;
-  if(expected!==totalEarned){
-    console.warn(`[특성 무결성] Lv.${tlv} 받은 ${totalEarned}pt vs 사용+잔여 ${expected}pt (${totalSpent}+${remaining})`);
-    // 자동 보정 — 받은 만큼 - 사용한 만큼 = 잔여
-    const corrected=Math.max(0,totalEarned-totalSpent);
-    if(corrected!==remaining){
-      char._talentPoints=corrected;
-      saveChar();
-      toast(`⚙ 특성 포인트 자동 보정: ${remaining}pt → ${corrected}pt`,5000);
-    }
+  const expected=tlv;  // 받은 총 pt = 특성 Lv
+  const actual=spent+remaining;
+  const diff=expected-actual;
+  
+  if(diff===0){
+    toast(`✅ 특성 포인트 정상 (Lv.${tlv} 받음 ${tlv}pt = 사용 ${spent}pt + 잔여 ${remaining}pt)`,6000);
+    return;
+  }
+  
+  const msg=`📊 특성 포인트 진단\n\n받은 포인트: ${expected}pt (Lv.${tlv})\n사용 포인트: ${spent}pt\n잔여 포인트: ${remaining}pt\n\n불일치 ${diff>0?'+':''}${diff}pt\n\n잔여를 ${Math.max(0,expected-spent)}pt로 보정하시겠습니까?`;
+  if(confirm(msg)){
+    char._talentPoints=Math.max(0,expected-spent);
+    await saveChar();
+    toast(`✅ 특성 포인트 보정: ${remaining}pt → ${char._talentPoints}pt`,5000);
+    if(typeof renderTalentTree==='function')renderTalentTree();
   }
 }
-window.validateTalentIntegrity=validateTalentIntegrity;
+window.diagnoseTalentPoints=diagnoseTalentPoints;
+
 async function resetTalents(){
   if(!char._talentNodes||char._talentNodes.length===0){toast('찍은 노드가 없습니다');return;}
   const cost=getTalentResetCost();
@@ -16908,8 +16911,6 @@ window.openTalentTree=function(){
     saveChar();
     toast('🌳 특성 시스템 활성! Lv.1 시작 (1pt 지급)',4000);
   }
-  // ★ v3.1 핫픽스 — 무결성 체크 (특성 Lv vs 실제 사용 포인트 검증)
-  validateTalentIntegrity();
   _curTalentTree='s';
   let modal=document.getElementById('talentModal');
   if(!modal){
@@ -16928,7 +16929,7 @@ window.openTalentTree=function(){
       ">
       <!-- 헤더 -->
       <div style="background:linear-gradient(180deg,rgba(167,140,255,.10),transparent);border-bottom:1px solid var(--bd);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0">
-        <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#a78cff;flex-shrink:0">🌳 특성 트리</div>
+        <div onclick="window._talHeaderTaps=(window._talHeaderTaps||0)+1;if(window._talHeaderTaps>=5){window._talHeaderTaps=0;diagnoseTalentPoints();}clearTimeout(window._talHeaderTapsT);window._talHeaderTapsT=setTimeout(()=>{window._talHeaderTaps=0;},2500);" style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#a78cff;flex-shrink:0;cursor:pointer;user-select:none">🌳 특성 트리</div>
         <div id="talentHeaderInfo" style="flex:1;font-size:11px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0"></div>
         <button onclick="resetTalents()" style="background:rgba(220,50,50,.15);border:1px solid rgba(220,50,50,.35);color:var(--red);font-size:10px;padding:5px 10px;border-radius:5px;cursor:pointer;flex-shrink:0">🔄 리셋</button>
         <button onclick="closeTalentTree()" style="background:rgba(255,255,255,.08);border:1px solid var(--bd);color:var(--tx);font-size:13px;padding:5px 11px;border-radius:5px;cursor:pointer;font-weight:700;flex-shrink:0">✕</button>
