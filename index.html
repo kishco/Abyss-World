@@ -13738,12 +13738,13 @@ async function renderWarehouse(sb){
     </div>
     <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
       <select id="whFilterType" onchange="whRefresh()" style="flex:1;min-width:80px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
-        <option value="">전체</option>
-        <option value="weapon">무기</option>
-        <option value="armor">방어구</option>
-        <option value="accessory">장신구</option>
-        <option value="scroll">주문서</option>
-        <option value="set">유일</option>
+        <option value="">전체 (가구 제외)</option>
+        <option value="weapon">⚔ 무기</option>
+        <option value="armor">🛡 방어구</option>
+        <option value="accessory">💍 장신구</option>
+        <option value="scroll">📜 주문서</option>
+        <option value="set">✦ 유일</option>
+        <option value="furniture">🪑 가구</option>
       </select>
       <select id="whFilterGrade" onchange="whRefresh()" style="flex:1;min-width:80px;padding:5px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;color:var(--tx);font-size:10px;outline:none">
         <option value="">전체 등급</option>
@@ -13761,12 +13762,15 @@ async function renderWarehouse(sb){
     const tf=document.getElementById('whFilterType')?.value||'';
     const gf=document.getElementById('whFilterGrade')?.value||'';
     return items.filter(i=>{
+      // ★ v3.1.2 — '전체' 선택 시 가구 제외 (장비 찾기 편의)
+      if(!tf&&i.isFurniture)return false;
       const typeOk=!tf
-        ||(tf==='weapon'&&i.slot==='weapon')
-        ||(tf==='armor'&&['head','chest','legs','boots','offhand'].includes(i.slot))
-        ||(tf==='accessory'&&(i.slot==='accessory'||i.slot==='neck'))
+        ||(tf==='weapon'&&i.slot==='weapon'&&!i.isFurniture)
+        ||(tf==='armor'&&['head','chest','legs','boots','offhand'].includes(i.slot)&&!i.isFurniture)
+        ||(tf==='accessory'&&(i.slot==='accessory'||i.slot==='neck')&&!i.isFurniture)
         ||(tf==='scroll'&&(i.isScroll||i.isEnchantScroll||i.isProtectScroll||i.isExtractScroll))
-        ||(tf==='set'&&i.grade==='set');
+        ||(tf==='set'&&i.grade==='set'&&!i.isFurniture)
+        ||(tf==='furniture'&&i.isFurniture);
       const gradeOk=!gf||i.grade===gf;
       return typeOk&&gradeOk;
     });
