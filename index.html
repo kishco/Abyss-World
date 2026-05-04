@@ -6479,6 +6479,10 @@ async function activateTalent(nid){
     if(!char._talentNodes)char._talentNodes=[];
     char._talentNodes.push(nid);
     await saveChar();
+    // ★ v3.1.2 — 노드 찍은 즉시 스탯/UI 전체 갱신 (캐릭터 정보창에 실시간 반영)
+    if(typeof updateTop==='function')updateTop();
+    if(typeof renderChar==='function')renderChar();
+    if(typeof renderTalentTree==='function')renderTalentTree();
     toast(`✨ "${node.name}" 활성!`,2500);
     return true;
   }finally{
@@ -6540,6 +6544,9 @@ async function resetTalents(){
   char._talentResetCount=(char._talentResetCount||0)+1;
   await saveChar();
   toast(`🔄 특성 리셋 완료! ${refund}pt 환원`,4000);
+  // ★ v3.1.2 — 리셋 즉시 스탯/UI 전체 갱신
+  if(typeof updateTop==='function')updateTop();
+  if(typeof renderChar==='function')renderChar();
   if(typeof renderTalentTree==='function')renderTalentTree();
 }
 window.resetTalents=resetTalents;
