@@ -3945,6 +3945,8 @@ async function selChar(id){
   set(ref(db,`presence/${curUser.uid}`),{charName:char.name,lastSeen:Date.now()});
   // ★ 만료 경매 자동 취소 (7일)
   cleanExpiredAuctions();
+  // ★ v3.1.2 — 본인 만료 경매 자동 회수 (인벤/임시보관함)
+  returnMyExpiredAuctions();
 
   // ★ 다중 탭 방지 — 세션 락
   if(_sessionUnsub){_sessionUnsub();_sessionUnsub=null;}
@@ -7203,7 +7205,7 @@ function openIM(it){
       <div style="font-size:11px;color:var(--tx3);margin-bottom:12px">현재 스탯: STR${char.str} DEX${char.dex} INT${char.int} VIT${char.vit} LUK${char.luk}</div>
       <button class="btn btn-purple" id="useScrollBtn" style="width:100%;margin-bottom:8px">✨ 주문서 사용</button>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-gold btn-sm" style="flex:1" onclick="(async()=>{if(!confirm('100G에 판매?'))return;delete inv['${it.id}'];gainGold(100);await saveChar();await saveInv();closeIM();renderInv();updateTop();toast('💰 +100G');})()">💰 판매 (100G)</button>
+        <button class="btn btn-gold btn-sm" style="flex:1" onclick="(async()=>{if(!confirm('25,000G에 판매?'))return;delete inv['${it.id}'];gainGold(25000);await saveChar();await saveInv();closeIM();renderInv();updateTop();toast('💰 +25,000G');})()">💰 판매 (25,000G)</button>
         <button class="btn btn-red btn-sm" onclick="(async()=>{if(!confirm('버리시겠습니까?'))return;delete inv['${it.id}'];await saveInv();closeIM();renderInv();toast('버림');})()">버리기</button>
       </div>`;
     document.getElementById('useScrollBtn').onclick=()=>useRerollScroll(it.id);
@@ -9002,8 +9004,18 @@ async function renderAuction(sb){
       }).join('')}</div>`;
     }else if(tab==='sell'){
       const eq2=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
-      const tradeable=Object.values(inv).filter(it=>it.tradeable===true&&!eq2.has(it.id)&&!it.isScroll);
-      if(!tradeable.length){
+      // ★ v3.1.2 — 장비/가구 분리 (기본 장비, 토글로 가구)
+      if(typeof window._auctionSellCat==='undefined')window._auctionSellCat='gear';
+      const cat=window._auctionSellCat;
+      const allTradeable=Object.values(inv).filter(it=>it.tradeable===true&&!eq2.has(it.id)&&!it.isScroll);
+      const gearList=allTradeable.filter(it=>!it.isFurniture);
+      const furnList=allTradeable.filter(it=>it.isFurniture);
+      const tradeable=cat==='furniture'?furnList:gearList;
+      const catTabs=`<div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="btn ${cat==='gear'?'btn-gold':'btn-ghost'} btn-sm" style="flex:1" onclick="window._auctionSellCat='gear';renderAuctionTab('sell')">⚔️ 장비 (${gearList.length})</button>
+        <button class="btn ${cat==='furniture'?'btn-gold':'btn-ghost'} btn-sm" style="flex:1" onclick="window._auctionSellCat='furniture';renderAuctionTab('sell')">🪑 가구 (${furnList.length})</button>
+      </div>`;
+      if(!allTradeable.length){
         ac.innerHTML=`<div style="font-size:11.5px;color:var(--tx3);text-align:center;padding:24px">
           거래 가능한 아이템 없음<br>
           <span style="font-size:10px;line-height:2">
@@ -9014,18 +9026,22 @@ async function renderAuction(sb){
         </div>`;return;
       }
       ac.innerHTML=`
+        ${catTabs}
         <div style="font-size:10px;color:var(--tx3);margin-bottom:10px;padding:8px;background:rgba(0,0,0,.3);border-radius:6px;line-height:1.8">
           ⚠️ 드랍 아이템만 등록 가능 · 구매 후 재판매 불가 · 취소 시 인벤 반환
         </div>
+        ${!tradeable.length?`<div style="font-size:11px;color:var(--tx3);text-align:center;padding:18px">${cat==='furniture'?'거래 가능한 가구가 없습니다':'거래 가능한 장비가 없습니다'}</div>`:`
         <div style="display:flex;flex-direction:column;gap:6px" id="auctionSellList">
           ${tradeable.map(it=>{
-            const statStr=Object.entries(it.stats||{}).filter(([,v])=>v>0).map(([k,v])=>fmtStatKV(k,v)).join(' ');
+            const statStr=it.isFurniture
+              ?`${FURN_CAT_KR[it.cat]||it.cat} · ${it.size?.[0]||1}×${it.size?.[1]||1}`
+              :Object.entries(it.stats||{}).filter(([,v])=>v>0).map(([k,v])=>fmtStatKV(k,v)).join(' ');
             const suggestPrice=Math.round(getSellPrice(it)*3);
             return`<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px">
               <div style="display:flex;align-items:flex-start;gap:8px">
                 <div style="flex:1;min-width:0">
-                  <div class="icname g-${it.grade}" style="font-size:11px;margin-bottom:2px">${it.name}${it.enhance>0?` <span style="color:var(--gold)">+${it.enhance}</span>`:''}</div>
-                  <div style="font-size:9px;color:var(--tx3)">${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${statStr?' · '+statStr:''}</div>
+                  <div class="icname g-${it.grade}" style="font-size:11px;margin-bottom:2px">${it.isFurniture?(it.emoji||'📦')+' ':''}${it.name}${it.enhance>0?` <span style="color:var(--gold)">+${it.enhance}</span>`:''}</div>
+                  <div style="font-size:9px;color:var(--tx3)">${it.isFurniture?statStr:`${SLOT_KR[it.baseId]||SLOT_KR[it.slot]||it.slot}${statStr?' · '+statStr:''}`}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
                   <input id="ap_${it.id}" type="number" min="1" value="${suggestPrice}" style="width:80px;padding:4px 6px;background:var(--bg);border:1px solid var(--bd2);border-radius:5px;color:var(--gold);font-size:11px;outline:none;font-family:'IBM Plex Mono',monospace"/>
@@ -9035,7 +9051,7 @@ async function renderAuction(sb){
               </div>
             </div>`;
           }).join('')}
-        </div>`;
+        </div>`}`;
     }
   };
 
@@ -11293,8 +11309,9 @@ window.startPartyLootBid=function(){};
 window.renderLootBidPanel=function(){};
 window.confirmExitBattle=function(){};
 
-// ★ 만료 경매 자동 취소 (7일 경과 + 본인 등록 건은 인벤 반환) + 완료/만료 건 아카이브
+// ★ 만료 경매 자동 취소 (7일 경과 → 만료 마크) + 완료/만료 건 아카이브
 // ★ v3.x — 세션당 1회 + DB 락으로 시간당 1번만 실제 실행 (auction 풀 페치 빈도 감소)
+// ★ v3.1.2 — 본인 인벤 회수는 returnMyExpiredAuctions로 분리 (1시간 가드와 무관하게 매번 실행)
 let _cleanExpRanThisSession=false;
 async function cleanExpiredAuctions(){
   if(_cleanExpRanThisSession)return;
@@ -11314,17 +11331,14 @@ async function cleanExpiredAuctions(){
   const archiveOps={};
   for(const[lid,v]of Object.entries(all)){
     if(!v)continue;
-    // ★ 만료 처리
+    // ★ 만료 마크만 (실제 인벤 회수는 본인 접속 시 returnMyExpiredAuctions가 담당)
     if(v.status==='active'&&now-(v.registeredAt||now)>=EXPIRE){
       await update(ref(db,`auction/${lid}`),{status:'expired',expiredAt:now});
-      if(v.sellerCharId===charId){
-        inv[v.item.id]={...v.item};
-        await saveInv();
-        toast(`📦 경매 만료: ${v.item.name} 인벤 반환`);
-      }
     }
     // ★ 아카이브: expired/sold/cancelled 상태이고 2일 경과 → auction에서 제거
     if(v.status&&v.status!=='active'){
+      // ★ v3.1.2 — 미회수 expired 항목은 아카이브 보호 (판매자 회수권 영구 보존)
+      if(v.status==='expired'&&!v._returned)continue;
       const endTs=v.expiredAt||v.soldAt||v.cancelledAt||v.registeredAt||0;
       if(now-endTs>=ARCHIVE_AGE){
         archiveOps[lid]=null; // auction에서 삭제
@@ -11336,6 +11350,67 @@ async function cleanExpiredAuctions(){
     await update(ref(db,'auction'),archiveOps);
   }
 }
+
+// ★ v3.1.2 — 본인 만료 경매 자동 회수 (selChar 시 호출, 1시간 가드 없음)
+// 인벤 여유 있으면 인벤으로 / 가득 차면 임시보관함(7일 유예)으로 이동
+async function returnMyExpiredAuctions(){
+  if(!charId||!char)return;
+  try{
+    const sn=await get(ref(db,'auction'));
+    const all=sn.val()||{};
+    const now=Date.now();
+    const EXPIRE=7*24*60*60*1000;
+    let returnedInv=0, returnedTemp=0;
+    const ops={};
+    const returnedNames=[];
+    for(const[lid,v]of Object.entries(all)){
+      if(!v||v.sellerCharId!==charId)continue;
+      // 회수 대상: (1) 아직 active이지만 7일 경과 (2) 이미 expired인데 미회수
+      const isActiveExpired=v.status==='active'&&now-(v.registeredAt||now)>=EXPIRE;
+      const isPendingReturn=v.status==='expired'&&!v._returned;
+      if(!isActiveExpired&&!isPendingReturn)continue;
+      if(!v.item){
+        // item 정보 깨짐 → 회수 불가, 마크만
+        ops[`${lid}/status`]='expired';
+        ops[`${lid}/_returned`]=true;
+        if(!v.expiredAt)ops[`${lid}/expiredAt`]=now;
+        continue;
+      }
+      const item={...v.item};
+      const cnt=Object.values(inv).filter(i=>!i.isScroll&&!i.isProtectScroll&&!i.isExtractScroll&&!i.isFurniture).length;
+      const maxSlots=char?.invSlots||100;
+      const isNotCountable=item.isScroll||item.isProtectScroll||item.isExtractScroll||item.isFurniture;
+      if(isNotCountable||cnt<maxSlots){
+        // 인벤 여유 있음 → 인벤에 직접 추가
+        inv[item.id]=item;
+        returnedInv++;
+        returnedNames.push(item.name);
+      }else{
+        // 인벤 가득 → 임시보관함 (7일 유예)
+        char._tempStorage=char._tempStorage||{};
+        char._tempStorage[item.id]={...item,_expireAt:now+7*86400000};
+        returnedTemp++;
+        returnedNames.push(item.name+' (임시)');
+      }
+      ops[`${lid}/status`]='expired';
+      ops[`${lid}/_returned`]=true;
+      if(!v.expiredAt)ops[`${lid}/expiredAt`]=now;
+    }
+    if(returnedInv>0||returnedTemp>0){
+      await saveInv();await saveChar();
+      await update(ref(db,'auction'),ops);
+      const total=returnedInv+returnedTemp;
+      let msg=`📦 만료 경매 ${total}건 자동 회수`;
+      if(returnedTemp>0)msg+=`\n⚠ 인벤 부족 ${returnedTemp}건 → 임시보관함 (7일 유예)`;
+      toast(msg,6000);
+      blogAdd&&blogAdd(`<span class="l-sys" style="color:var(--gold)">📦 만료 경매 ${total}건 회수: ${returnedNames.slice(0,3).join(', ')}${returnedNames.length>3?` 외 ${returnedNames.length-3}건`:''}</span>`);
+    }else if(Object.keys(ops).length>0){
+      // item 깨진 항목만 마크
+      await update(ref(db,'auction'),ops);
+    }
+  }catch(e){console.warn('[returnMyExpiredAuctions]',e);}
+}
+window.returnMyExpiredAuctions=returnMyExpiredAuctions;
 
 
 // (파티 관련 함수들 제거됨 — v2.0)
@@ -16037,13 +16112,49 @@ function renderStronghold(){
     </div>`:'';
 
   // 가구 인벤 (배치되지 않은 것만)
+  // ★ v3.1.2 — 카테고리 필터 + 등급 정렬
+  if(typeof window._shFurnCat==='undefined')window._shFurnCat='all';
+  if(typeof window._shFurnSort==='undefined')window._shFurnSort='gradeDesc';
+  const FURN_GRADE_RANK={set:6,legendary:5,epic:4,rare:3,uncommon:2,normal:1};
+  // 카테고리별 카운트
+  const catCounts={all:unplacedFurn.length,deco:0,inv_slot:0,wh_slot:0,passive:0,crafter:0};
+  for(const f of unplacedFurn){if(catCounts[f.cat]!=null)catCounts[f.cat]++;}
+  // 필터 적용
+  let filteredFurn=window._shFurnCat==='all'?unplacedFurn.slice():unplacedFurn.filter(f=>f.cat===window._shFurnCat);
+  // 정렬 적용
+  filteredFurn.sort((a,b)=>{
+    const ga=FURN_GRADE_RANK[a.grade]||0, gb=FURN_GRADE_RANK[b.grade]||0;
+    if(window._shFurnSort==='gradeDesc')return gb-ga||(a.name||'').localeCompare(b.name||'');
+    if(window._shFurnSort==='gradeAsc') return ga-gb||(a.name||'').localeCompare(b.name||'');
+    if(window._shFurnSort==='nameAsc')  return (a.name||'').localeCompare(b.name||'');
+    if(window._shFurnSort==='catAsc')   return (a.cat||'').localeCompare(b.cat||'')||gb-ga;
+    return 0;
+  });
+  // 카테고리 탭
+  const catBtns=[
+    ['all','전체',catCounts.all],
+    ['deco','🖼 장식',catCounts.deco],
+    ['inv_slot','📦 인벤',catCounts.inv_slot],
+    ['wh_slot','🏦 창고',catCounts.wh_slot],
+    ['passive','✨ 패시브',catCounts.passive],
+    ['crafter','⚒ 제작대',catCounts.crafter],
+  ].map(([k,n,c])=>`<button class="btn ${window._shFurnCat===k?'btn-blue':'btn-ghost'} btn-xs" onclick="window._shFurnCat='${k}';renderStronghold()">${n} ${c}</button>`).join('');
+  // 정렬 셀렉트
+  const sortSel=`<select onchange="window._shFurnSort=this.value;renderStronghold()" style="padding:3px 6px;background:var(--bg);border:1px solid var(--bd2);border-radius:4px;color:var(--tx);font-size:10px">
+    <option value="gradeDesc" ${window._shFurnSort==='gradeDesc'?'selected':''}>등급 ↓</option>
+    <option value="gradeAsc"  ${window._shFurnSort==='gradeAsc' ?'selected':''}>등급 ↑</option>
+    <option value="nameAsc"   ${window._shFurnSort==='nameAsc'  ?'selected':''}>이름순</option>
+    <option value="catAsc"    ${window._shFurnSort==='catAsc'   ?'selected':''}>카테고리</option>
+  </select>`;
   const furnInvBlock=`
     <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:.7px">🪑 가구 인벤 (${unplacedFurn.length})</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+        <div style="font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:.7px">🪑 가구 인벤 (${filteredFurn.length}/${unplacedFurn.length})</div>
+        ${unplacedFurn.length?sortSel:''}
       </div>
-      ${unplacedFurn.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px">
-        ${unplacedFurn.map(it=>{
+      ${unplacedFurn.length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${catBtns}</div>`:''}
+      ${filteredFurn.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px">
+        ${filteredFurn.map(it=>{
           const passDesc=it.passive?FURNITURE_PASSIVES[it.passive]?.desc:'';
           const slotDesc=it.slots?(it.targetType==='inv'?`인벤 +${it.slots}`:`창고 +${it.slots}`):'';
           return `<div class="card2 gb-${it.grade}" style="padding:7px;cursor:pointer" onclick="strongholdPlaceMode('${it.id}')">
@@ -16056,7 +16167,7 @@ function renderStronghold(){
             ${passDesc?`<div style="font-size:9px;color:var(--gold);line-height:1.3;margin-top:2px">${passDesc}</div>`:''}
           </div>`;
         }).join('')}
-      </div>`:'<div style="font-size:11px;color:var(--tx3);padding:4px 0">보유 가구 없음 — 마을 가구 상점 또는 던전 드랍에서 획득하세요</div>'}
+      </div>`:unplacedFurn.length?`<div style="font-size:11px;color:var(--tx3);padding:4px 0;text-align:center">이 카테고리에 가구가 없습니다</div>`:'<div style="font-size:11px;color:var(--tx3);padding:4px 0">보유 가구 없음 — 마을 가구 상점 또는 던전 드랍에서 획득하세요</div>'}
     </div>`;
 
   // 거점 확장 버튼
