@@ -2297,7 +2297,8 @@ const MEMORIAL_BOSS={
   color:'#80a0ff',
   _attr:'dark',
   _eventOnly:true,
-  hp:80000000, atk:5800, def:1100, dodge:8,
+  // ★ v3.1.2 — 솔로 1회 한정 이벤트 보스 난이도로 조정 (8천만→3천만, atk/def 완화)
+  hp:30000000, atk:4200, def:800, dodge:8,
   desc:'심연에 잡혀간 어린 영혼들이 라바돈의 본체에 휘감긴 모습. 슬픔과 분노로 폭발하는 차원의 화염.',
   skillDesc:'영혼 화염 · 잃어버린 비명 · 망령의 강림',
   skills:[
@@ -2311,11 +2312,11 @@ const MEMORIAL_BOSS={
      fx:(b,s,myHp,maxHp,slog)=>{
        const d=Math.max(1,Math.round(b.atk*1.0*(100/(100+(s.def||0)))));
        slog(`<span class="l-skill">😱 ${b.name}의 잃어버린 비명! -${d} (방어 무시 일부)</span>`);
-       return{dmg:d,ignoreDef:0.3};
+       return{dmg:d,ignoreDef:0.20};
      }},
     {id:'wraith_descend', n:'망령의 강림', prob:0.12,
      fx:(b,s,myHp,maxHp,slog)=>{
-       b._atkBuff=(b._atkBuff||0)+0.40;
+       b._atkBuff=(b._atkBuff||0)+0.25;
        slog(`<span class="l-warn">👻 ${b.name}의 망령 강림! ATK ${Math.round(b._atkBuff*100)}% 상승</span>`);
        return{dmg:0};
      }},
@@ -3620,6 +3621,26 @@ async function selChar(id){
   }
   const is=await get(ref(db,`inv/${id}`));inv=is.val()||{};
   const ws=await get(ref(db,`warehouse/${id}`));warehouse=ws.val()||{};
+  // ★ v3.1.2 — 거점 고스트 itemId 자동 청소
+  // 경매 등록/판매로 inv에서 사라진 가구가 거점 placedItems / activePassives에 남아있는 케이스
+  // (수호자의 결의 동명 가구 등록 시 영구 슬롯 점유 버그의 사후 복구)
+  try{
+    if(char.house){
+      const _validIds=new Set(Object.keys(inv||{}));
+      const _pB=(char.house.placedItems||[]).length;
+      const _aB=(char.house.activePassives||[]).length;
+      char.house.placedItems=(char.house.placedItems||[]).filter(p=>p&&_validIds.has(p.itemId));
+      char.house.activePassives=(char.house.activePassives||[]).filter(idd=>_validIds.has(idd));
+      const _pD=_pB-char.house.placedItems.length;
+      const _aD=_aB-char.house.activePassives.length;
+      if(_pD>0||_aD>0){
+        console.log(`[거점 고스트 청소] 배치 ${_pD}개 / 패시브 ${_aD}개 정리됨`);
+        setTimeout(()=>{
+          if(typeof toast==='function')toast(`🧹 거점 데이터 정리: 사라진 가구 ${_pD+_aD}건 자동 회수`,5000);
+        },1500);
+      }
+    }
+  }catch(e){console.warn('[house ghost cleanup]',e);}
   // ★ v3.x — 파괴 방지 스크롤 자동 변환 마이그레이션 (1회만)
   // 기존 인벤/창고에 카드로 남아있던 isProtectScroll → _forgeWard 스택으로 흡수
   if(!char._protectMigV1){
@@ -9020,10 +9041,18 @@ async function renderAuction(sb){
       }).join('')}</div>`;
     }else if(tab==='sell'){
       const eq2=new Set(Object.values(char.equipment||{}).filter(Boolean).map(e=>e.id));
+      // ★ v3.1.2 — 거점 배치/활성 패시브 가구 등록 차단 (소실 방지)
+      const placedFurnIds=new Set((char?.house?.placedItems||[]).map(p=>p.itemId));
+      const activePassiveIds=new Set(char?.house?.activePassives||[]);
       // ★ v3.1.2 — 장비/가구 분리 (기본 장비, 토글로 가구)
       if(typeof window._auctionSellCat==='undefined')window._auctionSellCat='gear';
       const cat=window._auctionSellCat;
-      const allTradeable=Object.values(inv).filter(it=>it.tradeable===true&&!eq2.has(it.id)&&!it.isScroll);
+      const allTradeable=Object.values(inv).filter(it=>{
+        if(!(it.tradeable===true&&!eq2.has(it.id)&&!it.isScroll))return false;
+        // 거점 배치 가구 / 활성 패시브 가구 / 프리셋 가구 제외
+        if(it.isFurniture&&(placedFurnIds.has(it.id)||activePassiveIds.has(it.id)))return false;
+        return true;
+      });
       const gearList=allTradeable.filter(it=>!it.isFurniture);
       const furnList=allTradeable.filter(it=>it.isFurniture);
       const tradeable=cat==='furniture'?furnList:gearList;
@@ -9075,6 +9104,13 @@ async function renderAuction(sb){
     const it=inv[itemId];if(!it){toast('아이템 없음');return;}
     if(!it.tradeable){toast('거래 불가 아이템');return;}
     if(it._locked){toast('🔒 잠금된 아이템은 경매 등록할 수 없습니다');return;}
+    // ★ v3.1.2 — 거점 배치/활성 패시브 가구 등록 차단 (이중 안전장치)
+    if(it.isFurniture){
+      const placedIds=new Set((char?.house?.placedItems||[]).map(p=>p.itemId));
+      const activeIds=new Set(char?.house?.activePassives||[]);
+      if(placedIds.has(itemId)){toast('🏯 거점에 배치된 가구는 등록할 수 없습니다 — 먼저 회수하세요',4500);return;}
+      if(activeIds.has(itemId)){toast('✨ 활성 패시브 가구는 등록할 수 없습니다 — 먼저 비활성화하세요',4500);return;}
+    }
     const presetName=isInPreset(itemId);
     if(presetName){toast(`⚡ 프리셋 [${presetName}]에 등록된 아이템입니다. 프리셋 삭제 후 등록 가능합니다.`,4000);return;}
     const priceEl=document.getElementById('ap_'+itemId);
@@ -16654,7 +16690,7 @@ window.startMemorialBoss=async function(){
   if(!isMemorialBossDay()){toast('보스는 5월 5일 당일에만 출현합니다');return;}
   if(char._memorialEvent.bossKilled){toast('이미 위령제 보스를 처치하셨습니다');return;}
   if(battle&&!battle.done){toast('⚔️ 다른 전투 진행 중에는 도전할 수 없습니다');return;}
-  if(!confirm(`${MEMORIAL_BOSS.name} 토벌에 도전하시겠습니까?\n\n${MEMORIAL_BOSS.desc}\n\n처치 시 어린 왕의 옥좌 도면 확정 드랍.\n실패 시 재도전 가능 (1회 처치 시 종료).`))return;
+  if(!confirm(`${MEMORIAL_BOSS.name} 토벌에 도전하시겠습니까?\n\n${MEMORIAL_BOSS.desc}\n\n처치 시 어린 왕의 옥좌(set 가구) + 1천만G + tier4 인챈트 스크롤 ×2 확정 지급.\n패배 시 보스 잔여 HP 보존 — 다음 도전에서 이어서 깎을 수 있습니다.`))return;
 
   // 보스 클론 — 원본 오염 방지
   const boss={...MEMORIAL_BOSS,skills:(MEMORIAL_BOSS.skills||[]).map(sk=>({...sk}))};
@@ -16684,7 +16720,9 @@ window.startMemorialBoss=async function(){
     if(p.proc?.type==='invuln')startBuffs.invuln=Math.max(startBuffs.invuln,p.proc.turns||0);
   }
   let myHp=s.maxHp, myPotions=5+(char.extraPotions||0);
-  let bossHp=boss.hp;
+  // ★ v3.1.2 — 보스 HP 누적 시스템: 이전 도전에서 깎인 HP를 이어받음 (없으면 풀 HP)
+  const _savedBossHp=char._memorialEvent?.bossHp;
+  let bossHp=(typeof _savedBossHp==='number'&&_savedBossHp>0&&_savedBossHp<=boss.hp)?_savedBossHp:boss.hp;
   let totalDmgDealt=0, phase=1, done=false, turn=0;
   let firstHitDodgeUsed=false; // 그림자 거울 1회 회피
   let invulnTurns=startBuffs.invuln;
@@ -16856,6 +16894,7 @@ window.startMemorialBoss=async function(){
     mlog(`<span class="l-set" style="color:var(--st);font-weight:700">✨ 위령제 보스 처치! ${MEMORIAL_BOSS.name}이(가) 평온을 찾았습니다.</span>`);
     char._memorialEvent.bossKilled=true;
     char._memorialEvent.throneClaimed=true;
+    char._memorialEvent.bossHp=null; // ★ v3.1.2 — 누적 HP 정리
     // 어린 왕의 옥좌 가구 지급
     const fItem=genFurnitureItem('memorial_throne');
     if(fItem){fItem._gotAt=Date.now(); await addItem(fItem);}
@@ -16876,7 +16915,14 @@ window.startMemorialBoss=async function(){
   }
   function mbDefeat(){
     done=true;
-    mlog(`<span class="l-dead">패배... 다시 도전 가능합니다.</span>`);
+    // ★ v3.1.2 — 잔여 보스 HP 저장 (다음 도전에서 이어서)
+    try{
+      char._memorialEvent=char._memorialEvent||{};
+      char._memorialEvent.bossHp=Math.max(1,Math.round(bossHp));
+      saveChar();
+    }catch(e){console.warn('[mbDefeat save bossHp]',e);}
+    const remainPct=Math.round((bossHp/boss.hp)*100);
+    mlog(`<span class="l-dead">패배... 보스 잔여 HP ${bossHp.toLocaleString()} / ${boss.hp.toLocaleString()} (${remainPct}%) — 다음 도전에 이어서 시작합니다.</span>`);
     renderMb();
   }
   window.exitMemorialBattle=function(){
@@ -17020,14 +17066,29 @@ window.renderMemorial=function(){
   // 위령제 보스 (5/5만)
   if(isMemorialBossDay()){
     const bossKilled=ev.bossKilled;
+    // ★ v3.1.2 — 누적 도전 잔여 HP 표시
+    const _saved=ev.bossHp;
+    const _maxHp=MEMORIAL_BOSS.hp;
+    const _curHp=(typeof _saved==='number'&&_saved>0&&_saved<=_maxHp)?_saved:_maxHp;
+    const _hpPct=Math.round((_curHp/_maxHp)*100);
+    const _hasProgress=!bossKilled&&_curHp<_maxHp;
     html+=`<div style="background:linear-gradient(135deg,rgba(255,34,68,.08),rgba(80,80,255,.05));
                       border:2px solid rgba(255,34,68,.4);border-radius:10px;padding:14px;margin-bottom:12px">
       <div style="font-size:14px;color:#FF2244;font-weight:700;margin-bottom:6px">👹 ${MEMORIAL_BOSS.name}</div>
       <div style="font-size:11px;color:var(--tx2);font-style:italic;margin-bottom:8px">${MEMORIAL_BOSS.desc}</div>
       <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">스킬: ${MEMORIAL_BOSS.skillDesc}</div>
+      ${!bossKilled?`<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx2);margin-bottom:3px">
+          <span style="color:#FF2244;font-weight:700">HP ${_hasProgress?'<span style=\"color:var(--gold);font-size:9px;margin-left:4px\">(이어서 도전)</span>':''}</span>
+          <span style="font-family:'IBM Plex Mono',monospace">${_curHp.toLocaleString()} / ${_maxHp.toLocaleString()}</span>
+        </div>
+        <div style="width:100%;height:10px;background:rgba(0,0,0,.6);border-radius:5px;overflow:hidden;border:1px solid #FF224444">
+          <div style="width:${_hpPct}%;height:100%;background:linear-gradient(90deg,#FF2244,#FF224499);border-radius:5px;transition:width .5s"></div>
+        </div>
+      </div>`:''}
       ${bossKilled?
-        '<div style="font-size:11px;color:var(--green);text-align:center;padding:8px">✓ 토벌 완료 — 어린 왕의 옥좌 도면 획득</div>':
-        '<button class="btn btn-red" style="width:100%" onclick="startMemorialBoss()">⚔ 위령제 보스 토벌 (1회 한정)</button>'}
+        '<div style="font-size:11px;color:var(--green);text-align:center;padding:8px">✓ 토벌 완료 — 어린 왕의 옥좌 획득</div>':
+        `<button class="btn btn-red" style="width:100%" onclick="startMemorialBoss()">⚔ ${_hasProgress?'위령제 보스 이어서 도전':'위령제 보스 토벌 시작'}</button>`}
     </div>`;
   }else{
     const daysToBoss=Math.ceil((MEMORIAL_EVENT.bossDay-now)/86400000);
