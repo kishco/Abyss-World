@@ -10592,12 +10592,21 @@ async function lootPhase(){
   for(const m of deadMons)trackMonsterKill(m.name,area,m._attr,m.isBoss);
   for(const m of battle.monsters){
     const lv=t.recLv;
-    // ★ 월급루팡 처치 시 현재 레벨 최대 경험치의 50% 지급
+    // ★ 월급루팡 처치 시 보상
+    // ★ v3.1.2 — 만렙(Lv.99)에서는 EXP 미지급 (특성 EXP 시스템에 영향 X), 대신 골드 보너스
     if(m._isLupang){
-      const bonusExp=Math.round(char.expNext*0.5);
-      totalExp+=bonusExp;
-      blogAdd(`<span class="l-exp" style="color:var(--gold)">👔 월급루팡하던 고블린 처치! 밀린 업무 경험치 획득 +${bonusExp.toLocaleString()} EXP!</span>`);
-      totalGold+=rand(500,2000);
+      const _isMaxLv=(char.level||1)>=99;
+      if(_isMaxLv){
+        // 만렙: EXP 보상 없음, 골드 보너스만
+        const bonusGold=rand(500000,2000000);
+        totalGold+=bonusGold;
+        blogAdd(`<span class="l-exp" style="color:var(--gold)">👔 월급루팡하던 고블린 처치! 만렙이라 EXP는 없지만 비자금 발견! +${bonusGold.toLocaleString()}G</span>`);
+      }else{
+        const bonusExp=Math.round(char.expNext*0.5);
+        totalExp+=bonusExp;
+        totalGold+=rand(500,2000);
+        blogAdd(`<span class="l-exp" style="color:var(--gold)">👔 월급루팡하던 고블린 처치! 밀린 업무 경험치 획득 +${bonusExp.toLocaleString()} EXP!</span>`);
+      }
       continue;
     }
     const exp=Math.round((30+lv*8)*m.expR*d.expMult*(_globalExpMult||1.0)*getActiveExpMult());
