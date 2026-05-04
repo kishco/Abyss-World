@@ -14341,6 +14341,11 @@ window.enterSubjBattle=async function(){
   const bossIdx=getCurSubjBossIdx();
   // ★ 세션 전용 boss 클론 — 스킬 상태(_atkBuff 등)가 SUBJ_BOSSES 원본을 오염시키지 않도록
   const boss={...SUBJ_BOSSES[bossIdx],skills:(SUBJ_BOSSES[bossIdx].skills||[]).map(sk=>({...sk}))};
+  // ★ v3.1.2 — 토벌전 참전 시 도감 자동 등록 (다른 유저가 마무리해도 본인 도감 보존)
+  try{
+    trackMonsterKill(boss.name,'subjugation',boss._attr,true);
+    saveChar(); // 디바운스 저장 (즉시 await 불필요)
+  }catch(e){console.warn('[subj codex]',e);}
   const sm=document.getElementById('subjMain');
   const sb=document.getElementById('subjBattle');
   sm.style.display='none';sb.style.display='block';
