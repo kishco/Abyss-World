@@ -7126,7 +7126,8 @@ function openIM(it){
   }
   // ★ 인챈트 추출 스크롤
   if(it.isExtractScroll){
-    const eqItemsEx=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it&&(x.it.prefix||x.it.suffix)&&x.it.grade!=='set');
+    // ★ v3.1.2 — 유일(set) 등급도 추출 가능하도록 변경. 불멸(immortal)만 차단 유지.
+    const eqItemsEx=EQSLOTS.map(sl=>({sl:sl.k,it:char.equipment[sl.k]})).filter(x=>x.it&&(x.it.prefix||x.it.suffix)&&x.it.grade!=='immortal');
     document.getElementById('imtitle').innerHTML=`<span style="color:var(--ep)">💎 인챈트 추출 스크롤</span>`;
     function renderExtractTargets(){
       document.getElementById('imbody').innerHTML=`
@@ -11001,8 +11002,9 @@ async function dungeonClear(){
     const enchData=pool.length?pool[Math.floor(Math.random()*pool.length)]:fallbackPool[Math.floor(Math.random()*fallbackPool.length)];
     const scroll=genEnchantScrollItem(enchData,isPrefix,tier,tier);
     scroll.tradeable=true; scroll._gotAt=Date.now();
-    await addItem(scroll);
     blogAdd(`<span class="l-skill" style="color:var(--purple)">🔮 영혼석 제단! 인챈트 스크롤 추가 드랍! (${scroll.name})</span>`);
+    // ★ v3.1.2 — 자동판매 필터 통과 후 인벤 추가 (기존 던전 드랍과 동일한 흐름)
+    if(!tryAutoSell(scroll))await addItem(scroll);
   }
 
   // ★ 물약 +1: vhard 최초 1회만 (솔로/파티 각각 별도, 최대 15개 = 기본5 + 최대10)
@@ -14182,9 +14184,12 @@ window.enterSubjBattle=async function(){
   if(char.level<50){toast('⚠️ Lv.50 이상만 참여 가능합니다');return;}
   if(battle&&!battle.done){toast('⚔️ 던전 진행 중에는 참여할 수 없습니다');return;}
   // ★ v3.x — 보스 사망 체크 (시간차/캐시로 사망한 보스에 참전 시도 차단)
+  // ★ v3.1.2 핫픽스 — 주간 리셋 후 bossHp가 null이면 '풀 HP'로 간주 (renderSubjugation과 동일 처리)
   try{
+    const _bIdx=getCurSubjBossIdx();
+    const _bMax=SUBJ_BOSSES[_bIdx]?.hp||0;
     const hpSn=await get(ref(db,'subjugation/bossHp'));
-    const curHp=hpSn.val()??0;
+    const curHp=hpSn.val()??_bMax;
     if(curHp<=0){toast('💀 보스가 이미 토벌되었습니다 — 다음 주 월요일에 갱신');renderSubjugation();return;}
   }catch(e){console.warn('[enterSubj hp check]',e);}
   const bossIdx=getCurSubjBossIdx();
@@ -16934,6 +16939,16 @@ window.synthesizeFurniture=async function(grade){
   const conf=FURN_SYNTH_DATA[grade];if(!conf){toast('합성 불가 등급');return;}
   // ★ v3.1.2 — 합성 직전 강제 재동기화 (모달 미경유 호출 대응)
   let _fdirty=false;
+  // baseId 누락 가구 — 이름/이모지로 FURNITURE 정의 역추적
+  for(const it of Object.values(inv)){
+    if(!it||!it.isFurniture)continue;
+    if(it.baseId&&FURNITURE[it.baseId])continue;
+    let foundId=null;
+    for(const[fid,f]of Object.entries(FURNITURE)){
+      if(f.n===it.name||(f.emoji===it.emoji&&f.cat===it.cat&&f.n===it.name)){foundId=fid;break;}
+    }
+    if(foundId){it.baseId=foundId;_fdirty=true;}
+  }
   for(const it of Object.values(inv)){
     if(it&&it.isFurniture&&autoMigrateFurnitureGrade(it))_fdirty=true;
   }
@@ -17065,21 +17080,47 @@ window.openFurnSynth=async function(){
   // ★ v3.1.2 — 모달 진입 시 가구 인스턴스 즉시 재동기화 (selChar 미경유 케이스 대응)
   // 노말/언커먼 카운트 0 버그 핫픽스 — grade·baseId 깨진 가구 즉시 복구
   let _furnDirty=false;
+  // 1) baseId 누락 가구 — 이름/이모지로 FURNITURE 정의 역추적 (옛 데이터 복구)
+  for(const it of Object.values(inv)){
+    if(!it||!it.isFurniture)continue;
+    if(it.baseId&&FURNITURE[it.baseId])continue;
+    // baseId 없거나 정의에 없음 → 이름/이모지로 매칭 시도
+    let foundId=null;
+    for(const[fid,f]of Object.entries(FURNITURE)){
+      if(f.n===it.name||(f.emoji===it.emoji&&f.cat===it.cat&&f.n===it.name)){foundId=fid;break;}
+    }
+    if(foundId){
+      it.baseId=foundId;
+      _furnDirty=true;
+      console.log('[가구합성] baseId 복구:',it.name,'→',foundId);
+    }
+  }
+  // 2) 일반 grade 마이그레이션
   for(const it of Object.values(inv)){
     if(it&&it.isFurniture&&autoMigrateFurnitureGrade(it))_furnDirty=true;
   }
   if(_furnDirty){try{await saveInv();}catch(e){console.warn('[furnSynth migrate save fail]',e);}}
-  // 진단 로그 — 가구 grade 분포 출력 (사용자가 콘솔에서 확인 가능)
+  // 진단 로그 — 가구 grade 분포 + 미인식 가구 상세 출력
   try{
     const _furnDist={};
+    const _unrecognized=[];
+    const _placed=new Set((char?.house?.placedItems||[]).map(p=>p.itemId));
     for(const it of Object.values(inv)){
       if(!it?.isFurniture)continue;
-      const def=FURNITURE[it.baseId];
-      const cg=def?.grade||it.grade||'?';
-      _furnDist[cg]=(_furnDist[cg]||0)+1;
+      const cg=canonFurnGrade(it);
+      if(!cg){_unrecognized.push({id:it.id,name:it.name,baseId:it.baseId,grade:it.grade,gradeName:it.gradeName,emoji:it.emoji});continue;}
+      const tags=[];
+      if(it._locked)tags.push('🔒잠금');
+      if(_placed.has(it.id))tags.push('🏯배치');
+      if(it._eventOnly||FURNITURE[it.baseId]?._eventOnly)tags.push('🎁이벤트한정');
+      if(isInPreset(it.id))tags.push('📋프리셋');
+      const tagStr=tags.length?` [${tags.join(',')}]`:'';
+      const key=cg+tagStr;
+      _furnDist[key]=(_furnDist[key]||0)+1;
     }
-    console.log('[가구합성] 인벤 가구 등급 분포:',_furnDist);
-  }catch(e){}
+    console.log('[가구합성] 인벤 가구 등급 분포 (보호상태 포함):',_furnDist);
+    if(_unrecognized.length)console.log('[가구합성] ⚠️ 등급 인식 불가 가구:',_unrecognized);
+  }catch(e){console.warn('[furnSynth diag]',e);}
 
   const placedItems=char?.house?.placedItems||[];
   const placedIds=new Set(placedItems.map(p=>p.itemId));
