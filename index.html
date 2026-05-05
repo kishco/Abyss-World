@@ -3613,6 +3613,32 @@ async function selChar(id){
       challengeClaimed:false,
     };
   }
+  // ★ v3.1.2 — 위령제 보스 처치자 소급 도감 등록 (이름 불일치로 누락된 케이스 복구)
+  // 1회만 실행 (마이그레이션 플래그)
+  if(char._memorialEvent.bossKilled&&!char._memorialBossCodexMig){
+    try{
+      char._codex=char._codex||{};
+      const memKey='잃어버린_아이들의_망령';
+      if(!char._codex[memKey]){
+        const master=MASTER_BESTIARY[memKey];
+        if(master){
+          char._codex[memKey]={
+            name:master.name,
+            kills:1,
+            area:master.area,
+            attr:master.attr,
+            isBoss:true,
+            firstKill:Date.now()
+          };
+          console.log('[위령제 도감 소급 등록]',master.name);
+          setTimeout(()=>{
+            toast(`📖 도감 소급 등록: ${master.name}`,5000);
+          },2500);
+        }
+      }
+      char._memorialBossCodexMig=true;
+    }catch(e){console.warn('[memorial codex mig]',e);}
+  }
   // ★ v3.0 — 신규 환영 패키지 (진짜 신규 캐릭터만 1회 지급)
   // 강화된 판별: 레벨/EXP/골드/은행/장비/기록 모두 깨끗해야 진짜 신규
   if(!char._newbieWelcomeClaimed){
@@ -4748,8 +4774,8 @@ const MASTER_BESTIARY=(()=>{
     const k=n.replace(/[\s.\#\$\/\[\]]/g,'_').replace(/_+/g,'_');
     out[k]=_MK(n,'subjugation',6,attr,true,'주간 토벌전 보스');
   }
-  // 위령제 보스
-  out['위령제_라바돈_재림']=_MK('위령제 라바돈 재림','memorial',6,'fire',true,'위령제 한정 보스');
+  // 위령제 보스 — MEMORIAL_BOSS.name과 정확 일치 필요
+  out['잃어버린_아이들의_망령']=_MK('잃어버린 아이들의 망령','memorial',6,'dark',true,'위령제 한정 보스 (1회)');
   return out;
 })();
 // 영역 메타 정보 (UI / 보상용)
